@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import * as Navigation from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { HandoffIcon, HomeIcon, OrdersIcon, ProductionIcon, SetupIcon } from '@/components/ui-icons';
 
 function NavLink({ href, label, active, children }: { href: '/' | '/orders' | '/production' | '/handoff' | '/setup'; label: string; active: boolean; children: ReactNode }) {
@@ -19,7 +19,7 @@ function NavLink({ href, label, active, children }: { href: '/' | '/orders' | '/
 }
 
 export function PrimaryNav() {
-  const pathname = Navigation.usePathname();
+  const pathname = usePathname();
 
   const isHome = pathname === '/';
   const isOrders = pathname.startsWith('/orders');
