@@ -217,6 +217,13 @@ Before heavy implementation begins, the goal is to clarify:
 - `docs/progressive-adoption.md` — draft-first and zero-blocking workflow principles
 - `docs/deployment-principles.md` — lightweight hosting and local-first direction
 - `docs/security-and-portability.md` — practical security, backup, and restore principles
+- `docs/architecture-options.md` — practical architecture direction comparison for v0
+- `docs/technical-decision-framework.md` — criteria for choosing architecture and major dependencies
+- `docs/data-lifecycle.md` — how draft, structured, recurring, and historical data should evolve
+- `docs/realtime-offline-strategy.md` — selective realtime and offline-aware boundaries
+- `docs/deployment-modes.md` — likely hosting modes and their tradeoffs
+- `docs/floss-landscape.md` — conservative FLOSS dependency landscape review
+- `docs/build-vs-adopt.md` — what SKOSS should own directly vs adopt from FLOSS tools
 - `docs/future-ideas.md` — intentionally deferred ideas
 - `docs/ux-principles.md` — practical UX rules
 - `docs/open-questions.md` — unresolved product and domain questions
