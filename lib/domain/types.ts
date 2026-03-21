@@ -7,6 +7,7 @@ export type DestinationKind = 'pickup' | 'delivery_stop' | 'counter' | 'internal
 export type WipStatus = 'planned' | 'in_progress' | 'ready' | 'consumed' | 'discarded';
 export type WipStage = 'prepared' | 'shaped' | 'baked' | 'ready';
 export type ShiftStatus = 'open' | 'ready_for_handoff' | 'acknowledged' | 'closed';
+export type ShiftNoteState = 'info' | 'watch' | 'blocked' | 'done';
 
 export interface Workspace {
   id: string;
@@ -73,6 +74,8 @@ export interface Order {
   notes?: string;
   createdAt: string;
   updatedAt: string;
+  changedInKitchen: boolean;
+  visibleOnProductionBoard: boolean;
   lines: OrderLine[];
 }
 
@@ -102,6 +105,8 @@ export interface ShiftNote {
   id: string;
   authorLabel: string;
   note: string;
+  state: ShiftNoteState;
+  linkedItemLabel?: string;
   createdAt: string;
 }
 

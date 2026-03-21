@@ -132,6 +132,8 @@
   ],
   "orders": [
     {
+      "changedInKitchen": false,
+      "visibleOnProductionBoard": true,
       "id": "order-cafe-luna-2026-03-28",
       "source": "generated",
       "status": "active",
@@ -164,6 +166,8 @@
       ]
     },
     {
+      "changedInKitchen": false,
+      "visibleOnProductionBoard": true,
       "id": "order-front-counter-2026-03-28",
       "source": "generated",
       "status": "active",
@@ -194,6 +198,8 @@
       ]
     },
     {
+      "changedInKitchen": true,
+      "visibleOnProductionBoard": true,
       "id": "order-sofia-birthday",
       "source": "whatsapp",
       "status": "changed",
@@ -226,6 +232,8 @@
       ]
     },
     {
+      "changedInKitchen": false,
+      "visibleOnProductionBoard": true,
       "id": "order-mercado-domingo",
       "source": "phone",
       "status": "active",
@@ -314,6 +322,8 @@
       "updatedAt": "2026-03-21T05:30:00Z",
       "shiftNotes": [
         {
+          "state": "info",
+          "linkedItemLabel": "Croissant dough",
           "id": "shift-note-night-1",
           "authorLabel": "Noche",
           "note": "Mini sweet tray is still draft; review decoration before packing.",

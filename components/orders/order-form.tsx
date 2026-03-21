@@ -1,5 +1,5 @@
-import { getDefaultLineDrafts } from '@/lib/server/demo-data';
 import type { Destination, Order } from '@/lib/domain/types';
+import { getDefaultLineDrafts } from '@/lib/server/demo-data';
 
 interface OrderFormProps {
   action: (formData: FormData) => void | Promise<void>;
@@ -22,8 +22,18 @@ const sourceOptions = [
   { value: 'walk_in', label: 'Walk-in' },
 ] as const;
 
+const statusOptions = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'active', label: 'Active' },
+  { value: 'changed', label: 'Changed' },
+  { value: 'cancelled', label: 'Cancelled' },
+  { value: 'completed', label: 'Completed' },
+] as const;
+
 export function OrderForm({ action, destinations, order, productSuggestions, focusDate }: OrderFormProps) {
   const lineDrafts = getDefaultLineDrafts(order?.lines);
+  const visibleOnProductionBoard = order?.visibleOnProductionBoard ?? true;
+  const changedInKitchen = order?.changedInKitchen ?? order?.status === 'changed';
 
   return (
     <form action={action} className="page-stack">
@@ -68,6 +78,16 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
             </select>
           </label>
           <label>
+            Status
+            <select name="status" defaultValue={order?.status ?? 'active'}>
+              {statusOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
             Destination
             <input
               name="destinationLabel"
@@ -88,6 +108,21 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
           <label>
             Due / delivery day
             <input name="dueDate" type="date" defaultValue={order?.dueDate ?? focusDate} required />
+          </label>
+        </div>
+
+        <div className="grid-two">
+          <label className="checkbox-row">
+            <input name="changedInKitchen" type="checkbox" defaultChecked={changedInKitchen} />
+            <span>Mark this order as changed / attention-needed for the kitchen</span>
+          </label>
+          <label className="checkbox-row">
+            <input
+              name="visibleOnProductionBoard"
+              type="checkbox"
+              defaultChecked={visibleOnProductionBoard}
+            />
+            <span>Keep this order visible on the production board</span>
           </label>
         </div>
 

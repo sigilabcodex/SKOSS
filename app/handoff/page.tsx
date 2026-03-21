@@ -1,14 +1,16 @@
-import { formatDateLabel, formatDateTimeLabel, formatShiftKeyLabel, formatStatusLabel } from '@/lib/domain/formatters';
 import {
-  addShiftNoteAction,
-  addWipEntryAction,
-  saveShiftLogAction,
-} from '@/lib/server/actions';
+  formatDateLabel,
+  formatDateTimeLabel,
+  formatShiftKeyLabel,
+  formatStatusLabel,
+} from '@/lib/domain/formatters';
+import { addShiftNoteAction, addWipEntryAction, saveShiftLogAction } from '@/lib/server/actions';
 import { getHandoffWorkspace } from '@/lib/server/demo-data';
 
 const shiftOptions = ['night', 'morning', 'afternoon'] as const;
 const stageOptions = ['prepared', 'shaped', 'baked', 'ready'] as const;
 const handoffStatusOptions = ['open', 'ready_for_handoff', 'acknowledged', 'closed'] as const;
+const noteStateOptions = ['info', 'watch', 'blocked', 'done'] as const;
 
 export default async function HandoffPage({
   searchParams,
@@ -212,6 +214,20 @@ export default async function HandoffPage({
             Worker / role
             <input name="authorLabel" defaultValue="Amanecer" />
           </label>
+          <label>
+            State
+            <select name="state" defaultValue="info">
+              {noteStateOptions.map((option) => (
+                <option key={option} value={option}>
+                  {formatStatusLabel(option)}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="line-span-2">
+            Linked item or product
+            <input name="linkedItemLabel" placeholder="Mini sweet tray or rack 2 croissants" />
+          </label>
           <label className="line-span-2">
             Note
             <textarea name="note" placeholder="Ready trays on rack 1, sweet items still pending" required />
@@ -242,7 +258,9 @@ export default async function HandoffPage({
                     <li key={note.id}>
                       <strong>{note.authorLabel}</strong>
                       <span>
-                        {note.note} · {formatDateTimeLabel(note.createdAt)}
+                        {formatStatusLabel(note.state)}
+                        {note.linkedItemLabel ? ` · ${note.linkedItemLabel}` : ''}
+                        {` · ${note.note} · ${formatDateTimeLabel(note.createdAt)}`}
                       </span>
                     </li>
                   ))}

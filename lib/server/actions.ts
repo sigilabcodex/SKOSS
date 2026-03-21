@@ -5,10 +5,12 @@ import { redirect } from 'next/navigation';
 import {
   buildOrderRecord,
   buildShiftLog,
+  buildShiftNote,
   buildWipEntry,
   normalizeOrderForm,
   validateOrderForm,
   validateShiftLog,
+  validateShiftNote,
   validateWipEntry,
 } from '@/lib/server/demo-data';
 import { readStore, writeStore } from '@/lib/server/store';
@@ -23,7 +25,11 @@ export async function createOrderAction(formData: FormData) {
   }
 
   const order = buildOrderRecord(data, values);
-  data.orders = [...data.orders, order].sort((left, right) => left.productionDate.localeCompare(right.productionDate));
+  data.orders = [...data.orders, order].sort((left, right) =>
+    left.productionDate === right.productionDate
+      ? right.updatedAt.localeCompare(left.updatedAt)
+      : left.productionDate.localeCompare(right.productionDate),
+  );
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/orders');
@@ -47,7 +53,13 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
   }
 
   const updated = buildOrderRecord(data, values, existing);
-  data.orders = data.orders.map((entry) => (entry.id === orderId ? updated : entry));
+  data.orders = data.orders
+    .map((entry) => (entry.id === orderId ? updated : entry))
+    .sort((left, right) =>
+      left.productionDate === right.productionDate
+        ? right.updatedAt.localeCompare(left.updatedAt)
+        : left.productionDate.localeCompare(right.productionDate),
+    );
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/orders');
@@ -93,11 +105,12 @@ export async function saveShiftLogAction(formData: FormData) {
     redirect(`/handoff?error=${encodeURIComponent(error)}`);
   }
 
-  data.shiftLogs = existing
+  data.shiftLogs = (existing
     ? data.shiftLogs.map((entry) =>
         entry.productionDate === productionDate && entry.shiftKey === shiftKey ? nextLog : entry,
       )
-    : [nextLog, ...data.shiftLogs];
+    : [nextLog, ...data.shiftLogs]
+  ).sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/production');
@@ -109,23 +122,16 @@ export async function addShiftNoteAction(formData: FormData) {
   const data = await readStore();
   const productionDate = String(formData.get('productionDate') ?? '');
   const shiftKey = String(formData.get('shiftKey') ?? 'night');
-  const authorLabel = String(formData.get('authorLabel') ?? 'Shift team').trim() || 'Shift team';
-  const note = String(formData.get('note') ?? '').trim();
+  const shiftNote = buildShiftNote(formData);
+  const error = validateShiftNote(shiftNote, productionDate);
 
-  if (!productionDate || !note) {
-    redirect('/handoff?error=Shift%20note%20needs%20a%20date%20and%20text.');
+  if (error) {
+    redirect(`/handoff?error=${encodeURIComponent(error)}`);
   }
 
   const targetLog = data.shiftLogs.find(
     (entry) => entry.productionDate === productionDate && entry.shiftKey === shiftKey,
   );
-
-  const shiftNote = {
-    id: `shift-note-${crypto.randomUUID()}`,
-    authorLabel,
-    note,
-    createdAt: new Date().toISOString(),
-  };
 
   if (targetLog) {
     targetLog.shiftNotes = [shiftNote, ...targetLog.shiftNotes];
@@ -147,8 +153,11 @@ export async function addShiftNoteAction(formData: FormData) {
     ];
   }
 
+  data.shiftLogs = [...data.shiftLogs].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/handoff');
+  revalidatePath('/production');
   redirect('/handoff?saved=note');
 }
