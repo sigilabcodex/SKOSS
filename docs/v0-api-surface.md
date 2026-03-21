@@ -327,3 +327,15 @@ The v0 API surface does not define endpoints for:
 The initial codebase does not need to expose every endpoint immediately.
 
 The important thing is that implementation grows along this narrow operational surface rather than drifting into generic CRUD for every possible concept.
+
+## Current vertical-slice note
+
+In the first usable operational slice, the primary user flow may be implemented as **server-rendered forms plus server actions** before the API surface is rounded out.
+
+That means the practical end-to-end path can be:
+
+- create or edit orders from the sales workspace
+- review grouped demand in the production workspace
+- record WIP and handoff notes from the shift workspace
+
+while still keeping the conceptual API above as the guiding shape for later endpoint hardening.

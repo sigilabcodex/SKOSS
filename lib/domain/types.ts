@@ -5,6 +5,7 @@ export type OrderLineStatus = 'draft' | 'planned' | 'in_progress' | 'done' | 'ca
 export type OrderSource = 'manual' | 'whatsapp' | 'phone' | 'walk_in' | 'generated';
 export type DestinationKind = 'pickup' | 'delivery_stop' | 'counter' | 'internal';
 export type WipStatus = 'planned' | 'in_progress' | 'ready' | 'consumed' | 'discarded';
+export type WipStage = 'prepared' | 'shaped' | 'baked' | 'ready';
 export type ShiftStatus = 'open' | 'ready_for_handoff' | 'acknowledged' | 'closed';
 
 export interface Workspace {
@@ -65,10 +66,13 @@ export interface Order {
   source: OrderSource;
   status: OrderStatus;
   customerLabel: string;
+  customerPhone?: string;
   destinationLabel?: string;
   dueDate: string;
   productionDate: string;
   notes?: string;
+  createdAt: string;
+  updatedAt: string;
   lines: OrderLine[];
 }
 
@@ -83,12 +87,22 @@ export interface RecurringTemplate {
 export interface WipEntry {
   id: string;
   productionDate: string;
+  shiftKey: 'night' | 'morning' | 'afternoon';
   wipType: 'base_dough' | 'prep' | 'baked_items' | 'packed_items' | 'other';
   referenceLabel: string;
   quantity: number;
   unit: string;
+  stage: WipStage;
   status: WipStatus;
   notes?: string;
+  updatedAt: string;
+}
+
+export interface ShiftNote {
+  id: string;
+  authorLabel: string;
+  note: string;
+  createdAt: string;
 }
 
 export interface ShiftLog {
@@ -99,4 +113,17 @@ export interface ShiftLog {
   summary: string;
   openItems: string[];
   handoffNotes: string;
+  updatedAt: string;
+  shiftNotes: ShiftNote[];
+}
+
+export interface AppData {
+  workspace: Workspace;
+  users: User[];
+  destinations: Destination[];
+  products: Product[];
+  recurringTemplates: RecurringTemplate[];
+  orders: Order[];
+  wipEntries: WipEntry[];
+  shiftLogs: ShiftLog[];
 }

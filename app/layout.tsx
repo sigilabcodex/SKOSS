@@ -1,11 +1,11 @@
-import type { ReactNode } from 'react';
 import type { Metadata } from 'next';
+import type { ReactNode } from 'react';
 import './globals.css';
 import { AppShell } from '@/components/app-shell';
 
 export const metadata: Metadata = {
-  title: 'SKOSS v0 foundation',
-  description: 'Implementation-ready foundation for the first SKOSS version.',
+  title: 'SKOSS operational slice',
+  description: 'Order intake, production board, and shift handoff for the first usable SKOSS workflow.',
 };
 
 export default function RootLayout({

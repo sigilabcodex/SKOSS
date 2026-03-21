@@ -173,6 +173,8 @@ Fields:
 - `createdByUserId`
 - `updatedAt`
 
+The first usable order intake flow should also tolerate a lightweight contact field such as phone or message handle stored directly on the order until customer setup is formalized.
+
 ### Order line
 
 Represents one requested item or note-bearing production demand line.
@@ -209,6 +211,8 @@ Fields:
 - `notes` nullable
 - `recordedByUserId`
 - `updatedAt`
+
+For the first vertical slice, a lightweight `stage` field is also acceptable so operators can quickly mark practical states such as `prepared`, `shaped`, `baked`, or `ready` without forcing recipe logic first.
 
 ### Shift log
 
