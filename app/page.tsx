@@ -3,7 +3,13 @@ import Link from 'next/link';
 import { formatDateLabel } from '@/lib/domain/formatters';
 import { getWorkspaceSummary } from '@/lib/server/demo-data';
 
-const quickLinks = [
+type QuickLink = {
+  href: Route;
+  title: string;
+  description: string;
+};
+
+const quickLinks: QuickLink[] = [
   {
     href: '/orders',
     title: 'Order intake + list',
@@ -24,11 +30,7 @@ const quickLinks = [
     title: 'Light setup',
     description: 'Review the minimal structure that supports the operational slice.',
   },
-] satisfies ReadonlyArray<{
-  href: Route;
-  title: string;
-  description: string;
-}>;
+];
 
 export default async function HomePage() {
   const summary = await getWorkspaceSummary();

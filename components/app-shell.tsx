@@ -2,16 +2,18 @@ import type { Route } from 'next';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 
-const navItems = [
+type NavItem = {
+  href: Route;
+  label: string;
+};
+
+const navItems: NavItem[] = [
   { href: '/', label: 'Home' },
   { href: '/orders', label: 'Orders' },
   { href: '/production', label: 'Production' },
   { href: '/handoff', label: 'WIP / Handoff' },
   { href: '/setup', label: 'Setup' },
-] satisfies ReadonlyArray<{
-  href: Route;
-  label: string;
-}>;
+];
 
 export function AppShell({ children }: { children?: ReactNode }) {
   return (
