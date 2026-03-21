@@ -1,9 +1,9 @@
-import type { Route } from 'next';
 import Link from 'next/link';
+import { formatDateLabel } from '@/lib/domain/formatters';
 import { getWorkspaceSummary } from '@/lib/server/demo-data';
 
 type QuickLink = {
-  href: Route;
+  href: Parameters<typeof Link>[0]['href'];
   title: string;
   description: string;
 };
@@ -11,57 +11,57 @@ type QuickLink = {
 const quickLinks: QuickLink[] = [
   {
     href: '/orders',
-    title: 'Sales workspace',
-    description: 'Capture ad hoc and recurring demand without blocking on full setup.',
+    title: 'Order intake + list',
+    description: 'Capture demand with draft customers, draft items, and quick edits.',
   },
   {
     href: '/production',
-    title: 'Kitchen workspace',
-    description: 'Review grouped demand, WIP, and changed items for the production day.',
+    title: 'Production board',
+    description: 'See grouped demand by production day, item, and late changes.',
   },
   {
     href: '/handoff',
-    title: 'Shift handoff',
-    description: 'See open items, WIP, and cross-shift notes before the next push of work.',
+    title: 'WIP + handoff',
+    description: 'Record prep state, shift notes, and what the next shift needs to know.',
   },
   {
     href: '/setup',
-    title: 'Setup workspace',
-    description: 'Keep products, destinations, recurring templates, and users lightweight.',
+    title: 'Light setup',
+    description: 'Review the minimal structure that supports the operational slice.',
   },
 ];
 
-export default function HomePage() {
-  const summary = getWorkspaceSummary();
+export default async function HomePage() {
+  const summary = await getWorkspaceSummary();
 
   return (
     <div className="page-stack">
       <section className="hero-card">
-        <p className="eyebrow">v0 convergence foundation</p>
+        <p className="eyebrow">First operational slice</p>
         <h1>{summary.workspace.name}</h1>
         <p className="lede">
-          SKOSS v0 is converging on one boring, portable path: a single mobile-first web app
-          for order intake, production review, WIP, and handoff.
+          SKOSS now runs the first real loop: order intake, visible orders, grouped production, and
+          WIP handoff for a Kalali-style bakery rhythm.
         </p>
         <div className="stats-grid">
           <div>
             <strong>{summary.ordersToday}</strong>
-            <span>orders for the production day</span>
+            <span>orders on {formatDateLabel(summary.focusDate)}</span>
           </div>
           <div>
             <strong>{summary.changedOrders}</strong>
-            <span>changed orders needing visibility</span>
+            <span>orders marked changed for kitchen visibility</span>
           </div>
           <div>
             <strong>{summary.readyWip}</strong>
-            <span>WIP entries already ready</span>
+            <span>WIP entries already ready for the next shift</span>
           </div>
         </div>
       </section>
 
       <section className="grid-cards">
         {quickLinks.map((link) => (
-          <Link key={link.href} href={link.href} className="panel-link">
+          <Link key={String(link.href)} href={link.href} className="panel-link">
             <h2>{link.title}</h2>
             <p>{link.description}</p>
           </Link>

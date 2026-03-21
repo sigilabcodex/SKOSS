@@ -1,6 +1,18 @@
-import { NextResponse } from 'next/server';
-import { orders } from '@/data/demo-fixtures';
+import { readStore } from '@/lib/server/store';
 
-export function GET() {
-  return NextResponse.json({ items: orders });
+export async function GET(): Promise<Response> {
+  try {
+    const data = await readStore();
+    return Response.json({ items: data.orders });
+  } catch {
+    return Response.json(
+      {
+        error: {
+          code: 'internal_error',
+          message: 'Unable to load orders.',
+        },
+      },
+      { status: 500 },
+    );
+  }
 }

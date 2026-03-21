@@ -1,29 +1,30 @@
-import type { Route } from 'next';
 import type { ReactNode } from 'react';
 import Link from 'next/link';
 
-const navItems = [
+type NavItem = {
+  href: Parameters<typeof Link>[0]['href'];
+  label: string;
+};
+
+const navItems: NavItem[] = [
   { href: '/', label: 'Home' },
   { href: '/orders', label: 'Orders' },
   { href: '/production', label: 'Production' },
-  { href: '/handoff', label: 'Handoff' },
+  { href: '/handoff', label: 'WIP / Handoff' },
   { href: '/setup', label: 'Setup' },
-] satisfies ReadonlyArray<{
-  href: Route;
-  label: string;
-}>;
+];
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children }: { children?: ReactNode }) {
   return (
     <div className="shell">
       <header className="shell-header">
         <div className="brand-block">
           <strong>SKOSS</strong>
-          <span>Small Kitchen Operations and Services System</span>
+          <span>Operator-first kitchen workflow</span>
         </div>
         <nav className="shell-nav" aria-label="Primary">
           {navItems.map((item) => (
-            <Link key={item.href} href={item.href}>
+            <Link key={String(item.href)} href={item.href}>
               {item.label}
             </Link>
           ))}
