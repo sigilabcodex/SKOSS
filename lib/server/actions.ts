@@ -4,16 +4,26 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import {
   buildOrderRecord,
+  buildRecurringTemplateRecord,
   buildShiftLog,
   buildShiftNote,
   buildWipEntry,
+  getLineStatus,
   normalizeOrderForm,
+  normalizeRecurringTemplateForm,
   validateOrderForm,
+  validateRecurringTemplateForm,
   validateShiftLog,
   validateShiftNote,
   validateWipEntry,
 } from '@/lib/server/demo-data';
 import { readStore, writeStore } from '@/lib/server/store';
+
+function sortOrders(left: { productionDate: string; updatedAt: string }, right: { productionDate: string; updatedAt: string }) {
+  return left.productionDate === right.productionDate
+    ? right.updatedAt.localeCompare(left.updatedAt)
+    : left.productionDate.localeCompare(right.productionDate);
+}
 
 export async function createOrderAction(formData: FormData) {
   const data = await readStore();
@@ -25,11 +35,7 @@ export async function createOrderAction(formData: FormData) {
   }
 
   const order = buildOrderRecord(data, values);
-  data.orders = [...data.orders, order].sort((left, right) =>
-    left.productionDate === right.productionDate
-      ? right.updatedAt.localeCompare(left.updatedAt)
-      : left.productionDate.localeCompare(right.productionDate),
-  );
+  data.orders = [...data.orders, order].sort(sortOrders);
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/orders');
@@ -53,13 +59,7 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
   }
 
   const updated = buildOrderRecord(data, values, existing);
-  data.orders = data.orders
-    .map((entry) => (entry.id === orderId ? updated : entry))
-    .sort((left, right) =>
-      left.productionDate === right.productionDate
-        ? right.updatedAt.localeCompare(left.updatedAt)
-        : left.productionDate.localeCompare(right.productionDate),
-    );
+  data.orders = data.orders.map((entry) => (entry.id === orderId ? updated : entry)).sort(sortOrders);
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/orders');
@@ -67,6 +67,71 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
   revalidatePath('/production');
   revalidatePath('/handoff');
   redirect(`/orders/${orderId}?saved=1`);
+}
+
+export async function createRecurringTemplateAction(formData: FormData) {
+  const data = await readStore();
+  const values = normalizeRecurringTemplateForm(formData);
+  const error = validateRecurringTemplateForm(values);
+
+  if (error) {
+    redirect(`/orders/templates/new?error=${encodeURIComponent(error)}`);
+  }
+
+  const template = buildRecurringTemplateRecord(values);
+  data.recurringTemplates = [...data.recurringTemplates, template].sort((left, right) =>
+    left.nextOccurrenceDate === right.nextOccurrenceDate
+      ? left.customerLabel.localeCompare(right.customerLabel)
+      : left.nextOccurrenceDate.localeCompare(right.nextOccurrenceDate),
+  );
+  await writeStore(data);
+  revalidatePath('/');
+  revalidatePath('/orders');
+  revalidatePath('/orders/templates/new');
+  revalidatePath('/production');
+  redirect('/orders?saved=template');
+}
+
+export async function updateOrderLineProgressAction(orderId: string, lineId: string, formData: FormData) {
+  const data = await readStore();
+  const order = data.orders.find((entry) => entry.id === orderId);
+
+  if (!order) {
+    redirect('/orders?error=missing-order');
+  }
+
+  const line = order.lines.find((entry) => entry.id === lineId);
+  if (!line) {
+    redirect(`/orders/${orderId}?error=missing-line`);
+  }
+
+  const requestedCompletedQuantity = Number(formData.get('completedQuantity') ?? line.completedQuantity ?? 0);
+  const completedQuantity = Math.max(0, Math.min(line.quantity, requestedCompletedQuantity));
+  line.completedQuantity = completedQuantity;
+  line.lineStatus = getLineStatus({
+    quantity: line.quantity,
+    completedQuantity,
+    lineStatus: line.lineStatus,
+  });
+  order.updatedAt = new Date().toISOString();
+
+  const activeLines = order.lines.filter((entry) => entry.lineType !== 'note_item' && entry.lineStatus !== 'cancelled');
+  const allDone = activeLines.length > 0 && activeLines.every((entry) => entry.lineStatus === 'done');
+  const anyStarted = activeLines.some((entry) => entry.completedQuantity > 0);
+  if (allDone) {
+    order.status = 'completed';
+  } else if (order.status === 'completed') {
+    order.status = anyStarted ? 'changed' : 'active';
+  }
+
+  data.orders = [...data.orders].sort(sortOrders);
+  await writeStore(data);
+  revalidatePath('/');
+  revalidatePath('/orders');
+  revalidatePath(`/orders/${orderId}`);
+  revalidatePath('/production');
+  revalidatePath('/handoff');
+  redirect(`/orders/${orderId}?saved=progress`);
 }
 
 export async function addWipEntryAction(formData: FormData) {
@@ -78,11 +143,7 @@ export async function addWipEntryAction(formData: FormData) {
     redirect(`/handoff?error=${encodeURIComponent(error)}`);
   }
 
-  data.wipEntries = [entry, ...data.wipEntries].sort((left, right) =>
-    left.productionDate === right.productionDate
-      ? right.updatedAt.localeCompare(left.updatedAt)
-      : left.productionDate.localeCompare(right.productionDate),
-  );
+  data.wipEntries = [entry, ...data.wipEntries].sort(sortOrders);
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/production');

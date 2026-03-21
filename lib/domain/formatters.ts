@@ -1,3 +1,5 @@
+import type { OrderLine, RecurringTemplate } from '@/lib/domain/types';
+
 export function formatDateLabel(date: string) {
   return new Intl.DateTimeFormat('en-US', {
     month: 'short',
@@ -23,4 +25,17 @@ export function formatShiftKeyLabel(shiftKey: 'night' | 'morning' | 'afternoon')
 
 export function formatStatusLabel(value: string) {
   return value.replaceAll('_', ' ');
+}
+
+export function formatLineProgressLabel(line: Pick<OrderLine, 'completedQuantity' | 'quantity' | 'unit'>) {
+  return `${line.completedQuantity}/${line.quantity} ${line.unit}`;
+}
+
+export function formatTemplateScheduleLabel(template: Pick<RecurringTemplate, 'frequency' | 'weeklyDays'>) {
+  if (template.frequency === 'daily') {
+    return 'Daily';
+  }
+
+  const labels = template.weeklyDays.map((day) => day.charAt(0).toUpperCase() + day.slice(1, 3));
+  return `Weekly · ${labels.join(', ')}`;
 }

@@ -3,8 +3,10 @@ import type {
   Order,
   OrderLine,
   Product,
+  RecurringTemplate,
   ShiftLog,
   ShiftNote,
+  WeekdayKey,
   WipEntry,
 } from '@/lib/domain/types';
 import { readStore } from '@/lib/server/store';
@@ -29,6 +31,33 @@ export interface OrderFormValues {
   }>;
 }
 
+export interface RecurringTemplateFormValues {
+  customerLabel: string;
+  customerPhone?: string;
+  destinationLabel?: string;
+  notes?: string;
+  frequency: RecurringTemplate['frequency'];
+  weeklyDays: WeekdayKey[];
+  nextOccurrenceDate: string;
+  lines: Array<{
+    lineType: OrderLine['lineType'];
+    productLabel: string;
+    quantity: number;
+    unit: string;
+    note?: string;
+  }>;
+}
+
+export const weekdayOptions: Array<{ value: WeekdayKey; label: string; index: number }> = [
+  { value: 'sun', label: 'Sun', index: 0 },
+  { value: 'mon', label: 'Mon', index: 1 },
+  { value: 'tue', label: 'Tue', index: 2 },
+  { value: 'wed', label: 'Wed', index: 3 },
+  { value: 'thu', label: 'Thu', index: 4 },
+  { value: 'fri', label: 'Fri', index: 5 },
+  { value: 'sat', label: 'Sat', index: 6 },
+];
+
 function sortOrders(left: Order, right: Order) {
   return left.productionDate === right.productionDate
     ? right.updatedAt.localeCompare(left.updatedAt)
@@ -45,21 +74,25 @@ export function getProductSuggestions(products: Product[]) {
   );
 }
 
-export function getAllProductionDates(data: Pick<AppData, 'orders' | 'wipEntries' | 'shiftLogs'>) {
+export function getAllProductionDates(data: Pick<AppData, 'orders' | 'wipEntries' | 'shiftLogs' | 'recurringTemplates'>) {
   return [...new Set([
     ...data.orders.map((order) => order.productionDate),
     ...data.wipEntries.map((entry) => entry.productionDate),
     ...data.shiftLogs.map((log) => log.productionDate),
+    ...data.recurringTemplates.map((template) => template.nextOccurrenceDate),
   ])].sort();
 }
 
-export function getFocusDate(data: Pick<AppData, 'orders' | 'wipEntries' | 'shiftLogs'>) {
+export function getFocusDate(data: Pick<AppData, 'orders' | 'wipEntries' | 'shiftLogs' | 'recurringTemplates'>) {
   const today = new Date().toISOString().slice(0, 10);
   const dates = getAllProductionDates(data);
   return dates.find((date) => date >= today) ?? dates[0] ?? today;
 }
 
-export function getDefaultLineDrafts(existingLines: OrderLine[] = [], desiredCount = 5) {
+export function getDefaultLineDrafts(
+  existingLines: Array<Pick<OrderLine, 'lineType' | 'productLabel' | 'quantity' | 'unit' | 'note'>> = [],
+  desiredCount = 5,
+) {
   const drafts = existingLines.map((line) => ({
     lineType: line.lineType,
     productLabel: line.productLabel,
@@ -85,21 +118,93 @@ function toStageStatus(stage: WipEntry['stage']): WipEntry['status'] {
   return stage === 'ready' || stage === 'baked' ? 'ready' : 'in_progress';
 }
 
+export function getLineCompletion(line: Pick<OrderLine, 'quantity' | 'completedQuantity'>) {
+  return Math.max(0, Math.min(line.quantity, line.completedQuantity));
+}
+
+export function getLineStatus(line: Pick<OrderLine, 'quantity' | 'completedQuantity' | 'lineStatus'>): OrderLine['lineStatus'] {
+  if (line.lineStatus === 'cancelled') {
+    return 'cancelled';
+  }
+
+  const completedQuantity = getLineCompletion(line);
+  if (completedQuantity <= 0) {
+    return 'pending';
+  }
+
+  if (completedQuantity >= line.quantity) {
+    return 'done';
+  }
+
+  return 'in_progress';
+}
+
+export function getOrderProgress(order: Pick<Order, 'lines'>) {
+  const workableLines = order.lines.filter((line) => line.lineType !== 'note_item');
+  const requiredQuantity = workableLines.reduce((sum, line) => sum + line.quantity, 0);
+  const completedQuantity = workableLines.reduce((sum, line) => sum + getLineCompletion(line), 0);
+  const remainingQuantity = Math.max(0, requiredQuantity - completedQuantity);
+  const partialLines = workableLines.filter((line) => getLineStatus(line) === 'in_progress').length;
+  const doneLines = workableLines.filter((line) => getLineStatus(line) === 'done').length;
+
+  return {
+    requiredQuantity,
+    completedQuantity,
+    remainingQuantity,
+    partialLines,
+    doneLines,
+    lineCount: workableLines.length,
+  };
+}
+
+function hasOrderCoreChanges(existingOrder: Order, values: OrderFormValues) {
+  return (
+    existingOrder.customerLabel !== values.customerLabel.trim() ||
+    (existingOrder.customerPhone ?? '') !== (values.customerPhone?.trim() ?? '') ||
+    (existingOrder.destinationLabel ?? '') !== (values.destinationLabel?.trim() ?? '') ||
+    existingOrder.productionDate !== values.productionDate ||
+    existingOrder.dueDate !== values.dueDate ||
+    (existingOrder.notes ?? '') !== (values.notes?.trim() ?? '') ||
+    existingOrder.visibleOnProductionBoard !== values.visibleOnProductionBoard ||
+    existingOrder.lines.length !== values.lines.filter((line) => line.productLabel.trim() && line.quantity > 0).length ||
+    existingOrder.lines.some((line, index) => {
+      const nextLine = values.lines.filter((entry) => entry.productLabel.trim() && entry.quantity > 0)[index];
+      return (
+        !nextLine ||
+        line.lineType !== nextLine.lineType ||
+        line.productLabel !== nextLine.productLabel.trim() ||
+        line.quantity !== nextLine.quantity ||
+        line.unit !== (nextLine.unit.trim() || 'pieces') ||
+        (line.note ?? '') !== (nextLine.note?.trim() ?? '')
+      );
+    })
+  );
+}
+
 export function buildOrderRecord(data: AppData, values: OrderFormValues, existingOrder?: Order): Order {
   const now = new Date().toISOString();
-  const cleanLines = values.lines
-    .map((line, index) => ({
-      id: existingOrder?.lines[index]?.id ?? `line-${crypto.randomUUID()}`,
+  const cleanInputLines = values.lines.filter((line) => line.productLabel.trim() && line.quantity > 0);
+  const cleanLines: OrderLine[] = cleanInputLines.map((line, index) => {
+    const previousLine = existingOrder?.lines[index];
+    const completedQuantity = Math.max(0, Math.min(line.quantity, previousLine?.completedQuantity ?? 0));
+    const lineStatus = previousLine?.lineStatus ?? 'pending';
+
+    return {
+      id: previousLine?.id ?? `line-${crypto.randomUUID()}`,
       lineType: line.lineType,
       productLabel: line.productLabel.trim(),
       quantity: line.quantity,
+      completedQuantity,
       unit: line.unit.trim() || 'pieces',
-      lineStatus: existingOrder?.lines[index]?.lineStatus ?? ('planned' as const),
+      lineStatus: getLineStatus({ quantity: line.quantity, completedQuantity, lineStatus }),
       note: line.note?.trim() || undefined,
-    }))
-    .filter((line) => line.productLabel && line.quantity > 0);
+    };
+  });
 
   const changedInKitchen = values.changedInKitchen || values.status === 'changed';
+  const templateEdited = existingOrder?.generatedFromTemplate
+    ? existingOrder.templateEdited || hasOrderCoreChanges(existingOrder, values)
+    : existingOrder?.templateEdited ?? false;
   const nextStatus = values.status === 'changed'
     ? 'changed'
     : changedInKitchen && values.status === 'active'
@@ -120,22 +225,59 @@ export function buildOrderRecord(data: AppData, values: OrderFormValues, existin
     updatedAt: now,
     changedInKitchen,
     visibleOnProductionBoard: values.visibleOnProductionBoard,
+    templateId: existingOrder?.templateId,
+    templateTitle: existingOrder?.templateTitle,
+    generatedOccurrenceDate: existingOrder?.generatedOccurrenceDate,
+    generatedFromTemplate: existingOrder?.generatedFromTemplate ?? values.source === 'generated',
+    templateEdited,
     lines: cleanLines,
+  };
+}
+
+export function buildRecurringTemplateRecord(values: RecurringTemplateFormValues): RecurringTemplate {
+  const now = new Date().toISOString();
+
+  return {
+    id: `template-${crypto.randomUUID()}`,
+    templateType: 'customer_order',
+    customerLabel: values.customerLabel.trim(),
+    customerPhone: values.customerPhone?.trim() || undefined,
+    destinationLabel: values.destinationLabel?.trim() || undefined,
+    notes: values.notes?.trim() || undefined,
+    frequency: values.frequency,
+    weeklyDays: values.frequency === 'weekly' ? values.weeklyDays : [],
+    nextOccurrenceDate: values.nextOccurrenceDate,
+    active: true,
+    createdAt: now,
+    updatedAt: now,
+    lines: values.lines
+      .filter((line) => line.productLabel.trim() && line.quantity > 0)
+      .map((line) => ({
+        id: `template-line-${crypto.randomUUID()}`,
+        lineType: line.lineType,
+        productLabel: line.productLabel.trim(),
+        quantity: line.quantity,
+        unit: line.unit.trim() || 'pieces',
+        note: line.note?.trim() || undefined,
+      })),
   };
 }
 
 export async function getWorkspaceSummary() {
   const data = await readStore();
   const focusDate = getFocusDate(data);
+  const ordersToday = data.orders.filter((order) => order.productionDate === focusDate);
 
   return {
     workspace: data.workspace,
     focusDate,
-    ordersToday: data.orders.filter((order) => order.productionDate === focusDate).length,
-    changedOrders: data.orders.filter(
-      (order) => order.productionDate === focusDate && (order.status === 'changed' || order.changedInKitchen),
+    ordersToday: ordersToday.length,
+    changedOrders: ordersToday.filter(
+      (order) => order.status === 'changed' || order.changedInKitchen || order.templateEdited,
     ).length,
     readyWip: data.wipEntries.filter((entry) => entry.productionDate === focusDate && entry.status === 'ready').length,
+    recurringTemplates: data.recurringTemplates.filter((template) => template.active).length,
+    partialOrders: ordersToday.filter((order) => getOrderProgress(order).partialLines > 0).length,
   };
 }
 
@@ -144,11 +286,17 @@ export async function getOrdersWorkspace() {
   const dates = getAllProductionDates(data);
   const focusDate = getFocusDate(data);
   const orders = [...data.orders].sort(sortOrders);
+  const recurringTemplates = [...data.recurringTemplates].sort((left, right) =>
+    left.nextOccurrenceDate === right.nextOccurrenceDate
+      ? left.customerLabel.localeCompare(right.customerLabel)
+      : left.nextOccurrenceDate.localeCompare(right.nextOccurrenceDate),
+  );
 
   return {
     focusDate,
     dates,
     orders,
+    recurringTemplates,
     orderGroups: dates
       .map((productionDate) => ({
         productionDate,
@@ -173,6 +321,17 @@ export async function getOrderEditor(orderId?: string) {
   };
 }
 
+export async function getRecurringTemplateEditor() {
+  const data = await readStore();
+
+  return {
+    destinations: data.destinations,
+    productSuggestions: getProductSuggestions(data.products),
+    focusDate: getFocusDate(data),
+    weekdayOptions,
+  };
+}
+
 export async function getProductionBoard() {
   const data = await readStore();
   const dates = getAllProductionDates(data);
@@ -194,10 +353,14 @@ function buildProductionDayView(data: AppData, productionDate: string) {
     {
       label: string;
       quantity: number;
+      completedQuantity: number;
+      remainingQuantity: number;
       unit: string;
       orderCount: number;
       destinations: Set<string>;
       draft: boolean;
+      partial: boolean;
+      changed: boolean;
     }
   >();
 
@@ -207,9 +370,12 @@ function buildProductionDayView(data: AppData, productionDate: string) {
         continue;
       }
 
+      const completedQuantity = getLineCompletion(line);
       const existing = groupedDemandMap.get(line.productLabel);
       if (existing) {
         existing.quantity += line.quantity;
+        existing.completedQuantity += completedQuantity;
+        existing.remainingQuantity += Math.max(0, line.quantity - completedQuantity);
         existing.orderCount += 1;
         if (order.destinationLabel) {
           existing.destinations.add(order.destinationLabel);
@@ -217,14 +383,24 @@ function buildProductionDayView(data: AppData, productionDate: string) {
         if (line.lineType === 'draft_product') {
           existing.draft = true;
         }
+        if (getLineStatus(line) === 'in_progress') {
+          existing.partial = true;
+        }
+        if (order.status === 'changed' || order.changedInKitchen || order.templateEdited) {
+          existing.changed = true;
+        }
       } else {
         groupedDemandMap.set(line.productLabel, {
           label: line.productLabel,
           quantity: line.quantity,
+          completedQuantity,
+          remainingQuantity: Math.max(0, line.quantity - completedQuantity),
           unit: line.unit,
           orderCount: 1,
           destinations: new Set(order.destinationLabel ? [order.destinationLabel] : []),
           draft: line.lineType === 'draft_product',
+          partial: getLineStatus(line) === 'in_progress',
+          changed: order.status === 'changed' || order.changedInKitchen || order.templateEdited,
         });
       }
     }
@@ -240,6 +416,17 @@ function buildProductionDayView(data: AppData, productionDate: string) {
       shiftKey: log.shiftKey,
       productionDate: log.productionDate,
     })),
+  );
+  const boardProgress = boardOrders.reduce(
+    (summary, order) => {
+      const progress = getOrderProgress(order);
+      summary.requiredQuantity += progress.requiredQuantity;
+      summary.completedQuantity += progress.completedQuantity;
+      summary.remainingQuantity += progress.remainingQuantity;
+      summary.partialOrders += progress.partialLines > 0 ? 1 : 0;
+      return summary;
+    },
+    { requiredQuantity: 0, completedQuantity: 0, remainingQuantity: 0, partialOrders: 0 },
   );
 
   return {
@@ -263,12 +450,15 @@ function buildProductionDayView(data: AppData, productionDate: string) {
           customerLabel: order.customerLabel,
         })),
     ),
-    changedOrders: productionOrders.filter((order) => order.status === 'changed' || order.changedInKitchen),
+    changedOrders: productionOrders.filter(
+      (order) => order.status === 'changed' || order.changedInKitchen || order.templateEdited,
+    ),
     hiddenOrders: productionOrders.filter((order) => order.visibleOnProductionBoard === false),
     wipEntries,
     handoffEntries,
     readyCount: wipEntries.filter((entry) => entry.status === 'ready').length,
     handoffCount: shiftLogs.length,
+    boardProgress,
   };
 }
 
@@ -328,6 +518,32 @@ export function normalizeOrderForm(formData: FormData): OrderFormValues {
   };
 }
 
+export function normalizeRecurringTemplateForm(formData: FormData): RecurringTemplateFormValues {
+  const lineTypes = formData.getAll('lineType');
+  const productLabels = formData.getAll('productLabel');
+  const quantities = formData.getAll('quantity');
+  const units = formData.getAll('unit');
+  const lineNotes = formData.getAll('lineNote');
+  const weeklyDays = formData.getAll('weeklyDays').map((value) => String(value) as WeekdayKey);
+
+  return {
+    customerLabel: String(formData.get('customerLabel') ?? ''),
+    customerPhone: String(formData.get('customerPhone') ?? ''),
+    destinationLabel: String(formData.get('destinationLabel') ?? ''),
+    notes: String(formData.get('notes') ?? ''),
+    frequency: String(formData.get('frequency') ?? 'daily') as RecurringTemplate['frequency'],
+    weeklyDays,
+    nextOccurrenceDate: String(formData.get('nextOccurrenceDate') ?? ''),
+    lines: productLabels.map((value, index) => ({
+      lineType: (lineTypes[index] as OrderLine['lineType']) ?? 'draft_product',
+      productLabel: String(value),
+      quantity: Number(quantities[index] ?? 0),
+      unit: String(units[index] ?? 'pieces'),
+      note: String(lineNotes[index] ?? ''),
+    })),
+  };
+}
+
 export function validateOrderForm(values: OrderFormValues) {
   if (!values.productionDate || !values.dueDate) {
     return 'Production and delivery dates are required.';
@@ -340,6 +556,27 @@ export function validateOrderForm(values: OrderFormValues) {
 
   if (values.status === 'cancelled' && !values.notes?.trim()) {
     return 'Add a short note when cancelling an order.';
+  }
+
+  return null;
+}
+
+export function validateRecurringTemplateForm(values: RecurringTemplateFormValues) {
+  if (!values.customerLabel.trim()) {
+    return 'Add a customer or route label for the recurring order.';
+  }
+
+  if (!values.nextOccurrenceDate) {
+    return 'Choose the next occurrence date to seed generation.';
+  }
+
+  if (values.frequency === 'weekly' && values.weeklyDays.length === 0) {
+    return 'Choose at least one weekday for a weekly recurring order.';
+  }
+
+  const usableLines = values.lines.filter((line) => line.productLabel.trim() && line.quantity > 0);
+  if (usableLines.length === 0) {
+    return 'Add at least one recurring line with a name and quantity.';
   }
 
   return null;
@@ -365,39 +602,32 @@ export function buildWipEntry(formData: FormData): WipEntry {
 
 export function validateWipEntry(entry: WipEntry) {
   if (!entry.productionDate || !entry.referenceLabel || entry.quantity <= 0) {
-    return 'Production date, label, and quantity are required for WIP.';
+    return 'WIP needs a production day, label, and quantity greater than zero.';
   }
 
   return null;
 }
 
-export function buildShiftLog(log: ShiftLog | undefined, formData: FormData): ShiftLog {
-  const now = new Date().toISOString();
-  const openItems = String(formData.get('openItems') ?? '')
-    .split('\n')
-    .map((item) => item.trim())
-    .filter(Boolean);
-
+export function buildShiftLog(existing: ShiftLog | undefined, formData: FormData): ShiftLog {
   return {
-    id: log?.id ?? `shift-${crypto.randomUUID()}`,
+    id: existing?.id ?? `shift-${crypto.randomUUID()}`,
     productionDate: String(formData.get('productionDate') ?? ''),
     shiftKey: String(formData.get('shiftKey') ?? 'night') as ShiftLog['shiftKey'],
     status: String(formData.get('status') ?? 'open') as ShiftLog['status'],
     summary: String(formData.get('summary') ?? '').trim(),
-    openItems,
+    openItems: String(formData.get('openItems') ?? '')
+      .split('\n')
+      .map((value) => value.trim())
+      .filter(Boolean),
     handoffNotes: String(formData.get('handoffNotes') ?? '').trim(),
-    updatedAt: now,
-    shiftNotes: log?.shiftNotes ?? [],
+    updatedAt: new Date().toISOString(),
+    shiftNotes: existing?.shiftNotes ?? [],
   };
 }
 
 export function validateShiftLog(log: ShiftLog) {
   if (!log.productionDate || !log.summary) {
-    return 'Production date and summary are required for handoff.';
-  }
-
-  if (log.status === 'ready_for_handoff' && !log.handoffNotes) {
-    return 'Add a short handoff note before marking the shift ready for handoff.';
+    return 'Shift handoff needs a production day and summary.';
   }
 
   return null;
@@ -406,7 +636,7 @@ export function validateShiftLog(log: ShiftLog) {
 export function buildShiftNote(formData: FormData): ShiftNote {
   return {
     id: `shift-note-${crypto.randomUUID()}`,
-    authorLabel: String(formData.get('authorLabel') ?? 'Shift team').trim() || 'Shift team',
+    authorLabel: String(formData.get('authorLabel') ?? '').trim() || 'Shift note',
     note: String(formData.get('note') ?? '').trim(),
     state: String(formData.get('state') ?? 'info') as ShiftNote['state'],
     linkedItemLabel: String(formData.get('linkedItemLabel') ?? '').trim() || undefined,
@@ -416,7 +646,7 @@ export function buildShiftNote(formData: FormData): ShiftNote {
 
 export function validateShiftNote(note: ShiftNote, productionDate: string) {
   if (!productionDate || !note.note) {
-    return 'Shift note needs a date and text.';
+    return 'Shift note needs a production day and note text.';
   }
 
   return null;
