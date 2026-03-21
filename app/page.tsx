@@ -1,32 +1,31 @@
-import type { Route } from 'next';
 import Link from 'next/link';
 import { formatDateLabel } from '@/lib/domain/formatters';
 import { getWorkspaceSummary } from '@/lib/server/demo-data';
 
 type QuickLink = {
-  href: Route;
+  href: Parameters<typeof Link>[0]['href'];
   title: string;
   description: string;
 };
 
 const quickLinks: QuickLink[] = [
   {
-    href: '/orders' as Route,
+    href: '/orders',
     title: 'Order intake + list',
     description: 'Capture demand with draft customers, draft items, and quick edits.',
   },
   {
-    href: '/production' as Route,
+    href: '/production',
     title: 'Production board',
     description: 'See grouped demand by production day, item, and late changes.',
   },
   {
-    href: '/handoff' as Route,
+    href: '/handoff',
     title: 'WIP + handoff',
     description: 'Record prep state, shift notes, and what the next shift needs to know.',
   },
   {
-    href: '/setup' as Route,
+    href: '/setup',
     title: 'Light setup',
     description: 'Review the minimal structure that supports the operational slice.',
   },
@@ -62,7 +61,7 @@ export default async function HomePage() {
 
       <section className="grid-cards">
         {quickLinks.map((link) => (
-          <Link key={link.href} href={link.href} className="panel-link">
+          <Link key={String(link.href)} href={link.href} className="panel-link">
             <h2>{link.title}</h2>
             <p>{link.description}</p>
           </Link>
