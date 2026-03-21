@@ -12,12 +12,12 @@ const quickLinks: QuickLink[] = [
   {
     href: '/orders',
     title: 'Order intake + list',
-    description: 'Capture demand with draft customers, draft items, and quick edits.',
+    description: 'Capture demand with recurring templates, draft customers, draft items, and quick edits.',
   },
   {
     href: '/production',
     title: 'Production board',
-    description: 'See grouped demand by production day, item, and late changes.',
+    description: 'See required vs completed demand, line progress, and late changes in one board.',
   },
   {
     href: '/handoff',
@@ -40,8 +40,8 @@ export default async function HomePage() {
         <p className="eyebrow">First operational slice</p>
         <h1>{summary.workspace.name}</h1>
         <p className="lede">
-          SKOSS now runs the first real loop: order intake, visible orders, grouped production, and
-          WIP handoff for a Kalali-style bakery rhythm.
+          SKOSS now covers a practical kitchen loop: order intake, recurring generation, grouped production,
+          partial completion, and WIP handoff for a Kalali-style bakery rhythm.
         </p>
         <div className="stats-grid">
           <div>
@@ -50,11 +50,19 @@ export default async function HomePage() {
           </div>
           <div>
             <strong>{summary.changedOrders}</strong>
-            <span>orders marked changed for kitchen visibility</span>
+            <span>orders marked changed or edited from the recurring baseline</span>
           </div>
           <div>
             <strong>{summary.readyWip}</strong>
             <span>WIP entries already ready for the next shift</span>
+          </div>
+          <div>
+            <strong>{summary.recurringTemplates}</strong>
+            <span>active recurring templates feeding the next demand</span>
+          </div>
+          <div>
+            <strong>{summary.partialOrders}</strong>
+            <span>orders already partially completed</span>
           </div>
         </div>
       </section>

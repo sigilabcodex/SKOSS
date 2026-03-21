@@ -415,6 +415,98 @@ textarea {
   gap: 0.85rem;
 }
 
+
+.action-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.wrap-cluster {
+  align-items: flex-start;
+}
+
+.compact-badge-stack {
+  gap: 0.45rem;
+}
+
+.compact-stats-grid {
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+}
+
+.recurring-grid {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.progress-card,
+.progress-row {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.progress-row {
+  grid-template-columns: minmax(0, 2fr) minmax(140px, 180px) auto auto;
+  align-items: end;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: #fffdf8;
+}
+
+.progress-label {
+  font-size: 0.82rem;
+}
+
+.order-card-partial,
+.demand-card-remaining {
+  border-color: #d8a95d;
+  box-shadow: 0 10px 24px rgba(154, 91, 0, 0.08);
+}
+
+.demand-card-done {
+  border: 1px solid rgba(49, 90, 52, 0.2);
+  background: #f3faf3;
+}
+
+.badge-generated {
+  color: #4c3f9a;
+}
+
+.weekday-fieldset {
+  display: grid;
+  gap: 0.75rem;
+  padding: 1rem;
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+}
+
+.weekday-fieldset legend {
+  padding: 0 0.35rem;
+  color: var(--muted);
+}
+
+.weekday-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.weekday-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fff9f0;
+}
+
+.weekday-chip input {
+  width: auto;
+  min-height: auto;
+}
+
 @media (min-width: 768px) {
   .grid-cards,
   .card-grid,
@@ -453,5 +545,14 @@ textarea {
   .button-primary,
   .button-secondary {
     width: 100%;
+  }
+
+  .progress-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .action-cluster {
+    flex-direction: column;
+    align-items: stretch;
   }
 }

@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { OrderForm } from '@/components/orders/order-form';
-import { updateOrderAction } from '@/lib/server/actions';
-import { getOrderEditor } from '@/lib/server/demo-data';
+import { formatLineProgressLabel, formatStatusLabel } from '@/lib/domain/formatters';
+import { updateOrderAction, updateOrderLineProgressAction } from '@/lib/server/actions';
+import { getLineStatus, getOrderEditor, getOrderProgress } from '@/lib/server/demo-data';
 
 export default async function EditOrderPage({
   params,
@@ -22,6 +23,7 @@ export default async function EditOrderPage({
   }
 
   const action = updateOrderAction.bind(null, view.order.id);
+  const progress = getOrderProgress(view.order);
 
   return (
     <div className="page-stack">
@@ -29,15 +31,69 @@ export default async function EditOrderPage({
         <div>
           <p className="eyebrow">Sales workspace</p>
           <h1>{view.order.customerLabel}</h1>
-          <p>Edit quantities, notes, or draft items without leaving the workspace.</p>
+          <p>Edit quantities, notes, recurrence-generated demand, or quick completion updates without leaving the workspace.</p>
         </div>
         <Link href="/orders" className="button-secondary">
           Back to orders
         </Link>
       </section>
 
-      {pageParams?.saved ? <p className="inline-success">Order saved and marked visible to production.</p> : null}
+      {pageParams?.saved === '1' ? <p className="inline-success">Order saved and marked visible to production.</p> : null}
+      {pageParams?.saved === 'progress' ? <p className="inline-success">Line completion updated.</p> : null}
       {pageParams?.error ? <p className="inline-warning">{pageParams.error}</p> : null}
+
+      <section className="panel page-stack">
+        <div className="table-header-row">
+          <div>
+            <strong>Quick completion</strong>
+            <p>Update partial work per line without opening a separate kitchen-only screen.</p>
+          </div>
+          <span>
+            {progress.completedQuantity}/{progress.requiredQuantity || 0} completed
+          </span>
+        </div>
+
+        <div className="line-grid-stack">
+          {view.order.lines.filter((line) => line.lineType !== 'note_item').map((line) => {
+            const progressAction = updateOrderLineProgressAction.bind(null, view.order!.id, line.id);
+            const lineStatus = getLineStatus(line);
+
+            return (
+              <form key={line.id} action={progressAction} className="line-entry-card progress-card">
+                <div className="order-card-header">
+                  <div>
+                    <strong>{line.productLabel}</strong>
+                    <p>{line.note ?? 'No extra line note'}</p>
+                  </div>
+                  <span className={`badge badge-${lineStatus}`}>{formatStatusLabel(lineStatus)}</span>
+                </div>
+                <div className="line-grid">
+                  <label>
+                    Completed
+                    <input
+                      name="completedQuantity"
+                      type="number"
+                      min="0"
+                      max={line.quantity}
+                      defaultValue={line.completedQuantity}
+                    />
+                  </label>
+                  <label>
+                    Total
+                    <input value={`${line.quantity} ${line.unit}`} disabled />
+                  </label>
+                </div>
+                <div className="action-cluster">
+                  <span className="field-label progress-label">{formatLineProgressLabel(line)}</span>
+                  <button type="submit" className="button-primary button-reset">
+                    Save progress
+                  </button>
+                </div>
+              </form>
+            );
+          })}
+        </div>
+      </section>
 
       <OrderForm
         action={action}

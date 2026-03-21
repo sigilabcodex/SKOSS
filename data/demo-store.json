@@ -109,97 +109,132 @@
   ],
   "recurringTemplates": [
     {
-      "id": "rt-cafe-luna-saturday",
+      "id": "template-cafe-luna-saturday",
       "templateType": "customer_order",
-      "title": "Cafe Luna Saturday delivery",
-      "scheduleRule": "Every Saturday",
-      "active": true
-    },
-    {
-      "id": "rt-front-counter-saturday",
-      "templateType": "internal_task",
-      "title": "Saturday front counter production",
-      "scheduleRule": "Every Saturday",
-      "active": true
-    },
-    {
-      "id": "rt-market-sunday",
-      "templateType": "customer_order",
-      "title": "Sunday market stall base stock",
-      "scheduleRule": "Every Sunday",
-      "active": true
-    }
-  ],
-  "orders": [
-    {
-      "changedInKitchen": false,
-      "visibleOnProductionBoard": true,
-      "id": "order-cafe-luna-2026-03-28",
-      "source": "generated",
-      "status": "active",
       "customerLabel": "Cafe Luna",
       "customerPhone": "+52 555 010 3000",
       "destinationLabel": "Cafe Luna",
-      "dueDate": "2026-03-28",
-      "productionDate": "2026-03-28",
       "notes": "Recurring Saturday delivery. Bag loaves in pairs for dispatch.",
+      "frequency": "weekly",
+      "weeklyDays": [
+        "sat"
+      ],
+      "nextOccurrenceDate": "2026-04-04",
+      "active": true,
       "createdAt": "2026-03-20T18:00:00Z",
-      "updatedAt": "2026-03-20T18:00:00Z",
+      "updatedAt": "2026-03-21T21:01:10.210Z",
       "lines": [
         {
-          "id": "line-country-loaf",
+          "id": "template-line-cafe-loaf",
           "lineType": "product_variant",
           "productLabel": "Country Loaf / 800g",
           "quantity": 12,
           "unit": "pieces",
-          "lineStatus": "planned",
           "note": "Score with cafe mark."
         },
         {
-          "id": "line-croissant",
+          "id": "template-line-cafe-croissant",
           "lineType": "product_variant",
           "productLabel": "Croissant / Butter",
           "quantity": 30,
-          "unit": "pieces",
-          "lineStatus": "planned"
+          "unit": "pieces"
         }
       ]
     },
     {
-      "changedInKitchen": false,
-      "visibleOnProductionBoard": true,
-      "id": "order-front-counter-2026-03-28",
-      "source": "generated",
-      "status": "active",
-      "customerLabel": "Front Counter",
+      "id": "template-front-counter-daily",
+      "templateType": "customer_order",
+      "customerLabel": "Front Counter opening trays",
       "destinationLabel": "Front Counter",
-      "dueDate": "2026-03-28",
-      "productionDate": "2026-03-28",
-      "notes": "Counter rhythm for Saturday opening trays.",
+      "notes": "Daily opening rhythm. Adjust sweet tray mix if the prior evening sold down.",
+      "frequency": "daily",
+      "weeklyDays": [],
+      "nextOccurrenceDate": "2026-04-01",
+      "active": true,
       "createdAt": "2026-03-20T18:05:00Z",
-      "updatedAt": "2026-03-20T18:05:00Z",
+      "updatedAt": "2026-03-21T21:01:10.210Z",
       "lines": [
         {
-          "id": "line-roll-sesame-counter",
+          "id": "template-line-counter-roll",
           "lineType": "product_variant",
           "productLabel": "Roll / Sesame",
           "quantity": 20,
-          "unit": "pieces",
-          "lineStatus": "planned"
+          "unit": "pieces"
         },
         {
-          "id": "line-croissant-counter",
+          "id": "template-line-counter-croissant",
           "lineType": "product_variant",
           "productLabel": "Croissant / Butter",
           "quantity": 10,
-          "unit": "pieces",
-          "lineStatus": "planned"
+          "unit": "pieces"
         }
       ]
     },
     {
-      "changedInKitchen": true,
+      "id": "template-market-sunday",
+      "templateType": "customer_order",
+      "customerLabel": "Sunday Market Stall",
+      "customerPhone": "+52 555 010 1880",
+      "destinationLabel": "Sunday Market Stall",
+      "notes": "Weekly market stock. Keep sweet tray count flexible if Saturday sells out.",
+      "frequency": "weekly",
+      "weeklyDays": [
+        "sun"
+      ],
+      "nextOccurrenceDate": "2026-04-05",
+      "active": true,
+      "createdAt": "2026-03-20T18:10:00Z",
+      "updatedAt": "2026-03-21T21:01:10.210Z",
+      "lines": [
+        {
+          "id": "template-line-market-loaf",
+          "lineType": "product_variant",
+          "productLabel": "Country Loaf / 800g",
+          "quantity": 6,
+          "unit": "pieces"
+        },
+        {
+          "id": "template-line-market-savory",
+          "lineType": "draft_product",
+          "productLabel": "Savory market tray",
+          "quantity": 1,
+          "unit": "tray",
+          "note": "Draft item until the market mix is standardized."
+        }
+      ]
+    }
+  ],
+  "orders": [
+    {
+      "id": "order-walk-in-buns",
+      "source": "walk_in",
+      "status": "active",
+      "customerLabel": "Morning walk-in buns",
+      "destinationLabel": "Front Counter",
+      "dueDate": "2026-03-28",
+      "productionDate": "2026-03-28",
+      "notes": "Quick add from the morning counter. Keep draft-first capture.",
+      "createdAt": "2026-03-21T06:10:00Z",
+      "updatedAt": "2026-03-21T06:10:00Z",
+      "changedInKitchen": false,
       "visibleOnProductionBoard": true,
+      "generatedFromTemplate": false,
+      "templateEdited": false,
+      "lines": [
+        {
+          "id": "line-walk-in-roll",
+          "lineType": "draft_product",
+          "productLabel": "Soft lunch bun tray",
+          "quantity": 1,
+          "completedQuantity": 0,
+          "unit": "tray",
+          "lineStatus": "pending",
+          "note": "Draft label until the counter bundle is standardized."
+        }
+      ],
+      "generatedOccurrenceDate": "2026-03-28"
+    },
+    {
       "id": "order-sofia-birthday",
       "source": "whatsapp",
       "status": "changed",
@@ -210,58 +245,269 @@
       "productionDate": "2026-03-28",
       "notes": "Late change: sesame rolls increased from 6 to 8. Confirm decoration at pickup.",
       "createdAt": "2026-03-21T00:30:00Z",
-      "updatedAt": "2026-03-21T01:10:00Z",
+      "updatedAt": "2026-03-21T06:05:00Z",
+      "changedInKitchen": true,
+      "visibleOnProductionBoard": true,
+      "generatedFromTemplate": false,
+      "templateEdited": false,
       "lines": [
         {
           "id": "line-roll-sesame-sofia",
           "lineType": "product_variant",
           "productLabel": "Roll / Sesame",
           "quantity": 8,
+          "completedQuantity": 4,
           "unit": "pieces",
-          "lineStatus": "planned"
+          "lineStatus": "in_progress"
         },
         {
           "id": "line-mini-sweet-tray",
           "lineType": "draft_product",
           "productLabel": "Mini sweet tray",
           "quantity": 2,
+          "completedQuantity": 0,
           "unit": "trays",
-          "lineStatus": "planned",
+          "lineStatus": "pending",
           "note": "Draft product; decoration still to confirm."
+        }
+      ],
+      "generatedOccurrenceDate": "2026-03-28"
+    },
+    {
+      "id": "order-template-front-counter-daily-2026-03-28",
+      "source": "generated",
+      "status": "changed",
+      "customerLabel": "Front Counter opening trays",
+      "destinationLabel": "Front Counter",
+      "dueDate": "2026-03-28",
+      "productionDate": "2026-03-28",
+      "notes": "Daily opening rhythm. Sweet tray mix trimmed because Friday sold slower than usual.",
+      "createdAt": "2026-03-20T18:05:00Z",
+      "updatedAt": "2026-03-21T05:50:00Z",
+      "changedInKitchen": true,
+      "visibleOnProductionBoard": true,
+      "templateId": "template-front-counter-daily",
+      "templateTitle": "Front Counter opening trays recurring",
+      "generatedOccurrenceDate": "2026-03-28",
+      "generatedFromTemplate": true,
+      "templateEdited": true,
+      "lines": [
+        {
+          "id": "line-roll-sesame-counter",
+          "lineType": "product_variant",
+          "productLabel": "Roll / Sesame",
+          "quantity": 20,
+          "completedQuantity": 8,
+          "unit": "pieces",
+          "lineStatus": "in_progress"
+        },
+        {
+          "id": "line-croissant-counter",
+          "lineType": "product_variant",
+          "productLabel": "Croissant / Butter",
+          "quantity": 10,
+          "completedQuantity": 6,
+          "unit": "pieces",
+          "lineStatus": "in_progress"
         }
       ]
     },
     {
+      "id": "order-template-cafe-luna-saturday-2026-03-28",
+      "source": "generated",
+      "status": "active",
+      "customerLabel": "Cafe Luna",
+      "customerPhone": "+52 555 010 3000",
+      "destinationLabel": "Cafe Luna",
+      "dueDate": "2026-03-28",
+      "productionDate": "2026-03-28",
+      "notes": "Recurring Saturday delivery. Bag loaves in pairs for dispatch.",
+      "createdAt": "2026-03-20T18:00:00Z",
+      "updatedAt": "2026-03-21T05:45:00Z",
       "changedInKitchen": false,
       "visibleOnProductionBoard": true,
-      "id": "order-mercado-domingo",
-      "source": "phone",
+      "templateId": "template-cafe-luna-saturday",
+      "templateTitle": "Cafe Luna recurring",
+      "generatedOccurrenceDate": "2026-03-28",
+      "generatedFromTemplate": true,
+      "templateEdited": false,
+      "lines": [
+        {
+          "id": "line-country-loaf",
+          "lineType": "product_variant",
+          "productLabel": "Country Loaf / 800g",
+          "quantity": 12,
+          "completedQuantity": 12,
+          "unit": "pieces",
+          "lineStatus": "done",
+          "note": "Score with cafe mark."
+        },
+        {
+          "id": "line-croissant",
+          "lineType": "product_variant",
+          "productLabel": "Croissant / Butter",
+          "quantity": 30,
+          "completedQuantity": 12,
+          "unit": "pieces",
+          "lineStatus": "in_progress"
+        }
+      ]
+    },
+    {
+      "id": "order-template-front-counter-daily-2026-03-29",
+      "source": "generated",
+      "status": "active",
+      "customerLabel": "Front Counter opening trays",
+      "destinationLabel": "Front Counter",
+      "dueDate": "2026-03-29",
+      "productionDate": "2026-03-29",
+      "notes": "Daily opening rhythm. Adjust sweet tray mix if the prior evening sold down.",
+      "createdAt": "2026-03-21T21:01:10.210Z",
+      "updatedAt": "2026-03-21T21:01:10.210Z",
+      "changedInKitchen": false,
+      "visibleOnProductionBoard": true,
+      "templateId": "template-front-counter-daily",
+      "templateTitle": "Front Counter opening trays recurring",
+      "generatedOccurrenceDate": "2026-03-29",
+      "generatedFromTemplate": true,
+      "templateEdited": false,
+      "lines": [
+        {
+          "id": "line-7141b0b5-70fd-4fde-97c2-63c3d64f5cc9",
+          "lineType": "product_variant",
+          "productLabel": "Roll / Sesame",
+          "quantity": 20,
+          "completedQuantity": 0,
+          "unit": "pieces",
+          "lineStatus": "pending"
+        },
+        {
+          "id": "line-30acc6fa-df71-426e-9953-5efdd9e7e2f2",
+          "lineType": "product_variant",
+          "productLabel": "Croissant / Butter",
+          "quantity": 10,
+          "completedQuantity": 0,
+          "unit": "pieces",
+          "lineStatus": "pending"
+        }
+      ]
+    },
+    {
+      "id": "order-template-market-sunday-2026-03-29",
+      "source": "generated",
       "status": "active",
       "customerLabel": "Sunday Market Stall",
       "customerPhone": "+52 555 010 1880",
       "destinationLabel": "Sunday Market Stall",
       "dueDate": "2026-03-29",
       "productionDate": "2026-03-29",
-      "notes": "Recurring-style market rhythm. Keep sweet tray count flexible if Saturday sells out.",
-      "createdAt": "2026-03-21T02:15:00Z",
-      "updatedAt": "2026-03-21T02:15:00Z",
+      "notes": "Weekly market stock. Keep sweet tray count flexible if Saturday sells out.",
+      "createdAt": "2026-03-21T21:01:10.210Z",
+      "updatedAt": "2026-03-21T21:01:10.210Z",
+      "changedInKitchen": false,
+      "visibleOnProductionBoard": true,
+      "templateId": "template-market-sunday",
+      "templateTitle": "Sunday Market Stall recurring",
+      "generatedOccurrenceDate": "2026-03-29",
+      "generatedFromTemplate": true,
+      "templateEdited": false,
       "lines": [
         {
-          "id": "line-country-loaf-market",
+          "id": "line-8e1039e9-b551-4222-aa50-d19e5a54b993",
           "lineType": "product_variant",
           "productLabel": "Country Loaf / 800g",
           "quantity": 6,
+          "completedQuantity": 0,
           "unit": "pieces",
-          "lineStatus": "planned"
+          "lineStatus": "pending"
         },
         {
-          "id": "line-market-savory-tray",
+          "id": "line-0223707f-a57b-4570-a2f1-5f2a6ed8ea87",
           "lineType": "draft_product",
           "productLabel": "Savory market tray",
           "quantity": 1,
+          "completedQuantity": 0,
           "unit": "tray",
-          "lineStatus": "planned",
+          "lineStatus": "pending",
           "note": "Draft item until the market mix is standardized."
+        }
+      ]
+    },
+    {
+      "id": "order-template-front-counter-daily-2026-03-30",
+      "source": "generated",
+      "status": "active",
+      "customerLabel": "Front Counter opening trays",
+      "destinationLabel": "Front Counter",
+      "dueDate": "2026-03-30",
+      "productionDate": "2026-03-30",
+      "notes": "Daily opening rhythm. Adjust sweet tray mix if the prior evening sold down.",
+      "createdAt": "2026-03-21T21:01:10.210Z",
+      "updatedAt": "2026-03-21T21:01:10.210Z",
+      "changedInKitchen": false,
+      "visibleOnProductionBoard": true,
+      "templateId": "template-front-counter-daily",
+      "templateTitle": "Front Counter opening trays recurring",
+      "generatedOccurrenceDate": "2026-03-30",
+      "generatedFromTemplate": true,
+      "templateEdited": false,
+      "lines": [
+        {
+          "id": "line-9dc67011-ba8e-4047-aa63-f23c0092569a",
+          "lineType": "product_variant",
+          "productLabel": "Roll / Sesame",
+          "quantity": 20,
+          "completedQuantity": 0,
+          "unit": "pieces",
+          "lineStatus": "pending"
+        },
+        {
+          "id": "line-0faffec9-83d4-43be-9541-ea2a08c4e37e",
+          "lineType": "product_variant",
+          "productLabel": "Croissant / Butter",
+          "quantity": 10,
+          "completedQuantity": 0,
+          "unit": "pieces",
+          "lineStatus": "pending"
+        }
+      ]
+    },
+    {
+      "id": "order-template-front-counter-daily-2026-03-31",
+      "source": "generated",
+      "status": "active",
+      "customerLabel": "Front Counter opening trays",
+      "destinationLabel": "Front Counter",
+      "dueDate": "2026-03-31",
+      "productionDate": "2026-03-31",
+      "notes": "Daily opening rhythm. Adjust sweet tray mix if the prior evening sold down.",
+      "createdAt": "2026-03-21T21:01:10.210Z",
+      "updatedAt": "2026-03-21T21:01:10.210Z",
+      "changedInKitchen": false,
+      "visibleOnProductionBoard": true,
+      "templateId": "template-front-counter-daily",
+      "templateTitle": "Front Counter opening trays recurring",
+      "generatedOccurrenceDate": "2026-03-31",
+      "generatedFromTemplate": true,
+      "templateEdited": false,
+      "lines": [
+        {
+          "id": "line-6ce8dc35-614a-4448-a694-ee2f9276b3bd",
+          "lineType": "product_variant",
+          "productLabel": "Roll / Sesame",
+          "quantity": 20,
+          "completedQuantity": 0,
+          "unit": "pieces",
+          "lineStatus": "pending"
+        },
+        {
+          "id": "line-1dc8c08d-ac01-4aa3-8644-a3107c29747c",
+          "lineType": "product_variant",
+          "productLabel": "Croissant / Butter",
+          "quantity": 10,
+          "completedQuantity": 0,
+          "unit": "pieces",
+          "lineStatus": "pending"
         }
       ]
     }
@@ -303,7 +549,7 @@
       "unit": "tray",
       "stage": "baked",
       "status": "ready",
-      "notes": "Includes part of the late WhatsApp order.",
+      "notes": "Includes part of the late WhatsApp order and the recurring front counter demand.",
       "updatedAt": "2026-03-21T05:10:00Z"
     }
   ],
@@ -313,19 +559,20 @@
       "productionDate": "2026-03-28",
       "shiftKey": "night",
       "status": "ready_for_handoff",
-      "summary": "Country dough fermentation complete. Croissant dough is ready for shaping.",
+      "summary": "Country dough fermentation complete. Croissant dough is ready for shaping. Front counter trays are partially finished.",
       "openItems": [
-        "Finish 2 trays of sweet items.",
-        "Final sesame roll count includes the late WhatsApp edit."
+        "Finish 18 Cafe Luna croissants.",
+        "Complete 12 front counter sesame rolls and 4 counter croissants.",
+        "Finalize the draft mini sweet trays after decoration is confirmed."
       ],
-      "handoffNotes": "Use croissant dough first; fridge shelf 2 is tagged.",
+      "handoffNotes": "Use croissant dough first; fridge shelf 2 is tagged. Generated recurring orders already include the counter baseline.",
       "updatedAt": "2026-03-21T05:30:00Z",
       "shiftNotes": [
         {
-          "state": "info",
-          "linkedItemLabel": "Croissant dough",
           "id": "shift-note-night-1",
           "authorLabel": "Noche",
+          "state": "info",
+          "linkedItemLabel": "Croissant dough",
           "note": "Mini sweet tray is still draft; review decoration before packing.",
           "createdAt": "2026-03-21T05:28:00Z"
         }

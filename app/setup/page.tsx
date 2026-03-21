@@ -1,3 +1,4 @@
+import { formatDateLabel, formatTemplateScheduleLabel } from '@/lib/domain/formatters';
 import { getSetupWorkspace } from '@/lib/server/demo-data';
 
 export default async function SetupPage() {
@@ -10,8 +11,8 @@ export default async function SetupPage() {
           <p className="eyebrow">Setup workspace</p>
           <h1>Lightweight organization</h1>
           <p>
-            Setup still supports the work instead of blocking it. Products, destinations, and rhythms
-            are visible, but draft capture remains first-class.
+            Setup still supports the work instead of blocking it. Products, destinations, recurring
+            rhythms, and active users stay visible without turning into ERP-heavy configuration.
           </p>
         </div>
       </section>
@@ -48,8 +49,10 @@ export default async function SetupPage() {
           <ul className="stack-list">
             {data.recurringTemplates.map((template) => (
               <li key={template.id}>
-                <strong>{template.title}</strong>
-                <span>{template.scheduleRule}</span>
+                <strong>{template.customerLabel}</strong>
+                <span>
+                  {formatTemplateScheduleLabel(template)} · next {formatDateLabel(template.nextOccurrenceDate)}
+                </span>
               </li>
             ))}
           </ul>

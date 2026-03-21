@@ -1,6 +1,6 @@
 import Link from 'next/link';
-import { formatDateLabel, formatStatusLabel } from '@/lib/domain/formatters';
-import { getOrdersWorkspace } from '@/lib/server/demo-data';
+import { formatDateLabel, formatLineProgressLabel, formatStatusLabel, formatTemplateScheduleLabel } from '@/lib/domain/formatters';
+import { getOrderProgress, getOrdersWorkspace } from '@/lib/server/demo-data';
 
 function OrderCard({
   order,
@@ -8,17 +8,21 @@ function OrderCard({
   key?: string;
   order: Awaited<ReturnType<typeof getOrdersWorkspace>>['orders'][number];
 }) {
+  const progress = getOrderProgress(order);
+
   return (
-    <article className="order-card">
+    <article className={`order-card ${progress.partialLines > 0 ? 'order-card-partial' : ''}`}>
       <div className="order-card-header">
         <div>
           <strong>{order.customerLabel}</strong>
           <p>{order.destinationLabel ?? 'Destination still open'}</p>
         </div>
-        <div className="page-stack">
+        <div className="page-stack compact-badge-stack">
           <span className={`badge badge-${order.status}`}>{formatStatusLabel(order.status)}</span>
+          {order.generatedFromTemplate ? <span className="badge badge-generated">generated</span> : <span className="badge">manual</span>}
           {order.visibleOnProductionBoard === false ? <span className="badge">hidden from board</span> : null}
-          {order.changedInKitchen ? <span className="badge badge-changed">kitchen attention</span> : null}
+          {order.changedInKitchen || order.templateEdited ? <span className="badge badge-changed">kitchen attention</span> : null}
+          {progress.partialLines > 0 ? <span className="badge badge-in_progress">partial work</span> : null}
         </div>
       </div>
       <div className="order-meta-grid">
@@ -31,8 +35,8 @@ function OrderCard({
           <strong>{formatDateLabel(order.productionDate)}</strong>
         </div>
         <div>
-          <span className="field-label">Contact</span>
-          <strong>{order.customerPhone ?? 'Not captured'}</strong>
+          <span className="field-label">Completion</span>
+          <strong>{progress.completedQuantity}/{progress.requiredQuantity || 0} ready</strong>
         </div>
         <div>
           <span className="field-label">Notes</span>
@@ -42,9 +46,7 @@ function OrderCard({
       <ul className="mini-line-list">
         {order.lines.map((line) => (
           <li key={line.id}>
-            <span>
-              {line.quantity} {line.unit}
-            </span>
+            <span>{formatLineProgressLabel(line)}</span>
             <strong>{line.productLabel}</strong>
           </li>
         ))}
@@ -56,8 +58,12 @@ function OrderCard({
   );
 }
 
-export default async function OrdersPage() {
-  const view = await getOrdersWorkspace();
+export default async function OrdersPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ saved?: string }>;
+}) {
+  const [view, params] = await Promise.all([getOrdersWorkspace(), searchParams]);
 
   return (
     <div className="page-stack">
@@ -66,13 +72,56 @@ export default async function OrdersPage() {
           <p className="eyebrow">Sales workspace</p>
           <h1>Orders</h1>
           <p>
-            Saved orders are now the primary source here. Draft customers, freeform items, late edits,
-            and board visibility all stay visible.
+            Manual orders, generated recurring orders, partial completion, and kitchen-visible changes
+            all stay in one touch-friendly list.
           </p>
         </div>
-        <Link href="/orders/new" className="button-primary">
-          New order
-        </Link>
+        <div className="action-cluster">
+          <Link href="/orders/templates/new" className="button-secondary">
+            New recurring template
+          </Link>
+          <Link href="/orders/new" className="button-primary">
+            New order
+          </Link>
+        </div>
+      </section>
+
+      {params?.saved === 'template' ? <p className="inline-success">Recurring template saved. Upcoming orders will generate automatically.</p> : null}
+
+      <section className="panel page-stack">
+        <div className="table-header-row">
+          <div>
+            <strong>Recurring demand</strong>
+            <p>Keep the next repeated work visible without adding a scheduling engine.</p>
+          </div>
+          <span>{view.recurringTemplates.length} templates</span>
+        </div>
+        <div className="card-grid recurring-grid">
+          {view.recurringTemplates.map((template) => (
+            <article key={template.id} className="subpanel page-stack">
+              <div className="order-card-header">
+                <div>
+                  <strong>{template.customerLabel}</strong>
+                  <p>{template.destinationLabel ?? 'Destination still open'}</p>
+                </div>
+                <span className="badge badge-generated">recurring</span>
+              </div>
+              <p>
+                {formatTemplateScheduleLabel(template)} · next up {formatDateLabel(template.nextOccurrenceDate)}
+              </p>
+              <ul className="mini-line-list">
+                {template.lines.map((line) => (
+                  <li key={line.id}>
+                    <span>
+                      {line.quantity} {line.unit}
+                    </span>
+                    <strong>{line.productLabel}</strong>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          ))}
+        </div>
       </section>
 
       {view.orderGroups.map((group) => (

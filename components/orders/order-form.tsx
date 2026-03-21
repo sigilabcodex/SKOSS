@@ -1,5 +1,5 @@
 import type { Destination, Order } from '@/lib/domain/types';
-import { getDefaultLineDrafts } from '@/lib/server/demo-data';
+import { getDefaultLineDrafts, getOrderProgress } from '@/lib/server/demo-data';
 
 interface OrderFormProps {
   action: (formData: FormData) => void | Promise<void>;
@@ -34,6 +34,7 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
   const lineDrafts = getDefaultLineDrafts(order?.lines);
   const visibleOnProductionBoard = order?.visibleOnProductionBoard ?? true;
   const changedInKitchen = order?.changedInKitchen ?? order?.status === 'changed';
+  const progress = order ? getOrderProgress(order) : null;
 
   return (
     <form action={action} className="page-stack">
@@ -47,7 +48,32 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
               kitchen.
             </p>
           </div>
+          {order ? (
+            <div className="page-stack compact-badge-stack">
+              <span className={`badge badge-${order.status}`}>{order.status.replaceAll('_', ' ')}</span>
+              {order.generatedFromTemplate ? <span className="badge badge-generated">generated</span> : null}
+              {order.templateEdited ? <span className="badge badge-changed">edited from template</span> : null}
+              {progress && progress.partialLines > 0 ? <span className="badge badge-in_progress">partial work</span> : null}
+            </div>
+          ) : null}
         </div>
+
+        {order && progress ? (
+          <div className="stats-grid compact-stats-grid">
+            <div>
+              <strong>{progress.completedQuantity}</strong>
+              <span>completed pieces / units</span>
+            </div>
+            <div>
+              <strong>{progress.remainingQuantity}</strong>
+              <span>still pending</span>
+            </div>
+            <div>
+              <strong>{progress.partialLines}</strong>
+              <span>lines in progress</span>
+            </div>
+          </div>
+        ) : null}
 
         <div className="grid-two">
           <label>
@@ -69,12 +95,13 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
           </label>
           <label>
             Source
-            <select name="source" defaultValue={order?.source ?? 'manual'}>
+            <select name="source" defaultValue={order?.generatedFromTemplate ? 'generated' : order?.source ?? 'manual'}>
               {sourceOptions.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
+              {order?.generatedFromTemplate ? <option value="generated">Generated</option> : null}
             </select>
           </label>
           <label>
@@ -150,6 +177,11 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
             <div key={`${line.productLabel}-${index}`} className="line-entry-card">
               <div className="line-entry-top">
                 <strong>Line {index + 1}</strong>
+                {order?.lines[index] ? (
+                  <span className={`badge badge-${order.lines[index].lineStatus}`}>
+                    {order.lines[index].completedQuantity}/{order.lines[index].quantity} done
+                  </span>
+                ) : null}
               </div>
               <div className="line-grid">
                 <label>
