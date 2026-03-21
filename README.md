@@ -239,3 +239,66 @@ The best early contributions are not flashy abstractions. They are careful clari
 - what architecture assumptions would accidentally make the system heavier than its users need
 
 If you contribute, prefer concrete operational understanding over generic software patterns.
+
+
+## v0 implementation direction
+
+The repository now includes a first implementation-oriented convergence pass.
+
+### Chosen v0 path
+
+- single deployable Next.js web application
+- server-centered architecture with one Node.js process
+- SQLite as the v0 database choice
+- mobile-first workspace UI for sales, kitchen, handoff, and setup
+- polling-first freshness strategy with room for selective SSE later
+- offline-aware but not offline-sync-first
+
+### New v0 documents
+
+- `docs/adr/0001-v0-architecture.md` — concrete architecture decision record for v0
+- `docs/v0-technical-spec.md` — implementation-oriented v0 product specification
+- `docs/v0-api-surface.md` — minimal conceptual backend surface
+- `docs/v0-state-transitions.md` — small workflow state model
+- `docs/v0-seed-scenario.md` — Kalali end-to-end demo target
+
+## Local development
+
+The repo now contains a lightweight implementation scaffold.
+
+### Prerequisites
+
+- Node.js 20+
+- npm 10+
+
+### Run locally
+
+```bash
+cp .env.example .env.local
+npm install
+npm run dev
+```
+
+Then open `http://localhost:3000`.
+
+### Available commands
+
+```bash
+npm run dev
+npm run lint
+npm run typecheck
+npm run build
+```
+
+## Scaffold overview
+
+The first implementation scaffold includes:
+
+- `app/` — Next.js App Router pages for the first workspaces
+- `app/api/` — placeholder JSON endpoints for orders, production, and handoff
+- `components/` — shared shell/navigation components
+- `data/` — demo fixtures reflecting the Kalali seed scenario
+- `lib/domain/` — shared v0 domain types and formatting helpers
+- `lib/server/` — workflow-shaped demo aggregation functions
+
+This scaffold is intentionally light. It is meant to give the project a clean place to start implementing real v0 features without pretending the whole application is already designed.
