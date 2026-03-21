@@ -27,6 +27,7 @@ declare module 'next/link' {
 declare module 'next/navigation' {
   export function redirect(url: string): never;
   export function notFound(): never;
+  export function usePathname(): string;
 }
 
 declare module 'next/cache' {

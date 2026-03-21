@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
+import Script from 'next/script';
 import './globals.css';
 import { AppShell } from '@/components/app-shell';
 
@@ -8,14 +9,38 @@ export const metadata: Metadata = {
   description: 'Order intake, production board, and shift handoff for the first usable SKOSS workflow.',
 };
 
+const themeInitScript = `
+(() => {
+  const storageKey = 'skoss-theme';
+  const savedTheme = window.localStorage.getItem(storageKey);
+  const theme = savedTheme || 'light';
+  document.documentElement.dataset.theme = theme;
+
+  const syncThemeButtons = () => {
+    document.querySelectorAll('[data-theme-option]').forEach((button) => {
+      button.setAttribute('aria-pressed', String(button.getAttribute('data-theme-option') === theme));
+    });
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncThemeButtons, { once: true });
+  } else {
+    syncThemeButtons();
+  }
+})();
+`;
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body>
+        <Script id="skoss-theme-init" strategy="beforeInteractive">
+          {themeInitScript}
+        </Script>
         <AppShell>{children}</AppShell>
       </body>
     </html>
