@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { formatDateLabel, formatLineProgressLabel, formatStatusLabel, formatTemplateScheduleLabel } from '@/lib/domain/formatters';
 import { getOrderProgress, getOrdersWorkspace } from '@/lib/server/demo-data';
+import { ArrowRightIcon, CheckIcon, OrdersIcon, SparklesIcon } from '@/components/ui-icons';
 
 function OrderCard({
   order,
@@ -17,10 +18,10 @@ function OrderCard({
           <strong>{order.customerLabel}</strong>
           <p>{order.destinationLabel ?? 'Destination still open'}</p>
         </div>
-        <div className="page-stack compact-badge-stack">
+        <div className="page-stack compact-badge-stack align-end">
           <span className={`badge badge-${order.status}`}>{formatStatusLabel(order.status)}</span>
-          {order.generatedFromTemplate ? <span className="badge badge-generated">generated</span> : <span className="badge">manual</span>}
-          {order.visibleOnProductionBoard === false ? <span className="badge">hidden from board</span> : null}
+          {order.generatedFromTemplate ? <span className="badge badge-generated">recurring</span> : <span className="badge badge-manual">manual</span>}
+          {order.visibleOnProductionBoard === false ? <span className="badge badge-neutral">hidden from board</span> : null}
           {order.changedInKitchen || order.templateEdited ? <span className="badge badge-changed">kitchen attention</span> : null}
           {progress.partialLines > 0 ? <span className="badge badge-in_progress">partial work</span> : null}
         </div>
@@ -52,7 +53,8 @@ function OrderCard({
         ))}
       </ul>
       <Link href={`/orders/${order.id}`} className="button-secondary">
-        Open order
+        <span>Open order</span>
+        <ArrowRightIcon className="button-icon" />
       </Link>
     </article>
   );
@@ -67,7 +69,7 @@ export default async function OrdersPage({
 
   return (
     <div className="page-stack">
-      <section className="section-header">
+      <section className="section-header page-hero-header">
         <div>
           <p className="eyebrow">Sales workspace</p>
           <h1>Orders</h1>
@@ -78,15 +80,22 @@ export default async function OrdersPage({
         </div>
         <div className="action-cluster">
           <Link href="/orders/templates/new" className="button-secondary">
-            New recurring template
+            <SparklesIcon className="button-icon" />
+            <span>New recurring template</span>
           </Link>
           <Link href="/orders/new" className="button-primary">
-            New order
+            <OrdersIcon className="button-icon" />
+            <span>New order</span>
           </Link>
         </div>
       </section>
 
-      {params?.saved === 'template' ? <p className="inline-success">Recurring template saved. Upcoming orders will generate automatically.</p> : null}
+      {params?.saved === 'template' ? (
+        <p className="inline-success">
+          <CheckIcon className="button-icon" />
+          Recurring template saved. Upcoming orders will generate automatically.
+        </p>
+      ) : null}
 
       <section className="panel page-stack">
         <div className="table-header-row">
@@ -94,7 +103,7 @@ export default async function OrdersPage({
             <strong>Recurring demand</strong>
             <p>Keep the next repeated work visible without adding a scheduling engine.</p>
           </div>
-          <span>{view.recurringTemplates.length} templates</span>
+          <span className="summary-pill">{view.recurringTemplates.length} templates</span>
         </div>
         <div className="card-grid recurring-grid">
           {view.recurringTemplates.map((template) => (
@@ -125,7 +134,7 @@ export default async function OrdersPage({
       </section>
 
       {view.orderGroups.map((group) => (
-        <section key={group.productionDate} className="panel">
+        <section key={group.productionDate} className="panel page-stack">
           <div className="table-header-row">
             <div>
               <strong>{formatDateLabel(group.productionDate)}</strong>
@@ -135,7 +144,7 @@ export default async function OrdersPage({
                   : 'Saved orders grouped by production day.'}
               </p>
             </div>
-            <span>{group.orders.length} orders</span>
+            <span className="summary-pill">{group.orders.length} orders</span>
           </div>
           <div className="card-grid">
             {group.orders.map((order) => (

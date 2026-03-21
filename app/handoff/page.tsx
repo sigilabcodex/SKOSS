@@ -6,6 +6,8 @@ import {
 } from '@/lib/domain/formatters';
 import { addShiftNoteAction, addWipEntryAction, saveShiftLogAction } from '@/lib/server/actions';
 import { getHandoffWorkspace } from '@/lib/server/demo-data';
+import { SubmitButton } from '@/components/submit-button';
+import { CheckIcon, HandoffIcon } from '@/components/ui-icons';
 
 const shiftOptions = ['night', 'morning', 'afternoon'] as const;
 const stageOptions = ['prepared', 'shaped', 'baked', 'ready'] as const;
@@ -23,7 +25,7 @@ export default async function HandoffPage({
 
   return (
     <div className="page-stack">
-      <section className="section-header">
+      <section className="section-header page-hero-header">
         <div>
           <p className="eyebrow">WIP + shift handoff</p>
           <h1>Morning review</h1>
@@ -34,12 +36,18 @@ export default async function HandoffPage({
         </div>
       </section>
 
-      {params?.saved ? <p className="inline-success">Saved {params.saved} update.</p> : null}
+      {params?.saved ? <p className="inline-success"><CheckIcon className="button-icon" />Saved {params.saved} update.</p> : null}
       {params?.error ? <p className="inline-warning">{params.error}</p> : null}
 
       <section className="grid-two">
-        <article className="panel">
-          <h2>{formatDateLabel(view.focusDate)} handoff snapshot</h2>
+        <article className="panel page-stack">
+          <div className="table-header-row">
+            <div>
+              <h2>{formatDateLabel(view.focusDate)} handoff snapshot</h2>
+              <p>Main shift summary and open items for the current focus date.</p>
+            </div>
+            <span className="summary-pill">Night shift</span>
+          </div>
           {focusLog ? (
             <div className="page-stack">
               <div>
@@ -60,12 +68,24 @@ export default async function HandoffPage({
               </div>
             </div>
           ) : (
-            <p>No handoff summary yet for the focus date.</p>
+            <section className="page-context-card">
+              <HandoffIcon className="callout-icon" />
+              <div>
+                <strong>No handoff summary yet for the focus date.</strong>
+                <p className="helper-text no-margin">Save the main handoff card below to create the first visible summary.</p>
+              </div>
+            </section>
           )}
         </article>
 
-        <article className="panel">
-          <h2>Ready or pending WIP</h2>
+        <article className="panel page-stack">
+          <div className="table-header-row">
+            <div>
+              <h2>Ready or pending WIP</h2>
+              <p>The next shift should be able to scan this list fast on a phone or tablet.</p>
+            </div>
+            <span className="summary-pill">{focusWip.length} entries</span>
+          </div>
           <ul className="stack-list muted-list">
             {focusWip.map((entry) => (
               <li key={entry.id}>
@@ -83,17 +103,17 @@ export default async function HandoffPage({
       </section>
 
       <section className="grid-two">
-        <form action={addWipEntryAction} className="panel form-grid compact-form">
+        <form action={addWipEntryAction} className="panel form-grid compact-form page-stack">
           <div>
             <p className="eyebrow">Add WIP</p>
             <h2>Record what is already in motion</h2>
           </div>
           <label>
-            Production day
+            <span className="field-heading">Production day</span>
             <input name="productionDate" type="date" defaultValue={view.focusDate} required />
           </label>
           <label>
-            Shift
+            <span className="field-heading">Shift</span>
             <select name="shiftKey" defaultValue="night">
               {shiftOptions.map((option) => (
                 <option key={option} value={option}>
@@ -103,7 +123,7 @@ export default async function HandoffPage({
             </select>
           </label>
           <label>
-            WIP type
+            <span className="field-heading">WIP type</span>
             <select name="wipType" defaultValue="prep">
               <option value="base_dough">Base dough</option>
               <option value="prep">Prep</option>
@@ -113,19 +133,19 @@ export default async function HandoffPage({
             </select>
           </label>
           <label>
-            Label
+            <span className="field-heading">Label</span>
             <input name="referenceLabel" placeholder="Croissant dough" required />
           </label>
           <label>
-            Quantity
+            <span className="field-heading">Quantity</span>
             <input name="quantity" type="number" min="1" step="1" defaultValue="1" required />
           </label>
           <label>
-            Unit
+            <span className="field-heading">Unit</span>
             <input name="unit" defaultValue="batch" />
           </label>
           <label>
-            Stage
+            <span className="field-heading">Stage</span>
             <select name="stage" defaultValue="prepared">
               {stageOptions.map((option) => (
                 <option key={option} value={option}>
@@ -135,25 +155,29 @@ export default async function HandoffPage({
             </select>
           </label>
           <label className="line-span-2">
-            Notes
+            <span className="field-heading">Notes</span>
             <textarea name="notes" placeholder="What the next shift should know" />
           </label>
-          <button type="submit" className="button-primary button-reset">
+          <SubmitButton
+            className="button-primary button-reset"
+            pendingLabel="Saving WIP…"
+            icon={<CheckIcon className="button-icon" />}
+          >
             Save WIP
-          </button>
+          </SubmitButton>
         </form>
 
-        <form action={saveShiftLogAction} className="panel form-grid compact-form">
+        <form action={saveShiftLogAction} className="panel form-grid compact-form page-stack">
           <div>
             <p className="eyebrow">Shift handoff</p>
             <h2>Update the main handoff card</h2>
           </div>
           <label>
-            Production day
+            <span className="field-heading">Production day</span>
             <input name="productionDate" type="date" defaultValue={view.focusDate} required />
           </label>
           <label>
-            Shift
+            <span className="field-heading">Shift</span>
             <select name="shiftKey" defaultValue="night">
               {shiftOptions.map((option) => (
                 <option key={option} value={option}>
@@ -163,7 +187,7 @@ export default async function HandoffPage({
             </select>
           </label>
           <label>
-            Status
+            <span className="field-heading">Status</span>
             <select name="status" defaultValue={focusLog?.status ?? 'open'}>
               {handoffStatusOptions.map((option) => (
                 <option key={option} value={option}>
@@ -173,35 +197,39 @@ export default async function HandoffPage({
             </select>
           </label>
           <label className="line-span-2">
-            Summary
+            <span className="field-heading">Summary</span>
             <textarea name="summary" defaultValue={focusLog?.summary ?? ''} required />
           </label>
           <label className="line-span-2">
-            Open items (one per line)
+            <span className="field-heading">Open items (one per line)</span>
             <textarea name="openItems" defaultValue={focusLog?.openItems.join('\n') ?? ''} />
           </label>
           <label className="line-span-2">
-            Handoff note
+            <span className="field-heading">Handoff note</span>
             <textarea name="handoffNotes" defaultValue={focusLog?.handoffNotes ?? ''} />
           </label>
-          <button type="submit" className="button-primary button-reset">
+          <SubmitButton
+            className="button-primary button-reset"
+            pendingLabel="Saving handoff…"
+            icon={<CheckIcon className="button-icon" />}
+          >
             Save handoff
-          </button>
+          </SubmitButton>
         </form>
       </section>
 
       <section className="grid-two">
-        <form action={addShiftNoteAction} className="panel form-grid compact-form">
+        <form action={addShiftNoteAction} className="panel form-grid compact-form page-stack">
           <div>
             <p className="eyebrow">Shift note</p>
             <h2>Add a quick note to the timeline</h2>
           </div>
           <label>
-            Production day
+            <span className="field-heading">Production day</span>
             <input name="productionDate" type="date" defaultValue={view.focusDate} required />
           </label>
           <label>
-            Shift
+            <span className="field-heading">Shift</span>
             <select name="shiftKey" defaultValue="morning">
               {shiftOptions.map((option) => (
                 <option key={option} value={option}>
@@ -211,11 +239,11 @@ export default async function HandoffPage({
             </select>
           </label>
           <label>
-            Worker / role
+            <span className="field-heading">Worker / role</span>
             <input name="authorLabel" defaultValue="Amanecer" />
           </label>
           <label>
-            State
+            <span className="field-heading">State</span>
             <select name="state" defaultValue="info">
               {noteStateOptions.map((option) => (
                 <option key={option} value={option}>
@@ -225,19 +253,23 @@ export default async function HandoffPage({
             </select>
           </label>
           <label className="line-span-2">
-            Linked item or product
+            <span className="field-heading">Linked item or product</span>
             <input name="linkedItemLabel" placeholder="Mini sweet tray or rack 2 croissants" />
           </label>
           <label className="line-span-2">
-            Note
+            <span className="field-heading">Note</span>
             <textarea name="note" placeholder="Ready trays on rack 1, sweet items still pending" required />
           </label>
-          <button type="submit" className="button-primary button-reset">
+          <SubmitButton
+            className="button-primary button-reset"
+            pendingLabel="Adding note…"
+            icon={<CheckIcon className="button-icon" />}
+          >
             Add shift note
-          </button>
+          </SubmitButton>
         </form>
 
-        <article className="panel">
+        <article className="panel page-stack">
           <p className="eyebrow">Timeline</p>
           <h2>Recent handoff activity</h2>
           <div className="list-table">
