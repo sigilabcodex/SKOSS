@@ -2,7 +2,13 @@ import type { Route } from 'next';
 import Link from 'next/link';
 import { getWorkspaceSummary } from '@/lib/server/demo-data';
 
-const quickLinks = [
+type QuickLink = {
+  href: Route;
+  title: string;
+  description: string;
+};
+
+const quickLinks: QuickLink[] = [
   {
     href: '/orders',
     title: 'Sales workspace',
@@ -23,11 +29,7 @@ const quickLinks = [
     title: 'Setup workspace',
     description: 'Keep products, destinations, recurring templates, and users lightweight.',
   },
-] satisfies ReadonlyArray<{
-  href: Route;
-  title: string;
-  description: string;
-}>;
+];
 
 export default function HomePage() {
   const summary = getWorkspaceSummary();
