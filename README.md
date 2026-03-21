@@ -37,6 +37,7 @@ It is especially aimed at teams where:
 - phones and tablets are more common than office desktops
 - process consistency matters, but simplicity matters even more
 - planning and real-world execution drift apart constantly
+- software setup time competes with real kitchen work
 
 ## Why it exists
 
@@ -54,23 +55,52 @@ SKOSS exists to offer a lighter, more practical alternative:
 - **forgiving when reality changes**
 - **clear enough for shift work**
 - **structured enough to support consistency**
+- **usable before setup is perfect**
 
 ## Project philosophy
 
 The project starts from a few strong beliefs:
 
-1. **Daily operation matters more than perfect master data.**
-   A small kitchen must be able to work even without SKUs, barcodes, or complex setup.
-2. **Reality overrides plan.**
+1. **Daily operation matters more than perfect setup.**
+   A small kitchen must be able to work even without complete customer records, full product catalogs, detailed recipes, or advanced identifiers.
+2. **You can work now, organize later.**
+   The system should allow draft customers, draft products, uncategorized items, and freeform notes so operators can keep moving.
+3. **Reality overrides plan.**
    Manual adjustments, partial completion, notes, and exceptions are not edge cases.
-3. **Operators need role-shaped views.**
+4. **Operators need role-shaped views.**
    A baker, seller, shift lead, and admin should not all see the same screen.
-4. **Language should fit the kitchen.**
+5. **Language should fit the kitchen.**
    User-facing flows should avoid ERP jargon and use practical terms.
-5. **The system should grow from real use.**
+6. **The system should grow from real use.**
    Domain understanding comes before premature architecture.
-6. **FOSS maintainability matters.**
+7. **Simple deployment matters.**
+   The system should stay compatible with low-spec VPS hosting, small self-hosted servers, and practical local deployment.
+8. **FOSS maintainability matters.**
    Early scope should stay disciplined, understandable, and implementation-agnostic.
+
+## Progressive adoption
+
+SKOSS should adapt to how a business already works instead of forcing a big admin project before first use.
+
+A team should be able to create and track orders immediately, even if:
+
+- no customer directory exists yet
+- the product catalog is incomplete
+- ingredients and suppliers are not loaded
+- recipes are partially defined or missing
+- recurring patterns are still being discovered
+
+Structured data is still valuable, but it should refine real work rather than block it.
+
+This implies support for placeholder records such as:
+
+- draft customer
+- draft product
+- draft item
+- uncategorized item
+- freeform note item
+
+These should be enrichable later as the business formalizes its process.
 
 ## Initial scope
 
@@ -90,6 +120,30 @@ The initial product direction centers on the operational backbone of small kitch
 
 The near-term focus is the transformation engine that connects these concepts rather than trying to solve every business function at once.
 
+## Deployment direction
+
+SKOSS should aim to be practical for small operators, not only for well-funded teams with managed cloud infrastructure.
+
+Target deployment directions:
+
+- **primary mode:** server-hosted use on a small Linux VPS or similar modest infrastructure
+- **secondary mode:** self-hosted use on a local server, small office machine, or low-spec laptop on the local network
+- **future direction:** offline-aware or degraded-network behavior when internet access is unstable
+
+This does **not** mean the project is promising full offline sync immediately. It means architecture decisions should leave room for local-first and reliability-friendly evolution later.
+
+## Portability and trust
+
+Small businesses should not be trapped inside fragile software.
+
+SKOSS should favor:
+
+- practical exports in human-manageable formats
+- reliable backups
+- simple restore paths
+- architecture that can be understood and maintained by FOSS contributors
+- sensible privacy and security defaults for customer and operational data
+
 ## Non-goals for the first phase
 
 SKOSS should **not** try to become a full ERP from day one.
@@ -103,6 +157,7 @@ Early non-goals include:
 - enterprise manufacturing complexity
 - mandatory barcode or SKU-centric operations
 - broad analytics before the operational core is reliable
+- cloud-heavy architecture assumptions that raise hosting burden early
 
 Advanced identifiers such as SKU, barcode, and internal codes may exist later as optional power features, but they should not shape the first user experience.
 
@@ -144,6 +199,9 @@ Before heavy implementation begins, the goal is to clarify:
 - role-based workspaces
 - recurrence logic
 - production logic
+- progressive adoption behavior
+- lightweight deployment expectations
+- portability and security baselines
 - a disciplined MVP
 
 ## Repository map
@@ -156,6 +214,9 @@ Before heavy implementation begins, the goal is to clarify:
 - `docs/recurring-logic.md` — recurrence model and editing rules
 - `docs/production-logic.md` — order-to-production transformation logic
 - `docs/mvp-v0.md` — narrow first MVP definition
+- `docs/progressive-adoption.md` — draft-first and zero-blocking workflow principles
+- `docs/deployment-principles.md` — lightweight hosting and local-first direction
+- `docs/security-and-portability.md` — practical security, backup, and restore principles
 - `docs/future-ideas.md` — intentionally deferred ideas
 - `docs/ux-principles.md` — practical UX rules
 - `docs/open-questions.md` — unresolved product and domain questions
@@ -168,5 +229,6 @@ The best early contributions are not flashy abstractions. They are careful clari
 - what information they need at each moment
 - what should remain optional
 - what should stay out of scope until the core loop works
+- what architecture assumptions would accidentally make the system heavier than its users need
 
 If you contribute, prefer concrete operational understanding over generic software patterns.

@@ -14,6 +14,115 @@ The central question is not just "what records exist?" It is:
 
 That is why the model centers on orders, recurrence, products, dough/prep concepts, production batches, WIP, and handoff.
 
+A second modeling stance matters just as much:
+
+**operational capture must work before full normalization exists.**
+
+The model should therefore support both:
+
+- immediate, messy, practical operational capture
+- later enrichment into clearer and more structured records
+
+## Progressive structuring
+
+SKOSS should distinguish between information that is good enough to keep work moving and information that has been fully formalized.
+
+Examples:
+
+- an order can start with a draft customer instead of a fully managed customer record
+- an order line can point to a draft product or uncategorized item instead of a finished catalog entry
+- a production note can remain freeform when there is not yet a strong structured concept behind it
+- a known product, destination, recipe, or base dough should still be reused when it already exists
+
+This is not an excuse for bad data. It is a recognition that small businesses often learn and formalize while operating.
+
+## Operational data vs normalized admin data
+
+The model should preserve a clear difference between two kinds of information.
+
+### Freeform or operational capture
+
+This is the data people enter because work is happening now.
+
+Characteristics:
+
+- fast to enter
+- may be incomplete
+- may use placeholder labels
+- may contain notes instead of structured references
+- optimized for immediate usability under time pressure
+
+Examples:
+
+- "walk-in customer wants 3 sesame rolls for tomorrow"
+- "special tray for cafe, same as last week"
+- "unknown sweet bread item, estimate 12 pieces"
+- "use remaining dough from night shift first"
+
+### Structured or administrative data
+
+This is the data that has been reviewed, named clearly, and linked to other concepts.
+
+Characteristics:
+
+- reusable across future work
+- more normalized and searchable
+- supports better planning and reporting
+- often created or cleaned up after operations are already moving
+
+Examples:
+
+- a customer with contact details and preferred destinations
+- a product with variants, standard units, and defaults
+- a base dough linked to multiple sellable variants
+- a recipe or process profile used repeatedly in production planning
+
+The system should support movement from the first category to the second without forcing that conversion too early.
+
+## Placeholder and draft concepts
+
+The following placeholder concepts should be considered first-class in the domain, even if implementation details come later.
+
+### Draft customer
+
+A draft customer represents a person or business known well enough to take an order, but not yet fully set up.
+
+Responsibilities:
+
+- allow immediate order capture
+- store minimal identifying context such as a name or note
+- be convertible into a fuller customer record later
+
+### Draft product
+
+A draft product represents a sellable item not yet formalized in the catalog.
+
+Responsibilities:
+
+- allow order capture without blocking on product administration
+- preserve the label used by the operator or customer
+- support later conversion into a structured product and variant model
+
+### Draft item / uncategorized item
+
+A draft item or uncategorized item represents an operational line that is known to matter but does not yet fit the formal catalog.
+
+Responsibilities:
+
+- keep ad hoc demand visible
+- avoid forcing false precision
+- support later classification or merging into real catalog structure
+
+### Freeform note item
+
+A freeform note item represents demand or work that is easier to capture as text than as a catalog line.
+
+Responsibilities:
+
+- preserve important context immediately
+- support unusual requests, one-off prep, substitutions, or verbal commitments
+- remain visible in planning and handoff even if it cannot yet drive full automation
+
 ## Core entities
 
 ### Order
@@ -26,6 +135,7 @@ Responsibilities:
 - hold timing or delivery expectations
 - preserve notes and exceptions
 - act as one source of production demand
+- allow draft or structured references depending on what is available
 
 An order contains one or more order lines.
 
@@ -35,7 +145,7 @@ An order line represents a specific requested item and quantity within an order.
 
 Responsibilities:
 
-- identify the requested product or variant
+- identify the requested product, variant, draft item, or note item
 - hold quantity and unit context
 - preserve line-specific notes
 - support grouping for planning
@@ -66,6 +176,16 @@ Responsibilities:
 - appear in role-appropriate workspaces
 - carry notes, status, and handoff relevance
 
+### Customer
+
+A customer represents a person or organization that places demand.
+
+Responsibilities:
+
+- provide identity and relationship context
+- support recurring work, communication, and destination handling
+- remain optional for first capture through draft customer support
+
 ### Product
 
 A product represents a recognizable operational and commercial item.
@@ -75,6 +195,7 @@ Responsibilities:
 - provide a stable item concept for ordering and planning
 - group related variants
 - connect to recipe and process definitions where relevant
+- coexist with draft products during progressive formalization
 
 ### Variant
 
@@ -109,6 +230,8 @@ Responsibilities:
 - connect operational planning to production reality
 
 Recipe should stay practical. It does not need to become a full costing engine in the first phase.
+
+Recipes may also be missing or partial early in adoption. Their absence should reduce planning precision, not block basic operation.
 
 ### Process profile
 
@@ -178,10 +301,17 @@ Responsibilities:
 
 ## Important relationships
 
-### Orders and order lines -> products and variants
+### Orders and order lines -> products, variants, and placeholders
 
 Orders generate demand through order lines.
-Order lines typically point to products or variants, because the kitchen must know not only what category was requested, but what specific operational version was requested.
+Order lines may point to:
+
+- a structured product or variant
+- a draft product
+- an uncategorized item
+- a freeform note item
+
+This flexibility is important because the kitchen must stay operational even while its catalog is still forming.
 
 ### Variants -> base dough, recipe, and process profile
 
@@ -266,6 +396,18 @@ Shift handoff needs to be explicit because:
 
 The system should therefore treat handoff as part of the operational model itself.
 
+## Modeling implications
+
+The conceptual model should allow progressive formalization without collapsing into chaos.
+
+That implies:
+
+- draft records should have a clear upgrade path into structured records
+- structured records should remain reusable and preferred when available
+- freeform capture should be preserved as historical operational truth, even if later linked to cleaner entities
+- the same workflow may contain both well-structured and lightly structured lines at the same time
+- planning logic may need confidence levels or fallback handling when data is incomplete
+
 ## Deliberate omissions
 
 This model does not yet lock in:
@@ -276,5 +418,6 @@ This model does not yet lock in:
 - inventory valuation logic
 - accounting integration shape
 - advanced permission architecture
+- the exact persistence strategy for draft versus structured records
 
 Those decisions should follow only after the domain model and MVP workflow are better proven.

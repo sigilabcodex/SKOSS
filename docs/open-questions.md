@@ -43,6 +43,7 @@ These are important unresolved questions that should guide future product discov
 - Is destination always the same thing as customer?
 - How should the system handle one customer with multiple delivery points?
 - How much customer detail is really needed in the first phase?
+- How should draft customers evolve into structured customer records without losing the original order history?
 
 ## Shift handoff format
 
@@ -62,11 +63,46 @@ These are important unresolved questions that should guide future product discov
 - Which Kalali practices should remain examples rather than product assumptions?
 - When should the system generalize, and when should it stay bakery-first?
 
+## Progressive adoption model
+
+- What is the right persistence model for draft customers, draft products, and freeform items?
+- Should placeholders be separate entity types, flexible states on core entities, or a hybrid?
+- How much validation is enough to keep data usable without blocking work?
+- What cleanup or formalization workflows are necessary in v1 versus later?
+- How do we balance structure with operator speed when the same team may want both on the same day?
+
 ## Admin burden
 
 - What is the minimum setup required before the system becomes useful?
 - Which configuration tasks can be deferred until after daily usage begins?
 - How do we prevent admin setup from overwhelming first-time adoption?
+
+## Deployment and hosting direction
+
+- What minimum stack best supports low-spec hosting without making development or maintenance fragile?
+- Which architecture choices keep local self-hosting practical while still supporting a VPS-first model?
+- How far should shared-host feasibility influence technical choices, and where is that constraint unrealistic?
+- What deployment path is simple enough for small operators but still healthy for FOSS maintainers?
+
+## Offline and degraded-network direction
+
+- How far should offline support go in v1 versus later phases?
+- What degraded-mode behaviors matter most if internet is unstable but the local network still works?
+- Which workflows must continue locally, and which can wait for synchronization?
+- How do we avoid premature sync complexity while still protecting the possibility of offline-aware evolution?
+
+## Real-time collaboration model
+
+- What is the lightest real-time model that still helps kitchen workflows?
+- Are polling or manual refresh patterns good enough early on, or is live push essential for certain screens?
+- Which updates truly need to appear immediately for operators to trust the system?
+
+## Security and portability baseline
+
+- What security baseline is practical for small-business self-hosting without becoming enterprise-heavy?
+- Which export formats are most useful for operators and maintainers?
+- What should a simple, reliable backup and restore path look like from day one?
+- How can the project protect user data without locking operators into opaque infrastructure?
 
 ## Future skin/preset strategy
 
