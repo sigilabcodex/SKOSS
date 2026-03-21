@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { formatDateLabel, formatStatusLabel } from '@/lib/domain/formatters';
+import { formatDateLabel, formatShiftKeyLabel, formatStatusLabel } from '@/lib/domain/formatters';
 import { getProductionBoard } from '@/lib/server/demo-data';
 
 export default async function ProductionPage() {
@@ -13,7 +13,7 @@ export default async function ProductionPage() {
           <h1>Production board</h1>
           <p>
             Demand is grouped by production day and item so the kitchen can see what needs making,
-            what changed, and what is already in motion.
+            what changed, what is hidden, and what is already in motion.
           </p>
         </div>
         <Link href="/handoff" className="button-secondary">
@@ -27,11 +27,11 @@ export default async function ProductionPage() {
             <div>
               <strong>{formatDateLabel(board.productionDate)}</strong>
               <p>
-                {board.orders.length} orders · {board.readyCount} ready WIP entries · {board.handoffCount}{' '}
+                {board.boardOrders.length} visible orders · {board.readyCount} ready WIP entries · {board.handoffCount}{' '}
                 handoff logs
               </p>
             </div>
-            <span>{board.changedOrders.length} changed orders</span>
+            <span>{board.changedOrders.length} changed / flagged orders</span>
           </div>
 
           <div className="card-grid demand-grid">
@@ -83,9 +83,40 @@ export default async function ProductionPage() {
                       {entry.referenceLabel} · {entry.quantity} {entry.unit}
                     </strong>
                     <span>
-                      {formatStatusLabel(entry.stage)} · {formatStatusLabel(entry.shiftKey)} shift ·{' '}
+                      {formatStatusLabel(entry.stage)} · {formatShiftKeyLabel(entry.shiftKey)} shift ·{' '}
                       {entry.notes ?? 'No extra note'}
                     </span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+          </div>
+
+          <div className="grid-two">
+            <article className="subpanel">
+              <h2>Recent handoff notes</h2>
+              <ul className="stack-list muted-list">
+                {board.handoffEntries.map((entry) => (
+                  <li key={entry.id}>
+                    <strong>
+                      {formatShiftKeyLabel(entry.shiftKey)} · {formatStatusLabel(entry.state)}
+                    </strong>
+                    <span>
+                      {entry.linkedItemLabel ? `${entry.linkedItemLabel} · ` : ''}
+                      {entry.note}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </article>
+
+            <article className="subpanel">
+              <h2>Hidden from board</h2>
+              <ul className="stack-list muted-list">
+                {board.hiddenOrders.map((order) => (
+                  <li key={order.id}>
+                    <strong>{order.customerLabel}</strong>
+                    <span>{order.notes ?? 'Hidden from grouped demand but kept in saved orders.'}</span>
                   </li>
                 ))}
               </ul>

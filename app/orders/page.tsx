@@ -6,7 +6,7 @@ function OrderCard({
   order,
 }: {
   key?: string;
-  order: Awaited<ReturnType<typeof getOrdersWorkspace>>['todayOrders'][number];
+  order: Awaited<ReturnType<typeof getOrdersWorkspace>>['orders'][number];
 }) {
   return (
     <article className="order-card">
@@ -15,7 +15,11 @@ function OrderCard({
           <strong>{order.customerLabel}</strong>
           <p>{order.destinationLabel ?? 'Destination still open'}</p>
         </div>
-        <span className={`badge badge-${order.status}`}>{formatStatusLabel(order.status)}</span>
+        <div className="page-stack">
+          <span className={`badge badge-${order.status}`}>{formatStatusLabel(order.status)}</span>
+          {order.visibleOnProductionBoard === false ? <span className="badge">hidden from board</span> : null}
+          {order.changedInKitchen ? <span className="badge badge-changed">kitchen attention</span> : null}
+        </div>
       </div>
       <div className="order-meta-grid">
         <div>
@@ -62,8 +66,8 @@ export default async function OrdersPage() {
           <p className="eyebrow">Sales workspace</p>
           <h1>Orders</h1>
           <p>
-            Orders stay workable before setup is perfect. Draft customers, freeform items, and late
-            edits are all visible.
+            Saved orders are now the primary source here. Draft customers, freeform items, late edits,
+            and board visibility all stay visible.
           </p>
         </div>
         <Link href="/orders/new" className="button-primary">
@@ -71,35 +75,26 @@ export default async function OrdersPage() {
         </Link>
       </section>
 
-      <section className="panel">
-        <div className="table-header-row">
-          <div>
-            <strong>Today</strong>
-            <p>{formatDateLabel(view.focusDate)} production focus</p>
+      {view.orderGroups.map((group) => (
+        <section key={group.productionDate} className="panel">
+          <div className="table-header-row">
+            <div>
+              <strong>{formatDateLabel(group.productionDate)}</strong>
+              <p>
+                {group.productionDate === view.focusDate
+                  ? 'Current production focus.'
+                  : 'Saved orders grouped by production day.'}
+              </p>
+            </div>
+            <span>{group.orders.length} orders</span>
           </div>
-          <span>{view.todayOrders.length} orders</span>
-        </div>
-        <div className="card-grid">
-          {view.todayOrders.map((order) => (
-            <OrderCard key={order.id} order={order} />
-          ))}
-        </div>
-      </section>
-
-      <section className="panel">
-        <div className="table-header-row">
-          <div>
-            <strong>Upcoming</strong>
-            <p>Next production days already visible without switching tools.</p>
+          <div className="card-grid">
+            {group.orders.map((order) => (
+              <OrderCard key={order.id} order={order} />
+            ))}
           </div>
-          <span>{view.upcomingOrders.length} orders</span>
-        </div>
-        <div className="card-grid">
-          {view.upcomingOrders.map((order) => (
-            <OrderCard key={order.id} order={order} />
-          ))}
-        </div>
-      </section>
+        </section>
+      ))}
     </div>
   );
 }

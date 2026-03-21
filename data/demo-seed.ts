@@ -145,6 +145,8 @@ export const demoSeed: AppData = {
       notes: 'Recurring Saturday delivery. Bag loaves in pairs for dispatch.',
       createdAt: '2026-03-20T18:00:00Z',
       updatedAt: '2026-03-20T18:00:00Z',
+      changedInKitchen: false,
+      visibleOnProductionBoard: true,
       lines: [
         {
           id: 'line-country-loaf',
@@ -176,6 +178,8 @@ export const demoSeed: AppData = {
       notes: 'Counter rhythm for Saturday opening trays.',
       createdAt: '2026-03-20T18:05:00Z',
       updatedAt: '2026-03-20T18:05:00Z',
+      changedInKitchen: false,
+      visibleOnProductionBoard: true,
       lines: [
         {
           id: 'line-roll-sesame-counter',
@@ -207,6 +211,8 @@ export const demoSeed: AppData = {
       notes: 'Late change: sesame rolls increased from 6 to 8. Confirm decoration at pickup.',
       createdAt: '2026-03-21T00:30:00Z',
       updatedAt: '2026-03-21T01:10:00Z',
+      changedInKitchen: true,
+      visibleOnProductionBoard: true,
       lines: [
         {
           id: 'line-roll-sesame-sofia',
@@ -239,6 +245,8 @@ export const demoSeed: AppData = {
       notes: 'Recurring-style market rhythm. Keep sweet tray count flexible if Saturday sells out.',
       createdAt: '2026-03-21T02:15:00Z',
       updatedAt: '2026-03-21T02:15:00Z',
+      changedInKitchen: false,
+      visibleOnProductionBoard: true,
       lines: [
         {
           id: 'line-country-loaf-market',
@@ -318,6 +326,8 @@ export const demoSeed: AppData = {
         {
           id: 'shift-note-night-1',
           authorLabel: 'Noche',
+          state: 'info',
+          linkedItemLabel: 'Croissant dough',
           note: 'Mini sweet tray is still draft; review decoration before packing.',
           createdAt: '2026-03-21T05:28:00Z',
         },

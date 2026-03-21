@@ -1,4 +1,12 @@
-import type { AppData, Order, OrderLine, Product, ShiftLog, WipEntry } from '@/lib/domain/types';
+import type {
+  AppData,
+  Order,
+  OrderLine,
+  Product,
+  ShiftLog,
+  ShiftNote,
+  WipEntry,
+} from '@/lib/domain/types';
 import { readStore } from '@/lib/server/store';
 
 export interface OrderFormValues {
@@ -9,6 +17,9 @@ export interface OrderFormValues {
   productionDate: string;
   notes?: string;
   source: Order['source'];
+  status: Order['status'];
+  changedInKitchen: boolean;
+  visibleOnProductionBoard: boolean;
   lines: Array<{
     lineType: OrderLine['lineType'];
     productLabel: string;
@@ -18,10 +29,34 @@ export interface OrderFormValues {
   }>;
 }
 
+function sortOrders(left: Order, right: Order) {
+  return left.productionDate === right.productionDate
+    ? right.updatedAt.localeCompare(left.updatedAt)
+    : left.productionDate.localeCompare(right.productionDate);
+}
+
+function sortShiftLogs(left: ShiftLog, right: ShiftLog) {
+  return right.updatedAt.localeCompare(left.updatedAt);
+}
+
 export function getProductSuggestions(products: Product[]) {
   return products.flatMap((product) =>
     product.variants.map((variant) => `${product.name} / ${variant.name}`),
   );
+}
+
+export function getAllProductionDates(data: Pick<AppData, 'orders' | 'wipEntries' | 'shiftLogs'>) {
+  return [...new Set([
+    ...data.orders.map((order) => order.productionDate),
+    ...data.wipEntries.map((entry) => entry.productionDate),
+    ...data.shiftLogs.map((log) => log.productionDate),
+  ])].sort();
+}
+
+export function getFocusDate(data: Pick<AppData, 'orders' | 'wipEntries' | 'shiftLogs'>) {
+  const today = new Date().toISOString().slice(0, 10);
+  const dates = getAllProductionDates(data);
+  return dates.find((date) => date >= today) ?? dates[0] ?? today;
 }
 
 export function getDefaultLineDrafts(existingLines: OrderLine[] = [], desiredCount = 5) {
@@ -59,15 +94,22 @@ export function buildOrderRecord(data: AppData, values: OrderFormValues, existin
       productLabel: line.productLabel.trim(),
       quantity: line.quantity,
       unit: line.unit.trim() || 'pieces',
-      lineStatus: 'planned' as const,
+      lineStatus: existingOrder?.lines[index]?.lineStatus ?? ('planned' as const),
       note: line.note?.trim() || undefined,
     }))
     .filter((line) => line.productLabel && line.quantity > 0);
 
+  const changedInKitchen = values.changedInKitchen || values.status === 'changed';
+  const nextStatus = values.status === 'changed'
+    ? 'changed'
+    : changedInKitchen && values.status === 'active'
+      ? 'changed'
+      : values.status;
+
   return {
     id: existingOrder?.id ?? `order-${crypto.randomUUID()}`,
     source: values.source,
-    status: existingOrder ? (existingOrder.status === 'completed' ? 'completed' : 'changed') : 'active',
+    status: nextStatus,
     customerLabel: values.customerLabel.trim() || 'Walk-in customer',
     customerPhone: values.customerPhone?.trim() || undefined,
     destinationLabel: values.destinationLabel?.trim() || undefined,
@@ -76,37 +118,43 @@ export function buildOrderRecord(data: AppData, values: OrderFormValues, existin
     notes: values.notes?.trim() || undefined,
     createdAt: existingOrder?.createdAt ?? now,
     updatedAt: now,
+    changedInKitchen,
+    visibleOnProductionBoard: values.visibleOnProductionBoard,
     lines: cleanLines,
   };
 }
 
 export async function getWorkspaceSummary() {
   const data = await readStore();
-  const dates = getProductionDates(data.orders);
-  const focusDate = dates[0];
+  const focusDate = getFocusDate(data);
 
   return {
     workspace: data.workspace,
     focusDate,
     ordersToday: data.orders.filter((order) => order.productionDate === focusDate).length,
-    changedOrders: data.orders.filter((order) => order.status === 'changed').length,
+    changedOrders: data.orders.filter(
+      (order) => order.productionDate === focusDate && (order.status === 'changed' || order.changedInKitchen),
+    ).length,
     readyWip: data.wipEntries.filter((entry) => entry.productionDate === focusDate && entry.status === 'ready').length,
   };
 }
 
-export function getProductionDates(orders: Order[]) {
-  return [...new Set(orders.map((order) => order.productionDate))].sort();
-}
-
 export async function getOrdersWorkspace() {
   const data = await readStore();
-  const dates = getProductionDates(data.orders);
-  const focusDate = dates[0];
+  const dates = getAllProductionDates(data);
+  const focusDate = getFocusDate(data);
+  const orders = [...data.orders].sort(sortOrders);
 
   return {
     focusDate,
-    todayOrders: data.orders.filter((order) => order.productionDate === focusDate),
-    upcomingOrders: data.orders.filter((order) => order.productionDate > focusDate),
+    dates,
+    orders,
+    orderGroups: dates
+      .map((productionDate) => ({
+        productionDate,
+        orders: orders.filter((order) => order.productionDate === productionDate),
+      }))
+      .filter((group) => group.orders.length > 0),
     productSuggestions: getProductSuggestions(data.products),
     destinations: data.destinations,
     sources: ['manual', 'whatsapp', 'phone', 'walk_in'] as const,
@@ -121,13 +169,13 @@ export async function getOrderEditor(orderId?: string) {
     order,
     destinations: data.destinations,
     productSuggestions: getProductSuggestions(data.products),
-    focusDate: getProductionDates(data.orders)[0],
+    focusDate: getFocusDate(data),
   };
 }
 
 export async function getProductionBoard() {
   const data = await readStore();
-  const dates = getProductionDates(data.orders);
+  const dates = getAllProductionDates(data);
 
   return {
     dates,
@@ -138,7 +186,8 @@ export async function getProductionBoard() {
 function buildProductionDayView(data: AppData, productionDate: string) {
   const productionOrders = data.orders
     .filter((order) => order.productionDate === productionDate)
-    .sort((left, right) => left.destinationLabel?.localeCompare(right.destinationLabel ?? '') ?? 0);
+    .sort((left, right) => (left.destinationLabel ?? '').localeCompare(right.destinationLabel ?? ''));
+  const boardOrders = productionOrders.filter((order) => order.visibleOnProductionBoard !== false);
 
   const groupedDemandMap = new Map<
     string,
@@ -152,7 +201,7 @@ function buildProductionDayView(data: AppData, productionDate: string) {
     }
   >();
 
-  for (const order of productionOrders) {
+  for (const order of boardOrders) {
     for (const line of order.lines) {
       if (line.lineType === 'note_item') {
         continue;
@@ -181,17 +230,27 @@ function buildProductionDayView(data: AppData, productionDate: string) {
     }
   }
 
-  const shiftLogs = data.shiftLogs.filter((entry) => entry.productionDate === productionDate);
+  const shiftLogs = data.shiftLogs
+    .filter((entry) => entry.productionDate === productionDate)
+    .sort(sortShiftLogs);
   const wipEntries = data.wipEntries.filter((entry) => entry.productionDate === productionDate);
+  const handoffEntries = shiftLogs.flatMap((log) =>
+    log.shiftNotes.map((note) => ({
+      ...note,
+      shiftKey: log.shiftKey,
+      productionDate: log.productionDate,
+    })),
+  );
 
   return {
     productionDate,
     orders: productionOrders,
+    boardOrders,
     groupedDemand: [...groupedDemandMap.values()].map((entry) => ({
       ...entry,
       destinations: [...entry.destinations],
     })),
-    draftLines: productionOrders.flatMap((order) =>
+    draftLines: boardOrders.flatMap((order) =>
       order.lines
         .filter((line) => line.lineType === 'draft_product' || line.lineType === 'note_item')
         .map((line) => ({
@@ -204,8 +263,10 @@ function buildProductionDayView(data: AppData, productionDate: string) {
           customerLabel: order.customerLabel,
         })),
     ),
-    changedOrders: productionOrders.filter((order) => order.status === 'changed'),
+    changedOrders: productionOrders.filter((order) => order.status === 'changed' || order.changedInKitchen),
+    hiddenOrders: productionOrders.filter((order) => order.visibleOnProductionBoard === false),
     wipEntries,
+    handoffEntries,
     readyCount: wipEntries.filter((entry) => entry.status === 'ready').length,
     handoffCount: shiftLogs.length,
   };
@@ -213,9 +274,9 @@ function buildProductionDayView(data: AppData, productionDate: string) {
 
 export async function getHandoffWorkspace() {
   const data = await readStore();
-  const dates = getProductionDates(data.orders);
-  const focusDate = dates[0];
-  const logs = [...data.shiftLogs].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
+  const dates = getAllProductionDates(data);
+  const focusDate = getFocusDate(data);
+  const logs = [...data.shiftLogs].sort(sortShiftLogs);
   const wipByDate = new Map<string, WipEntry[]>();
 
   for (const entry of data.wipEntries) {
@@ -260,6 +321,9 @@ export function normalizeOrderForm(formData: FormData): OrderFormValues {
     productionDate: String(formData.get('productionDate') ?? ''),
     notes: String(formData.get('notes') ?? ''),
     source: (String(formData.get('source') ?? 'manual') as Order['source']) ?? 'manual',
+    status: (String(formData.get('status') ?? 'active') as Order['status']) ?? 'active',
+    changedInKitchen: formData.get('changedInKitchen') === 'on',
+    visibleOnProductionBoard: formData.get('visibleOnProductionBoard') !== null,
     lines,
   };
 }
@@ -272,6 +336,10 @@ export function validateOrderForm(values: OrderFormValues) {
   const usableLines = values.lines.filter((line) => line.productLabel.trim() && line.quantity > 0);
   if (usableLines.length === 0) {
     return 'Add at least one order line with a name and quantity.';
+  }
+
+  if (values.status === 'cancelled' && !values.notes?.trim()) {
+    return 'Add a short note when cancelling an order.';
   }
 
   return null;
@@ -326,6 +394,29 @@ export function buildShiftLog(log: ShiftLog | undefined, formData: FormData): Sh
 export function validateShiftLog(log: ShiftLog) {
   if (!log.productionDate || !log.summary) {
     return 'Production date and summary are required for handoff.';
+  }
+
+  if (log.status === 'ready_for_handoff' && !log.handoffNotes) {
+    return 'Add a short handoff note before marking the shift ready for handoff.';
+  }
+
+  return null;
+}
+
+export function buildShiftNote(formData: FormData): ShiftNote {
+  return {
+    id: `shift-note-${crypto.randomUUID()}`,
+    authorLabel: String(formData.get('authorLabel') ?? 'Shift team').trim() || 'Shift team',
+    note: String(formData.get('note') ?? '').trim(),
+    state: String(formData.get('state') ?? 'info') as ShiftNote['state'],
+    linkedItemLabel: String(formData.get('linkedItemLabel') ?? '').trim() || undefined,
+    createdAt: new Date().toISOString(),
+  };
+}
+
+export function validateShiftNote(note: ShiftNote, productionDate: string) {
+  if (!productionDate || !note.note) {
+    return 'Shift note needs a date and text.';
   }
 
   return null;

@@ -295,10 +295,10 @@ npm run build
 The first implementation scaffold includes:
 
 - `app/` — Next.js App Router pages for the first workspaces
-- `app/api/` — placeholder JSON endpoints for orders, production, and handoff
-- `components/` — shared shell/navigation components
-- `data/` — demo fixtures reflecting the Kalali seed scenario
+- `app/api/` — lightweight JSON endpoints for orders, production, and handoff reads
+- `components/` — shared shell/navigation components and forms
+- `data/` — seed fixtures plus the simple file-backed demo store used by the first write loop
 - `lib/domain/` — shared v0 domain types and formatting helpers
-- `lib/server/` — workflow-shaped demo aggregation functions
+- `lib/server/` — workflow-shaped read/write helpers and server actions
 
-This scaffold is intentionally light. It is meant to give the project a clean place to start implementing real v0 features without pretending the whole application is already designed.
+This scaffold is intentionally light. It now supports a first persisted operational loop without pretending the whole application is already designed.
