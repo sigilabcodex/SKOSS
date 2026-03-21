@@ -15,7 +15,29 @@ Implications:
 - allow notes on exceptions
 - avoid flows where one mistake traps the user in admin cleanup
 
-## 2. Touch-friendly first
+## 2. Never block operation because setup is incomplete
+
+A user should be able to keep working even when the catalog, customer list, or recipes are unfinished.
+
+Implications:
+
+- order entry must allow draft and placeholder data
+- missing structured records should degrade capability, not stop work
+- admin setup should follow repeated need, not precede first use
+- operator workflows should never require a fully populated back office
+
+## 3. Draft first, refine later
+
+The product should support gradual formalization.
+
+Implications:
+
+- let users capture a draft customer, draft product, or note item quickly
+- make later cleanup and conversion straightforward
+- prefer reusing structured records when they exist
+- preserve original operational context even after later normalization
+
+## 4. Touch-friendly first
 
 The primary experience should work well on phones and tablets.
 
@@ -26,7 +48,7 @@ Implications:
 - simple navigation depth
 - core actions reachable without fine pointer precision
 
-## 3. Minimal typing
+## 5. Minimal typing
 
 Typing on the production floor is expensive.
 
@@ -37,7 +59,7 @@ Implications:
 - make recurrence reduce repeated input
 - reserve text entry for notes and true exceptions
 
-## 4. Clear status visibility
+## 6. Clear status visibility
 
 Users should understand the state of work at a glance.
 
@@ -48,7 +70,7 @@ Implications:
 - distinguish planned work from active WIP
 - highlight changes that affect the current shift
 
-## 5. Fast notes
+## 7. Fast notes
 
 Notes are not secondary. They often carry the missing context that keeps work moving.
 
@@ -58,7 +80,7 @@ Implications:
 - surface the most relevant notes near the work itself
 - support handoff notes without forcing a long reporting workflow
 
-## 6. Partial completion support
+## 8. Partial completion support
 
 Real work is frequently half-done, split, delayed, or handed over.
 
@@ -68,17 +90,29 @@ Implications:
 - avoid binary done/not-done assumptions
 - preserve what remains vs what has already been completed
 
-## 7. Real-time shared state
+## 9. Degraded-network awareness
 
-The system should help teams see the same reality.
+The product should remain usable when connectivity is imperfect.
+
+Implications:
+
+- make important reads and writes efficient
+- avoid UX that depends on constant high-quality internet
+- keep critical actions understandable if refreshes or updates are delayed
+- design flows that could later support stronger offline behavior without rewriting the whole experience
+
+## 10. Real-time shared state, lightly applied
+
+The system should help teams see the same reality without assuming a heavy collaboration stack.
 
 Implications:
 
 - updates should be visible to others quickly
 - handoff should not depend only on verbal communication
 - the latest operational state should be easier to find than old plans
+- use the lightest real-time approach that meaningfully helps kitchen coordination
 
-## 8. Simple surface, deeper structure underneath
+## 11. Simple surface, deeper structure underneath
 
 The product can have meaningful domain depth without showing all of it at once.
 
@@ -89,7 +123,7 @@ Implications:
 - separate operator flows from heavy configuration concerns
 - avoid exposing advanced identifiers unless they actually help
 
-## 9. Use practical language
+## 12. Use practical language
 
 Words shape usability.
 
@@ -98,8 +132,9 @@ Implications:
 - prefer kitchen-friendly terms
 - avoid ERP jargon in user-facing flows
 - choose labels that map to how operators actually speak about work
+- avoid abstract setup language when a concrete term is available
 
-## 10. Reality beats plan
+## 13. Reality beats plan
 
 A plan is useful only if it can bend when the kitchen does.
 
