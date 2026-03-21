@@ -11,22 +11,22 @@ type QuickLink = {
 
 const quickLinks: QuickLink[] = [
   {
-    href: '/orders',
+    href: '/orders' as Route,
     title: 'Order intake + list',
     description: 'Capture demand with draft customers, draft items, and quick edits.',
   },
   {
-    href: '/production',
+    href: '/production' as Route,
     title: 'Production board',
     description: 'See grouped demand by production day, item, and late changes.',
   },
   {
-    href: '/handoff',
+    href: '/handoff' as Route,
     title: 'WIP + handoff',
     description: 'Record prep state, shift notes, and what the next shift needs to know.',
   },
   {
-    href: '/setup',
+    href: '/setup' as Route,
     title: 'Light setup',
     description: 'Review the minimal structure that supports the operational slice.',
   },

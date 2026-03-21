@@ -8,11 +8,11 @@ type NavItem = {
 };
 
 const navItems: NavItem[] = [
-  { href: '/', label: 'Home' },
-  { href: '/orders', label: 'Orders' },
-  { href: '/production', label: 'Production' },
-  { href: '/handoff', label: 'WIP / Handoff' },
-  { href: '/setup', label: 'Setup' },
+  { href: '/' as Route, label: 'Home' },
+  { href: '/orders' as Route, label: 'Orders' },
+  { href: '/production' as Route, label: 'Production' },
+  { href: '/handoff' as Route, label: 'WIP / Handoff' },
+  { href: '/setup' as Route, label: 'Setup' },
 ];
 
 export function AppShell({ children }: { children?: ReactNode }) {
