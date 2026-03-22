@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 import type { AppData, User, WorkspaceSurface } from '@/lib/domain/types';
-import { getDefaultWorkspaceForRole, getVisibleWorkspacesForRole } from '@/lib/workspaces';
+import { getDefaultWorkspaceForRole, getVisibleWorkspacesForRole, isPrimaryWorkspaceSurface } from '@/lib/workspaces';
 import { readStore } from '@/lib/server/store';
 
 export const sessionUserCookieName = 'skoss-user';
@@ -15,7 +15,13 @@ export function resolveUserHomeWorkspace(user: User | null | undefined): Workspa
     return 'home';
   }
 
-  return user.preferences?.defaultWorkspace ?? user.defaultWorkspace ?? getDefaultWorkspaceForRole(user.role);
+  const preferredWorkspace = user.preferences?.defaultWorkspace ?? user.defaultWorkspace;
+
+  if (!preferredWorkspace || !isPrimaryWorkspaceSurface(preferredWorkspace)) {
+    return getDefaultWorkspaceForRole(user.role);
+  }
+
+  return preferredWorkspace;
 }
 
 export async function getCurrentUserContext(sourceData?: AppData) {

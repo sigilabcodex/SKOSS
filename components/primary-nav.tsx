@@ -8,13 +8,12 @@ import {
   HandoffIcon,
   HomeIcon,
   OrdersIcon,
-  PreferencesIcon,
   ProductionIcon,
   SetupIcon,
 } from '@/components/ui-icons';
 import type { WorkspaceSurface } from '@/lib/domain/types';
 
-type NavHref = '/' | '/orders' | '/production' | '/handoff' | '/preferences' | '/setup';
+type NavHref = '/' | '/orders' | '/production' | '/handoff' | '/setup';
 
 type NavItem = {
   key: WorkspaceSurface;
@@ -65,13 +64,6 @@ const navItems: NavItem[] = [
     labelKey: 'nav.handoff',
     icon: HandoffIcon,
     active: (pathname) => pathname.startsWith('/handoff'),
-  },
-  {
-    key: 'preferences',
-    href: '/preferences',
-    labelKey: 'nav.preferences',
-    icon: PreferencesIcon,
-    active: (pathname) => pathname.startsWith('/preferences'),
   },
   {
     key: 'setup',

@@ -154,6 +154,7 @@ This is intentionally modest:
 - each user can have a default workspace or home surface
 - shared-device login can choose who is active without enterprise auth weight
 - personal **Preferences** are now starting to separate from shared **Settings**
+- personal/session controls should stay available through a compact user menu instead of competing with operational navigation
 
 This is not meant to lock the product into rigid permissions.
 

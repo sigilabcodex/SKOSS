@@ -214,6 +214,7 @@ Guidance:
 - avoid long descriptive copy in the global shell
 - keep global controls secondary to navigation and page work
 - group session and personal controls behind one compact user trigger instead of scattering them across the header
+- keep personal destinations such as Preferences reachable from that compact user surface rather than as a default primary-nav item
 - preserve touch-friendly hit areas, but reduce unnecessary bulk in pills and chips
 
 A good shell helps operators orient quickly, then gets out of the way.

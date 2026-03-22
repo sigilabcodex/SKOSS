@@ -37,7 +37,7 @@ import { getCurrentUserContext, loggedOutSessionValue, sessionUserCookieName } f
 import { readStore, writeStore } from '@/lib/server/store';
 import { isSupportedLocale, isSupportedPreset, localeCookieName, supportedLocales, presetCookieName, supportedPresets } from '@/lib/i18n/config';
 import { themeCookieName } from '@/lib/theme';
-import { getDefaultWorkspaceForRole } from '@/lib/workspaces';
+import { getDefaultWorkspaceForRole, isPrimaryWorkspaceSurface } from '@/lib/workspaces';
 
 function sortOrders(left: { productionDate: string; updatedAt: string }, right: { productionDate: string; updatedAt: string }) {
   return left.productionDate === right.productionDate
@@ -47,6 +47,7 @@ function sortOrders(left: { productionDate: string; updatedAt: string }, right: 
 
 const supportedThemes = ['light', 'dark', 'system'] as const;
 const supportedOperatingModes = ['pickup', 'delivery', 'mixed'] as const;
+const supportedPreferenceWorkspaces = ['orders', 'production', 'handoff', 'setup'] as const;
 
 function sortUsers(left: { displayName: string }, right: { displayName: string }) {
   return left.displayName.localeCompare(right.displayName);
@@ -149,7 +150,17 @@ export async function saveUserPreferencesAction(formData: FormData) {
     redirect('/preferences?error=' + encodeURIComponent('Choose an appearance theme.'));
   }
 
-  const defaultWorkspace = (defaultWorkspaceValue || currentUser.defaultWorkspace || getDefaultWorkspaceForRole(currentUser.role)) as typeof currentUser.defaultWorkspace;
+  const requestedWorkspace = defaultWorkspaceValue as typeof supportedPreferenceWorkspaces[number];
+  const currentWorkspace = currentUser.preferences?.defaultWorkspace ?? currentUser.defaultWorkspace;
+  const fallbackWorkspace = currentWorkspace && isPrimaryWorkspaceSurface(currentWorkspace)
+    ? currentWorkspace
+    : getDefaultWorkspaceForRole(currentUser.role);
+
+  if (defaultWorkspaceValue && !supportedPreferenceWorkspaces.includes(requestedWorkspace)) {
+    redirect('/preferences?error=' + encodeURIComponent('Choose a supported landing workspace.'));
+  }
+
+  const defaultWorkspace = defaultWorkspaceValue ? requestedWorkspace : fallbackWorkspace;
   const nextUpdatedAt = new Date().toISOString();
 
   data.users = data.users.map((user) => user.id === currentUser.id
