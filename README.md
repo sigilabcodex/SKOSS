@@ -113,6 +113,8 @@ A team should be able to create and track orders immediately, even if:
 
 Structured data is still valuable, but it should refine real work rather than block it.
 
+That same principle now applies to first-run setup: the initial onboarding flow should stay short and practical, capturing only a business name, language, preset, operating mode, and theme so a team can start quickly and adjust later.
+
 This implies support for placeholder records such as:
 
 - draft customer

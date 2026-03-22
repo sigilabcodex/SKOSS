@@ -78,6 +78,159 @@ const pt = {
       description: 'Acentos suaves em sálvia com uma sensação orgânica de cozinha e horta.',
     },
   },
+
+  operatingModes: {
+    pickup: {
+      label: 'Retirada',
+      description: 'A maioria dos pedidos fica simples e sai direto para o cliente.',
+    },
+    delivery: {
+      label: 'Entrega',
+      description: 'Rotas, entregadores e passagem precisam de mais visibilidade.',
+    },
+    mixed: {
+      label: 'Misto',
+      description: 'Retirada e entrega importam ao mesmo tempo no fluxo diário.',
+    },
+  },
+  presets: {
+    bakery: {
+      label: 'Padaria',
+      description: 'Melhor para massas, fornadas, WIP e passagem entre turnos.',
+    },
+    cafe: {
+      label: 'Café',
+      description: 'Deixa captura de pedidos e ritmo de balcão um pouco mais em evidência.',
+    },
+    small_restaurant: {
+      label: 'Restaurante pequeno',
+      description: 'Parte do fluxo de serviço, visibilidade de preparo e despacho prático.',
+    },
+    dark_kitchen: {
+      label: 'Dark kitchen',
+      description: 'Dá mais peso ao fluxo de pedidos, prontidão para entregadores e passagem de despacho.',
+    },
+    food_stall: {
+      label: 'Barraca de comida',
+      description: 'Captura rápida, serviço simples e configuração compacta para operação de feira ou pop-up.',
+    },
+    generic: {
+      label: 'Genérico',
+      description: 'Ponto de partida neutro quando o negócio ainda está descobrindo sua forma.',
+    },
+    other: {
+      label: 'Outro',
+      description: 'Use uma base flexível agora e ajuste depois sem ficar preso.',
+    },
+  },
+  presetSuggestions: {
+    sharedCutoff: {
+      title: 'Mantenha um corte de produção compartilhado visível.',
+      body: 'O preset de padaria destaca produção primeiro para enxergar mudanças tardias com facilidade.',
+    },
+    morningCounter: {
+      title: 'Comece com um destino de balcão.',
+      body: 'Isso ajuda a reconhecer bandejas de retirada e abertura sem uma configuração pesada.',
+    },
+    routePacking: {
+      title: 'Adicione primeiro um destino tipo rota.',
+      body: 'Assim o trabalho de entrega ganha um lugar antes de modelar cada parada em detalhe.',
+    },
+    mixedDispatch: {
+      title: 'Deixe juntas as notas de retirada e rota.',
+      body: 'O modo misto mantém as duas visíveis sem forçar outro fluxo.',
+    },
+    counterRush: {
+      title: 'Trate os picos primeiro como captura de pedidos.',
+      body: 'O preset de café deixa vendas mais perto para a equipe reagir rápido.',
+    },
+    simpleMenu: {
+      title: 'Comece com nomes práticos de cardápio.',
+      body: 'Use os nomes que a equipe já fala antes de refinar variantes depois.',
+    },
+    courierReady: {
+      title: 'Deixe óbvias as notas prontas para entregador.',
+      body: 'Algumas notas claras valem mais do que uma grande configuração de despacho.',
+    },
+    menuBoards: {
+      title: 'Mantenha os itens de serviço fáceis de escanear.',
+      body: 'Restaurantes pequenos funcionam melhor quando pedidos e preparo continuam conectados.',
+    },
+    prepNotes: {
+      title: 'Deixe espaço para exceções e notas de preparo.',
+      body: 'O preset mantém ajustes manuais por perto em vez de escondê-los em telas administrativas.',
+    },
+    dispatchFlow: {
+      title: 'Mostre despacho sem criar um módulo de despacho.',
+      body: 'Este preset só desloca a ênfase visual para trabalho pronto para entrega.',
+    },
+    handoffNotes: {
+      title: 'Faça das notas de passagem parte do fluxo principal.',
+      body: 'Equipes de dark kitchen costumam precisar manter contexto de entregador e turno visível.',
+    },
+    fastCapture: {
+      title: 'Mantenha a captura de pedidos curta.',
+      body: 'Trabalho de barraca se beneficia de menos campos e ações de serviço mais óbvias.',
+    },
+    singleBoard: {
+      title: 'Use primeiro um quadro compacto.',
+      body: 'O preset de barraca mantém a configuração modesta para trabalhar antes de formalizar tudo.',
+    },
+    simpleStart: {
+      title: 'Comece com uma base calma.',
+      body: 'Os presets genérico e outro ficam neutros para você ajustar o fluxo depois.',
+    },
+    notesFirst: {
+      title: 'Deixe as notas cobrirem os casos de borda.',
+      body: 'SKOSS deve continuar útil mesmo antes de modelar cada produto ou destino.',
+    },
+  },
+  presetExamples: {
+    counterPickup: {
+      title: 'Exemplo de destino: retirada no balcão',
+      body: 'Um ponto simples de retirada costuma bastar para começar a capturar pedidos.',
+    },
+    nightShift: {
+      title: 'Exemplo de ênfase: preparo noturno + passagem da manhã',
+      body: 'Útil para padarias que passam trabalho entre fermentação, fornada e embalagem.',
+    },
+    routeDrop: {
+      title: 'Exemplo de destino: entrega cedo na rota',
+      body: 'Uma etiqueta leve de rota ajuda a equipe a ver urgência sem lógica completa de roteirização.',
+    },
+    rushBoard: {
+      title: 'Exemplo de quadro: pico de hoje',
+      body: 'Útil quando a equipe precisa de entrada rápida e uma visão compacta de serviço.',
+    },
+    appCourier: {
+      title: 'Exemplo de configuração: origem do app + notas de despacho',
+      body: 'Suficiente para capturar o contexto de entrega por app sem criar uma grande integração.',
+    },
+    serviceWindow: {
+      title: 'Exemplo de destino: janela de serviço',
+      body: 'Mantém no UI o trabalho de salão, retirada ou passagem fácil de separar.',
+    },
+    prepList: {
+      title: 'Exemplo de estrutura inicial: uma lista de preparo',
+      body: 'Comece com um fluxo prático antes de dividir demais o trabalho.',
+    },
+    pickupWindow: {
+      title: 'Exemplo de destino: janela de retirada',
+      body: 'Útil quando chegam tanto entregadores quanto clientes diretos.',
+    },
+    expediteLane: {
+      title: 'Exemplo de ênfase: expedição + passagem',
+      body: 'Facilita perceber rapidamente o contexto de despacho entre turnos.',
+    },
+    stallPickup: {
+      title: 'Exemplo de destino: balcão da barraca',
+      body: 'Um ponto simples da barraca costuma bastar para uma configuração compacta.',
+    },
+    courierPocket: {
+      title: 'Exemplo de nota: área da bolsa / entregador',
+      body: 'Uma nota pequena pode carregar o detalhe da passagem sem criar outro fluxo.',
+    },
+  },
   terms: {
     workItem: { one: 'item de trabalho', many: 'itens de trabalho' },
     destination: { one: 'destino', many: 'destinos' },
@@ -91,6 +244,11 @@ const pt = {
       'O SKOSS agora cobre um ciclo prático de cozinha: captura de pedidos, geração recorrente, produção agrupada, conclusão parcial, passagem de WIP e uma camada operacional leve para atendimento e memória de compras.',
     focusDate: 'Data foco',
     focusDateHelp: 'é a visão operacional compartilhada atual.',
+    recommendedFirst: 'Recomendado primeiro',
+    presetFocusTitle: 'Foco inicial do preset',
+    presetFocusBody: '{{preset}} hoje só muda linguagem, ênfase na página inicial e orientação inicial.',
+    exampleSetupTitle: 'Exemplos iniciais',
+    exampleSetupBody: 'Esses exemplos são apenas sugestões leves. Você pode mudá-los depois em Configuração.',
     stats: {
       ordersToday: 'Pedidos de hoje',
       ordersOnDate: 'pedidos em',
@@ -124,6 +282,37 @@ const pt = {
         description: 'Revise a estrutura mínima que sustenta este recorte operacional.',
       },
     },
+  },
+  setupAssistant: {
+    eyebrow: 'Primeiro ajuste rápido',
+    firstRunTitle: 'Deixe o SKOSS pronto em um minuto',
+    firstRunIntro: 'Dê um nome ao espaço, escolha o idioma e o estilo do time, e siga trabalhando.',
+    settingsTitle: 'Revisar preferências do espaço',
+    settingsIntro: 'Atualize nome do negócio, idioma, preset, modo de operação ou tema quando o time precisar de outro ajuste.',
+    progress: '3 passos curtos',
+    progressAria: 'Progresso da configuração inicial',
+    stepLabel: 'Passo {{step}}',
+    notLocked: 'Os presets são só um ponto de partida. Você pode mudá-los depois.',
+    sections: {
+      business: 'Básico do negócio',
+      businessHelp: 'Mantenha o essencial curto e prático.',
+      preset: 'Preset inicial',
+      presetHelp: 'Escolha a forma mais próxima. Isso não vai travar seu fluxo.',
+      appearance: 'Aparência',
+      appearanceHelp: 'Escolha um tema confortável para os espaços onde as pessoas realmente trabalham.',
+    },
+    fields: {
+      businessName: 'Nome do negócio',
+      language: 'Idioma preferido',
+      operatingMode: 'Modo de operação',
+    },
+    placeholders: {
+      businessName: 'Padaria Kalali',
+    },
+    actions: {
+      save: 'Salvar configuração',
+    },
+    footer: 'Você pode revisar essas preferências depois em Configuração.',
   },
   orders: {
     workspace: 'Espaço de vendas',
@@ -411,6 +600,8 @@ const pt = {
       supplier: 'Fornecedor salvo. Continue ampliando a estrutura apenas onde ela ajudar o trabalho diário.',
       rawMaterial: 'Matéria-prima salva. O custo futuro já pode apontar para uma base real de ingredientes.',
       price: 'Preço de fornecedor salvo. Comparações históricas agora estão disponíveis para custos e compras futuras.',
+
+      preferences: 'Preferências do espaço salvas.',
     },
     calloutTitle: 'Mantenha a configuração prática.',
     calloutBody: 'Estas listas devem ajudar a operação a trabalhar mais rápido, não forçar manutenção pesada de dados antes do primeiro uso.',

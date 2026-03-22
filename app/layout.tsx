@@ -7,6 +7,7 @@ import { I18nProvider } from '@/components/i18n-provider';
 import { createTranslator } from '@/lib/i18n';
 import { localeCookieName, localeStorageKey, supportedLocales } from '@/lib/i18n/config';
 import { getRequestPreferences } from '@/lib/i18n/server';
+import { storageKey as themeStorageKey, themeCookieName } from '@/lib/theme';
 
 export const metadata: Metadata = {
   title: 'SKOSS operational slice',
@@ -15,9 +16,16 @@ export const metadata: Metadata = {
 
 const themeInitScript = `
 (() => {
-  const storageKey = 'skoss-theme';
+  const storageKey = '${themeStorageKey}';
+  const cookieKey = '${themeCookieName}';
   const savedTheme = window.localStorage.getItem(storageKey);
-  document.documentElement.dataset.theme = savedTheme || 'light';
+  const cookieTheme = document.cookie
+    .split('; ')
+    .find((entry) => entry.startsWith(cookieKey + '='))
+    ?.split('=')[1];
+  const nextTheme = savedTheme || cookieTheme || document.documentElement.dataset.theme || 'light';
+  document.documentElement.dataset.theme = nextTheme;
+  window.localStorage.setItem(storageKey, nextTheme);
 })();
 `;
 
@@ -42,11 +50,11 @@ export default async function RootLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
-  const { locale, preset } = await getRequestPreferences();
+  const { locale, preset, theme } = await getRequestPreferences();
   const translator = createTranslator({ locale, preset });
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} data-theme={theme} suppressHydrationWarning>
       <body>
         <Script id="skoss-theme-init" strategy="beforeInteractive">
           {themeInitScript}

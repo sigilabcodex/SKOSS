@@ -78,6 +78,158 @@ const en = {
       description: 'Muted sage accents with an organic, kitchen-garden feel.',
     },
   },
+  operatingModes: {
+    pickup: {
+      label: 'Pickup',
+      description: 'Most orders stay simple and collected in person.',
+    },
+    delivery: {
+      label: 'Delivery',
+      description: 'Routing, couriers, and handoff need more visibility.',
+    },
+    mixed: {
+      label: 'Mixed',
+      description: 'Pickup and delivery both matter in the daily flow.',
+    },
+  },
+  presets: {
+    bakery: {
+      label: 'Bakery',
+      description: 'Best for dough work, batches, WIP, and shift handoff.',
+    },
+    cafe: {
+      label: 'Café',
+      description: 'Keeps order capture and counter rhythm a little more front-and-center.',
+    },
+    small_restaurant: {
+      label: 'Small restaurant',
+      description: 'Starts from service flow, prep visibility, and practical dispatch.',
+    },
+    dark_kitchen: {
+      label: 'Dark kitchen',
+      description: 'Gives more weight to order flow, courier readiness, and dispatch handoff.',
+    },
+    food_stall: {
+      label: 'Food stall',
+      description: 'Fast capture, simple service flow, and compact setup for pop-up style work.',
+    },
+    generic: {
+      label: 'Generic',
+      description: 'A neutral starting point when the business still wants to discover its shape.',
+    },
+    other: {
+      label: 'Other',
+      description: 'Use a flexible baseline now and tune it later without getting boxed in.',
+    },
+  },
+  presetSuggestions: {
+    sharedCutoff: {
+      title: 'Keep one shared production cutoff visible.',
+      body: 'A bakery preset highlights production first so late order changes are easy to catch.',
+    },
+    morningCounter: {
+      title: 'Start with a front counter destination.',
+      body: 'This makes pickup trays and opening bakes easy to recognize without deep setup.',
+    },
+    routePacking: {
+      title: 'Add one route-style destination first.',
+      body: 'That gives delivery work a home before you model every stop in detail.',
+    },
+    mixedDispatch: {
+      title: 'Let pickup and route notes live side by side.',
+      body: 'Mixed mode keeps both visible without forcing a separate workflow.',
+    },
+    counterRush: {
+      title: 'Treat rushes as order intake first.',
+      body: 'The café preset keeps the sales workspace closest so the team can react fast.',
+    },
+    simpleMenu: {
+      title: 'Start with practical menu names.',
+      body: 'Use names the staff already say out loud before refining variants later.',
+    },
+    courierReady: {
+      title: 'Keep courier-ready notes obvious.',
+      body: 'A few clear handoff notes matter more than a large dispatch setup.',
+    },
+    menuBoards: {
+      title: 'Keep service-facing items easy to scan.',
+      body: 'Small restaurant setups work best when orders and prep stay connected.',
+    },
+    prepNotes: {
+      title: 'Leave room for exceptions and prep notes.',
+      body: 'The preset keeps manual adjustments close instead of hiding them in admin screens.',
+    },
+    dispatchFlow: {
+      title: 'Show dispatch without building a dispatch module.',
+      body: 'This preset only nudges the UI emphasis toward delivery-ready work.',
+    },
+    handoffNotes: {
+      title: 'Make handoff notes part of the main flow.',
+      body: 'Dark kitchen teams usually need courier and shift context to stay visible.',
+    },
+    fastCapture: {
+      title: 'Keep order capture short.',
+      body: 'Food stall work benefits from fewer fields and more obvious service actions.',
+    },
+    singleBoard: {
+      title: 'Use one compact board first.',
+      body: 'A stall preset keeps setup modest so teams can work before they formalize structure.',
+    },
+    simpleStart: {
+      title: 'Start with a calm default.',
+      body: 'Generic and other presets stay neutral so you can shape the workflow later.',
+    },
+    notesFirst: {
+      title: 'Let notes carry edge cases.',
+      body: 'SKOSS should stay useful even before every product or destination is fully modeled.',
+    },
+  },
+  presetExamples: {
+    counterPickup: {
+      title: 'Example destination: Front counter pickup',
+      body: 'A simple pickup point is often enough to begin order capture.',
+    },
+    nightShift: {
+      title: 'Example workspace emphasis: Night prep + morning handoff',
+      body: 'Useful for bakeries that hand work between fermentation, bake, and packing.',
+    },
+    routeDrop: {
+      title: 'Example destination: Early route drop',
+      body: 'A lightweight route label helps the team see urgency without full routing logic.',
+    },
+    rushBoard: {
+      title: 'Example board emphasis: Today’s rush',
+      body: 'Helpful when the team needs fast intake and a compact service view.',
+    },
+    appCourier: {
+      title: 'Example setup: Courier source + dispatch notes',
+      body: 'Enough to capture app delivery context without building a large integration layer.',
+    },
+    serviceWindow: {
+      title: 'Example destination: Service window',
+      body: 'Keeps dine-in, takeaway, or pass-through work easy to separate in the UI.',
+    },
+    prepList: {
+      title: 'Example starter structure: One prep list',
+      body: 'Begin with one practical prep flow before splitting the work too much.',
+    },
+    pickupWindow: {
+      title: 'Example destination: Pickup window',
+      body: 'Useful when drivers and direct customers both arrive for finished orders.',
+    },
+    expediteLane: {
+      title: 'Example emphasis: Expedite + handoff',
+      body: 'Makes shift-to-shift dispatch context easier to spot quickly.',
+    },
+    stallPickup: {
+      title: 'Example destination: Stall counter',
+      body: 'A simple stall point is often enough for a compact service setup.',
+    },
+    courierPocket: {
+      title: 'Example notes: Courier pocket / bag area',
+      body: 'A small note can carry the handoff detail without adding a new workflow.',
+    },
+  },
   terms: {
     workItem: { one: 'work item', many: 'work items' },
     destination: { one: 'destination', many: 'destinations' },
@@ -91,6 +243,11 @@ const en = {
       'SKOSS now covers a practical kitchen loop: order intake, recurring generation, grouped production, partial completion, WIP handoff, and a lightweight operational data layer for fulfillment and buying memory.',
     focusDate: 'Focus date',
     focusDateHelp: 'is the current shared operational view.',
+    recommendedFirst: 'Recommended first',
+    presetFocusTitle: 'Preset starter focus',
+    presetFocusBody: '{{preset}} currently shifts language, home emphasis, and starter guidance only.',
+    exampleSetupTitle: 'Starter examples',
+    exampleSetupBody: 'These examples are only lightweight suggestions. You can change them later in Setup.',
     stats: {
       ordersToday: 'Orders today',
       ordersOnDate: 'orders on',
@@ -124,6 +281,37 @@ const en = {
         description: 'Review the minimal structure that supports the operational slice.',
       },
     },
+  },
+  setupAssistant: {
+    eyebrow: 'Quick first setup',
+    firstRunTitle: 'Get SKOSS ready in a minute',
+    firstRunIntro: 'Give the workspace a name, choose the language and style that fit your team, and keep moving.',
+    settingsTitle: 'Review workspace preferences',
+    settingsIntro: 'Update your business name, language, preset, operating mode, or theme whenever the team needs a different fit.',
+    progress: '3 short steps',
+    progressAria: 'Onboarding progress',
+    stepLabel: 'Step {{step}}',
+    notLocked: 'Presets are only a starting point. You can change them later.',
+    sections: {
+      business: 'Business basics',
+      businessHelp: 'Keep the essentials short and practical.',
+      preset: 'Starting preset',
+      presetHelp: 'Choose the closest starting shape. It will not lock your workflow.',
+      appearance: 'Appearance',
+      appearanceHelp: 'Pick a comfortable theme for the spaces where people actually work.',
+    },
+    fields: {
+      businessName: 'Business name',
+      language: 'Preferred language',
+      operatingMode: 'Operating mode',
+    },
+    placeholders: {
+      businessName: 'Kalali Bakery',
+    },
+    actions: {
+      save: 'Save setup',
+    },
+    footer: 'You can revisit these preferences later from Setup.',
   },
   orders: {
     workspace: 'Sales workspace',
@@ -411,11 +599,16 @@ const en = {
       supplier: 'Supplier saved. Keep growing structure only where it helps daily work.',
       rawMaterial: 'Raw material saved. Future recipe costing can now point to a real ingredient foundation.',
       price: 'Supplier price saved. Historical comparisons are now available for future costing and buying choices.',
+      preferences: 'Workspace preferences saved.',
     },
     calloutTitle: 'Keep setup practical.',
     calloutBody: 'These lists should help operators work faster, not force heavy data maintenance before first use.',
     appearance: 'Appearance',
     appearanceHelp: 'Global theme controls should stay available, but the fuller choice belongs in setup instead of dominating the header.',
+    presetWorkspaceTitle: 'Preset workspace emphasis',
+    presetWorkspaceHelp: 'Today the selected preset reorders and highlights the most relevant workspaces without hiding the others.',
+    starterSuggestionsTitle: 'Starter suggestions',
+    starterSuggestionsHelp: 'These are practical nudges, not locked configuration.',
     activeSuppliers: 'Active suppliers',
     activeSuppliersHelp: 'Practical vendor contacts ready for replenishment conversations.',
     rawMaterials: 'Raw materials',

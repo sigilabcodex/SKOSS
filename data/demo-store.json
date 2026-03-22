@@ -779,5 +779,12 @@
       "createdAt": "2026-03-19T09:30:00Z",
       "updatedAt": "2026-03-19T09:30:00Z"
     }
-  ]
+  ],
+  "preferences": {
+    "locale": "en",
+    "preset": "generic",
+    "operatingMode": "mixed",
+    "theme": "garden",
+    "onboardingCompleted": false
+  }
 }

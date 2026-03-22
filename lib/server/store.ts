@@ -1,7 +1,8 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { demoSeed } from '@/data/demo-seed';
-import type { AppData, Order, OrderLine, RecurringTemplate, WeekdayKey } from '@/lib/domain/types';
+import type { AppData, Order, OrderLine, RecurringTemplate, WeekdayKey, WorkspacePreferences } from '@/lib/domain/types';
+import { defaultLocale, defaultPreset } from '@/lib/i18n/config';
 
 const storePath = path.join(process.cwd(), 'data', 'demo-store.json');
 const generationHorizonDays = 10;
@@ -212,8 +213,19 @@ function ensureGeneratedOrders(data: AppData) {
 }
 
 function hydrateStore(rawData: AppData): AppData {
+  const preferences: WorkspacePreferences = {
+    locale: rawData.preferences?.locale ?? defaultLocale,
+    preset: rawData.preferences?.preset ?? defaultPreset,
+    operatingMode: rawData.preferences?.operatingMode ?? 'mixed',
+    theme: rawData.preferences?.theme ?? 'light',
+    onboardingCompleted: rawData.preferences?.onboardingCompleted ?? false,
+    completedAt: rawData.preferences?.completedAt,
+    updatedAt: rawData.preferences?.updatedAt,
+  };
+
   const data: AppData = {
     ...rawData,
+    preferences,
     recurringTemplates: (rawData.recurringTemplates ?? []).map((template) =>
       normalizeTemplate(template as Partial<RecurringTemplate>),
     ),

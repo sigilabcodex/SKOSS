@@ -315,6 +315,7 @@ export async function getWorkspaceSummary() {
 
   return {
     workspace: data.workspace,
+    preferences: data.preferences,
     focusDate,
     ordersToday: ordersToday.length,
     changedOrders: ordersToday.filter(
