@@ -211,6 +211,7 @@ Before heavy implementation begins, the goal is to clarify:
 - `docs/domain-glossary.md` — practical domain definitions
 - `docs/domain-model.md` — conceptual domain model
 - `docs/workspaces.md` — initial role-based workspace definitions
+- `docs/operational-data-layer.md` — lightweight suppliers, raw materials, fulfillment context, and price-history direction
 - `docs/recurring-logic.md` — recurrence model and editing rules
 - `docs/production-logic.md` — order-to-production transformation logic
 - `docs/mvp-v0.md` — narrow first MVP definition
@@ -300,5 +301,14 @@ The first implementation scaffold includes:
 - `data/` — seed fixtures plus the simple file-backed demo store used by the first write loop
 - `lib/domain/` — shared v0 domain types and formatting helpers
 - `lib/server/` — workflow-shaped read/write helpers and server actions
+
+The scaffold now also starts a lightweight operational data layer for:
+
+- fulfillment distinctions on orders
+- suppliers
+- raw materials
+- supplier-specific historical prices
+
+This remains intentionally narrow so future recipe costing and supplier comparison can grow without turning the early product into a full procurement suite.
 
 This scaffold is intentionally light. It now supports a first persisted operational loop without pretending the whole application is already designed.

@@ -49,7 +49,7 @@ export default async function HomePage() {
             <h1>{summary.workspace.name}</h1>
             <p className="lede">
               SKOSS now covers a practical kitchen loop: order intake, recurring generation, grouped production,
-              partial completion, and WIP handoff for a Kalali-style bakery rhythm.
+              partial completion, WIP handoff, and a lightweight operational data layer for fulfillment and buying memory.
             </p>
           </div>
           <div className="hero-note">
@@ -85,6 +85,11 @@ export default async function HomePage() {
             <span className="stat-label">Partial orders</span>
             <strong>{summary.partialOrders}</strong>
             <span>orders already partially completed</span>
+          </div>
+          <div className="stat-card">
+            <span className="stat-label">Supplier prices</span>
+            <strong>{summary.procurementPrices}</strong>
+            <span>{summary.suppliers} suppliers · {summary.rawMaterials} raw materials in the new ops layer</span>
           </div>
         </div>
       </section>

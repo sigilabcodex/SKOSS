@@ -149,10 +149,10 @@
       "notes": "Daily opening rhythm. Adjust sweet tray mix if the prior evening sold down.",
       "frequency": "daily",
       "weeklyDays": [],
-      "nextOccurrenceDate": "2026-04-01",
+      "nextOccurrenceDate": "2026-04-02",
       "active": true,
       "createdAt": "2026-03-20T18:05:00Z",
-      "updatedAt": "2026-03-21T21:01:10.210Z",
+      "updatedAt": "2026-03-22T03:45:10.595Z",
       "lines": [
         {
           "id": "template-line-counter-roll",
@@ -232,7 +232,11 @@
           "note": "Draft label until the counter bundle is standardized."
         }
       ],
-      "generatedOccurrenceDate": "2026-03-28"
+      "generatedOccurrenceDate": "2026-03-28",
+      "fulfillmentType": "pickup",
+      "deliveryProvider": null,
+      "deliveryAssignee": null,
+      "dispatchNotes": null
     },
     {
       "id": "order-sofia-birthday",
@@ -271,7 +275,11 @@
           "note": "Draft product; decoration still to confirm."
         }
       ],
-      "generatedOccurrenceDate": "2026-03-28"
+      "generatedOccurrenceDate": "2026-03-28",
+      "fulfillmentType": "pickup",
+      "deliveryProvider": null,
+      "deliveryAssignee": null,
+      "dispatchNotes": "Call on arrival"
     },
     {
       "id": "order-template-front-counter-daily-2026-03-28",
@@ -310,7 +318,11 @@
           "unit": "pieces",
           "lineStatus": "in_progress"
         }
-      ]
+      ],
+      "fulfillmentType": "pickup",
+      "deliveryProvider": null,
+      "deliveryAssignee": null,
+      "dispatchNotes": null
     },
     {
       "id": "order-template-cafe-luna-saturday-2026-03-28",
@@ -351,7 +363,11 @@
           "unit": "pieces",
           "lineStatus": "in_progress"
         }
-      ]
+      ],
+      "fulfillmentType": "own_delivery",
+      "deliveryProvider": "Kalali route",
+      "deliveryAssignee": "Morning route",
+      "dispatchNotes": "Recurring Saturday delivery. Bag loaves in pairs for dispatch."
     },
     {
       "id": "order-template-front-counter-daily-2026-03-29",
@@ -390,7 +406,11 @@
           "unit": "pieces",
           "lineStatus": "pending"
         }
-      ]
+      ],
+      "fulfillmentType": "pickup",
+      "deliveryProvider": null,
+      "deliveryAssignee": null,
+      "dispatchNotes": null
     },
     {
       "id": "order-template-market-sunday-2026-03-29",
@@ -431,7 +451,11 @@
           "lineStatus": "pending",
           "note": "Draft item until the market mix is standardized."
         }
-      ]
+      ],
+      "fulfillmentType": "own_delivery",
+      "deliveryProvider": "Kalali route",
+      "deliveryAssignee": "Morning route",
+      "dispatchNotes": "Weekly market stock. Keep sweet tray count flexible if Saturday sells out."
     },
     {
       "id": "order-template-front-counter-daily-2026-03-30",
@@ -470,7 +494,11 @@
           "unit": "pieces",
           "lineStatus": "pending"
         }
-      ]
+      ],
+      "fulfillmentType": "pickup",
+      "deliveryProvider": null,
+      "deliveryAssignee": null,
+      "dispatchNotes": null
     },
     {
       "id": "order-template-front-counter-daily-2026-03-31",
@@ -502,6 +530,51 @@
         },
         {
           "id": "line-1dc8c08d-ac01-4aa3-8644-a3107c29747c",
+          "lineType": "product_variant",
+          "productLabel": "Croissant / Butter",
+          "quantity": 10,
+          "completedQuantity": 0,
+          "unit": "pieces",
+          "lineStatus": "pending"
+        }
+      ],
+      "fulfillmentType": "pickup",
+      "deliveryProvider": null,
+      "deliveryAssignee": null,
+      "dispatchNotes": null
+    },
+    {
+      "id": "order-template-front-counter-daily-2026-04-01",
+      "source": "generated",
+      "status": "active",
+      "fulfillmentType": "pickup",
+      "customerLabel": "Front Counter opening trays",
+      "destinationLabel": "Front Counter",
+      "dispatchNotes": "Daily opening rhythm. Adjust sweet tray mix if the prior evening sold down.",
+      "dueDate": "2026-04-01",
+      "productionDate": "2026-04-01",
+      "notes": "Daily opening rhythm. Adjust sweet tray mix if the prior evening sold down.",
+      "createdAt": "2026-03-22T03:45:10.595Z",
+      "updatedAt": "2026-03-22T03:45:10.595Z",
+      "changedInKitchen": false,
+      "visibleOnProductionBoard": true,
+      "templateId": "template-front-counter-daily",
+      "templateTitle": "Front Counter opening trays recurring",
+      "generatedOccurrenceDate": "2026-04-01",
+      "generatedFromTemplate": true,
+      "templateEdited": false,
+      "lines": [
+        {
+          "id": "line-2c74f3b4-ce00-47c4-b82e-ddb03669610e",
+          "lineType": "product_variant",
+          "productLabel": "Roll / Sesame",
+          "quantity": 20,
+          "completedQuantity": 0,
+          "unit": "pieces",
+          "lineStatus": "pending"
+        },
+        {
+          "id": "line-9631deb4-43aa-47a5-860c-64e75fc37fb9",
           "lineType": "product_variant",
           "productLabel": "Croissant / Butter",
           "quantity": 10,
@@ -577,6 +650,134 @@
           "createdAt": "2026-03-21T05:28:00Z"
         }
       ]
+    }
+  ],
+  "suppliers": [
+    {
+      "id": "supplier-harina-viva",
+      "name": "Harina Viva",
+      "contact": "María · +52 555 010 2020",
+      "notes": "Primary flour supplier. Usually confirms next-day pickup before 16:00.",
+      "active": true,
+      "createdAt": "2026-03-18T15:00:00Z",
+      "updatedAt": "2026-03-18T15:00:00Z"
+    },
+    {
+      "id": "supplier-granja-sol",
+      "name": "Granja del Sol",
+      "contact": "Pedidos by WhatsApp · +52 555 010 3030",
+      "notes": "Eggs and butter. Flexible on emergency top-ups.",
+      "active": true,
+      "createdAt": "2026-03-18T15:10:00Z",
+      "updatedAt": "2026-03-18T15:10:00Z"
+    },
+    {
+      "id": "supplier-dulce-ruta",
+      "name": "Dulce Ruta",
+      "contact": "Route rep: Sergio",
+      "notes": "Chocolate and specialty fillings.",
+      "active": false,
+      "createdAt": "2026-03-18T15:20:00Z",
+      "updatedAt": "2026-03-20T12:00:00Z"
+    }
+  ],
+  "rawMaterials": [
+    {
+      "id": "raw-material-bread-flour",
+      "name": "Bread flour",
+      "category": "Flour",
+      "defaultUnit": "kg",
+      "brand": "Harina Viva",
+      "notes": "Main country loaf flour. Keep strong-protein option visible.",
+      "active": true,
+      "createdAt": "2026-03-18T16:00:00Z",
+      "updatedAt": "2026-03-18T16:00:00Z"
+    },
+    {
+      "id": "raw-material-butter",
+      "name": "Butter",
+      "category": "Dairy",
+      "defaultUnit": "kg",
+      "brand": "Granja del Sol",
+      "notes": "Croissant lamination butter.",
+      "active": true,
+      "createdAt": "2026-03-18T16:10:00Z",
+      "updatedAt": "2026-03-18T16:10:00Z"
+    },
+    {
+      "id": "raw-material-eggs",
+      "name": "Eggs",
+      "category": "Dairy / eggs",
+      "defaultUnit": "dozen",
+      "notes": "Used for enriched doughs and pastry wash.",
+      "active": true,
+      "createdAt": "2026-03-18T16:20:00Z",
+      "updatedAt": "2026-03-18T16:20:00Z"
+    }
+  ],
+  "supplierPriceEntries": [
+    {
+      "id": "supplier-price-bread-flour-2026-03-10",
+      "supplierId": "supplier-harina-viva",
+      "supplierLabel": "Harina Viva",
+      "rawMaterialId": "raw-material-bread-flour",
+      "rawMaterialLabel": "Bread flour",
+      "presentation": "25 kg sack",
+      "brand": "Harina Viva",
+      "packageQuantity": 25,
+      "packageUnit": "kg",
+      "price": 28,
+      "priceDate": "2026-03-10",
+      "note": "Standard weekly restock.",
+      "createdAt": "2026-03-10T18:00:00Z",
+      "updatedAt": "2026-03-10T18:00:00Z"
+    },
+    {
+      "id": "supplier-price-bread-flour-2026-03-18",
+      "supplierId": "supplier-harina-viva",
+      "supplierLabel": "Harina Viva",
+      "rawMaterialId": "raw-material-bread-flour",
+      "rawMaterialLabel": "Bread flour",
+      "presentation": "25 kg sack",
+      "brand": "Harina Viva",
+      "packageQuantity": 25,
+      "packageUnit": "kg",
+      "price": 30,
+      "priceDate": "2026-03-18",
+      "note": "Supplier raised price after freight change.",
+      "createdAt": "2026-03-18T18:00:00Z",
+      "updatedAt": "2026-03-18T18:00:00Z"
+    },
+    {
+      "id": "supplier-price-butter-2026-03-16",
+      "supplierId": "supplier-granja-sol",
+      "supplierLabel": "Granja del Sol",
+      "rawMaterialId": "raw-material-butter",
+      "rawMaterialLabel": "Butter",
+      "presentation": "5 kg block",
+      "brand": "Granja del Sol",
+      "packageQuantity": 5,
+      "packageUnit": "kg",
+      "price": 42,
+      "priceDate": "2026-03-16",
+      "note": "Promo case price when ordering two or more blocks.",
+      "createdAt": "2026-03-16T14:00:00Z",
+      "updatedAt": "2026-03-16T14:00:00Z"
+    },
+    {
+      "id": "supplier-price-eggs-2026-03-19",
+      "supplierId": "supplier-granja-sol",
+      "supplierLabel": "Granja del Sol",
+      "rawMaterialId": "raw-material-eggs",
+      "rawMaterialLabel": "Eggs",
+      "presentation": "Tray",
+      "packageQuantity": 30,
+      "packageUnit": "eggs",
+      "price": 8.5,
+      "priceDate": "2026-03-19",
+      "note": "Large eggs. Vendor can substitute medium with prior warning.",
+      "createdAt": "2026-03-19T09:30:00Z",
+      "updatedAt": "2026-03-19T09:30:00Z"
     }
   ]
 }

@@ -1,4 +1,4 @@
-import type { OrderLine, RecurringTemplate } from '@/lib/domain/types';
+import type { OrderLine, RecurringTemplate, SupplierPriceEntry } from '@/lib/domain/types';
 
 export function formatDateLabel(date: string) {
   return new Intl.DateTimeFormat('en-US', {
@@ -25,6 +25,23 @@ export function formatShiftKeyLabel(shiftKey: 'night' | 'morning' | 'afternoon')
 
 export function formatStatusLabel(value: string) {
   return value.replaceAll('_', ' ');
+}
+
+export function formatCurrency(value: number) {
+  return new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+    minimumFractionDigits: value % 1 === 0 ? 0 : 2,
+    maximumFractionDigits: 2,
+  }).format(value);
+}
+
+export function formatUnitRate(entry: Pick<SupplierPriceEntry, 'price' | 'packageQuantity' | 'packageUnit'>) {
+  if (!entry.packageQuantity) {
+    return 'Rate unavailable';
+  }
+
+  return `${formatCurrency(entry.price / entry.packageQuantity)} / ${entry.packageUnit}`;
 }
 
 export function formatLineProgressLabel(line: Pick<OrderLine, 'completedQuantity' | 'quantity' | 'unit'>) {

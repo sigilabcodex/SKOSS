@@ -32,6 +32,10 @@ function OrderCard({
           <strong>{formatStatusLabel(order.source)}</strong>
         </div>
         <div>
+          <span className="field-label">Fulfillment</span>
+          <strong>{formatStatusLabel(order.fulfillmentType)}</strong>
+        </div>
+        <div>
           <span className="field-label">Production</span>
           <strong>{formatDateLabel(order.productionDate)}</strong>
         </div>
@@ -41,9 +45,15 @@ function OrderCard({
         </div>
         <div>
           <span className="field-label">Notes</span>
-          <strong>{order.notes ? 'Has notes' : 'Clear'}</strong>
+          <strong>{order.dispatchNotes || order.notes ? 'Has notes' : 'Clear'}</strong>
         </div>
       </div>
+      {order.deliveryProvider || order.deliveryAssignee ? (
+        <p className="helper-text no-margin">
+          {order.deliveryProvider ? `Provider: ${order.deliveryProvider}. ` : ''}
+          {order.deliveryAssignee ? `Assignee: ${order.deliveryAssignee}.` : ''}
+        </p>
+      ) : null}
       <ul className="mini-line-list">
         {order.lines.map((line) => (
           <li key={line.id}>

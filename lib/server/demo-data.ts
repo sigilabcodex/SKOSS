@@ -1,11 +1,15 @@
 import type {
   AppData,
+  FulfillmentType,
   Order,
   OrderLine,
   Product,
+  RawMaterial,
   RecurringTemplate,
   ShiftLog,
   ShiftNote,
+  Supplier,
+  SupplierPriceEntry,
   WeekdayKey,
   WipEntry,
 } from '@/lib/domain/types';
@@ -15,6 +19,10 @@ export interface OrderFormValues {
   customerLabel: string;
   customerPhone?: string;
   destinationLabel?: string;
+  fulfillmentType: FulfillmentType;
+  deliveryProvider?: string;
+  deliveryAssignee?: string;
+  dispatchNotes?: string;
   dueDate: string;
   productionDate: string;
   notes?: string;
@@ -29,6 +37,34 @@ export interface OrderFormValues {
     unit: string;
     note?: string;
   }>;
+}
+
+export interface SupplierFormValues {
+  name: string;
+  contact?: string;
+  notes?: string;
+  active: boolean;
+}
+
+export interface RawMaterialFormValues {
+  name: string;
+  category?: string;
+  defaultUnit: string;
+  brand?: string;
+  notes?: string;
+  active: boolean;
+}
+
+export interface SupplierPriceEntryFormValues {
+  supplierId: string;
+  rawMaterialId: string;
+  presentation?: string;
+  brand?: string;
+  packageQuantity: number;
+  packageUnit: string;
+  price: number;
+  priceDate: string;
+  note?: string;
 }
 
 export interface RecurringTemplateFormValues {
@@ -162,6 +198,10 @@ function hasOrderCoreChanges(existingOrder: Order, values: OrderFormValues) {
     existingOrder.customerLabel !== values.customerLabel.trim() ||
     (existingOrder.customerPhone ?? '') !== (values.customerPhone?.trim() ?? '') ||
     (existingOrder.destinationLabel ?? '') !== (values.destinationLabel?.trim() ?? '') ||
+    existingOrder.fulfillmentType !== values.fulfillmentType ||
+    (existingOrder.deliveryProvider ?? '') !== (values.deliveryProvider?.trim() ?? '') ||
+    (existingOrder.deliveryAssignee ?? '') !== (values.deliveryAssignee?.trim() ?? '') ||
+    (existingOrder.dispatchNotes ?? '') !== (values.dispatchNotes?.trim() ?? '') ||
     existingOrder.productionDate !== values.productionDate ||
     existingOrder.dueDate !== values.dueDate ||
     (existingOrder.notes ?? '') !== (values.notes?.trim() ?? '') ||
@@ -215,9 +255,13 @@ export function buildOrderRecord(data: AppData, values: OrderFormValues, existin
     id: existingOrder?.id ?? `order-${crypto.randomUUID()}`,
     source: values.source,
     status: nextStatus,
+    fulfillmentType: values.fulfillmentType,
     customerLabel: values.customerLabel.trim() || 'Walk-in customer',
     customerPhone: values.customerPhone?.trim() || undefined,
     destinationLabel: values.destinationLabel?.trim() || undefined,
+    deliveryProvider: values.deliveryProvider?.trim() || undefined,
+    deliveryAssignee: values.deliveryAssignee?.trim() || undefined,
+    dispatchNotes: values.dispatchNotes?.trim() || undefined,
     dueDate: values.dueDate,
     productionDate: values.productionDate,
     notes: values.notes?.trim() || undefined,
@@ -267,6 +311,7 @@ export async function getWorkspaceSummary() {
   const data = await readStore();
   const focusDate = getFocusDate(data);
   const ordersToday = data.orders.filter((order) => order.productionDate === focusDate);
+  const activePriceEntries = data.supplierPriceEntries.filter((entry) => entry.priceDate <= focusDate);
 
   return {
     workspace: data.workspace,
@@ -278,6 +323,9 @@ export async function getWorkspaceSummary() {
     readyWip: data.wipEntries.filter((entry) => entry.productionDate === focusDate && entry.status === 'ready').length,
     recurringTemplates: data.recurringTemplates.filter((template) => template.active).length,
     partialOrders: ordersToday.filter((order) => getOrderProgress(order).partialLines > 0).length,
+    suppliers: data.suppliers.filter((supplier) => supplier.active).length,
+    rawMaterials: data.rawMaterials.filter((material) => material.active).length,
+    procurementPrices: activePriceEntries.length,
   };
 }
 
@@ -485,7 +533,26 @@ export async function getHandoffWorkspace() {
 }
 
 export async function getSetupWorkspace() {
-  return readStore();
+  const data = await readStore();
+
+  const latestPriceByMaterial = new Map<string, SupplierPriceEntry>();
+  for (const entry of [...data.supplierPriceEntries].sort((left, right) => right.priceDate.localeCompare(left.priceDate))) {
+    if (!latestPriceByMaterial.has(entry.rawMaterialId)) {
+      latestPriceByMaterial.set(entry.rawMaterialId, entry);
+    }
+  }
+
+  return {
+    ...data,
+    suppliers: [...data.suppliers].sort((left, right) => left.name.localeCompare(right.name)),
+    rawMaterials: [...data.rawMaterials].sort((left, right) => left.name.localeCompare(right.name)),
+    supplierPriceEntries: [...data.supplierPriceEntries].sort((left, right) =>
+      left.priceDate === right.priceDate
+        ? left.rawMaterialLabel.localeCompare(right.rawMaterialLabel)
+        : right.priceDate.localeCompare(left.priceDate),
+    ),
+    latestPriceByMaterial,
+  };
 }
 
 export function normalizeOrderForm(formData: FormData): OrderFormValues {
@@ -507,6 +574,10 @@ export function normalizeOrderForm(formData: FormData): OrderFormValues {
     customerLabel: String(formData.get('customerLabel') ?? ''),
     customerPhone: String(formData.get('customerPhone') ?? ''),
     destinationLabel: String(formData.get('destinationLabel') ?? ''),
+    fulfillmentType: String(formData.get('fulfillmentType') ?? 'pickup') as FulfillmentType,
+    deliveryProvider: String(formData.get('deliveryProvider') ?? ''),
+    deliveryAssignee: String(formData.get('deliveryAssignee') ?? ''),
+    dispatchNotes: String(formData.get('dispatchNotes') ?? ''),
     dueDate: String(formData.get('dueDate') ?? ''),
     productionDate: String(formData.get('productionDate') ?? ''),
     notes: String(formData.get('notes') ?? ''),
@@ -549,6 +620,14 @@ export function validateOrderForm(values: OrderFormValues) {
     return 'Production and delivery dates are required.';
   }
 
+  if (values.fulfillmentType !== 'pickup' && !values.destinationLabel?.trim()) {
+    return 'Add a destination or route label for delivery orders.';
+  }
+
+  if (values.fulfillmentType === 'app_delivery' && !values.deliveryProvider?.trim()) {
+    return 'Add the app delivery source when using app delivery.';
+  }
+
   const usableLines = values.lines.filter((line) => line.productLabel.trim() && line.quantity > 0);
   if (usableLines.length === 0) {
     return 'Add at least one order line with a name and quantity.';
@@ -559,6 +638,147 @@ export function validateOrderForm(values: OrderFormValues) {
   }
 
   return null;
+}
+
+export function normalizeSupplierForm(formData: FormData): SupplierFormValues {
+  return {
+    name: String(formData.get('name') ?? ''),
+    contact: String(formData.get('contact') ?? ''),
+    notes: String(formData.get('notes') ?? ''),
+    active: formData.get('active') !== null,
+  };
+}
+
+export function validateSupplierForm(values: SupplierFormValues) {
+  if (!values.name.trim()) {
+    return 'Supplier name is required.';
+  }
+
+  return null;
+}
+
+export function buildSupplierRecord(values: SupplierFormValues): Supplier {
+  const now = new Date().toISOString();
+
+  return {
+    id: `supplier-${crypto.randomUUID()}`,
+    name: values.name.trim(),
+    contact: values.contact?.trim() || undefined,
+    notes: values.notes?.trim() || undefined,
+    active: values.active,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+export function normalizeRawMaterialForm(formData: FormData): RawMaterialFormValues {
+  return {
+    name: String(formData.get('name') ?? ''),
+    category: String(formData.get('category') ?? ''),
+    defaultUnit: String(formData.get('defaultUnit') ?? 'kg'),
+    brand: String(formData.get('brand') ?? ''),
+    notes: String(formData.get('notes') ?? ''),
+    active: formData.get('active') !== null,
+  };
+}
+
+export function validateRawMaterialForm(values: RawMaterialFormValues) {
+  if (!values.name.trim()) {
+    return 'Raw material name is required.';
+  }
+
+  if (!values.defaultUnit.trim()) {
+    return 'Default unit is required for raw materials.';
+  }
+
+  return null;
+}
+
+export function buildRawMaterialRecord(values: RawMaterialFormValues): RawMaterial {
+  const now = new Date().toISOString();
+
+  return {
+    id: `raw-material-${crypto.randomUUID()}`,
+    name: values.name.trim(),
+    category: values.category?.trim() || undefined,
+    defaultUnit: values.defaultUnit.trim(),
+    brand: values.brand?.trim() || undefined,
+    notes: values.notes?.trim() || undefined,
+    active: values.active,
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
+export function normalizeSupplierPriceEntryForm(formData: FormData): SupplierPriceEntryFormValues {
+  return {
+    supplierId: String(formData.get('supplierId') ?? ''),
+    rawMaterialId: String(formData.get('rawMaterialId') ?? ''),
+    presentation: String(formData.get('presentation') ?? ''),
+    brand: String(formData.get('brand') ?? ''),
+    packageQuantity: Number(formData.get('packageQuantity') ?? 0),
+    packageUnit: String(formData.get('packageUnit') ?? ''),
+    price: Number(formData.get('price') ?? 0),
+    priceDate: String(formData.get('priceDate') ?? ''),
+    note: String(formData.get('note') ?? ''),
+  };
+}
+
+export function validateSupplierPriceEntryForm(
+  values: SupplierPriceEntryFormValues,
+  data: Pick<AppData, 'suppliers' | 'rawMaterials'>,
+) {
+  if (!values.supplierId || !data.suppliers.find((supplier) => supplier.id === values.supplierId)) {
+    return 'Choose a supplier for the price entry.';
+  }
+
+  if (!values.rawMaterialId || !data.rawMaterials.find((material) => material.id === values.rawMaterialId)) {
+    return 'Choose a raw material for the price entry.';
+  }
+
+  if (values.packageQuantity <= 0 || !values.packageUnit.trim()) {
+    return 'Add a package size and package unit for the price entry.';
+  }
+
+  if (values.price <= 0) {
+    return 'Price must be greater than zero.';
+  }
+
+  if (!values.priceDate) {
+    return 'Choose the date the supplier price applied.';
+  }
+
+  return null;
+}
+
+export function buildSupplierPriceEntryRecord(
+  values: SupplierPriceEntryFormValues,
+  data: Pick<AppData, 'suppliers' | 'rawMaterials'>,
+): SupplierPriceEntry {
+  const now = new Date().toISOString();
+  const supplier = data.suppliers.find((entry) => entry.id === values.supplierId);
+  const rawMaterial = data.rawMaterials.find((entry) => entry.id === values.rawMaterialId);
+
+  if (!supplier || !rawMaterial) {
+    throw new Error('Supplier or raw material missing when building price entry.');
+  }
+
+  return {
+    id: `supplier-price-${crypto.randomUUID()}`,
+    supplierId: supplier.id,
+    supplierLabel: supplier.name,
+    rawMaterialId: rawMaterial.id,
+    rawMaterialLabel: rawMaterial.name,
+    presentation: values.presentation?.trim() || undefined,
+    brand: values.brand?.trim() || rawMaterial.brand || undefined,
+    packageQuantity: values.packageQuantity,
+    packageUnit: values.packageUnit.trim(),
+    price: values.price,
+    priceDate: values.priceDate,
+    note: values.note?.trim() || undefined,
+    createdAt: now,
+    updatedAt: now,
+  };
 }
 
 export function validateRecurringTemplateForm(values: RecurringTemplateFormValues) {

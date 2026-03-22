@@ -33,6 +33,19 @@ function addDays(date: string, days: number) {
   return isoDateFromDate(next);
 }
 
+function inferFulfillmentType(destinationLabel?: string) {
+  const label = destinationLabel?.toLowerCase() ?? '';
+  if (!label) {
+    return 'pickup' as const;
+  }
+
+  if (label.includes('counter') || label.includes('pickup')) {
+    return 'pickup' as const;
+  }
+
+  return 'own_delivery' as const;
+}
+
 function weekdayToIndex(day: WeekdayKey) {
   return {
     sun: 0,
@@ -118,14 +131,19 @@ function nextOccurrenceDate(template: RecurringTemplate, currentDate: string) {
 
 function buildGeneratedOrder(template: RecurringTemplate, productionDate: string): Order {
   const timestamp = new Date().toISOString();
+  const fulfillmentType = inferFulfillmentType(template.destinationLabel);
 
   return {
     id: `order-${template.id}-${productionDate}`,
     source: 'generated',
     status: 'active',
+    fulfillmentType,
     customerLabel: template.customerLabel,
     customerPhone: template.customerPhone,
     destinationLabel: template.destinationLabel,
+    deliveryProvider: undefined,
+    deliveryAssignee: undefined,
+    dispatchNotes: template.notes,
     dueDate: productionDate,
     productionDate,
     notes: template.notes,
@@ -201,6 +219,10 @@ function hydrateStore(rawData: AppData): AppData {
     ),
     orders: (rawData.orders ?? []).map((order) => ({
       ...order,
+      fulfillmentType: order.fulfillmentType ?? inferFulfillmentType(order.destinationLabel),
+      deliveryProvider: order.deliveryProvider,
+      deliveryAssignee: order.deliveryAssignee,
+      dispatchNotes: order.dispatchNotes,
       changedInKitchen: order.changedInKitchen ?? false,
       visibleOnProductionBoard: order.visibleOnProductionBoard ?? true,
       templateId: order.templateId,
@@ -210,6 +232,9 @@ function hydrateStore(rawData: AppData): AppData {
       templateEdited: order.templateEdited ?? false,
       lines: normalizeLines(order.lines),
     })),
+    suppliers: rawData.suppliers ?? [],
+    rawMaterials: rawData.rawMaterials ?? [],
+    supplierPriceEntries: rawData.supplierPriceEntries ?? [],
     wipEntries: rawData.wipEntries ?? [],
     shiftLogs: rawData.shiftLogs ?? [],
   };

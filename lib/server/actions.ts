@@ -3,18 +3,27 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import {
+  buildRawMaterialRecord,
   buildOrderRecord,
   buildRecurringTemplateRecord,
   buildShiftLog,
   buildShiftNote,
+  buildSupplierPriceEntryRecord,
+  buildSupplierRecord,
   buildWipEntry,
   getLineStatus,
+  normalizeRawMaterialForm,
   normalizeOrderForm,
   normalizeRecurringTemplateForm,
+  normalizeSupplierForm,
+  normalizeSupplierPriceEntryForm,
+  validateRawMaterialForm,
   validateOrderForm,
   validateRecurringTemplateForm,
   validateShiftLog,
   validateShiftNote,
+  validateSupplierForm,
+  validateSupplierPriceEntryForm,
   validateWipEntry,
 } from '@/lib/server/demo-data';
 import { readStore, writeStore } from '@/lib/server/store';
@@ -149,6 +158,61 @@ export async function addWipEntryAction(formData: FormData) {
   revalidatePath('/production');
   revalidatePath('/handoff');
   redirect('/handoff?saved=wip');
+}
+
+export async function createSupplierAction(formData: FormData) {
+  const data = await readStore();
+  const values = normalizeSupplierForm(formData);
+  const error = validateSupplierForm(values);
+
+  if (error) {
+    redirect(`/setup?error=${encodeURIComponent(error)}`);
+  }
+
+  const supplier = buildSupplierRecord(values);
+  data.suppliers = [...data.suppliers, supplier].sort((left, right) => left.name.localeCompare(right.name));
+  await writeStore(data);
+  revalidatePath('/');
+  revalidatePath('/setup');
+  redirect('/setup?saved=supplier');
+}
+
+export async function createRawMaterialAction(formData: FormData) {
+  const data = await readStore();
+  const values = normalizeRawMaterialForm(formData);
+  const error = validateRawMaterialForm(values);
+
+  if (error) {
+    redirect(`/setup?error=${encodeURIComponent(error)}`);
+  }
+
+  const rawMaterial = buildRawMaterialRecord(values);
+  data.rawMaterials = [...data.rawMaterials, rawMaterial].sort((left, right) => left.name.localeCompare(right.name));
+  await writeStore(data);
+  revalidatePath('/');
+  revalidatePath('/setup');
+  redirect('/setup?saved=raw-material');
+}
+
+export async function createSupplierPriceEntryAction(formData: FormData) {
+  const data = await readStore();
+  const values = normalizeSupplierPriceEntryForm(formData);
+  const error = validateSupplierPriceEntryForm(values, data);
+
+  if (error) {
+    redirect(`/setup?error=${encodeURIComponent(error)}`);
+  }
+
+  const priceEntry = buildSupplierPriceEntryRecord(values, data);
+  data.supplierPriceEntries = [...data.supplierPriceEntries, priceEntry].sort((left, right) =>
+    left.priceDate === right.priceDate
+      ? left.rawMaterialLabel.localeCompare(right.rawMaterialLabel)
+      : right.priceDate.localeCompare(left.priceDate),
+  );
+  await writeStore(data);
+  revalidatePath('/');
+  revalidatePath('/setup');
+  redirect('/setup?saved=price');
 }
 
 export async function saveShiftLogAction(formData: FormData) {
