@@ -1,52 +1,92 @@
 'use client';
 
-import { LeafIcon, MoonIcon, SunIcon } from '@/components/ui-icons';
+import { applyThemeState, themeOptions } from '@/lib/theme';
+import { SparklesIcon } from '@/components/ui-icons';
 
-type ThemeName = 'light' | 'dark' | 'garden';
-
-type ThemeOption = {
-  name: ThemeName;
-  label: string;
-  icon: typeof SunIcon;
+type ThemeSwitcherProps = {
+  variant?: 'compact' | 'panel';
 };
 
-const themeOptions: ThemeOption[] = [
-  { name: 'light', label: 'Light', icon: SunIcon },
-  { name: 'dark', label: 'Dark', icon: MoonIcon },
-  { name: 'garden', label: 'Green', icon: LeafIcon },
-];
+export function ThemeSwitcher({ variant = 'compact' }: ThemeSwitcherProps) {
+  if (variant === 'panel') {
+    return (
+      <div className="theme-panel" role="group" aria-label="Appearance theme">
+        {themeOptions.map((option) => {
+          const Icon = option.icon;
 
-const storageKey = 'skoss-theme';
+          return (
+            <button
+              key={option.name}
+              type="button"
+              className="theme-panel-option"
+              data-theme-option={option.name}
+              onClick={() => applyThemeState(option.name)}
+              aria-pressed="false"
+            >
+              <span className="theme-panel-header">
+                <span className="theme-panel-icon-wrap">
+                  <Icon className="button-icon" />
+                </span>
+                <span>
+                  <strong>{option.label}</strong>
+                  <span className="theme-panel-kicker">{option.shortLabel}</span>
+                </span>
+              </span>
+              <span className="helper-text">{option.description}</span>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
 
-function applyThemeState(theme: ThemeName) {
-  document.documentElement.dataset.theme = theme;
-  window.localStorage.setItem(storageKey, theme);
-
-  document.querySelectorAll<HTMLButtonElement>('[data-theme-option]').forEach((button) => {
-    button.setAttribute('aria-pressed', String(button.dataset.themeOption === theme));
-  });
-}
-
-export function ThemeSwitcher() {
   return (
-    <div className="theme-switcher" role="group" aria-label="Theme switcher">
-      {themeOptions.map((option) => {
-        const Icon = option.icon;
+    <details className="theme-switcher">
+      <summary className="theme-menu-button" aria-label="Open appearance menu">
+        <SparklesIcon className="button-icon" />
+      </summary>
+      <div className="theme-menu" aria-label="Theme options">
+        <div className="theme-menu-header">
+          <SparklesIcon className="button-icon" />
+          <div>
+            <strong>Appearance</strong>
+            <p className="helper-text no-margin">Quick switch. Full controls stay in Setup.</p>
+          </div>
+        </div>
+        <div className="theme-menu-options">
+          {themeOptions.map((option) => {
+            const Icon = option.icon;
 
-        return (
-          <button
-            key={option.name}
-            type="button"
-            className="theme-chip"
-            data-theme-option={option.name}
-            onClick={() => applyThemeState(option.name)}
-            aria-pressed="false"
-          >
-            <Icon className="button-icon" />
-            <span>{option.label}</span>
-          </button>
-        );
-      })}
-    </div>
+            return (
+              <button
+                key={option.name}
+                type="button"
+                className="theme-menu-option"
+                data-theme-option={option.name}
+                aria-pressed="false"
+                onClick={(event) => {
+                  applyThemeState(option.name);
+                  const details = event.currentTarget.closest('details');
+
+                  if (details instanceof HTMLDetailsElement) {
+                    details.open = false;
+                  }
+                }}
+              >
+                <span className="theme-menu-option-main">
+                  <span className="theme-menu-icon-wrap">
+                    <Icon className="button-icon" />
+                  </span>
+                  <span>
+                    <strong>{option.label}</strong>
+                    <span className="theme-menu-caption">{option.description}</span>
+                  </span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </details>
   );
 }

@@ -1,5 +1,6 @@
 import { formatDateLabel, formatTemplateScheduleLabel } from '@/lib/domain/formatters';
 import { getSetupWorkspace } from '@/lib/server/demo-data';
+import { ThemeSwitcher } from '@/components/theme-switcher';
 import { SetupIcon, SparklesIcon } from '@/components/ui-icons';
 
 export default async function SetupPage() {
@@ -24,6 +25,17 @@ export default async function SetupPage() {
           <strong>Keep setup practical.</strong>
           <p className="helper-text no-margin">These lists should help operators work faster, not force heavy data maintenance before first use.</p>
         </div>
+      </section>
+
+      <section className="panel page-stack">
+        <div className="table-header-row">
+          <div>
+            <h2>Appearance</h2>
+            <p>Global theme controls should stay available, but the fuller choice belongs in setup instead of dominating the header.</p>
+          </div>
+          <span className="summary-pill">Quick switch in header</span>
+        </div>
+        <ThemeSwitcher variant="panel" />
       </section>
 
       <section className="grid-two">

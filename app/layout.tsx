@@ -13,20 +13,7 @@ const themeInitScript = `
 (() => {
   const storageKey = 'skoss-theme';
   const savedTheme = window.localStorage.getItem(storageKey);
-  const theme = savedTheme || 'light';
-  document.documentElement.dataset.theme = theme;
-
-  const syncThemeButtons = () => {
-    document.querySelectorAll('[data-theme-option]').forEach((button) => {
-      button.setAttribute('aria-pressed', String(button.getAttribute('data-theme-option') === theme));
-    });
-  };
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', syncThemeButtons, { once: true });
-  } else {
-    syncThemeButtons();
-  }
+  document.documentElement.dataset.theme = savedTheme || 'light';
 })();
 `;
 

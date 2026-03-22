@@ -36,7 +36,7 @@ Implemented themes:
 
 - `light`
 - `dark`
-- `garden` (green/colorful)
+- `garden` (sage / kitchen-garden)
 
 Guidance:
 
@@ -44,11 +44,14 @@ Guidance:
 - prefer `--surface`, `--surface-soft`, `--border`, `--ink`, and semantic state variables
 - keep contrast strong enough for busy kitchens and imperfect lighting
 - avoid theme-specific component overrides unless absolutely necessary
+- keep theme accent colors distinct from semantic success colors so completed states still scan immediately
+- treat the green theme as an intentional palette, not a simple token swap from the default accent
 
 Persistence:
 
 - theme choice is stored locally in the browser
 - the shell applies the saved theme on initial load before the app renders
+- the header should expose only a low-emphasis quick switch, while full theme selection lives in Setup / Appearance
 - future themes should follow the same token contract instead of adding ad hoc classes
 
 ## 3. Tokens and layout rules
@@ -157,7 +160,13 @@ Primary navigation should show:
 
 - icon + label
 - active state
-- current workspace indicator in the shell
+- enough spacing and contrast to scan quickly without turning navigation into a row of large buttons
+
+Header rule:
+
+- the global header should carry brand identity and primary wayfinding only
+- page or workspace context belongs in the page heading, subtitle, and local summary cards
+- avoid repeating the same workspace label in the shell and the page body
 
 ## 6. Forms and data-entry guidance
 
@@ -194,7 +203,22 @@ Card guidance:
 - use badges for state, not for every fact
 - make partial or changed work slightly more prominent than settled items
 
-## 8. Icon usage
+## 8. Header and global shell guidance
+
+The shell should stay lighter than the page content it contains.
+
+Guidance:
+
+- keep the header visually short and calm
+- separate product identity from page context
+- avoid long descriptive copy in the global shell
+- keep global controls secondary to navigation and page work
+- prefer a compact appearance control over a large persistent switcher
+- preserve touch-friendly hit areas, but reduce unnecessary bulk in pills and chips
+
+A good shell helps operators orient quickly, then gets out of the way.
+
+## 9. Icon usage
 
 Use icons sparingly and functionally.
 
@@ -210,7 +234,7 @@ Avoid:
 - decorative icon spam inside every list item
 - icons that duplicate already-obvious meaning without improving scan speed
 
-## 9. Guidance for future PRs
+## 10. Guidance for future PRs
 
 Future UI work should follow these rules:
 
