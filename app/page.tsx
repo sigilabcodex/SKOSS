@@ -1,7 +1,9 @@
 import Link from 'next/link';
+import { OnboardingAssistant } from '@/components/setup/onboarding-assistant';
 import { formatDateLabel } from '@/lib/domain/formatters';
+import { getPresetExperience, type WorkspaceLinkKey } from '@/lib/business-presets';
 import { getWorkspaceSummary } from '@/lib/server/demo-data';
-import { getServerTranslator } from '@/lib/i18n/server';
+import { getRequestPreferences, getServerTranslator } from '@/lib/i18n/server';
 import { ArrowRightIcon, HandoffIcon, OrdersIcon, ProductionIcon, SetupIcon, SparklesIcon } from '@/components/ui-icons';
 
 type QuickLink = {
@@ -12,34 +14,70 @@ type QuickLink = {
 };
 
 export default async function HomePage() {
-  const [summary, { t, locale }] = await Promise.all([getWorkspaceSummary(), getServerTranslator()]);
+  const [summary, { t, locale, preset }, requestPreferences] = await Promise.all([
+    getWorkspaceSummary(),
+    getServerTranslator(),
+    getRequestPreferences(),
+  ]);
 
-  const quickLinks: QuickLink[] = [
-    {
+  const quickLinkMap: Record<WorkspaceLinkKey, QuickLink> = {
+    orders: {
       href: '/orders',
       title: t('home.quickLinks.orders.title'),
       description: t('home.quickLinks.orders.description'),
       icon: OrdersIcon,
     },
-    {
+    production: {
       href: '/production',
       title: t('home.quickLinks.production.title'),
       description: t('home.quickLinks.production.description'),
       icon: ProductionIcon,
     },
-    {
+    handoff: {
       href: '/handoff',
       title: t('home.quickLinks.handoff.title'),
       description: t('home.quickLinks.handoff.description'),
       icon: HandoffIcon,
     },
-    {
+    setup: {
       href: '/setup',
       title: t('home.quickLinks.setup.title'),
       description: t('home.quickLinks.setup.description'),
       icon: SetupIcon,
     },
-  ];
+  };
+
+  const presetExperience = getPresetExperience(preset, summary.preferences.operatingMode);
+  const quickLinks = presetExperience.featuredWorkspaces.map((key) => quickLinkMap[key]);
+
+  if (!summary.preferences.onboardingCompleted) {
+    return (
+      <div className="page-stack">
+        <section className="hero-card">
+          <div className="hero-header">
+            <div>
+              <p className="eyebrow">{t('setupAssistant.eyebrow')}</p>
+              <h1>{t('setupAssistant.firstRunTitle')}</h1>
+              <p className="lede">{t('setupAssistant.firstRunIntro')}</p>
+            </div>
+            <div className="hero-note">
+              <SparklesIcon className="callout-icon" />
+              <div>
+                <strong>{t(`presets.${requestPreferences.preset}.label`)}</strong>
+                <p className="helper-text no-margin">{t('setupAssistant.notLocked')}</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <OnboardingAssistant
+          businessName={summary.workspace.name}
+          preferences={summary.preferences}
+          variant="first-run"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="page-stack">
@@ -57,6 +95,11 @@ export default async function HomePage() {
               <p className="helper-text no-margin">{formatDateLabel(summary.focusDate, locale)} {t('home.focusDateHelp')}</p>
             </div>
           </div>
+        </div>
+        <div className="summary-pill-row">
+          <span className="summary-pill">{t(`presets.${preset}.label`)}</span>
+          <span className="summary-pill">{t(`operatingModes.${summary.preferences.operatingMode}.label`)}</span>
+          <span className="summary-pill">{t(`nav.${presetExperience.emphasisWorkspace}`)} · {t('home.recommendedFirst')}</span>
         </div>
         <div className="stats-grid">
           <div className="stat-card">
@@ -92,8 +135,46 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <section className="grid-two">
+        <article className="panel page-stack">
+          <div className="table-header-row">
+            <div>
+              <h2>{t('home.presetFocusTitle')}</h2>
+              <p>{t('home.presetFocusBody', { preset: t(`presets.${preset}.label`) })}</p>
+            </div>
+            <span className="summary-pill">{t(`nav.${presetExperience.emphasisWorkspace}`)}</span>
+          </div>
+          <ul className="stack-list">
+            {presetExperience.starterSuggestionKeys.map((key) => (
+              <li key={key}>
+                <strong>{t(`presetSuggestions.${key}.title`)}</strong>
+                <span>{t(`presetSuggestions.${key}.body`)}</span>
+              </li>
+            ))}
+          </ul>
+        </article>
+
+        <article className="panel page-stack">
+          <div className="table-header-row">
+            <div>
+              <h2>{t('home.exampleSetupTitle')}</h2>
+              <p>{t('home.exampleSetupBody')}</p>
+            </div>
+            <span className="summary-pill">{t('setup.title')}</span>
+          </div>
+          <ul className="stack-list">
+            {presetExperience.exampleKeys.map((key) => (
+              <li key={key}>
+                <strong>{t(`presetExamples.${key}.title`)}</strong>
+                <span>{t(`presetExamples.${key}.body`)}</span>
+              </li>
+            ))}
+          </ul>
+        </article>
+      </section>
+
       <section className="grid-cards">
-        {quickLinks.map((link) => {
+        {quickLinks.map((link, index) => {
           const Icon = link.icon;
 
           return (
@@ -104,6 +185,7 @@ export default async function HomePage() {
                 </div>
                 <ArrowRightIcon className="panel-link-arrow" />
               </div>
+              {index === 0 ? <span className="summary-pill">{t('home.recommendedFirst')}</span> : null}
               <h2>{link.title}</h2>
               <p>{link.description}</p>
             </Link>

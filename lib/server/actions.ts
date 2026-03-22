@@ -1,6 +1,7 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import {
   buildRawMaterialRecord,
@@ -27,11 +28,77 @@ import {
   validateWipEntry,
 } from '@/lib/server/demo-data';
 import { readStore, writeStore } from '@/lib/server/store';
+import { isSupportedLocale, isSupportedPreset, localeCookieName, supportedLocales, presetCookieName, supportedPresets } from '@/lib/i18n/config';
+import { themeCookieName } from '@/lib/theme';
 
 function sortOrders(left: { productionDate: string; updatedAt: string }, right: { productionDate: string; updatedAt: string }) {
   return left.productionDate === right.productionDate
     ? right.updatedAt.localeCompare(left.updatedAt)
     : left.productionDate.localeCompare(right.productionDate);
+}
+
+const supportedThemes = ['light', 'dark', 'garden'] as const;
+const supportedOperatingModes = ['pickup', 'delivery', 'mixed'] as const;
+
+export async function saveOnboardingPreferencesAction(formData: FormData) {
+  const data = await readStore();
+  const businessName = String(formData.get('businessName') ?? '').trim();
+  const locale = String(formData.get('locale') ?? '');
+  const preset = String(formData.get('preset') ?? '');
+  const operatingMode = String(formData.get('operatingMode') ?? '');
+  const theme = String(formData.get('theme') ?? '');
+  const redirectTo = String(formData.get('redirectTo') ?? '/');
+
+  if (!businessName) {
+    redirect(`${redirectTo.startsWith('/setup') ? '/setup' : '/'}?error=${encodeURIComponent('Add a business name to continue.')}`);
+  }
+
+  if (!isSupportedLocale(locale) || !supportedLocales.includes(locale)) {
+    redirect(`${redirectTo.startsWith('/setup') ? '/setup' : '/'}?error=${encodeURIComponent('Choose a supported language.')}`);
+  }
+
+  if (!isSupportedPreset(preset) || !supportedPresets.includes(preset)) {
+    redirect(`${redirectTo.startsWith('/setup') ? '/setup' : '/'}?error=${encodeURIComponent('Choose a supported preset.')}`);
+  }
+
+  if (!supportedOperatingModes.includes(operatingMode as (typeof supportedOperatingModes)[number])) {
+    redirect(`${redirectTo.startsWith('/setup') ? '/setup' : '/'}?error=${encodeURIComponent('Choose how you usually operate.')}`);
+  }
+
+  if (!supportedThemes.includes(theme as (typeof supportedThemes)[number])) {
+    redirect(`${redirectTo.startsWith('/setup') ? '/setup' : '/'}?error=${encodeURIComponent('Choose an appearance theme.')}`);
+  }
+
+  const now = new Date().toISOString();
+  data.workspace.name = businessName;
+  data.preferences = {
+    locale,
+    preset,
+    operatingMode: operatingMode as (typeof supportedOperatingModes)[number],
+    theme: theme as (typeof supportedThemes)[number],
+    onboardingCompleted: true,
+    completedAt: data.preferences.completedAt ?? now,
+    updatedAt: now,
+  };
+
+  await writeStore(data);
+
+  const cookieStore = await cookies();
+  cookieStore.set(localeCookieName, locale, { path: '/', maxAge: 31536000, sameSite: 'lax' });
+  cookieStore.set(presetCookieName, preset, { path: '/', maxAge: 31536000, sameSite: 'lax' });
+  cookieStore.set(themeCookieName, theme, { path: '/', maxAge: 31536000, sameSite: 'lax' });
+
+  revalidatePath('/');
+  revalidatePath('/setup');
+  revalidatePath('/orders');
+  revalidatePath('/production');
+  revalidatePath('/handoff');
+
+  if (redirectTo.startsWith('/setup')) {
+    redirect('/setup?saved=preferences');
+  }
+
+  redirect('/?welcome=1');
 }
 
 export async function createOrderAction(formData: FormData) {

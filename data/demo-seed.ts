@@ -1,4 +1,5 @@
 import type { AppData } from '@/lib/domain/types';
+import { defaultLocale, defaultPreset } from '@/lib/i18n/config';
 
 export const demoSeed: AppData = {
   workspace: {
@@ -7,6 +8,13 @@ export const demoSeed: AppData = {
     slug: 'kalali-demo',
     timezone: 'America/Mexico_City',
     defaultProductionCutoffHour: 4,
+  },
+  preferences: {
+    locale: defaultLocale,
+    preset: defaultPreset,
+    operatingMode: 'mixed',
+    theme: 'garden',
+    onboardingCompleted: false,
   },
   users: [
     {

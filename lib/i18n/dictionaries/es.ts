@@ -78,6 +78,159 @@ const es = {
       description: 'Acentos salvia suaves con una sensación orgánica de cocina y huerta.',
     },
   },
+
+  operatingModes: {
+    pickup: {
+      label: 'Retiro',
+      description: 'La mayoría de los pedidos se entregan directamente al cliente.',
+    },
+    delivery: {
+      label: 'Entrega',
+      description: 'Rutas, repartidores y relevo necesitan más visibilidad.',
+    },
+    mixed: {
+      label: 'Mixto',
+      description: 'Retiro y entrega importan al mismo tiempo en el flujo diario.',
+    },
+  },
+  presets: {
+    bakery: {
+      label: 'Panadería',
+      description: 'Mejor para masas, lotes, WIP y relevo entre turnos.',
+    },
+    cafe: {
+      label: 'Cafetería',
+      description: 'Da un poco más de peso a la captura de pedidos y al ritmo de mostrador.',
+    },
+    small_restaurant: {
+      label: 'Restaurante pequeño',
+      description: 'Parte del flujo de servicio, visibilidad de prep y despacho práctico.',
+    },
+    dark_kitchen: {
+      label: 'Dark kitchen',
+      description: 'Da más peso al flujo de pedidos, preparación para courier y relevo de despacho.',
+    },
+    food_stall: {
+      label: 'Puesto de comida',
+      description: 'Captura rápida, servicio simple y configuración compacta para trabajo tipo feria o pop-up.',
+    },
+    generic: {
+      label: 'Genérico',
+      description: 'Punto de partida neutral cuando el negocio aún está definiendo su forma.',
+    },
+    other: {
+      label: 'Otro',
+      description: 'Usa una base flexible ahora y ajústala después sin quedar encerrado.',
+    },
+  },
+  presetSuggestions: {
+    sharedCutoff: {
+      title: 'Mantén visible un solo corte de producción.',
+      body: 'El preset de panadería resalta producción primero para detectar cambios tardíos con facilidad.',
+    },
+    morningCounter: {
+      title: 'Empieza con un destino de mostrador.',
+      body: 'Eso ayuda a reconocer bandejas de retiro y aperturas sin una configuración profunda.',
+    },
+    routePacking: {
+      title: 'Agrega primero un destino tipo ruta.',
+      body: 'Así el trabajo de entrega tiene un lugar antes de modelar cada parada en detalle.',
+    },
+    mixedDispatch: {
+      title: 'Deja juntas las notas de retiro y ruta.',
+      body: 'El modo mixto mantiene ambas visibles sin forzar otro flujo.',
+    },
+    counterRush: {
+      title: 'Trata los picos primero como captura de pedidos.',
+      body: 'El preset de cafetería deja ventas más cerca para que el equipo reaccione rápido.',
+    },
+    simpleMenu: {
+      title: 'Empieza con nombres prácticos de menú.',
+      body: 'Usa los nombres que el equipo ya dice en voz alta antes de refinar variantes.',
+    },
+    courierReady: {
+      title: 'Haz obvias las notas listas para courier.',
+      body: 'Unas pocas notas claras valen más que una gran configuración de despacho.',
+    },
+    menuBoards: {
+      title: 'Mantén fáciles de leer los ítems de servicio.',
+      body: 'Los restaurantes pequeños funcionan mejor cuando pedidos y prep siguen conectados.',
+    },
+    prepNotes: {
+      title: 'Deja espacio para excepciones y notas de prep.',
+      body: 'El preset mantiene los ajustes manuales cerca en vez de esconderlos en pantallas administrativas.',
+    },
+    dispatchFlow: {
+      title: 'Muestra despacho sin construir un módulo de despacho.',
+      body: 'Este preset solo mueve el énfasis visual hacia trabajo listo para entrega.',
+    },
+    handoffNotes: {
+      title: 'Haz que las notas de relevo sean parte del flujo principal.',
+      body: 'Los equipos de dark kitchen suelen necesitar visibles el contexto de courier y turno.',
+    },
+    fastCapture: {
+      title: 'Mantén corta la captura de pedidos.',
+      body: 'El trabajo de un puesto se beneficia de menos campos y acciones de servicio más obvias.',
+    },
+    singleBoard: {
+      title: 'Usa primero un tablero compacto.',
+      body: 'El preset de puesto mantiene la configuración modesta para trabajar antes de formalizar todo.',
+    },
+    simpleStart: {
+      title: 'Empieza con una base tranquila.',
+      body: 'Los presets genérico y otro se mantienen neutrales para ajustar el flujo después.',
+    },
+    notesFirst: {
+      title: 'Deja que las notas cubran los casos límite.',
+      body: 'SKOSS debe seguir siendo útil incluso antes de modelar cada producto o destino.',
+    },
+  },
+  presetExamples: {
+    counterPickup: {
+      title: 'Ejemplo de destino: retiro en mostrador',
+      body: 'Un punto simple de retiro suele ser suficiente para empezar a capturar pedidos.',
+    },
+    nightShift: {
+      title: 'Ejemplo de énfasis: prep nocturno + relevo matutino',
+      body: 'Útil para panaderías que pasan trabajo entre fermentación, horneado y empaque.',
+    },
+    routeDrop: {
+      title: 'Ejemplo de destino: entrega temprana en ruta',
+      body: 'Una etiqueta ligera de ruta ayuda a ver urgencia sin lógica completa de ruteo.',
+    },
+    rushBoard: {
+      title: 'Ejemplo de tablero: pico de hoy',
+      body: 'Útil cuando el equipo necesita captura rápida y una vista compacta de servicio.',
+    },
+    appCourier: {
+      title: 'Ejemplo de configuración: origen courier + notas de despacho',
+      body: 'Suficiente para capturar contexto de apps sin construir una gran integración.',
+    },
+    serviceWindow: {
+      title: 'Ejemplo de destino: ventana de servicio',
+      body: 'Mantiene claro en la interfaz el trabajo en sala, para llevar o de paso.',
+    },
+    prepList: {
+      title: 'Ejemplo de estructura inicial: una lista de prep',
+      body: 'Empieza con un flujo práctico antes de dividir demasiado el trabajo.',
+    },
+    pickupWindow: {
+      title: 'Ejemplo de destino: ventana de retiro',
+      body: 'Útil cuando llegan tanto repartidores como clientes directos.',
+    },
+    expediteLane: {
+      title: 'Ejemplo de énfasis: expedición + relevo',
+      body: 'Hace más fácil detectar rápido el contexto de despacho entre turnos.',
+    },
+    stallPickup: {
+      title: 'Ejemplo de destino: mostrador del puesto',
+      body: 'Un punto simple del puesto suele bastar para una configuración compacta.',
+    },
+    courierPocket: {
+      title: 'Ejemplo de nota: zona para courier / bolsa',
+      body: 'Una nota pequeña puede cargar el detalle de relevo sin crear otro flujo.',
+    },
+  },
   terms: {
     workItem: { one: 'elemento de trabajo', many: 'elementos de trabajo' },
     destination: { one: 'destino', many: 'destinos' },
@@ -91,6 +244,11 @@ const es = {
       'SKOSS ahora cubre un ciclo práctico de cocina: captura de pedidos, generación recurrente, producción agrupada, avance parcial, relevo de WIP y una capa operativa ligera para entrega y memoria de compras.',
     focusDate: 'Fecha foco',
     focusDateHelp: 'es la vista operativa compartida actual.',
+    recommendedFirst: 'Recomendado primero',
+    presetFocusTitle: 'Enfoque inicial del preset',
+    presetFocusBody: '{{preset}} hoy solo cambia lenguaje, énfasis en inicio y guía inicial.',
+    exampleSetupTitle: 'Ejemplos de arranque',
+    exampleSetupBody: 'Estos ejemplos son solo sugerencias ligeras. Puedes cambiarlos después en Configuración.',
     stats: {
       ordersToday: 'Pedidos de hoy',
       ordersOnDate: 'pedidos en',
@@ -124,6 +282,37 @@ const es = {
         description: 'Revisa la estructura mínima que sostiene el tramo operativo.',
       },
     },
+  },
+  setupAssistant: {
+    eyebrow: 'Primer ajuste rápido',
+    firstRunTitle: 'Deja SKOSS listo en un minuto',
+    firstRunIntro: 'Pon nombre al espacio, elige idioma y estilo para tu equipo, y sigue trabajando.',
+    settingsTitle: 'Revisar preferencias del espacio',
+    settingsIntro: 'Actualiza nombre del negocio, idioma, preset, modo operativo o tema cuando el equipo necesite otro ajuste.',
+    progress: '3 pasos cortos',
+    progressAria: 'Progreso de inicio',
+    stepLabel: 'Paso {{step}}',
+    notLocked: 'Los presets solo son un punto de partida. Puedes cambiarlos después.',
+    sections: {
+      business: 'Datos básicos',
+      businessHelp: 'Mantén lo esencial corto y práctico.',
+      preset: 'Preset inicial',
+      presetHelp: 'Elige la forma más cercana. No bloqueará tu flujo.',
+      appearance: 'Apariencia',
+      appearanceHelp: 'Elige un tema cómodo para los espacios donde la gente realmente trabaja.',
+    },
+    fields: {
+      businessName: 'Nombre del negocio',
+      language: 'Idioma preferido',
+      operatingMode: 'Modo operativo',
+    },
+    placeholders: {
+      businessName: 'Panadería Kalali',
+    },
+    actions: {
+      save: 'Guardar configuración',
+    },
+    footer: 'Puedes volver a estas preferencias después desde Configuración.',
   },
   orders: {
     workspace: 'Espacio de ventas',
@@ -411,11 +600,18 @@ const es = {
       supplier: 'Proveedor guardado. Sigue agregando estructura solo donde ayude al trabajo diario.',
       rawMaterial: 'Materia prima guardada. El costeo futuro ya puede apuntar a una base real de ingredientes.',
       price: 'Precio de proveedor guardado. Las comparaciones históricas ya están disponibles para costos y compras futuras.',
+
+      preferences: 'Preferencias del espacio guardadas.',
     },
     calloutTitle: 'Mantén la configuración práctica.',
     calloutBody: 'Estas listas deben ayudar a los operadores a trabajar más rápido, no forzar mantenimiento pesado de datos antes del primer uso.',
     appearance: 'Apariencia',
     appearanceHelp: 'Los controles globales de tema deben seguir disponibles, pero la elección más completa pertenece a Configuración en vez de dominar el encabezado.',
+
+    presetWorkspaceTitle: 'Énfasis de espacios por preset',
+    presetWorkspaceHelp: 'Hoy el preset elegido solo reordena y resalta los espacios más relevantes sin ocultar los demás.',
+    starterSuggestionsTitle: 'Sugerencias iniciales',
+    starterSuggestionsHelp: 'Son empujes prácticos, no configuración bloqueada.',
     activeSuppliers: 'Proveedores activos',
     activeSuppliersHelp: 'Contactos de proveedores prácticos listos para conversaciones de reposición.',
     rawMaterials: 'Materias primas',

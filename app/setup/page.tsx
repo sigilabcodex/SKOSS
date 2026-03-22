@@ -1,7 +1,9 @@
 import { formatCurrency, formatDateLabel, formatTemplateScheduleLabel, formatUnitRate } from '@/lib/domain/formatters';
 import { createRawMaterialAction, createSupplierAction, createSupplierPriceEntryAction } from '@/lib/server/actions';
 import { getSetupWorkspace } from '@/lib/server/demo-data';
+import { getPresetExperience } from '@/lib/business-presets';
 import { getServerTranslator } from '@/lib/i18n/server';
+import { OnboardingAssistant } from '@/components/setup/onboarding-assistant';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { SetupIcon, SparklesIcon } from '@/components/ui-icons';
 
@@ -20,6 +22,10 @@ async function SavedMessage({ saved }: { saved?: string }) {
     return <p className="inline-success">{t('setup.saved.price')}</p>;
   }
 
+  if (saved === 'preferences') {
+    return <p className="inline-success">{t('setup.saved.preferences')}</p>;
+  }
+
   return null;
 }
 
@@ -29,6 +35,7 @@ export default async function SetupPage({
   searchParams?: Promise<{ error?: string; saved?: string }>;
 }) {
   const [data, params, { t, locale, term }] = await Promise.all([getSetupWorkspace(), searchParams, getServerTranslator()]);
+  const presetExperience = getPresetExperience(data.preferences.preset, data.preferences.operatingMode);
 
   return (
     <div className="page-stack">
@@ -43,12 +50,59 @@ export default async function SetupPage({
       <SavedMessage saved={params?.saved} />
       {params?.error ? <p className="inline-warning">{params.error}</p> : null}
 
+      <OnboardingAssistant
+        businessName={data.workspace.name}
+        preferences={data.preferences}
+        variant="settings"
+      />
+
       <section className="page-context-card">
         <SetupIcon className="callout-icon" />
         <div>
           <strong>{t('setup.calloutTitle')}</strong>
           <p className="helper-text no-margin">{t('setup.calloutBody')}</p>
         </div>
+      </section>
+
+      <section className="grid-two">
+        <article className="panel page-stack">
+          <div className="table-header-row">
+            <div>
+              <h2>{t('setup.presetWorkspaceTitle')}</h2>
+              <p>{t('setup.presetWorkspaceHelp')}</p>
+            </div>
+            <span className="summary-pill">{t(`presets.${data.preferences.preset}.label`)}</span>
+          </div>
+          <ul className="stack-list">
+            {presetExperience.featuredWorkspaces.map((workspaceKey, index) => (
+              <li key={workspaceKey}>
+                <strong>
+                  {t(`nav.${workspaceKey}`)}
+                  {index === 0 ? ` · ${t('home.recommendedFirst')}` : ''}
+                </strong>
+                <span>{t(`home.quickLinks.${workspaceKey}.description`)}</span>
+              </li>
+            ))}
+          </ul>
+        </article>
+
+        <article className="panel page-stack">
+          <div className="table-header-row">
+            <div>
+              <h2>{t('setup.starterSuggestionsTitle')}</h2>
+              <p>{t('setup.starterSuggestionsHelp')}</p>
+            </div>
+            <span className="summary-pill">{t(`operatingModes.${data.preferences.operatingMode}.label`)}</span>
+          </div>
+          <ul className="stack-list">
+            {presetExperience.starterSuggestionKeys.map((key) => (
+              <li key={key}>
+                <strong>{t(`presetSuggestions.${key}.title`)}</strong>
+                <span>{t(`presetSuggestions.${key}.body`)}</span>
+              </li>
+            ))}
+          </ul>
+        </article>
       </section>
 
       <section className="panel page-stack">

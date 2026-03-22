@@ -120,3 +120,15 @@ Admin matters, but it should remain in service of operations. The project should
 A workspace is successful when the main user can complete common tasks quickly without seeing the full complexity of the system.
 
 The same underlying data may support multiple workspaces, but the presentation, vocabulary, and default actions should be role-shaped.
+
+## Current preset-aware behavior
+
+The onboarding assistant can now choose a starting preset such as bakery, café, small restaurant, dark kitchen, food stall, generic, or other.
+
+At the moment this preset layer stays intentionally light:
+
+- it can shift terminology through the i18n layer
+- it can reorder which workspaces are emphasized first on the home surface
+- it can show starter suggestions and example setup hints that match the chosen operating style
+
+It does **not** yet hide major parts of the product, fork business logic, or force a team into one workspace model permanently.

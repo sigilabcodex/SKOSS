@@ -1,4 +1,8 @@
+import type { AppLocale, AppPreset } from '@/lib/i18n/config';
+
 export type UserRole = 'owner_admin' | 'sales' | 'kitchen' | 'shift_lead';
+export type ThemeName = 'light' | 'dark' | 'garden';
+export type OperatingMode = 'pickup' | 'delivery' | 'mixed';
 
 export type OrderStatus = 'draft' | 'active' | 'changed' | 'cancelled' | 'completed';
 export type OrderLineStatus = 'pending' | 'in_progress' | 'done' | 'cancelled';
@@ -18,6 +22,16 @@ export interface Workspace {
   slug: string;
   timezone: string;
   defaultProductionCutoffHour: number;
+}
+
+export interface WorkspacePreferences {
+  locale: AppLocale;
+  preset: AppPreset;
+  operatingMode: OperatingMode;
+  theme: ThemeName;
+  onboardingCompleted: boolean;
+  completedAt?: string;
+  updatedAt?: string;
 }
 
 export interface User {
@@ -193,6 +207,7 @@ export interface ShiftLog {
 
 export interface AppData {
   workspace: Workspace;
+  preferences: WorkspacePreferences;
   users: User[];
   destinations: Destination[];
   products: Product[];

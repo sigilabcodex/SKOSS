@@ -1,6 +1,5 @@
 import { LeafIcon, MoonIcon, SunIcon } from '@/components/ui-icons';
-
-export type ThemeName = 'light' | 'dark' | 'garden';
+import type { ThemeName } from '@/lib/domain/types';
 
 export type ThemeOption = {
   name: ThemeName;
@@ -8,6 +7,7 @@ export type ThemeOption = {
 };
 
 export const storageKey = 'skoss-theme';
+export const themeCookieName = 'skoss-theme';
 
 export const themeOptions: ThemeOption[] = [
   {
@@ -27,6 +27,7 @@ export const themeOptions: ThemeOption[] = [
 export function applyThemeState(theme: ThemeName) {
   document.documentElement.dataset.theme = theme;
   window.localStorage.setItem(storageKey, theme);
+  document.cookie = `${themeCookieName}=${theme}; path=/; max-age=31536000; samesite=lax`;
 }
 
 export function getThemeOption(theme: ThemeName) {

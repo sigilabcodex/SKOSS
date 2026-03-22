@@ -11,7 +11,7 @@ export type TranslateValues = Record<string, string | number>;
 const dictionaries: Record<AppLocale, TranslationTree> = { en, es, pt };
 
 const presetOverrides: Record<AppPreset, Partial<Record<AppLocale, TranslationTree>>> = {
-  core: {},
+  generic: {},
   bakery: {
     en: {
       terms: {
@@ -41,6 +41,123 @@ const presetOverrides: Record<AppPreset, Partial<Record<AppLocale, TranslationTr
       },
     },
   },
+  cafe: {
+    en: {
+      terms: {
+        workItem: { one: 'prep item', many: 'prep items' },
+        destination: { one: 'pickup point', many: 'pickup points' },
+        handoff: 'counter handoff',
+        fulfillment: 'counter / delivery',
+        productionDay: 'service day',
+      },
+    },
+    es: {
+      terms: {
+        workItem: { one: 'ítem de preparación', many: 'ítems de preparación' },
+        destination: { one: 'punto de retiro', many: 'puntos de retiro' },
+        handoff: 'relevo de mostrador',
+        fulfillment: 'mostrador / entrega',
+        productionDay: 'día de servicio',
+      },
+    },
+    pt: {
+      terms: {
+        workItem: { one: 'item de preparo', many: 'itens de preparo' },
+        destination: { one: 'ponto de retirada', many: 'pontos de retirada' },
+        handoff: 'passagem de balcão',
+        fulfillment: 'balcão / entrega',
+        productionDay: 'dia de serviço',
+      },
+    },
+  },
+  small_restaurant: {
+    en: {
+      terms: {
+        workItem: { one: 'service item', many: 'service items' },
+        destination: { one: 'service point', many: 'service points' },
+        handoff: 'service handoff',
+        fulfillment: 'service / dispatch',
+        productionDay: 'service shift',
+      },
+    },
+    es: {
+      terms: {
+        workItem: { one: 'ítem de servicio', many: 'ítems de servicio' },
+        destination: { one: 'punto de servicio', many: 'puntos de servicio' },
+        handoff: 'relevo de servicio',
+        fulfillment: 'servicio / despacho',
+        productionDay: 'turno de servicio',
+      },
+    },
+    pt: {
+      terms: {
+        workItem: { one: 'item de serviço', many: 'itens de serviço' },
+        destination: { one: 'ponto de serviço', many: 'pontos de serviço' },
+        handoff: 'passagem de serviço',
+        fulfillment: 'serviço / despacho',
+        productionDay: 'turno de serviço',
+      },
+    },
+  },
+  dark_kitchen: {
+    en: {
+      terms: {
+        workItem: { one: 'dispatch item', many: 'dispatch items' },
+        destination: { one: 'delivery zone', many: 'delivery zones' },
+        handoff: 'dispatch handoff',
+        fulfillment: 'dispatch',
+        productionDay: 'dispatch run',
+      },
+    },
+    es: {
+      terms: {
+        workItem: { one: 'ítem de despacho', many: 'ítems de despacho' },
+        destination: { one: 'zona de entrega', many: 'zonas de entrega' },
+        handoff: 'relevo de despacho',
+        fulfillment: 'despacho',
+        productionDay: 'salida de despacho',
+      },
+    },
+    pt: {
+      terms: {
+        workItem: { one: 'item de despacho', many: 'itens de despacho' },
+        destination: { one: 'zona de entrega', many: 'zonas de entrega' },
+        handoff: 'passagem de despacho',
+        fulfillment: 'despacho',
+        productionDay: 'rodada de despacho',
+      },
+    },
+  },
+  food_stall: {
+    en: {
+      terms: {
+        workItem: { one: 'stall item', many: 'stall items' },
+        destination: { one: 'stall point', many: 'stall points' },
+        handoff: 'stall handoff',
+        fulfillment: 'stall pickup',
+        productionDay: 'stall day',
+      },
+    },
+    es: {
+      terms: {
+        workItem: { one: 'ítem del puesto', many: 'ítems del puesto' },
+        destination: { one: 'punto del puesto', many: 'puntos del puesto' },
+        handoff: 'relevo del puesto',
+        fulfillment: 'retiro del puesto',
+        productionDay: 'día del puesto',
+      },
+    },
+    pt: {
+      terms: {
+        workItem: { one: 'item da barraca', many: 'itens da barraca' },
+        destination: { one: 'ponto da barraca', many: 'pontos da barraca' },
+        handoff: 'passagem da barraca',
+        fulfillment: 'retirada na barraca',
+        productionDay: 'dia da barraca',
+      },
+    },
+  },
+  other: {},
 };
 
 function isRecord(value: unknown): value is TranslationTree {
