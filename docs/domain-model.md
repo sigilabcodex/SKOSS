@@ -198,6 +198,13 @@ Responsibilities:
 - support later comparison and normalization
 - prepare the model for recipe costing and purchasing visibility
 
+Modeling notes:
+
+- entries should be append-only rather than mutable current-price fields
+- package quantity and unit can stay optional in early capture
+- duplicated supplier/material labels on the entry are acceptable when they preserve historical context cheaply
+- the record should remain useful even when the supplier card or raw material card is still lightweight
+
 ### Product
 
 A product represents a recognizable sellable or operational item.

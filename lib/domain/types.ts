@@ -123,7 +123,7 @@ export interface RawMaterial {
   id: string;
   name: string;
   category?: string;
-  defaultUnit: string;
+  defaultUnit?: string;
   brand?: string;
   notes?: string;
   active: boolean;
@@ -139,8 +139,8 @@ export interface SupplierPriceEntry {
   rawMaterialLabel: string;
   presentation?: string;
   brand?: string;
-  packageQuantity: number;
-  packageUnit: string;
+  packageQuantity?: number;
+  packageUnit?: string;
   price: number;
   priceDate: string;
   note?: string;

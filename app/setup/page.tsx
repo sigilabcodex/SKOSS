@@ -1,11 +1,36 @@
+import Link from 'next/link';
 import { formatCurrency, formatDateLabel, formatTemplateScheduleLabel, formatUnitRate } from '@/lib/domain/formatters';
-import { createRawMaterialAction, createSupplierAction, createSupplierPriceEntryAction } from '@/lib/server/actions';
+import {
+  createRawMaterialAction,
+  createSupplierAction,
+  createSupplierPriceEntryAction,
+  updateRawMaterialAction,
+  updateSupplierAction,
+} from '@/lib/server/actions';
 import { getSetupWorkspace } from '@/lib/server/demo-data';
 import { getPresetExperience } from '@/lib/business-presets';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { OnboardingAssistant } from '@/components/setup/onboarding-assistant';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { SetupIcon, SparklesIcon } from '@/components/ui-icons';
+
+const basicUnits = ['g', 'kg', 'ml', 'l', 'unit', 'piece', 'dozen'] as const;
+
+type SetupSearchParams = {
+  error?: string;
+  saved?: string;
+  supplier?: string;
+  material?: string;
+  historySupplier?: string;
+  historyMaterial?: string;
+};
+
+function buildSetupHref(params: Record<string, string | undefined>) {
+  return {
+    pathname: '/setup',
+    query: Object.fromEntries(Object.entries(params).filter(([, value]) => Boolean(value))),
+  };
+}
 
 async function SavedMessage({ saved }: { saved?: string }) {
   const { t } = await getServerTranslator();
@@ -32,13 +57,73 @@ async function SavedMessage({ saved }: { saved?: string }) {
 export default async function SetupPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string; saved?: string }>;
+  searchParams?: Promise<SetupSearchParams>;
 }) {
   const [data, params, { t, locale, term }] = await Promise.all([getSetupWorkspace(), searchParams, getServerTranslator()]);
   const presetExperience = getPresetExperience(data.preferences.preset, data.preferences.operatingMode);
+  const today = new Date().toISOString().slice(0, 10);
+
+  const editingSupplier = params?.supplier
+    ? data.suppliers.find((supplier) => supplier.id === params.supplier) ?? null
+    : null;
+  const editingMaterial = params?.material
+    ? data.rawMaterials.find((material) => material.id === params.material) ?? null
+    : null;
+  const historySupplier = params?.historySupplier
+    ? data.suppliers.find((supplier) => supplier.id === params.historySupplier) ?? null
+    : null;
+  const historyMaterial = params?.historyMaterial
+    ? data.rawMaterials.find((material) => material.id === params.historyMaterial) ?? null
+    : null;
+
+  const supplierFormAction = editingSupplier
+    ? updateSupplierAction.bind(null, editingSupplier.id)
+    : createSupplierAction;
+  const rawMaterialFormAction = editingMaterial
+    ? updateRawMaterialAction.bind(null, editingMaterial.id)
+    : createRawMaterialAction;
+
+  const supplierPriceCounts = new Map<string, number>();
+  const materialPriceCounts = new Map<string, number>();
+  for (const entry of data.supplierPriceEntries) {
+    supplierPriceCounts.set(entry.supplierId, (supplierPriceCounts.get(entry.supplierId) ?? 0) + 1);
+    materialPriceCounts.set(entry.rawMaterialId, (materialPriceCounts.get(entry.rawMaterialId) ?? 0) + 1);
+  }
+
+  const filteredPriceEntries = data.supplierPriceEntries.filter((entry) => {
+    if (historySupplier && entry.supplierId !== historySupplier.id) {
+      return false;
+    }
+
+    if (historyMaterial && entry.rawMaterialId !== historyMaterial.id) {
+      return false;
+    }
+
+    return true;
+  });
+
+  const supplierHistoryHref = (supplierId: string) => buildSetupHref({
+    historySupplier: supplierId,
+    historyMaterial: historyMaterial?.id,
+    supplier: editingSupplier?.id,
+    material: editingMaterial?.id,
+  });
+
+  const materialHistoryHref = (materialId: string) => buildSetupHref({
+    historySupplier: historySupplier?.id,
+    historyMaterial: materialId,
+    supplier: editingSupplier?.id,
+    material: editingMaterial?.id,
+  });
 
   return (
     <div className="page-stack">
+      <datalist id="basic-unit-options">
+        {basicUnits.map((unit) => (
+          <option key={unit} value={unit} label={t(`units.${unit}`)} />
+        ))}
+      </datalist>
+
       <section className="section-header page-hero-header">
         <div>
           <p className="eyebrow">{t('setup.workspace')}</p>
@@ -229,46 +314,64 @@ export default async function SetupPage({
               </div>
               <span className="summary-pill">{data.suppliers.length} {t('common.suppliers')}</span>
             </div>
-            <ul className="stack-list">
+            <ul className="stack-list compact-list">
               {data.suppliers.map((supplier) => (
-                <li key={supplier.id}>
-                  <strong>
-                    {supplier.name}
-                    {!supplier.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
-                  </strong>
-                  <span>{supplier.contact ?? supplier.notes ?? t('setup.noExtraContactYet')}</span>
+                <li key={supplier.id} className="list-with-actions">
+                  <div>
+                    <strong>
+                      {supplier.name}
+                      {!supplier.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
+                    </strong>
+                    <span>{supplier.contact ?? supplier.notes ?? t('setup.noExtraContactYet')}</span>
+                    <span className="inline-meta">{supplierPriceCounts.get(supplier.id) ?? 0} {t('setup.labels.priceEntries')}</span>
+                  </div>
+                  <div className="inline-action-row">
+                    <Link href={buildSetupHref({ supplier: supplier.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, material: editingMaterial?.id })} className="inline-link">
+                      {t('setup.actions.edit')}
+                    </Link>
+                    <Link href={supplierHistoryHref(supplier.id)} className="inline-link">
+                      {t('setup.actions.viewHistory')}
+                    </Link>
+                  </div>
                 </li>
               ))}
             </ul>
-            <form action={createSupplierAction} className="field-section page-stack">
+            <form action={supplierFormAction} className="field-section page-stack">
               <div className="field-section-header">
                 <div>
-                  <h3>{t('setup.addSupplier')}</h3>
-                  <p className="helper-text">{t('setup.addSupplierHelp')}</p>
+                  <h3>{editingSupplier ? t('setup.editSupplier') : t('setup.addSupplier')}</h3>
+                  <p className="helper-text">{editingSupplier ? t('setup.editSupplierHelp') : t('setup.addSupplierHelp')}</p>
                 </div>
+                {editingSupplier ? (
+                  <Link href={buildSetupHref({ historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, material: editingMaterial?.id })} className="button-secondary compact-button">
+                    {t('setup.actions.cancelEdit')}
+                  </Link>
+                ) : null}
               </div>
               <div className="grid-two">
                 <label>
                   <span className="field-heading">{t('setup.fields.supplierName')} <span className="required-dot">{t('common.required')}</span></span>
-                  <input name="name" placeholder="Harina Viva" required />
+                  <input name="name" placeholder="Harina Viva" defaultValue={editingSupplier?.name ?? ''} required />
                 </label>
                 <label>
                   <span className="field-heading">{t('setup.fields.contact')} <span className="optional-pill">{t('common.optional')}</span></span>
-                  <input name="contact" placeholder={t('setup.placeholders.contact')} />
+                  <input name="contact" placeholder={t('setup.placeholders.contact')} defaultValue={editingSupplier?.contact ?? ''} />
                 </label>
               </div>
               <label>
                 <span className="field-heading">{t('setup.fields.notes')} <span className="optional-pill">{t('common.optional')}</span></span>
-                <textarea name="notes" placeholder={t('setup.placeholders.supplierNotes')} />
+                <textarea name="notes" placeholder={t('setup.placeholders.supplierNotes')} defaultValue={editingSupplier?.notes ?? ''} />
               </label>
               <label className="checkbox-row">
-                <input name="active" type="checkbox" defaultChecked />
+                <input name="active" type="checkbox" defaultChecked={editingSupplier?.active ?? true} />
                 <span>
                   <strong>{t('setup.fields.activeSupplier')}</strong>
                   <span className="helper-text">{t('setup.fields.activeSupplierHelp')}</span>
                 </span>
               </label>
-              <button type="submit" className="button-primary">{t('setup.actions.saveSupplier')}</button>
+              <button type="submit" className="button-primary">
+                {editingSupplier ? t('setup.actions.updateSupplier') : t('setup.actions.saveSupplier')}
+              </button>
             </form>
           </article>
 
@@ -280,62 +383,85 @@ export default async function SetupPage({
               </div>
               <span className="summary-pill">{data.rawMaterials.length} {t('common.materials')}</span>
             </div>
-            <ul className="stack-list">
+            <ul className="stack-list compact-list">
               {data.rawMaterials.map((material) => {
                 const latestPrice = data.latestPriceByMaterial.get(material.id);
 
                 return (
-                  <li key={material.id}>
-                    <strong>
-                      {material.name}
-                      {!material.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
-                    </strong>
-                    <span>
-                      {[material.category, `${material.defaultUnit} ${t('setup.labels.defaultUnitSuffix')}`, latestPrice ? `${t('setup.labels.latest')} ${formatUnitRate(latestPrice, locale)}` : null]
-                        .filter(Boolean)
-                        .join(' · ')}
-                    </span>
+                  <li key={material.id} className="list-with-actions">
+                    <div>
+                      <strong>
+                        {material.name}
+                        {!material.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
+                      </strong>
+                      <span>
+                        {[
+                          material.category,
+                          material.defaultUnit ? `${material.defaultUnit} ${t('setup.labels.defaultUnitSuffix')}` : t('setup.labels.noDefaultUnit'),
+                          latestPrice ? `${t('setup.labels.latest')} ${formatUnitRate(latestPrice, locale)}` : null,
+                        ]
+                          .filter(Boolean)
+                          .join(' · ')}
+                      </span>
+                      <span className="inline-meta">{materialPriceCounts.get(material.id) ?? 0} {t('setup.labels.priceEntries')}</span>
+                    </div>
+                    <div className="inline-action-row">
+                      <Link href={buildSetupHref({ material: material.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, supplier: editingSupplier?.id })} className="inline-link">
+                        {t('setup.actions.edit')}
+                      </Link>
+                      <Link href={materialHistoryHref(material.id)} className="inline-link">
+                        {t('setup.actions.viewHistory')}
+                      </Link>
+                    </div>
                   </li>
                 );
               })}
             </ul>
-            <form action={createRawMaterialAction} className="field-section page-stack">
+            <form action={rawMaterialFormAction} className="field-section page-stack">
               <div className="field-section-header">
                 <div>
-                  <h3>{t('setup.addRawMaterial')}</h3>
-                  <p className="helper-text">{t('setup.addRawMaterialHelp')}</p>
+                  <h3>{editingMaterial ? t('setup.editRawMaterial') : t('setup.addRawMaterial')}</h3>
+                  <p className="helper-text">{editingMaterial ? t('setup.editRawMaterialHelp') : t('setup.addRawMaterialHelp')}</p>
                 </div>
+                {editingMaterial ? (
+                  <Link href={buildSetupHref({ historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, supplier: editingSupplier?.id })} className="button-secondary compact-button">
+                    {t('setup.actions.cancelEdit')}
+                  </Link>
+                ) : null}
               </div>
               <div className="grid-two">
                 <label>
                   <span className="field-heading">{t('setup.fields.rawMaterialName')} <span className="required-dot">{t('common.required')}</span></span>
-                  <input name="name" placeholder={t('setup.placeholders.rawMaterialName')} required />
+                  <input name="name" placeholder={t('setup.placeholders.rawMaterialName')} defaultValue={editingMaterial?.name ?? ''} required />
                 </label>
                 <label>
                   <span className="field-heading">{t('setup.fields.category')} <span className="optional-pill">{t('common.optional')}</span></span>
-                  <input name="category" placeholder={t('setup.placeholders.category')} />
+                  <input name="category" placeholder={t('setup.placeholders.category')} defaultValue={editingMaterial?.category ?? ''} />
                 </label>
                 <label>
-                  <span className="field-heading">{t('setup.fields.defaultUnit')} <span className="required-dot">{t('common.required')}</span></span>
-                  <input name="defaultUnit" defaultValue="kg" required />
+                  <span className="field-heading">{t('setup.fields.defaultUnit')} <span className="optional-pill">{t('common.optional')}</span></span>
+                  <input name="defaultUnit" list="basic-unit-options" placeholder={t('setup.placeholders.defaultUnit')} defaultValue={editingMaterial?.defaultUnit ?? ''} />
                 </label>
                 <label>
                   <span className="field-heading">{t('setup.fields.brand')} <span className="optional-pill">{t('common.optional')}</span></span>
-                  <input name="brand" placeholder={t('setup.placeholders.brand')} />
+                  <input name="brand" placeholder={t('setup.placeholders.brand')} defaultValue={editingMaterial?.brand ?? ''} />
                 </label>
               </div>
+              <p className="helper-text">{t('setup.fields.unitQuickHelp')}</p>
               <label>
                 <span className="field-heading">{t('setup.fields.notes')} <span className="optional-pill">{t('common.optional')}</span></span>
-                <textarea name="notes" placeholder={t('setup.placeholders.rawMaterialNotes')} />
+                <textarea name="notes" placeholder={t('setup.placeholders.rawMaterialNotes')} defaultValue={editingMaterial?.notes ?? ''} />
               </label>
               <label className="checkbox-row">
-                <input name="active" type="checkbox" defaultChecked />
+                <input name="active" type="checkbox" defaultChecked={editingMaterial?.active ?? true} />
                 <span>
                   <strong>{t('setup.fields.activeRawMaterial')}</strong>
                   <span className="helper-text">{t('setup.fields.activeRawMaterialHelp')}</span>
                 </span>
               </label>
-              <button type="submit" className="button-primary">{t('setup.actions.saveRawMaterial')}</button>
+              <button type="submit" className="button-primary">
+                {editingMaterial ? t('setup.actions.updateRawMaterial') : t('setup.actions.saveRawMaterial')}
+              </button>
             </form>
           </article>
         </div>
@@ -350,23 +476,54 @@ export default async function SetupPage({
           <span className="summary-pill">{data.supplierPriceEntries.length} {t('common.entries')}</span>
         </div>
 
+        <div className="filter-pill-row">
+          {historySupplier ? <span className="summary-pill">{t('setup.history.supplierFilter')}: {historySupplier.name}</span> : null}
+          {historyMaterial ? <span className="summary-pill">{t('setup.history.materialFilter')}: {historyMaterial.name}</span> : null}
+          {historySupplier || historyMaterial ? (
+            <Link href={buildSetupHref({ supplier: editingSupplier?.id, material: editingMaterial?.id })} className="inline-link">
+              {t('setup.actions.clearHistoryFilters')}
+            </Link>
+          ) : (
+            <span className="helper-text">{t('setup.history.allEntries')}</span>
+          )}
+        </div>
+
         <div className="grid-two">
           <div className="subpanel page-stack">
-            <ul className="stack-list">
-              {data.supplierPriceEntries.map((entry) => (
-                <li key={entry.id}>
-                  <strong>
-                    {entry.rawMaterialLabel} · {formatCurrency(entry.price, locale)}
-                  </strong>
-                  <span>
-                    {entry.supplierLabel} · {entry.packageQuantity} {entry.packageUnit}
-                    {entry.presentation ? ` · ${entry.presentation}` : ''}
-                    {' · '}
-                    {formatDateLabel(entry.priceDate, locale)}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <div className="table-header-row">
+              <div>
+                <h3>{t('setup.history.title')}</h3>
+                <p>{t('setup.history.help')}</p>
+              </div>
+              <span className="summary-pill">{filteredPriceEntries.length} {t('common.entries')}</span>
+            </div>
+            {filteredPriceEntries.length > 0 ? (
+              <ul className="stack-list compact-list">
+                {filteredPriceEntries.map((entry) => (
+                  <li key={entry.id} className="history-list-item">
+                    <strong>
+                      {entry.rawMaterialLabel} · {formatCurrency(entry.price, locale)}
+                    </strong>
+                    <span>
+                      {entry.supplierLabel} · {formatDateLabel(entry.priceDate, locale)}
+                    </span>
+                    <span>
+                      {[
+                        entry.presentation,
+                        entry.brand,
+                        entry.packageQuantity && entry.packageUnit ? `${entry.packageQuantity} ${entry.packageUnit}` : null,
+                        entry.packageQuantity && entry.packageUnit ? formatUnitRate(entry, locale) : t('setup.labels.noPackageDetails'),
+                      ]
+                        .filter(Boolean)
+                        .join(' · ')}
+                    </span>
+                    {entry.note ? <span className="helper-text">{entry.note}</span> : null}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="empty-state">{t('setup.history.empty')}</p>
+            )}
           </div>
 
           <form action={createSupplierPriceEntryAction} className="subpanel page-stack">
@@ -379,7 +536,7 @@ export default async function SetupPage({
             <div className="grid-two">
               <label>
                 <span className="field-heading">{t('setup.fields.supplier')} <span className="required-dot">{t('common.required')}</span></span>
-                <select name="supplierId" defaultValue="" required>
+                <select name="supplierId" defaultValue={historySupplier?.id ?? ''} required>
                   <option value="" disabled>{t('common.selectSupplier')}</option>
                   {data.suppliers.map((supplier) => (
                     <option key={supplier.id} value={supplier.id}>
@@ -390,7 +547,7 @@ export default async function SetupPage({
               </label>
               <label>
                 <span className="field-heading">{t('setup.fields.rawMaterial')} <span className="required-dot">{t('common.required')}</span></span>
-                <select name="rawMaterialId" defaultValue="" required>
+                <select name="rawMaterialId" defaultValue={historyMaterial?.id ?? ''} required>
                   <option value="" disabled>{t('common.selectRawMaterial')}</option>
                   {data.rawMaterials.map((material) => (
                     <option key={material.id} value={material.id}>
@@ -398,6 +555,14 @@ export default async function SetupPage({
                     </option>
                   ))}
                 </select>
+              </label>
+              <label>
+                <span className="field-heading">{t('setup.fields.price')} <span className="required-dot">{t('common.required')}</span></span>
+                <input name="price" type="number" min="0.01" step="0.01" placeholder={t('setup.placeholders.price')} required />
+              </label>
+              <label>
+                <span className="field-heading">{t('setup.fields.date')} <span className="required-dot">{t('common.required')}</span></span>
+                <input name="priceDate" type="date" defaultValue={today} required />
               </label>
               <label>
                 <span className="field-heading">{t('setup.fields.presentation')} <span className="optional-pill">{t('common.optional')}</span></span>
@@ -408,22 +573,15 @@ export default async function SetupPage({
                 <input name="brand" placeholder={t('setup.placeholders.supplierBrand')} />
               </label>
               <label>
-                <span className="field-heading">{t('setup.fields.packageQuantity')} <span className="required-dot">{t('common.required')}</span></span>
-                <input name="packageQuantity" type="number" min="0.01" step="0.01" placeholder={t('setup.placeholders.packageQuantity')} required />
+                <span className="field-heading">{t('setup.fields.packageQuantity')} <span className="optional-pill">{t('common.optional')}</span></span>
+                <input name="packageQuantity" type="number" min="0.01" step="0.01" placeholder={t('setup.placeholders.packageQuantity')} />
               </label>
               <label>
-                <span className="field-heading">{t('setup.fields.packageUnit')} <span className="required-dot">{t('common.required')}</span></span>
-                <input name="packageUnit" placeholder={t('setup.placeholders.packageUnit')} required />
-              </label>
-              <label>
-                <span className="field-heading">{t('setup.fields.price')} <span className="required-dot">{t('common.required')}</span></span>
-                <input name="price" type="number" min="0.01" step="0.01" placeholder={t('setup.placeholders.price')} required />
-              </label>
-              <label>
-                <span className="field-heading">{t('setup.fields.date')} <span className="required-dot">{t('common.required')}</span></span>
-                <input name="priceDate" type="date" defaultValue={data.supplierPriceEntries[0]?.priceDate ?? ''} required />
+                <span className="field-heading">{t('setup.fields.packageUnit')} <span className="optional-pill">{t('common.optional')}</span></span>
+                <input name="packageUnit" list="basic-unit-options" placeholder={t('setup.placeholders.packageUnit')} />
               </label>
             </div>
+            <p className="helper-text">{t('setup.fields.packageOptionalHelp')}</p>
             <label>
               <span className="field-heading">{t('setup.fields.note')} <span className="optional-pill">{t('common.optional')}</span></span>
               <textarea name="note" placeholder={t('setup.placeholders.priceNote')} />

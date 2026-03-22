@@ -46,7 +46,7 @@ export function formatUnitRate(
   entry: Pick<SupplierPriceEntry, 'price' | 'packageQuantity' | 'packageUnit'>,
   locale: AppLocale = 'en',
 ) {
-  if (!entry.packageQuantity) {
+  if (!entry.packageQuantity || !entry.packageUnit) {
     return '—';
   }
 

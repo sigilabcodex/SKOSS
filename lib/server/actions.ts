@@ -244,6 +244,31 @@ export async function createSupplierAction(formData: FormData) {
   redirect('/setup?saved=supplier');
 }
 
+export async function updateSupplierAction(supplierId: string, formData: FormData) {
+  const data = await readStore();
+  const existing = data.suppliers.find((entry) => entry.id === supplierId);
+
+  if (!existing) {
+    redirect('/setup?error=missing-supplier');
+  }
+
+  const values = normalizeSupplierForm(formData);
+  const error = validateSupplierForm(values);
+
+  if (error) {
+    redirect(`/setup?supplier=${supplierId}&error=${encodeURIComponent(error)}`);
+  }
+
+  const supplier = buildSupplierRecord(values, existing);
+  data.suppliers = data.suppliers
+    .map((entry) => (entry.id === supplierId ? supplier : entry))
+    .sort((left, right) => left.name.localeCompare(right.name));
+  await writeStore(data);
+  revalidatePath('/');
+  revalidatePath('/setup');
+  redirect('/setup?saved=supplier');
+}
+
 export async function createRawMaterialAction(formData: FormData) {
   const data = await readStore();
   const values = normalizeRawMaterialForm(formData);
@@ -255,6 +280,31 @@ export async function createRawMaterialAction(formData: FormData) {
 
   const rawMaterial = buildRawMaterialRecord(values);
   data.rawMaterials = [...data.rawMaterials, rawMaterial].sort((left, right) => left.name.localeCompare(right.name));
+  await writeStore(data);
+  revalidatePath('/');
+  revalidatePath('/setup');
+  redirect('/setup?saved=raw-material');
+}
+
+export async function updateRawMaterialAction(rawMaterialId: string, formData: FormData) {
+  const data = await readStore();
+  const existing = data.rawMaterials.find((entry) => entry.id === rawMaterialId);
+
+  if (!existing) {
+    redirect('/setup?error=missing-raw-material');
+  }
+
+  const values = normalizeRawMaterialForm(formData);
+  const error = validateRawMaterialForm(values);
+
+  if (error) {
+    redirect(`/setup?material=${rawMaterialId}&error=${encodeURIComponent(error)}`);
+  }
+
+  const rawMaterial = buildRawMaterialRecord(values, existing);
+  data.rawMaterials = data.rawMaterials
+    .map((entry) => (entry.id === rawMaterialId ? rawMaterial : entry))
+    .sort((left, right) => left.name.localeCompare(right.name));
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/setup');
