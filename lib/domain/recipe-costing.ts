@@ -1,6 +1,7 @@
-import type { Recipe, RecipeLine, SupplierPriceEntry } from '@/lib/domain/types';
+import type { Product, Recipe, RecipeLine, SupplierPriceEntry } from '@/lib/domain/types';
 
 export type RecipeCostLineStatus = 'costed' | 'missing_price' | 'missing_package' | 'unit_mismatch';
+export type CostingSnapshotStatus = 'fully_costed' | 'partially_costed' | 'missing_cost_evidence' | 'no_recipe';
 
 export interface RecipeCostLineEstimate {
   line: RecipeLine;
@@ -18,6 +19,28 @@ export interface RecipeCostEstimate {
   incompleteLineCount: number;
   complete: boolean;
   lines: RecipeCostLineEstimate[];
+}
+
+export interface CostingSnapshotItem {
+  id: string;
+  type: 'recipe' | 'product';
+  label: string;
+  productLabel: string;
+  recipeId?: string;
+  recipeTitle?: string;
+  batchYieldQuantity?: number;
+  batchYieldUnit?: string;
+  status: CostingSnapshotStatus;
+  estimatedBatchCost?: number;
+  estimatedUnitCost?: number;
+  lineCount: number;
+  costedLineCount: number;
+  incompleteLineCount: number;
+  missingEvidenceCount: number;
+  missingPackageCount: number;
+  unitMismatchCount: number;
+  hasRecipe: boolean;
+  recipeCost?: RecipeCostEstimate;
 }
 
 type UnitDefinition = {
@@ -127,4 +150,136 @@ export function calculateRecipeEstimatedMaterialCost(
     complete: lines.length > 0 && incompleteLineCount === 0,
     lines,
   };
+}
+
+function getProductLabel(product: Pick<Product, 'name'>, variant?: { name: string } | null) {
+  return variant ? `${product.name} / ${variant.name}` : product.name;
+}
+
+export function getCostingSnapshotStatus(recipeCost?: RecipeCostEstimate | null): CostingSnapshotStatus {
+  if (!recipeCost) {
+    return 'no_recipe';
+  }
+
+  if (recipeCost.complete) {
+    return 'fully_costed';
+  }
+
+  if (recipeCost.costedLineCount > 0) {
+    return 'partially_costed';
+  }
+
+  return 'missing_cost_evidence';
+}
+
+export function buildCostingSnapshotItems(
+  products: Product[],
+  recipes: Recipe[],
+  recipeCostById: Map<string, RecipeCostEstimate>,
+): CostingSnapshotItem[] {
+  const items: CostingSnapshotItem[] = [];
+  const coveredTargets = new Set<string>();
+
+  for (const recipe of recipes) {
+    const product = products.find((entry) => entry.id === recipe.productId);
+    const variant = recipe.productVariantId
+      ? product?.variants.find((entry) => entry.id === recipe.productVariantId) ?? null
+      : null;
+    const productLabel = product ? getProductLabel(product, variant) : recipe.title;
+    const targetKey = recipe.productVariantId ?? recipe.productId;
+    const recipeCost = recipeCostById.get(recipe.id);
+    const status = getCostingSnapshotStatus(recipeCost);
+
+    coveredTargets.add(targetKey);
+
+    items.push({
+      id: `recipe:${recipe.id}`,
+      type: 'recipe',
+      label: recipe.title,
+      productLabel,
+      recipeId: recipe.id,
+      recipeTitle: recipe.title,
+      batchYieldQuantity: recipe.batchYieldQuantity,
+      batchYieldUnit: recipe.batchYieldUnit,
+      status,
+      estimatedBatchCost: recipeCost?.lineCount ? recipeCost.totalEstimatedCost : undefined,
+      estimatedUnitCost:
+        recipeCost?.lineCount && recipe.batchYieldQuantity && recipe.batchYieldQuantity > 0
+          ? recipeCost.totalEstimatedCost / recipe.batchYieldQuantity
+          : undefined,
+      lineCount: recipeCost?.lineCount ?? recipe.lines.length,
+      costedLineCount: recipeCost?.costedLineCount ?? 0,
+      incompleteLineCount: recipeCost?.incompleteLineCount ?? recipe.lines.length,
+      missingEvidenceCount: recipeCost?.lines.filter((line) => line.status === 'missing_price').length ?? 0,
+      missingPackageCount: recipeCost?.lines.filter((line) => line.status === 'missing_package').length ?? 0,
+      unitMismatchCount: recipeCost?.lines.filter((line) => line.status === 'unit_mismatch').length ?? 0,
+      hasRecipe: true,
+      recipeCost,
+    });
+  }
+
+  for (const product of products) {
+    if (product.variants.length > 0) {
+      for (const variant of product.variants) {
+        if (coveredTargets.has(variant.id)) {
+          continue;
+        }
+
+        items.push({
+          id: `product:${variant.id}`,
+          type: 'product',
+          label: getProductLabel(product, variant),
+          productLabel: getProductLabel(product, variant),
+          status: 'no_recipe',
+          lineCount: 0,
+          costedLineCount: 0,
+          incompleteLineCount: 0,
+          missingEvidenceCount: 0,
+          missingPackageCount: 0,
+          unitMismatchCount: 0,
+          hasRecipe: false,
+        });
+      }
+
+      if (!coveredTargets.has(product.id)) {
+        items.push({
+          id: `product:${product.id}`,
+          type: 'product',
+          label: product.name,
+          productLabel: product.name,
+          status: 'no_recipe',
+          lineCount: 0,
+          costedLineCount: 0,
+          incompleteLineCount: 0,
+          missingEvidenceCount: 0,
+          missingPackageCount: 0,
+          unitMismatchCount: 0,
+          hasRecipe: false,
+        });
+      }
+
+      continue;
+    }
+
+    if (coveredTargets.has(product.id)) {
+      continue;
+    }
+
+    items.push({
+      id: `product:${product.id}`,
+      type: 'product',
+      label: product.name,
+      productLabel: product.name,
+      status: 'no_recipe',
+      lineCount: 0,
+      costedLineCount: 0,
+      incompleteLineCount: 0,
+      missingEvidenceCount: 0,
+      missingPackageCount: 0,
+      unitMismatchCount: 0,
+      hasRecipe: false,
+    });
+  }
+
+  return items.sort((left, right) => left.productLabel.localeCompare(right.productLabel));
 }

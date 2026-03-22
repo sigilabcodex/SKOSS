@@ -102,6 +102,7 @@ This workspace should feel like an operational briefing, not a report generator.
 - products and variants
 - base dough families
 - recipes and process profiles
+- a compact costing snapshot for recipe-linked products
 - destinations
 - recurrence templates for orders and internal tasks
 - user and role setup
@@ -114,6 +115,15 @@ This workspace should feel like an operational briefing, not a report generator.
 - settings that should be optional but are made mandatory
 
 Admin matters, but it should remain in service of operations. The project should resist the common trap of letting admin screens dominate the product's design.
+
+The costing snapshot belongs here as an operational setup surface, not as a separate finance workspace. It should help an owner or lead see:
+
+- what is fully costed
+- what is only partially costed
+- what is missing supplier evidence
+- what still has no recipe
+
+That visibility should support cleanup and trust in the estimate without turning setup into accounting software.
 
 ## Workspace design rule
 
