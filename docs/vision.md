@@ -4,13 +4,54 @@
 
 SKOSS exists to help small food operations run daily work with less friction.
 
-The project focuses on the gap between taking an order and actually making the food. For many small kitchens, that gap is managed through memory, paper notes, chat messages, and ad hoc routines. SKOSS aims to make that flow visible, shared, and easier to execute.
+The project focuses on the gap between taking an order and actually making and fulfilling the food. For many small kitchens, that gap is managed through memory, paper notes, chat messages, and ad hoc routines. SKOSS aims to make that flow visible, shared, and easier to execute.
 
 A core principle is simple:
 
 **adapt to the workflow, do not force the workflow to adapt to the software.**
 
-That means first use must be possible before every customer, product, ingredient, or recipe is perfectly configured.
+## Operator-first systems
+
+SKOSS is explicitly an operator-first system, not an admin-first one.
+
+That means the product should be shaped around people doing real work during active service and production:
+
+- bakers moving between dough, proofing, baking, and packing
+- front-of-house staff capturing demand quickly
+- shift leads coordinating partial completion and handoff
+- small teams switching roles during the same day
+
+The software should reduce friction in the kitchen rhythm instead of asking operators to behave like office administrators.
+
+## Progressive complexity
+
+SKOSS should start simple and grow only when the business truly needs more structure.
+
+This is a design rule, not just a roadmap preference.
+
+The system should:
+
+- work before setup is perfect
+- allow draft and placeholder records
+- make structure increasingly valuable over time
+- add deeper capabilities progressively
+- keep advanced features modular where possible
+
+A small team should be able to get value early without committing to a large software project.
+
+## Rejection of heavy ERP patterns
+
+SKOSS should not drift into the shape of a traditional heavy ERP.
+
+It should reject patterns such as:
+
+- large back-office setup projects before first use
+- forcing every workflow through normalized administration
+- assuming desktop admin work is the main user journey
+- making advanced identifiers central to daily work
+- bundling every business function into one mandatory system
+
+The product boundary should stay disciplined. When deeper business capabilities are useful, they should be added progressively and often as optional modules.
 
 ## Target users
 
@@ -35,6 +76,27 @@ The project is aimed first at small and medium food operations with repeatable p
 - small restaurants with recurring mise en place and prep cycles
 
 It is not aimed first at large enterprise manufacturing environments.
+
+## Real-world workflow emphasis
+
+SKOSS should remain grounded in the real flow of kitchen work:
+
+- orders arrive
+- demand is grouped and interpreted
+- production requirements are derived
+- WIP changes what still needs to be done
+- work is handed across shifts
+- final outputs are packed, dispatched, or picked up
+
+This rhythm matters more than abstract data purity.
+
+The system should stay shaped by:
+
+- kitchen timing
+- recurring production habits
+- role-based visibility
+- handoff reality
+- notes, substitutions, and partial completion
 
 ## Core problems solved
 
@@ -65,8 +127,6 @@ That includes:
 
 It does not need to own every business function.
 
-It also should not assume that full normalization comes before real work. Operator-facing flows should continue functioning when the business is still formalizing its catalog, customer list, or production definitions.
-
 ## Progressive adoption stance
 
 Early adoption matters.
@@ -82,19 +142,40 @@ The vision is:
 
 That means the product should support draft and placeholder records without pretending they are ideal forever.
 
+## Future onboarding and presets
+
+SKOSS should eventually provide a lightweight first-run setup to help teams start with sensible defaults.
+
+A first-run flow should ask only for a few practical inputs:
+
+- business name
+- business type, such as bakery, cafe, restaurant, or dark kitchen
+- operating mode, such as pickup, delivery, or mixed
+- default features enabled
+
+Presets should:
+
+- guide setup
+- tune initial vocabulary and visible features
+- recommend a sensible starting configuration
+- remain editable after setup
+- never lock the system into one permanent model
+
+This supports faster adoption while preserving flexibility.
+
 ## Long-term direction
 
-Over time, SKOSS may grow into a flexible operational platform for multiple kitchen types, with presets or skins for different business models.
+Over time, SKOSS should grow into a modular operational platform for multiple kitchen types while keeping the core system lightweight.
 
 A likely long-term path includes:
 
 - strong bakery support first
 - reusable operational patterns for other kitchen formats
-- optional advanced modules for identifiers, integrations, automation, and analytics
-- a domain model stable enough to support both SKOSS and future product-facing skins such as BAGET
+- optional modules for richer CRM, procurement, analytics, integrations, and delivery depth
+- a domain model stable enough to support presets and future product-facing skins
 - architecture that stays practical for small self-hosted deployments
 
-The long-term goal is breadth through a strong operational core, not breadth through a shallow pile of features.
+The long-term goal is breadth through a strong operational core, not breadth through indiscriminate feature sprawl.
 
 ## Deployment direction
 
@@ -111,7 +192,7 @@ A future offline-capable or degraded-network mode is desirable, but the project 
 
 ## Why bakery is a strong first domain
 
-Bakery operations highlight the exact kinds of coordination problems SKOSS is meant to solve:
+Bakery operations highlight the exact coordination problems SKOSS is meant to solve:
 
 - production often starts long before fulfillment
 - fermentation and rest periods matter
@@ -135,4 +216,4 @@ The first phase should not try to solve:
 - high-ceremony configuration that blocks real usage
 - infrastructure patterns that demand expensive always-on cloud services
 
-The initial success condition is much simpler: help a small kitchen run daily operations more clearly, reliably, and lightly.
+The initial success condition is simpler: help a small kitchen run daily operations more clearly, reliably, and lightly.
