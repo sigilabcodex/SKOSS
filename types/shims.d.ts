@@ -6,6 +6,10 @@ declare namespace JSX {
 
 declare module 'react' {
   export type ReactNode = any;
+  export type ChangeEvent<T = any> = any;
+  export function createContext<T>(value: T): any;
+  export function useContext<T>(context: any): T;
+  export function useMemo<T>(factory: () => T, deps: any[]): T;
 }
 
 declare module 'next' {
@@ -28,6 +32,7 @@ declare module 'next/navigation' {
   export function redirect(url: string): never;
   export function notFound(): never;
   export function usePathname(): string;
+  export function useRouter(): { refresh(): void };
 }
 
 declare module 'next/cache' {

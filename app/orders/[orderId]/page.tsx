@@ -5,6 +5,7 @@ import { SubmitButton } from '@/components/submit-button';
 import { formatLineProgressLabel, formatStatusLabel } from '@/lib/domain/formatters';
 import { updateOrderAction, updateOrderLineProgressAction } from '@/lib/server/actions';
 import { getLineStatus, getOrderEditor, getOrderProgress } from '@/lib/server/demo-data';
+import { getServerTranslator } from '@/lib/i18n/server';
 import { ArrowRightIcon, CheckIcon } from '@/components/ui-icons';
 
 export default async function EditOrderPage({
@@ -15,9 +16,10 @@ export default async function EditOrderPage({
   searchParams?: Promise<{ error?: string; saved?: string }>;
 }) {
   const resolvedParams = await params;
-  const [view, pageParams] = await Promise.all([
+  const [view, pageParams, { t }] = await Promise.all([
     getOrderEditor(resolvedParams.orderId),
     searchParams,
+    getServerTranslator(),
   ]);
 
   if (!view.order) {
@@ -31,31 +33,30 @@ export default async function EditOrderPage({
     <div className="page-stack">
       <section className="section-header page-hero-header">
         <div>
-          <p className="eyebrow">Sales workspace</p>
+          <p className="eyebrow">{t('orders.workspace')}</p>
           <h1>{view.order.customerLabel}</h1>
           <p>
-            {formatStatusLabel(view.order.fulfillmentType)} · edit quantities, dispatch details, and quick completion
-            updates without leaving the workspace.
+            {formatStatusLabel(view.order.fulfillmentType, t)} {t('orders.editPage.descriptionSeparator')} {t('orders.editPage.editDescription')}
           </p>
         </div>
         <Link href="/orders" className="button-secondary">
           <ArrowRightIcon className="button-icon button-icon-reverse" />
-          <span>Back to orders</span>
+          <span>{t('common.backToOrders')}</span>
         </Link>
       </section>
 
-      {pageParams?.saved === '1' ? <p className="inline-success"><CheckIcon className="button-icon" />Order saved and marked visible to production.</p> : null}
-      {pageParams?.saved === 'progress' ? <p className="inline-success"><CheckIcon className="button-icon" />Line completion updated.</p> : null}
+      {pageParams?.saved === '1' ? <p className="inline-success"><CheckIcon className="button-icon" />{t('orders.editPage.saved')}</p> : null}
+      {pageParams?.saved === 'progress' ? <p className="inline-success"><CheckIcon className="button-icon" />{t('orders.editPage.progressSaved')}</p> : null}
       {pageParams?.error ? <p className="inline-warning">{pageParams.error}</p> : null}
 
       <section className="panel page-stack">
         <div className="table-header-row">
           <div>
-            <strong>Quick completion</strong>
-            <p>Update partial work per line without opening a separate kitchen-only screen.</p>
+            <strong>{t('orders.editPage.quickCompletion')}</strong>
+            <p>{t('orders.editPage.quickCompletionHelp')}</p>
           </div>
           <span className="summary-pill">
-            {progress.completedQuantity}/{progress.requiredQuantity || 0} completed
+            {progress.completedQuantity}/{progress.requiredQuantity || 0} {t('common.completed').toLowerCase()}
           </span>
         </div>
 
@@ -69,13 +70,13 @@ export default async function EditOrderPage({
                 <div className="order-card-header">
                   <div>
                     <strong>{line.productLabel}</strong>
-                    <p>{line.note ?? 'No extra line note'}</p>
+                    <p>{line.note ?? t('orders.editPage.noExtraLineNote')}</p>
                   </div>
-                  <span className={`badge badge-${lineStatus}`}>{formatStatusLabel(lineStatus)}</span>
+                  <span className={`badge badge-${lineStatus}`}>{formatStatusLabel(lineStatus, t)}</span>
                 </div>
                 <div className="line-grid">
                   <label>
-                    <span className="field-heading">Completed</span>
+                    <span className="field-heading">{t('common.completed')}</span>
                     <input
                       name="completedQuantity"
                       type="number"
@@ -85,7 +86,7 @@ export default async function EditOrderPage({
                     />
                   </label>
                   <label>
-                    <span className="field-heading">Total</span>
+                    <span className="field-heading">{t('common.total')}</span>
                     <input value={`${line.quantity} ${line.unit}`} disabled />
                   </label>
                 </div>
@@ -93,10 +94,10 @@ export default async function EditOrderPage({
                   <span className="field-label progress-label">{formatLineProgressLabel(line)}</span>
                   <SubmitButton
                     className="button-primary button-reset"
-                    pendingLabel="Saving progress…"
+                    pendingLabel={t('orders.editPage.savingProgress')}
                     icon={<CheckIcon className="button-icon" />}
                   >
-                    Save progress
+                    {t('orders.editPage.saveProgress')}
                   </SubmitButton>
                 </div>
               </form>

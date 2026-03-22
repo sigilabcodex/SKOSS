@@ -1,5 +1,9 @@
+'use client';
+
 import type { Destination } from '@/lib/domain/types';
-import { getDefaultLineDrafts, weekdayOptions } from '@/lib/server/demo-data';
+import { getDefaultLineDrafts, weekdayOptions } from '@/lib/domain/order-helpers';
+import { formatWeekdayLabel } from '@/lib/domain/formatters';
+import { useI18n } from '@/components/i18n-provider';
 import { LineItemsEditor } from '@/components/orders/line-items-editor';
 import { SubmitButton } from '@/components/submit-button';
 import { CheckIcon, SparklesIcon } from '@/components/ui-icons';
@@ -11,10 +15,10 @@ interface RecurringTemplateFormProps {
   focusDate: string;
 }
 
-const lineTypeOptions = [
-  { value: 'product_variant', label: 'Structured item' },
-  { value: 'draft_product', label: 'Draft item' },
-  { value: 'note_item', label: 'Note item' },
+const lineTypeValues = [
+  { value: 'product_variant', key: 'structuredItem' },
+  { value: 'draft_product', key: 'draftItem' },
+  { value: 'note_item', key: 'noteItem' },
 ] as const;
 
 export function RecurringTemplateForm({
@@ -23,43 +27,45 @@ export function RecurringTemplateForm({
   productSuggestions,
   focusDate,
 }: RecurringTemplateFormProps) {
+  const { t } = useI18n();
   const lineDrafts = getDefaultLineDrafts([], 4);
+  const lineTypeOptions = lineTypeValues.map((option) => ({
+    value: option.value,
+    label: t(`orders.lineEditor.kinds.${option.key}`),
+  }));
 
   return (
     <form action={action} className="page-stack">
       <section className="panel page-stack">
         <div className="section-header compact-header">
           <div>
-            <p className="eyebrow">Recurring order</p>
-            <h2>Capture the kitchen rhythm once</h2>
-            <p className="section-copy">
-              Keep recurrence explicit: a customer label, a simple daily or weekly rhythm, and the next
-              date to generate.
-            </p>
+            <p className="eyebrow">{t('orders.recurringForm.eyebrow')}</p>
+            <h2>{t('orders.recurringForm.title')}</h2>
+            <p className="section-copy">{t('orders.recurringForm.intro')}</p>
           </div>
-          <span className="badge badge-generated">recurring</span>
+          <span className="badge badge-generated">{t('common.recurring')}</span>
         </div>
 
         <div className="field-section-grid">
           <section className="field-section">
             <div className="field-section-header">
               <div>
-                <h3>Template basics</h3>
-                <p className="helper-text">Set the repeatable demand first, then keep generated orders editable later.</p>
+                <h3>{t('orders.recurringForm.basics')}</h3>
+                <p className="helper-text">{t('orders.recurringForm.basicsHelp')}</p>
               </div>
             </div>
             <div className="grid-two">
               <label>
-                <span className="field-heading">Customer or route label <span className="required-dot">Required</span></span>
-                <input name="customerLabel" placeholder="Cafe Luna" required />
+                <span className="field-heading">{t('orders.recurringForm.customerOrRoute')} <span className="required-dot">{t('common.required')}</span></span>
+                <input name="customerLabel" placeholder={t('orders.recurringForm.placeholders.customerOrRoute')} required />
               </label>
               <label>
-                <span className="field-heading">Phone or contact <span className="optional-pill">Optional</span></span>
-                <input name="customerPhone" placeholder="Optional" />
+                <span className="field-heading">{t('orders.orderForm.fields.customerPhone')} <span className="optional-pill">{t('common.optional')}</span></span>
+                <input name="customerPhone" placeholder={t('common.optional')} />
               </label>
               <label>
-                <span className="field-heading">Destination <span className="optional-pill">Optional</span></span>
-                <input name="destinationLabel" list="destinations" placeholder="Cafe Luna" />
+                <span className="field-heading">{t('orders.orderForm.fields.destination')} <span className="optional-pill">{t('common.optional')}</span></span>
+                <input name="destinationLabel" list="destinations" placeholder={t('orders.recurringForm.placeholders.customerOrRoute')} />
                 <datalist id="destinations">
                   {destinations.map((destination) => (
                     <option key={destination.id} value={destination.name} />
@@ -67,21 +73,21 @@ export function RecurringTemplateForm({
                 </datalist>
               </label>
               <label>
-                <span className="field-heading">Next occurrence <span className="required-dot">Required</span></span>
+                <span className="field-heading">{t('orders.recurringForm.nextOccurrence')} <span className="required-dot">{t('common.required')}</span></span>
                 <input name="nextOccurrenceDate" type="date" defaultValue={focusDate} required />
               </label>
               <label>
-                <span className="field-heading">Recurrence</span>
+                <span className="field-heading">{t('orders.recurringForm.recurrence')}</span>
                 <select name="frequency" defaultValue="weekly">
-                  <option value="daily">Daily</option>
-                  <option value="weekly">Weekly</option>
+                  <option value="daily">{t('orders.recurringForm.frequency.daily')}</option>
+                  <option value="weekly">{t('orders.recurringForm.frequency.weekly')}</option>
                 </select>
               </label>
               <div className="form-callout form-callout-generated">
                 <SparklesIcon className="callout-icon" />
                 <div>
-                  <strong>Generated orders still stay editable later.</strong>
-                  <p className="helper-text no-margin">This template defines the baseline, not a locked schedule engine.</p>
+                  <strong>{t('orders.recurringForm.generatedCalloutTitle')}</strong>
+                  <p className="helper-text no-margin">{t('orders.recurringForm.generatedCalloutBody')}</p>
                 </div>
               </div>
             </div>
@@ -90,17 +96,17 @@ export function RecurringTemplateForm({
           <section className="field-section">
             <div className="field-section-header">
               <div>
-                <h3>Weekly rhythm</h3>
-                <p className="helper-text">Only the selected days should feed future recurring generation.</p>
+                <h3>{t('orders.recurringForm.weeklyRhythm')}</h3>
+                <p className="helper-text">{t('orders.recurringForm.weeklyRhythmHelp')}</p>
               </div>
             </div>
             <fieldset className="weekday-fieldset">
-              <legend>Weekly days</legend>
+              <legend>{t('orders.recurringForm.weeklyDays')}</legend>
               <div className="weekday-row">
                 {weekdayOptions.map((option) => (
                   <label key={option.value} className="weekday-chip">
                     <input name="weeklyDays" type="checkbox" value={option.value} defaultChecked={option.value === 'sat'} />
-                    <span>{option.label}</span>
+                    <span>{formatWeekdayLabel(option.value, t)}</span>
                   </label>
                 ))}
               </div>
@@ -111,13 +117,13 @@ export function RecurringTemplateForm({
         <section className="field-section">
           <div className="field-section-header">
             <div>
-              <h3>Template notes</h3>
-              <p className="helper-text">Use this for standing packing reminders or route-level exceptions.</p>
+              <h3>{t('orders.recurringForm.notes')}</h3>
+              <p className="helper-text">{t('orders.recurringForm.notesHelp')}</p>
             </div>
           </div>
           <label>
-            <span className="field-heading">Notes <span className="optional-pill">Optional</span></span>
-            <textarea name="notes" placeholder="Packing reminder, standing exception, or handoff note" />
+            <span className="field-heading">{t('orders.orderForm.fields.dispatchNotes')} <span className="optional-pill">{t('common.optional')}</span></span>
+            <textarea name="notes" placeholder={t('orders.recurringForm.placeholders.notes')} />
           </label>
         </section>
       </section>
@@ -125,9 +131,9 @@ export function RecurringTemplateForm({
       <section className="panel page-stack">
         <div className="section-header compact-header">
           <div>
-            <p className="eyebrow">Recurring lines</p>
-            <h2>Keep the repeated demand visible</h2>
-            <p className="section-copy">Operators can still use draft names here. Generated orders stay editable later.</p>
+            <p className="eyebrow">{t('orders.recurringForm.recurringLinesEyebrow')}</p>
+            <h2>{t('orders.recurringForm.recurringLinesTitle')}</h2>
+            <p className="section-copy">{t('orders.recurringForm.recurringLinesBody')}</p>
           </div>
         </div>
 
@@ -136,21 +142,21 @@ export function RecurringTemplateForm({
           initialLines={lineDrafts}
           productSuggestions={productSuggestions}
           lineTypeOptions={lineTypeOptions}
-          sectionLabel="Use only the rows needed for the actual rhythm. Add and remove lines as the route evolves."
+          sectionLabel={t('orders.recurringForm.lineSectionLabel')}
         />
       </section>
 
       <div className="action-row form-footer-row">
         <div className="helper-text action-hint">
           <CheckIcon className="button-icon" />
-          <span>Saving this template keeps the recurring rhythm visible without forcing a heavy scheduling setup.</span>
+          <span>{t('orders.recurringForm.footerHint')}</span>
         </div>
         <SubmitButton
           className="button-primary button-reset"
-          pendingLabel="Saving recurring template…"
+          pendingLabel={t('orders.recurringForm.saving')}
           icon={<CheckIcon className="button-icon" />}
         >
-          Save recurring template
+          {t('orders.recurringForm.save')}
         </SubmitButton>
       </div>
     </form>

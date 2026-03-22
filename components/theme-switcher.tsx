@@ -1,5 +1,6 @@
 'use client';
 
+import { useI18n } from '@/components/i18n-provider';
 import { applyThemeState, themeOptions } from '@/lib/theme';
 import { SparklesIcon } from '@/components/ui-icons';
 
@@ -8,9 +9,11 @@ type ThemeSwitcherProps = {
 };
 
 export function ThemeSwitcher({ variant = 'compact' }: ThemeSwitcherProps) {
+  const { t } = useI18n();
+
   if (variant === 'panel') {
     return (
-      <div className="theme-panel" role="group" aria-label="Appearance theme">
+      <div className="theme-panel" role="group" aria-label={t('theme.groupAria')}>
         {themeOptions.map((option) => {
           const Icon = option.icon;
 
@@ -28,11 +31,11 @@ export function ThemeSwitcher({ variant = 'compact' }: ThemeSwitcherProps) {
                   <Icon className="button-icon" />
                 </span>
                 <span>
-                  <strong>{option.label}</strong>
-                  <span className="theme-panel-kicker">{option.shortLabel}</span>
+                  <strong>{t(`theme.${option.name}.label`)}</strong>
+                  <span className="theme-panel-kicker">{t(`theme.${option.name}.shortLabel`)}</span>
                 </span>
               </span>
-              <span className="helper-text">{option.description}</span>
+              <span className="helper-text">{t(`theme.${option.name}.description`)}</span>
             </button>
           );
         })}
@@ -42,15 +45,15 @@ export function ThemeSwitcher({ variant = 'compact' }: ThemeSwitcherProps) {
 
   return (
     <details className="theme-switcher">
-      <summary className="theme-menu-button" aria-label="Open appearance menu">
+      <summary className="theme-menu-button" aria-label={t('theme.openMenu')}>
         <SparklesIcon className="button-icon" />
       </summary>
-      <div className="theme-menu" aria-label="Theme options">
+      <div className="theme-menu" aria-label={t('theme.optionsAria')}>
         <div className="theme-menu-header">
           <SparklesIcon className="button-icon" />
           <div>
-            <strong>Appearance</strong>
-            <p className="helper-text no-margin">Quick switch. Full controls stay in Setup.</p>
+            <strong>{t('theme.appearance')}</strong>
+            <p className="helper-text no-margin">{t('theme.quickSwitch')}</p>
           </div>
         </div>
         <div className="theme-menu-options">
@@ -78,8 +81,8 @@ export function ThemeSwitcher({ variant = 'compact' }: ThemeSwitcherProps) {
                     <Icon className="button-icon" />
                   </span>
                   <span>
-                    <strong>{option.label}</strong>
-                    <span className="theme-menu-caption">{option.description}</span>
+                    <strong>{t(`theme.${option.name}.label`)}</strong>
+                    <span className="theme-menu-caption">{t(`theme.${option.name}.description`)}</span>
                   </span>
                 </span>
               </button>
