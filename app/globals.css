@@ -1477,3 +1477,52 @@ select:disabled {
   font-size: 1.5rem;
   line-height: 1.1;
 }
+
+.setup-required-mark {
+  color: var(--danger);
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.summary-pill.is-selected,
+.list-with-actions.is-selected-row {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+  background: color-mix(in srgb, var(--accent-soft) 85%, var(--surface));
+}
+
+.costing-summary-grid {
+  display: grid;
+  gap: var(--space-3);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.costing-summary-grid strong {
+  font-size: 1.15rem;
+}
+
+.costing-line-item,
+.costing-line-header {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.costing-line-header {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.costing-status-pill.is-costed {
+  color: var(--success);
+}
+
+.costing-status-pill.is-missing_price,
+.costing-status-pill.is-missing_package,
+.costing-status-pill.is-unit_mismatch {
+  color: var(--warning);
+}
+
+@media (max-width: 640px) {
+  .costing-summary-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

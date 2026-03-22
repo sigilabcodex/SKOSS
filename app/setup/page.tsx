@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { formatCurrency, formatDateLabel, formatTemplateScheduleLabel, formatUnitRate } from '@/lib/domain/formatters';
 import type { Product, Recipe } from '@/lib/domain/types';
+import { buildCostingSnapshotItems } from '@/lib/domain/recipe-costing';
 import {
   createRawMaterialAction,
   createRecipeAction,
@@ -27,6 +28,8 @@ type SetupSearchParams = {
   historySupplier?: string;
   historyMaterial?: string;
   recipe?: string;
+  costingStatus?: 'all' | 'fully_costed' | 'partially_costed' | 'missing_cost_evidence' | 'no_recipe';
+  costingItem?: string;
 };
 
 function buildSetupHref(params: Record<string, string | undefined>) {
@@ -70,6 +73,14 @@ function buildRecipeLineRows(recipe?: Recipe | null) {
       key: `blank-${index}`,
     })),
   ];
+}
+
+function renderRequiredMark() {
+  return (
+    <span className="setup-required-mark" aria-hidden="true">
+      *
+    </span>
+  );
 }
 
 async function SavedMessage({ saved }: { saved?: string }) {
@@ -172,6 +183,33 @@ export default async function SetupPage({
   const editingRecipeCost = editingRecipe ? data.recipeCostById.get(editingRecipe.id) ?? null : null;
   const activeRecipes = data.recipes.filter((recipe) => recipe.active).length;
   const linkedProductCount = new Set(data.recipes.map((recipe) => recipe.productVariantId ?? recipe.productId)).size;
+  const costingItems = buildCostingSnapshotItems(data.products, data.recipes, data.recipeCostById);
+  const costingStatusFilter = params?.costingStatus ?? 'all';
+  const filteredCostingItems = costingItems.filter((item) => costingStatusFilter === 'all' || item.status === costingStatusFilter);
+  const selectedCostingItem =
+    (params?.costingItem
+      ? filteredCostingItems.find((item) => item.id === params.costingItem) ?? costingItems.find((item) => item.id === params.costingItem) ?? null
+      : null)
+    ?? filteredCostingItems[0]
+    ?? costingItems[0]
+    ?? null;
+  const costingSummary = {
+    fullyCosted: costingItems.filter((item) => item.status === 'fully_costed').length,
+    partiallyCosted: costingItems.filter((item) => item.status === 'partially_costed').length,
+    missingEvidence: costingItems.filter((item) => item.status === 'missing_cost_evidence').length,
+    noRecipe: costingItems.filter((item) => item.status === 'no_recipe').length,
+  };
+  const buildCostingHref = (overrides: Record<string, string | undefined>) =>
+    buildSetupHref({
+      supplier: editingSupplier?.id,
+      material: editingMaterial?.id,
+      historySupplier: historySupplier?.id,
+      historyMaterial: historyMaterial?.id,
+      recipe: editingRecipe?.id,
+      costingStatus: costingStatusFilter,
+      costingItem: selectedCostingItem?.id,
+      ...overrides,
+    });
 
   return (
     <div className="page-stack">
@@ -412,7 +450,7 @@ export default async function SetupPage({
               </div>
               <div className="grid-two">
                 <label>
-                  <span className="field-heading">{t('setup.fields.supplierName')} <span className="required-dot">{t('common.required')}</span></span>
+                  <span className="field-heading">{t('setup.fields.supplierName')} {renderRequiredMark()}</span>
                   <input name="name" placeholder="Harina Viva" defaultValue={editingSupplier?.name ?? ''} required />
                 </label>
                 <label>
@@ -493,7 +531,7 @@ export default async function SetupPage({
               </div>
               <div className="grid-two">
                 <label>
-                  <span className="field-heading">{t('setup.fields.rawMaterialName')} <span className="required-dot">{t('common.required')}</span></span>
+                  <span className="field-heading">{t('setup.fields.rawMaterialName')} {renderRequiredMark()}</span>
                   <input name="name" placeholder={t('setup.placeholders.rawMaterialName')} defaultValue={editingMaterial?.name ?? ''} required />
                 </label>
                 <label>
@@ -600,7 +638,7 @@ export default async function SetupPage({
 
               <div className="grid-two">
                 <label>
-                  <span className="field-heading">{t('setup.fields.product')} <span className="required-dot">{t('common.required')}</span></span>
+                  <span className="field-heading">{t('setup.fields.product')} {renderRequiredMark()}</span>
                   <select name="productId" defaultValue={editingRecipe?.productId ?? ''} required>
                     <option value="" disabled>{t('common.selectProduct')}</option>
                     {data.products.map((product) => (
@@ -767,6 +805,194 @@ export default async function SetupPage({
       <section className="panel page-stack">
         <div className="table-header-row">
           <div>
+            <h2>{t('setup.costingSnapshotTitle')}</h2>
+            <p>{t('setup.costingSnapshotHelp')}</p>
+          </div>
+          <span className="summary-pill">{t('setup.costingLabels.latestRecipeEvidence')}</span>
+        </div>
+
+        <div className="stats-grid compact-stats-grid">
+          <article className="stat-card stat-card-success">
+            <span className="stat-label">{t('setup.costingSummary.fullyCosted')}</span>
+            <strong>{costingSummary.fullyCosted}</strong>
+            <span>{t('setup.costingSummary.fullyCostedHelp')}</span>
+          </article>
+          <article className="stat-card stat-card-info">
+            <span className="stat-label">{t('setup.costingSummary.partiallyCosted')}</span>
+            <strong>{costingSummary.partiallyCosted}</strong>
+            <span>{t('setup.costingSummary.partiallyCostedHelp')}</span>
+          </article>
+          <article className="stat-card stat-card-warning">
+            <span className="stat-label">{t('setup.costingSummary.missingEvidence')}</span>
+            <strong>{costingSummary.missingEvidence}</strong>
+            <span>{t('setup.costingSummary.missingEvidenceHelp')}</span>
+          </article>
+          <article className="stat-card stat-card-neutral">
+            <span className="stat-label">{t('setup.costingSummary.noRecipe')}</span>
+            <strong>{costingSummary.noRecipe}</strong>
+            <span>{t('setup.costingSummary.noRecipeHelp')}</span>
+          </article>
+        </div>
+
+        <div className="filter-pill-row">
+          {(['all', 'fully_costed', 'partially_costed', 'missing_cost_evidence', 'no_recipe'] as const).map((statusKey) => (
+            <Link
+              key={statusKey}
+              href={buildCostingHref({
+                costingStatus: statusKey,
+                costingItem:
+                  (statusKey === 'all' ? costingItems : costingItems.filter((item) => item.status === statusKey))[0]?.id,
+              })}
+              className={`summary-pill ${costingStatusFilter === statusKey ? 'is-selected' : ''}`}
+            >
+              {t(`setup.costingFilters.${statusKey}`)}
+            </Link>
+          ))}
+        </div>
+
+        <div className="grid-two recipe-grid">
+          <article className="subpanel page-stack">
+            <div className="table-header-row">
+              <div>
+                <h3>{t('setup.costingListTitle')}</h3>
+                <p>{t('setup.costingListHelp')}</p>
+              </div>
+              <span className="summary-pill">{filteredCostingItems.length} {t('setup.costingLabels.items')}</span>
+            </div>
+            {filteredCostingItems.length > 0 ? (
+              <ul className="stack-list compact-list">
+                {filteredCostingItems.map((item) => (
+                  <li key={item.id} className={`list-with-actions ${selectedCostingItem?.id === item.id ? 'is-selected-row' : ''}`}>
+                    <div>
+                      <strong>{item.productLabel}</strong>
+                      <span>
+                        {item.hasRecipe
+                          ? `${item.recipeTitle ?? item.label} · ${t(`setup.costingStatuses.${item.status}`)}`
+                          : t('setup.costingNoRecipe')}
+                      </span>
+                      <span className="inline-meta">
+                        {item.estimatedBatchCost !== undefined
+                          ? `${t('setup.costingLabels.batch')} ${formatCurrency(item.estimatedBatchCost, locale)}`
+                          : t('setup.costingLabels.noBatchEstimate')}
+                        {item.estimatedUnitCost !== undefined && item.batchYieldUnit
+                          ? ` · ${t('setup.costingLabels.unit')} ${formatCurrency(item.estimatedUnitCost, locale)} / ${item.batchYieldUnit}`
+                          : ''}
+                      </span>
+                    </div>
+                    <div className="inline-action-row">
+                      <Link href={buildCostingHref({ costingItem: item.id })} className="inline-link">
+                        {t('setup.actions.viewCosting')}
+                      </Link>
+                      {item.recipeId ? (
+                        <Link href={buildSetupHref({ recipe: item.recipeId, supplier: editingSupplier?.id, material: editingMaterial?.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, costingStatus: costingStatusFilter, costingItem: item.id })} className="inline-link">
+                          {t('setup.actions.editRecipe')}
+                        </Link>
+                      ) : null}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="empty-state">{t('setup.costingEmptyForFilter')}</p>
+            )}
+          </article>
+
+          <article className="subpanel page-stack">
+            <div className="table-header-row">
+              <div>
+                <h3>{t('setup.costingDetailTitle')}</h3>
+                <p>{t('setup.costingDetailHelp')}</p>
+              </div>
+              {selectedCostingItem ? <span className="summary-pill">{t(`setup.costingStatuses.${selectedCostingItem.status}`)}</span> : null}
+            </div>
+
+            {selectedCostingItem ? (
+              <>
+                <div className="recipe-cost-summary">
+                  <strong>{selectedCostingItem.productLabel}</strong>
+                  <span>{selectedCostingItem.hasRecipe ? selectedCostingItem.recipeTitle : t('setup.costingNoRecipe')}</span>
+                  <div className="costing-summary-grid">
+                    <div>
+                      <span className="helper-text">{t('setup.costingLabels.batchCost')}</span>
+                      <strong>
+                        {selectedCostingItem.estimatedBatchCost !== undefined
+                          ? formatCurrency(selectedCostingItem.estimatedBatchCost, locale)
+                          : '—'}
+                      </strong>
+                    </div>
+                    <div>
+                      <span className="helper-text">{t('setup.costingLabels.unitCost')}</span>
+                      <strong>
+                        {selectedCostingItem.estimatedUnitCost !== undefined && selectedCostingItem.batchYieldUnit
+                          ? `${formatCurrency(selectedCostingItem.estimatedUnitCost, locale)} / ${selectedCostingItem.batchYieldUnit}`
+                          : t('setup.costingLabels.noYield')}
+                      </strong>
+                    </div>
+                  </div>
+                  <span>{t(`setup.costingStatusesHelp.${selectedCostingItem.status}`)}</span>
+                  {selectedCostingItem.hasRecipe ? (
+                    <span className="helper-text">
+                      {selectedCostingItem.costedLineCount}/{selectedCostingItem.lineCount} {t('setup.recipeLabels.linesCosted')}
+                      {selectedCostingItem.missingEvidenceCount ? ` · ${selectedCostingItem.missingEvidenceCount} ${t('setup.costingLabels.missingPrice')}` : ''}
+                      {selectedCostingItem.missingPackageCount ? ` · ${selectedCostingItem.missingPackageCount} ${t('setup.costingLabels.missingPackage')}` : ''}
+                      {selectedCostingItem.unitMismatchCount ? ` · ${selectedCostingItem.unitMismatchCount} ${t('setup.costingLabels.unitMismatch')}` : ''}
+                    </span>
+                  ) : null}
+                </div>
+
+                {selectedCostingItem.recipeCost?.lineCount ? (
+                  <ul className="stack-list compact-list">
+                    {selectedCostingItem.recipeCost.lines.map((line) => (
+                      <li key={line.line.id} className="history-list-item costing-line-item">
+                        <div className="costing-line-header">
+                          <strong>{line.line.rawMaterialLabel}</strong>
+                          <span className={`summary-pill costing-status-pill is-${line.status}`}>
+                            {t(`setup.costingLineStatuses.${line.status}`)}
+                          </span>
+                        </div>
+                        <span>{line.line.quantity} {line.line.unit}</span>
+                        {line.status === 'costed' ? (
+                          <>
+                            <span>
+                              {t('setup.costingLabels.lineContribution')} {formatCurrency(line.estimatedCost ?? 0, locale)}
+                              {line.latestPriceEntry ? ` · ${formatUnitRate(line.latestPriceEntry, locale)}` : ''}
+                            </span>
+                            {line.latestPriceEntry ? (
+                              <span className="helper-text">
+                                {t('setup.costingLabels.sourceEvidence')} {line.latestPriceEntry.supplierLabel} · {formatDateLabel(line.latestPriceEntry.priceDate, locale)}
+                              </span>
+                            ) : null}
+                          </>
+                        ) : (
+                          <>
+                            <span>{t(`setup.costingLineStatusesHelp.${line.status}`)}</span>
+                            {line.latestPriceEntry ? (
+                              <span className="helper-text">
+                                {t('setup.costingLabels.lastSeenPrice')} {line.latestPriceEntry.supplierLabel} · {formatDateLabel(line.latestPriceEntry.priceDate, locale)}
+                              </span>
+                            ) : null}
+                          </>
+                        )}
+                        {line.line.note ? <span className="helper-text">{line.line.note}</span> : null}
+                      </li>
+                    ))}
+                  </ul>
+                ) : selectedCostingItem.hasRecipe ? (
+                  <p className="empty-state">{t('setup.recipeCostEmpty')}</p>
+                ) : (
+                  <p className="empty-state">{t('setup.costingNoRecipeHelp')}</p>
+                )}
+              </>
+            ) : (
+              <p className="empty-state">{t('setup.costingEmpty')}</p>
+            )}
+          </article>
+        </div>
+      </section>
+
+      <section className="panel page-stack">
+        <div className="table-header-row">
+          <div>
             <h2>{t('setup.supplierPriceMemory')}</h2>
             <p>{t('setup.supplierPriceMemoryHelp')}</p>
           </div>
@@ -832,7 +1058,7 @@ export default async function SetupPage({
             </div>
             <div className="grid-two">
               <label>
-                <span className="field-heading">{t('setup.fields.supplier')} <span className="required-dot">{t('common.required')}</span></span>
+                <span className="field-heading">{t('setup.fields.supplier')} {renderRequiredMark()}</span>
                 <select name="supplierId" defaultValue={historySupplier?.id ?? ''} required>
                   <option value="" disabled>{t('common.selectSupplier')}</option>
                   {data.suppliers.map((supplier) => (
@@ -843,7 +1069,7 @@ export default async function SetupPage({
                 </select>
               </label>
               <label>
-                <span className="field-heading">{t('setup.fields.rawMaterial')} <span className="required-dot">{t('common.required')}</span></span>
+                <span className="field-heading">{t('setup.fields.rawMaterial')} {renderRequiredMark()}</span>
                 <select name="rawMaterialId" defaultValue={historyMaterial?.id ?? ''} required>
                   <option value="" disabled>{t('common.selectRawMaterial')}</option>
                   {data.rawMaterials.map((material) => (
@@ -854,11 +1080,11 @@ export default async function SetupPage({
                 </select>
               </label>
               <label>
-                <span className="field-heading">{t('setup.fields.price')} <span className="required-dot">{t('common.required')}</span></span>
+                <span className="field-heading">{t('setup.fields.price')} {renderRequiredMark()}</span>
                 <input name="price" type="number" min="0.01" step="0.01" placeholder={t('setup.placeholders.price')} required />
               </label>
               <label>
-                <span className="field-heading">{t('setup.fields.date')} <span className="required-dot">{t('common.required')}</span></span>
+                <span className="field-heading">{t('setup.fields.date')} {renderRequiredMark()}</span>
                 <input name="priceDate" type="date" defaultValue={today} required />
               </label>
               <label>

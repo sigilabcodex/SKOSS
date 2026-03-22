@@ -152,6 +152,8 @@ The first costing pass should stay intentionally lightweight:
 - use the latest available supplier price entry per raw material
 - estimate only when package quantity and unit make normalization reasonable
 - show incomplete costing honestly when a line has no usable price
+- show the supplier and date evidence behind each estimated line when practical
+- group recipe and product views into a compact costing snapshot so operators can quickly see what is usable, partial, missing evidence, or still recipe-free
 - avoid pretending to be inventory valuation, accounting, or full margin reporting
 
 For that reason, price history should stay:
@@ -172,6 +174,24 @@ The first UI for this layer should provide:
 - a raw material list with quick create/edit
 - a supplier price entry form optimized for fast capture
 - a readable history view that can be filtered by supplier or raw material
+- a compact costing snapshot surface inside setup/admin flow rather than a separate finance module
+
+That costing snapshot should answer a few operational questions quickly:
+
+- which recipes are fully costed from usable supplier evidence
+- which recipes are only partially costed
+- which recipes have no usable price evidence yet
+- which products or variants still have no recipe link
+
+It should stay compact and readable on phones and tablets:
+
+- summary counts first
+- quick filters for fully costed, partial, missing evidence, and no recipe
+- batch cost and unit cost only when the recipe yield makes that honest
+- ingredient-line detail with clear statuses such as `ok`, `missing price`, `missing package details`, or `unit mismatch`
+- supplier/source context kept lightweight, for example supplier name plus price date
+
+This surface is meant to support trust and cleanup, not financial reporting.
 
 This UI should stay clean on phones and tablets, use small forms instead of large admin tables, and avoid blocking entry when setup is incomplete.
 
@@ -212,6 +232,7 @@ This foundation layer is intentionally **not** full procurement yet.
 
 It does not add:
 
+- accounting
 - purchase orders
 - receiving workflows
 - inventory counts
@@ -219,7 +240,11 @@ It does not add:
 - invoice matching
 - accounting hooks
 - automatic costing runs
+- automatic stock deduction
 - inventory consumption from recipes
+- tax logic
+- full profitability reporting
+- automatic margin optimization
 - automatic production planning or MRP
 - full BOM or manufacturing module behavior
 
