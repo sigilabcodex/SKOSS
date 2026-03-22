@@ -208,6 +208,8 @@ Before heavy implementation begins, the goal is to clarify:
 
 - `AGENTS.md` — guidance for future coding agents and contributors
 - `docs/vision.md` — project vision and scope boundaries
+- `docs/roadmap.md` — phased roadmap from v0 to a modular platform
+- `docs/modules.md` — core vs extension architecture direction
 - `docs/domain-glossary.md` — practical domain definitions
 - `docs/domain-model.md` — conceptual domain model
 - `docs/workspaces.md` — initial role-based workspace definitions

@@ -1,0 +1,274 @@
+# Roadmap
+
+## Current state (v0 operational slice)
+
+SKOSS now has a stable first operational slice focused on the daily coordination loop:
+
+- order intake for ad hoc and recurring demand
+- recurring templates for repeated customer work and internal routines
+- production board views that translate demand into actionable work
+- WIP visibility and shift handoff support
+- an initial UI/UX system shaped for mobile-first operator use
+
+This v0 slice proves the core value of SKOSS: helping a small kitchen move from incoming demand to coordinated production without requiring heavy admin setup first.
+
+## Short-term (next iterations)
+
+The next iterations should strengthen fulfillment clarity and daily operator visibility without making the product heavier.
+
+### Fulfillment modes
+
+Orders should clearly support lightweight fulfillment modes:
+
+- `pickup`
+- `own_delivery`
+- `app_delivery`
+
+These modes should stay close to order entry and handoff views so teams can understand fulfillment context at a glance.
+
+### Delivery assignment and status
+
+SKOSS should add simple delivery coordination where it directly helps operations:
+
+- delivery assignee or route assignment
+- visible fulfillment status
+- dispatch and handoff notes
+- quick review of what is ready, packed, out, or pending
+
+This should remain practical dispatch support, not a full logistics suite.
+
+### Improved order metadata
+
+Order records should gain a small amount of additional structure where it improves execution:
+
+- better contact and destination context
+- fulfillment-specific notes
+- timing windows or promised-ready context
+- source labels when useful
+- clearer order tags or priority markers when they reduce confusion
+
+This metadata should improve visibility for operators without turning order capture into an admin form.
+
+### UI refinements where needed
+
+The first UI system should continue improving around real kitchen and front-of-house use:
+
+- clearer status hierarchy
+- better touch handling on phones and tablets
+- faster order review and edit flows
+- stronger visibility for notes, exceptions, and partial completion
+- more focused role-oriented views where daily use shows friction
+
+## Medium-term (structured operations data)
+
+Once the v0 loop is stable, SKOSS should add a lightweight structured operations layer that supports repeatable setup without blocking daily work.
+
+### Customer (CRM light)
+
+Customer records should become more useful while remaining operationally lightweight:
+
+- reusable customer profiles
+- practical contact details
+- preferred destinations or fulfillment context
+- customer notes that support real service and production coordination
+
+This is not meant to become a full sales CRM.
+
+### Suppliers
+
+Supplier records should capture the minimum structure needed for purchasing memory:
+
+- supplier identity and contact details
+- active or inactive state
+- practical notes
+- links to historical pricing
+
+### Raw materials / ingredients
+
+Raw materials should provide a stable ingredient reference for future recipe and cost intelligence:
+
+- practical material names
+- categories
+- default units
+- optional brand or presentation context
+- notes for operator clarity
+
+### Supplier price history
+
+Supplier pricing should be historical rather than overwritten in place:
+
+- dated price entries by supplier and ingredient
+- package quantity and package unit
+- total price and optional normalized rate later
+- notes for brand, presentation, or market context
+
+### Basic purchasing visibility
+
+SKOSS should support lightweight purchasing awareness before introducing procurement workflows:
+
+- recent supplier prices
+- alternate supplier comparison
+- simple visibility into what materials are usually sourced where
+- basic awareness of price changes over time
+
+### Preparation for recipe costing
+
+Recipe costing should remain deferred, but the data model should prepare for it.
+
+The goal is to make later costing possible by establishing:
+
+- reusable ingredient references
+- supplier-specific price history
+- date-aware price evidence
+- relationships that can later support recipe cost snapshots
+
+This stage should stop short of building full costing, margin engines, or inventory accounting.
+
+## Medium-term extensions (still lightweight)
+
+After the first structured data layer is stable, SKOSS can add higher-value operational extensions that still preserve core simplicity.
+
+### CRM light features
+
+Possible CRM light additions include:
+
+- customer notes
+- tags
+- order history review
+- simple segmentation such as wholesale, retail, recurring, or seasonal
+
+These should support better service and planning without creating a heavy sales pipeline system.
+
+### Delivery tracking improvements
+
+Possible lightweight delivery improvements include:
+
+- better dispatch status flow
+- route or driver visibility
+- clearer packed vs handed-off vs delivered states
+- optional delivery-provider references for app delivery work
+
+### Basic analytics
+
+Analytics should stay close to operational decision-making:
+
+- daily summaries
+- demand trends
+- fulfillment mix trends
+- recurring-vs-ad-hoc visibility
+- simple production and handoff review signals
+
+The purpose is to help operators and leads see patterns, not to create a broad BI stack.
+
+## Long-term vision (modular ecosystem)
+
+Longer term, SKOSS should evolve into a modular ecosystem built around a disciplined operational core.
+
+### Plugin / module system
+
+The core system should stay small and dependable, while advanced capabilities become optional modules.
+
+A future module system could support:
+
+- enablement by business need
+- preset bundles for different kitchen types
+- clear separation between core workflows and advanced features
+- reversible adoption instead of one-way platform bloat
+
+### Advanced CRM
+
+A future CRM-focused module could provide richer customer relationship features beyond the lightweight default layer.
+
+### Full procurement workflows
+
+A procurement-focused module could later add:
+
+- purchase order flows
+- receiving
+- supplier coordination
+- deeper purchasing history and comparison
+
+These should remain outside the core until clearly justified.
+
+### Recipe costing and margin analysis
+
+A future costing module could add:
+
+- recipe cost snapshots
+- supplier-aware costing inputs
+- margin analysis
+- pricing support
+
+This belongs in a later stage because it depends on stable upstream data and should not distort the operator-first core.
+
+### Integrations
+
+Integration modules may later connect SKOSS to:
+
+- POS systems
+- delivery platforms
+- GPS or route tools
+- messaging tools
+- other practical operational services
+
+### Multi-location support
+
+Multi-location coordination may later become a major extension area, especially for businesses that share templates, products, or reporting across sites.
+
+This should be treated as a deliberate expansion area, not as an assumption built into the earliest product core.
+
+## Core vs extension philosophy
+
+SKOSS should grow by protecting a lightweight operational center.
+
+Core should remain focused on:
+
+- orders and recurring demand
+- production interpretation
+- WIP visibility
+- shift handoff
+- practical fulfillment context
+- role-oriented operator workflows
+
+Extensions should be used for features that are valuable but not essential for every small kitchen, especially when they add setup burden, data depth, or workflow ceremony.
+
+A good rule is:
+
+- if it helps nearly every operator complete daily work, it may belong in core
+- if it adds advanced administration, deeper analysis, or business-specific workflow layers, it likely belongs in a module or progressive layer
+
+## Future onboarding and preset system
+
+SKOSS should eventually offer a lightweight first-run setup that helps a business start quickly without locking it into a rigid template.
+
+### First-run setup
+
+A first-run flow should ask only for a few practical choices:
+
+- business name
+- business type, such as bakery, cafe, restaurant, dark kitchen, or food stall
+- operating mode, such as pickup, delivery, or mixed
+- default features enabled
+
+### Preset behavior
+
+Presets should:
+
+- guide initial setup
+- adjust vocabulary, defaults, and visible features where useful
+- recommend a sensible starting module set
+- remain fully editable after setup
+- never lock the business into one model
+
+The goal is faster activation, not template rigidity.
+
+## Summary
+
+SKOSS should evolve from a stable v0 operational slice into a modular operational platform by expanding in layers:
+
+1. strengthen fulfillment and daily workflow clarity
+2. add lightweight structured data for customers, suppliers, and ingredients
+3. introduce optional operational intelligence and analytics
+4. grow advanced capabilities through modules instead of bloating the core
+
+Complexity stays controlled by keeping the operator workflow small, making deeper structure progressive, and moving advanced business functions into optional modules rather than forcing every kitchen into ERP-style depth.

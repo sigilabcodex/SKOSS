@@ -2,128 +2,42 @@
 
 This document describes the conceptual model for SKOSS. It is intentionally implementation-agnostic.
 
-The goal is to define the important operational concepts and how they relate, without prematurely freezing a database schema or service architecture.
+The goal is to define the operational concepts that matter most, how they relate, and how the model can expand without forcing early ERP-style complexity.
 
 ## Modeling stance
 
 SKOSS should be modeled as an operational transformation system.
 
-The central question is not just "what records exist?" It is:
+The core question is:
 
-**How does the business move from demand to coordinated production work?**
+**How does the business move from demand to coordinated production and fulfillment work?**
 
-That is why the model centers on orders, recurrence, products, dough/prep concepts, production batches, WIP, and handoff.
+That is why the model starts from orders, recurrence, production interpretation, WIP, and handoff.
 
-A second modeling stance matters just as much:
+A second stance matters just as much:
 
 **operational capture must work before full normalization exists.**
 
-The model should therefore support both:
+The model should support:
 
-- immediate, messy, practical operational capture
-- later enrichment into clearer and more structured records
+- immediate, practical capture during active work
+- progressive enrichment into more structured records
+- clear relationships between lightweight records and richer future data
 
 ## Progressive structuring
 
-SKOSS should distinguish between information that is good enough to keep work moving and information that has been fully formalized.
+SKOSS should distinguish between operational capture and structured reference data.
 
 Examples:
 
-- an order can start with a draft customer instead of a fully managed customer record
-- an order line can point to a draft product or uncategorized item instead of a finished catalog entry
-- a production note can remain freeform when there is not yet a strong structured concept behind it
-- a known product, destination, recipe, or base dough should still be reused when it already exists
+- an order can begin with a draft customer instead of a fully maintained customer profile
+- an order line can use a draft product or uncategorized item instead of a formal catalog entry
+- fulfillment context can begin with simple mode and notes before advanced delivery tracking exists
+- customer, supplier, and ingredient records can start lightweight and gain structure over time
 
-This is not an excuse for bad data. It is a recognition that small businesses often learn and formalize while operating.
+This allows the system to remain useful before setup is complete.
 
-## Operational data vs normalized admin data
-
-The model should preserve a clear difference between two kinds of information.
-
-### Freeform or operational capture
-
-This is the data people enter because work is happening now.
-
-Characteristics:
-
-- fast to enter
-- may be incomplete
-- may use placeholder labels
-- may contain notes instead of structured references
-- optimized for immediate usability under time pressure
-
-Examples:
-
-- "walk-in customer wants 3 sesame rolls for tomorrow"
-- "special tray for cafe, same as last week"
-- "unknown sweet bread item, estimate 12 pieces"
-- "use remaining dough from night shift first"
-
-### Structured or administrative data
-
-This is the data that has been reviewed, named clearly, and linked to other concepts.
-
-Characteristics:
-
-- reusable across future work
-- more normalized and searchable
-- supports better planning and reporting
-- often created or cleaned up after operations are already moving
-
-Examples:
-
-- a customer with contact details and preferred destinations
-- a product with variants, standard units, and defaults
-- a base dough linked to multiple sellable variants
-- a recipe or process profile used repeatedly in production planning
-
-The system should support movement from the first category to the second without forcing that conversion too early.
-
-## Placeholder and draft concepts
-
-The following placeholder concepts should be considered first-class in the domain, even if implementation details come later.
-
-### Draft customer
-
-A draft customer represents a person or business known well enough to take an order, but not yet fully set up.
-
-Responsibilities:
-
-- allow immediate order capture
-- store minimal identifying context such as a name or note
-- be convertible into a fuller customer record later
-
-### Draft product
-
-A draft product represents a sellable item not yet formalized in the catalog.
-
-Responsibilities:
-
-- allow order capture without blocking on product administration
-- preserve the label used by the operator or customer
-- support later conversion into a structured product and variant model
-
-### Draft item / uncategorized item
-
-A draft item or uncategorized item represents an operational line that is known to matter but does not yet fit the formal catalog.
-
-Responsibilities:
-
-- keep ad hoc demand visible
-- avoid forcing false precision
-- support later classification or merging into real catalog structure
-
-### Freeform note item
-
-A freeform note item represents demand or work that is easier to capture as text than as a catalog line.
-
-Responsibilities:
-
-- preserve important context immediately
-- support unusual requests, one-off prep, substitutions, or verbal commitments
-- remain visible in planning and handoff even if it cannot yet drive full automation
-
-## Core entities
+## Core operational entities
 
 ### Order
 
@@ -132,70 +46,143 @@ An order represents external demand.
 Responsibilities:
 
 - capture who needs what
-- hold timing or delivery expectations
-- preserve notes and exceptions
-- act as one source of production demand
-- allow draft or structured references depending on what is available
+- preserve timing and fulfillment expectations
+- hold notes and exceptions
+- act as a source of production demand
+- stay usable with either draft or structured references
 
-An order contains one or more order lines.
+An order contains one or more order lines and may reference a customer or a draft customer.
 
-### Order line
+### OrderLine
 
-An order line represents a specific requested item and quantity within an order.
+An order line represents a specific requested item within an order.
 
 Responsibilities:
 
-- identify the requested product, variant, draft item, or note item
+- identify the requested product, variant, draft item, or freeform note item
 - hold quantity and unit context
 - preserve line-specific notes
-- support grouping for planning
+- support grouping into production requirements
 
-Order lines are often the most direct bridge between sales input and production requirements.
+Order lines are the main bridge between sales capture and kitchen interpretation.
 
-### Recurrence template
+### RecurrenceTemplate
 
 A recurrence template defines repeated expected work.
 
 Responsibilities:
 
 - express a schedule pattern
-- generate future instances
-- distinguish template-level edits from one-off occurrence changes
-- support both customer demand and internal operational routines
+- generate future recurring orders or internal tasks
+- separate template changes from one-off occurrence changes
+- reduce repeated manual entry
 
-A recurrence template may generate recurring orders or recurring internal tasks.
+### InternalTask
 
-### Internal task
-
-An internal task represents work the operation must do even without a customer order.
+An internal task represents work that matters operationally even when it is not tied to a sale.
 
 Responsibilities:
 
-- capture non-sales operational work
-- support recurring operational routines
+- capture prep, staging, or routine work
+- support recurring internal routines
 - appear in role-appropriate workspaces
 - carry notes, status, and handoff relevance
 
-### Customer
+### ProductionBatch
+
+A production batch is a concrete planned or active chunk of kitchen work.
+
+Responsibilities:
+
+- group production requirements into executable work
+- carry quantities, notes, and status
+- reflect what the kitchen actually does
+- anchor partial completion and handoff
+
+### WIP
+
+WIP represents already-started or partially completed work.
+
+Responsibilities:
+
+- show current reality before more work is planned
+- reduce duplicate production
+- support manual adjustment when execution diverges from plan
+- preserve state across shifts
+
+WIP may apply to dough, prep, shaping, packing, or other in-progress stages.
+
+### ShiftLog
+
+A shift log records meaningful updates across a shift boundary.
+
+Responsibilities:
+
+- document what happened
+- preserve exceptions, shortages, substitutions, and notes
+- support continuity across night, morning, and later-day work
+- reduce dependence on memory or verbal-only handoff
+
+## Supporting structured entities
+
+### Customer (CRM light)
 
 A customer represents a person or organization that places demand.
 
 Responsibilities:
 
-- provide identity and relationship context
-- support recurring work, communication, and destination handling
-- remain optional for first capture through draft customer support
+- provide reusable identity and contact context
+- support recurring work and order history
+- carry practical notes, tags, or service context later
+- remain optional at first through draft customer support
 
-### Product
+A customer may be lightweight at first and later support richer CRM-style extensions.
 
-A product represents a recognizable operational and commercial item.
+### Supplier
+
+A supplier represents a business or person that provides ingredients or materials.
 
 Responsibilities:
 
-- provide a stable item concept for ordering and planning
+- provide reusable purchasing context
+- support historical pricing by supplier
+- hold contact details and practical notes
+- stay available historically even when inactive
+
+### RawMaterial / Ingredient
+
+A raw material or ingredient represents a reusable kitchen input.
+
+Responsibilities:
+
+- provide a stable reference for recipes and purchasing memory
+- support supplier price history
+- enable future costing without requiring it immediately
+- remain practical in naming and unit choice
+
+This entity should stay lightweight and kitchen-readable rather than inventory-heavy.
+
+### SupplierPriceEntry
+
+A supplier price entry represents a historical price observation for a material from a supplier.
+
+Responsibilities:
+
+- record dated price evidence instead of overwriting a single current price
+- preserve package quantity, unit, and optional presentation details
+- support later comparison and normalization
+- prepare the model for recipe costing and purchasing visibility
+
+### Product
+
+A product represents a recognizable sellable or operational item.
+
+Responsibilities:
+
+- provide a stable item concept for orders and planning
 - group related variants
-- connect to recipe and process definitions where relevant
-- coexist with draft products during progressive formalization
+- connect to recipe or process definitions where useful
+- coexist with draft products during adoption
 
 ### Variant
 
@@ -204,20 +191,18 @@ A variant represents an operationally meaningful version of a product.
 Responsibilities:
 
 - express differences that change production work
-- define distinctions in finish, shape, inclusion, size, weight, or handling
 - preserve customer-facing clarity without losing kitchen relevance
+- connect demand to upstream preparation more accurately
 
-Variants matter because small kitchens frequently sell many outcomes derived from the same underlying preparation work.
+### BaseDough
 
-### Base dough
-
-A base dough represents an upstream dough family used by one or more variants.
+A base dough represents a shared upstream preparation family.
 
 Responsibilities:
 
-- capture shared preparation logic before final item differentiation
-- support grouping production by what is actually mixed or fermented
-- make bakery planning more realistic than product-only counting
+- group work by what is actually mixed or fermented
+- support bakery-style aggregation across multiple final variants
+- reflect real kitchen preparation structure
 
 ### Recipe
 
@@ -229,56 +214,30 @@ Responsibilities:
 - support consistency across workers
 - connect operational planning to production reality
 
-Recipe should stay practical. It does not need to become a full costing engine in the first phase.
+Recipe support should stay practical. It does not need to become a full costing engine in the first phase.
 
-Recipes may also be missing or partial early in adoption. Their absence should reduce planning precision, not block basic operation.
-
-### Process profile
+### ProcessProfile
 
 A process profile describes how work progresses operationally.
 
 Responsibilities:
 
 - reflect stages, checkpoints, and timing logic
-- distinguish products that share dough but differ in workflow
+- distinguish items that share inputs but differ in workflow
 - help translate demand into executable work
 
-This is especially useful in bakery contexts where fermentation, proofing, shaping, and finishing differ materially across variants.
+### Fulfillment metadata
 
-### Production batch
-
-A production batch is a concrete planned or active chunk of work.
+Fulfillment metadata describes how an order is expected to reach the customer.
 
 Responsibilities:
 
-- group requirements into something the kitchen can execute
-- carry quantities, notes, and status
-- reflect actual operational work, not just abstract demand
-- provide an anchor for partial completion and handoff
+- distinguish fulfillment mode such as pickup, own delivery, or app delivery
+- preserve dispatch notes and promised timing context
+- support assignment and status visibility where relevant
+- remain lightweight until a fuller delivery module exists
 
-### WIP
-
-WIP represents already-started or partially completed work.
-
-Responsibilities:
-
-- reduce duplicate planning
-- make current reality visible
-- support manual adjustments when work diverges from plan
-- preserve state between shifts
-
-WIP can apply to dough, prep, shaped items, partially completed packing, or other in-progress stages.
-
-### Shift log
-
-A shift log records meaningful updates across a shift boundary.
-
-Responsibilities:
-
-- document what happened
-- preserve exceptions, shortages, substitutions, and notes
-- support morning review and next-shift continuity
-- reduce dependence on memory or verbal-only handoff
+This metadata may live directly on the order in early stages.
 
 ### Destination
 
@@ -286,11 +245,11 @@ A destination identifies where output is going.
 
 Responsibilities:
 
-- group demand by route, client, stall, or counter
+- group demand by route, client, stall, counter, or delivery point
 - support packing and dispatch logic
 - keep production connected to fulfillment context
 
-### Production day
+### ProductionDay
 
 A production day is the operational planning frame.
 
@@ -299,125 +258,114 @@ Responsibilities:
 - organize demand and work into a usable working period
 - support businesses where production spans calendar boundaries
 
-## Important relationships
+## Placeholder and draft concepts
 
-### Orders and order lines -> products, variants, and placeholders
+Progressive adoption requires placeholder entities to be first-class concepts.
 
-Orders generate demand through order lines.
-Order lines may point to:
+### DraftCustomer
 
-- a structured product or variant
+A draft customer allows immediate order capture before full customer setup exists.
+
+### DraftProduct
+
+A draft product allows immediate item capture before the catalog is fully structured.
+
+### UncategorizedItem
+
+An uncategorized item allows the team to preserve demand that matters before it has a clean home in the product model.
+
+### FreeformNoteItem
+
+A freeform note item allows unusual requests, exceptions, and one-off work to remain visible operationally.
+
+These placeholders should be clearly marked, searchable, and upgradable into more structured records later.
+
+## Key relationships
+
+### Order -> OrderLine
+
+An order contains one or more order lines.
+
+### Order -> Customer or DraftCustomer
+
+An order may reference:
+
+- a structured customer
+- a draft customer
+- no customer record yet, if the order still needs to be captured quickly
+
+### Order -> fulfillment metadata
+
+An order carries the fulfillment context that matters to execution, including:
+
+- fulfillment mode
+- promised timing
+- delivery or dispatch notes
+- optional assignment or status fields
+
+### OrderLine -> Product / Variant / placeholder item
+
+An order line may point to:
+
+- a structured product
+- a structured variant
 - a draft product
 - an uncategorized item
 - a freeform note item
 
-This flexibility is important because the kitchen must stay operational even while its catalog is still forming.
+This flexibility is necessary because real kitchens cannot stop order capture while administration catches up.
 
-### Variants -> base dough, recipe, and process profile
+### Customer -> Order
 
-Variants often inherit or reference shared upstream preparation.
+A customer may have many orders and may later support notes, tags, and simple history views.
 
-For example:
+### Supplier -> SupplierPriceEntry
 
-- vanilla concha and chocolate concha may share a brioche base dough
-- burger buns and sandwich loaves may share enriched dough but differ in shape, finish, weight, and bake handling
+A supplier may have many historical price entries.
 
-This relationship is central because demand may need to be aggregated at multiple levels:
+### RawMaterial -> SupplierPriceEntry
 
-- by final sellable item
-- by shared dough family
-- by process stage
+A raw material may have many historical price entries from one or more suppliers.
 
-### Orders and internal tasks -> production requirements
+### RawMaterial -> Recipe
 
-Not all work comes from sales.
-Some production requirements come from recurring internal tasks, maintenance prep, or routine staging work.
+A raw material may be referenced by one or more recipes.
 
-The model must allow both demand types to feed the production view.
+### Product / Variant -> Recipe / BaseDough / ProcessProfile
 
-### Production requirements -> production batches
+A product or variant may link to recipes, shared upstream preparation such as base dough, and process profiles that shape real production work.
 
-Grouped and interpreted requirements become production batches or other actionable work units.
+### Orders and InternalTasks -> ProductionBatch
 
-This transition is where the system stops being a passive record store and becomes a real operational engine.
+Customer demand and internal operational routines both feed production interpretation, which results in production batches or equivalent actionable work units.
 
-### WIP -> production adjustment
+### WIP -> ProductionBatch
 
-WIP modifies what still needs to happen.
+WIP modifies what still needs to be made. It is an input to planning, not just a historical status field.
 
-If dough is already mixed, the system should not blindly schedule the same upstream work again. If shaping is partially complete, the remaining task should reflect that. WIP is therefore not just descriptive state; it actively influences planning.
+### ShiftLog -> ProductionBatch / WIP / Order context
 
-### Shift log -> continuity across production day
+Shift logs preserve continuity across partially completed work, shortages, substitutions, and fulfillment issues.
 
-Shift logs preserve continuity when responsibility changes between people or time windows.
+## Expansion rules
 
-This is especially important in bakery operations where night production, proofing, baking, and morning packing may be handled by different workers.
+As the model grows, it should preserve a few constraints:
 
-## Why variants matter
-
-Variants are not cosmetic.
-
-In a bakery or compact kitchen, variants frequently change the actual work required:
-
-- toppings may alter finishing steps
-- fillings may add prep dependencies
-- target weight changes dough requirements
-- shape changes labor and tray planning
-- wash or garnish changes final handling
-- process timing may differ even with the same base dough
-
-If the model ignores variants, the system will quickly drift away from kitchen reality.
-
-## Why WIP is first-class
-
-Many systems treat work in progress as a thin status field. That is not enough here.
-
-WIP must be first-class because:
-
-- production can start before final order certainty
-- work may pause at intermediate stages
-- operators often need to make manual adjustments
-- planning without WIP visibility leads to duplication or confusion
-- shift changes depend on knowing the current real state of work
-
-In short, WIP is part of planning, not just reporting.
-
-## Why shift handoff is first-class
-
-Small food operations often rely on person-to-person memory for handoff. That works until it does not.
-
-Shift handoff needs to be explicit because:
-
-- production stages span multiple shifts
-- night and morning work are tightly linked in bakeries
-- partial completion is normal
-- problems and substitutions must remain visible
-- supervisors need quick review, not forensic reconstruction
-
-The system should therefore treat handoff as part of the operational model itself.
-
-## Modeling implications
-
-The conceptual model should allow progressive formalization without collapsing into chaos.
-
-That implies:
-
-- draft records should have a clear upgrade path into structured records
-- structured records should remain reusable and preferred when available
-- freeform capture should be preserved as historical operational truth, even if later linked to cleaner entities
-- the same workflow may contain both well-structured and lightly structured lines at the same time
-- planning logic may need confidence levels or fallback handling when data is incomplete
+- core workflows must still work with partially structured data
+- richer entities should extend the model without forcing all businesses into heavy setup
+- historical operational truth should not be erased when records are later formalized
+- advanced capabilities such as CRM+, procurement, costing, and deep delivery tracking should build on these entities rather than replacing them
 
 ## Deliberate omissions
 
-This model does not yet lock in:
+This document does not lock in:
 
 - table structures
-- event models
+- APIs
 - service boundaries
 - inventory valuation logic
-- accounting integration shape
-- advanced permission architecture
-- the exact persistence strategy for draft versus structured records
+- accounting models
+- advanced permissions
+- specific implementation strategy for draft-to-structured conversion
 
-Those decisions should follow only after the domain model and MVP workflow are better proven.
+Those decisions should follow only after the domain model and workflow layers are proven in practice.
