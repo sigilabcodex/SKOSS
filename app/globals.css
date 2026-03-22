@@ -1444,3 +1444,36 @@ select:disabled {
   white-space: nowrap;
   border: 0;
 }
+
+
+.recipe-grid {
+  align-items: start;
+}
+
+.recipe-lines-block {
+  gap: var(--space-3);
+}
+
+.recipe-line-list {
+  display: grid;
+  gap: var(--space-3);
+}
+
+.recipe-line-card,
+.recipe-cost-summary {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--surface-soft) 75%, transparent);
+}
+
+.recipe-remove-row {
+  padding-top: 0;
+}
+
+.recipe-cost-summary strong {
+  font-size: 1.5rem;
+  line-height: 1.1;
+}

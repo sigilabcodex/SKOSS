@@ -1,10 +1,13 @@
 import Link from 'next/link';
 import { formatCurrency, formatDateLabel, formatTemplateScheduleLabel, formatUnitRate } from '@/lib/domain/formatters';
+import type { Product, Recipe } from '@/lib/domain/types';
 import {
   createRawMaterialAction,
+  createRecipeAction,
   createSupplierAction,
   createSupplierPriceEntryAction,
   updateRawMaterialAction,
+  updateRecipeAction,
   updateSupplierAction,
 } from '@/lib/server/actions';
 import { getSetupWorkspace } from '@/lib/server/demo-data';
@@ -14,7 +17,7 @@ import { OnboardingAssistant } from '@/components/setup/onboarding-assistant';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { SetupIcon, SparklesIcon } from '@/components/ui-icons';
 
-const basicUnits = ['g', 'kg', 'ml', 'l', 'unit', 'piece', 'dozen'] as const;
+const basicUnits = ['g', 'kg', 'ml', 'l', 'unit', 'piece', 'dozen', 'eggs'] as const;
 
 type SetupSearchParams = {
   error?: string;
@@ -23,6 +26,7 @@ type SetupSearchParams = {
   material?: string;
   historySupplier?: string;
   historyMaterial?: string;
+  recipe?: string;
 };
 
 function buildSetupHref(params: Record<string, string | undefined>) {
@@ -30,6 +34,42 @@ function buildSetupHref(params: Record<string, string | undefined>) {
     pathname: '/setup',
     query: Object.fromEntries(Object.entries(params).filter(([, value]) => Boolean(value))),
   };
+}
+
+function getProductLabel(product: Pick<Product, 'name'>, variant?: { name: string } | null) {
+  return variant ? `${product.name} / ${variant.name}` : product.name;
+}
+
+function getRecipeLinkLabel(recipe: Recipe, products: Product[]) {
+  const product = products.find((entry) => entry.id === recipe.productId);
+  if (!product) {
+    return recipe.title;
+  }
+
+  const variant = recipe.productVariantId
+    ? product.variants.find((entry) => entry.id === recipe.productVariantId) ?? null
+    : null;
+
+  return getProductLabel(product, variant);
+}
+
+function buildRecipeLineRows(recipe?: Recipe | null) {
+  const existing = recipe?.lines ?? [];
+  const blankCount = Math.max(3, 5 - existing.length);
+
+  return [
+    ...existing.map((line) => ({ ...line, isBlank: false, key: line.id })),
+    ...Array.from({ length: blankCount }, (_, index) => ({
+      id: '',
+      rawMaterialId: '',
+      rawMaterialLabel: '',
+      quantity: undefined,
+      unit: '',
+      note: '',
+      isBlank: true,
+      key: `blank-${index}`,
+    })),
+  ];
 }
 
 async function SavedMessage({ saved }: { saved?: string }) {
@@ -45,6 +85,10 @@ async function SavedMessage({ saved }: { saved?: string }) {
 
   if (saved === 'price') {
     return <p className="inline-success">{t('setup.saved.price')}</p>;
+  }
+
+  if (saved === 'recipe') {
+    return <p className="inline-success">{t('setup.saved.recipe')}</p>;
   }
 
   if (saved === 'preferences') {
@@ -69,6 +113,9 @@ export default async function SetupPage({
   const editingMaterial = params?.material
     ? data.rawMaterials.find((material) => material.id === params.material) ?? null
     : null;
+  const editingRecipe = params?.recipe
+    ? data.recipes.find((recipe) => recipe.id === params.recipe) ?? null
+    : null;
   const historySupplier = params?.historySupplier
     ? data.suppliers.find((supplier) => supplier.id === params.historySupplier) ?? null
     : null;
@@ -82,6 +129,9 @@ export default async function SetupPage({
   const rawMaterialFormAction = editingMaterial
     ? updateRawMaterialAction.bind(null, editingMaterial.id)
     : createRawMaterialAction;
+  const recipeFormAction = editingRecipe
+    ? updateRecipeAction.bind(null, editingRecipe.id)
+    : createRecipeAction;
 
   const supplierPriceCounts = new Map<string, number>();
   const materialPriceCounts = new Map<string, number>();
@@ -107,6 +157,7 @@ export default async function SetupPage({
     historyMaterial: historyMaterial?.id,
     supplier: editingSupplier?.id,
     material: editingMaterial?.id,
+    recipe: editingRecipe?.id,
   });
 
   const materialHistoryHref = (materialId: string) => buildSetupHref({
@@ -114,7 +165,13 @@ export default async function SetupPage({
     historyMaterial: materialId,
     supplier: editingSupplier?.id,
     material: editingMaterial?.id,
+    recipe: editingRecipe?.id,
   });
+
+  const recipeLineRows = buildRecipeLineRows(editingRecipe);
+  const editingRecipeCost = editingRecipe ? data.recipeCostById.get(editingRecipe.id) ?? null : null;
+  const activeRecipes = data.recipes.filter((recipe) => recipe.active).length;
+  const linkedProductCount = new Set(data.recipes.map((recipe) => recipe.productVariantId ?? recipe.productId)).size;
 
   return (
     <div className="page-stack">
@@ -216,6 +273,11 @@ export default async function SetupPage({
           <span className="stat-label">{t('setup.recordedPrices')}</span>
           <strong>{data.supplierPriceEntries.length}</strong>
           <span>{t('setup.recordedPricesHelp')}</span>
+        </article>
+        <article className="stat-card stat-card-neutral">
+          <span className="stat-label">{t('setup.recipes')}</span>
+          <strong>{activeRecipes}</strong>
+          <span>{t('setup.recipesHelp')}</span>
         </article>
       </section>
 
@@ -326,7 +388,7 @@ export default async function SetupPage({
                     <span className="inline-meta">{supplierPriceCounts.get(supplier.id) ?? 0} {t('setup.labels.priceEntries')}</span>
                   </div>
                   <div className="inline-action-row">
-                    <Link href={buildSetupHref({ supplier: supplier.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, material: editingMaterial?.id })} className="inline-link">
+                    <Link href={buildSetupHref({ supplier: supplier.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, material: editingMaterial?.id, recipe: editingRecipe?.id })} className="inline-link">
                       {t('setup.actions.edit')}
                     </Link>
                     <Link href={supplierHistoryHref(supplier.id)} className="inline-link">
@@ -343,7 +405,7 @@ export default async function SetupPage({
                   <p className="helper-text">{editingSupplier ? t('setup.editSupplierHelp') : t('setup.addSupplierHelp')}</p>
                 </div>
                 {editingSupplier ? (
-                  <Link href={buildSetupHref({ historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, material: editingMaterial?.id })} className="button-secondary compact-button">
+                  <Link href={buildSetupHref({ historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, material: editingMaterial?.id, recipe: editingRecipe?.id })} className="button-secondary compact-button">
                     {t('setup.actions.cancelEdit')}
                   </Link>
                 ) : null}
@@ -406,7 +468,7 @@ export default async function SetupPage({
                       <span className="inline-meta">{materialPriceCounts.get(material.id) ?? 0} {t('setup.labels.priceEntries')}</span>
                     </div>
                     <div className="inline-action-row">
-                      <Link href={buildSetupHref({ material: material.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, supplier: editingSupplier?.id })} className="inline-link">
+                      <Link href={buildSetupHref({ material: material.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, supplier: editingSupplier?.id, recipe: editingRecipe?.id })} className="inline-link">
                         {t('setup.actions.edit')}
                       </Link>
                       <Link href={materialHistoryHref(material.id)} className="inline-link">
@@ -424,7 +486,7 @@ export default async function SetupPage({
                   <p className="helper-text">{editingMaterial ? t('setup.editRawMaterialHelp') : t('setup.addRawMaterialHelp')}</p>
                 </div>
                 {editingMaterial ? (
-                  <Link href={buildSetupHref({ historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, supplier: editingSupplier?.id })} className="button-secondary compact-button">
+                  <Link href={buildSetupHref({ historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, supplier: editingSupplier?.id, recipe: editingRecipe?.id })} className="button-secondary compact-button">
                     {t('setup.actions.cancelEdit')}
                   </Link>
                 ) : null}
@@ -470,6 +532,241 @@ export default async function SetupPage({
       <section className="panel page-stack">
         <div className="table-header-row">
           <div>
+            <h2>{t('setup.recipeFoundationTitle')}</h2>
+            <p>{t('setup.recipeFoundationHelp')}</p>
+          </div>
+          <span className="summary-pill">{linkedProductCount} {t('setup.recipeLabels.linkedProducts')}</span>
+        </div>
+
+        <div className="grid-two recipe-grid">
+          <article className="subpanel page-stack">
+            <div className="table-header-row">
+              <div>
+                <h3>{t('setup.recipeListTitle')}</h3>
+                <p>{t('setup.recipeListHelp')}</p>
+              </div>
+              <span className="summary-pill">{data.recipes.length} {t('common.recipes')}</span>
+            </div>
+            {data.recipes.length > 0 ? (
+              <ul className="stack-list compact-list">
+                {data.recipes.map((recipe) => {
+                  const recipeCost = data.recipeCostById.get(recipe.id);
+                  const productLabel = getRecipeLinkLabel(recipe, data.products);
+
+                  return (
+                    <li key={recipe.id} className="list-with-actions">
+                      <div>
+                        <strong>
+                          {recipe.title}
+                          {!recipe.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
+                        </strong>
+                        <span>{productLabel}</span>
+                        <span className="inline-meta">
+                          {recipe.lines.length} {t('setup.recipeLabels.lines')}
+                          {recipeCost?.lineCount
+                            ? ` · ${recipeCost.complete
+                              ? `${t('setup.recipeLabels.costed')} ${formatCurrency(recipeCost.totalEstimatedCost, locale)}`
+                              : `${formatCurrency(recipeCost.totalEstimatedCost, locale)} · ${recipeCost.incompleteLineCount} ${t('setup.recipeLabels.incomplete')}`}`
+                            : ` · ${t('setup.recipeLabels.noLinesYet')}`}
+                        </span>
+                      </div>
+                      <div className="inline-action-row">
+                        <Link href={buildSetupHref({ recipe: recipe.id, supplier: editingSupplier?.id, material: editingMaterial?.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id })} className="inline-link">
+                          {t('setup.actions.edit')}
+                        </Link>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="empty-state">{t('setup.recipeEmpty')}</p>
+            )}
+          </article>
+
+          <div className="page-stack">
+            <form action={recipeFormAction} className="subpanel page-stack">
+              <div className="field-section-header">
+                <div>
+                  <h3>{editingRecipe ? t('setup.editRecipe') : t('setup.addRecipe')}</h3>
+                  <p className="helper-text">{editingRecipe ? t('setup.editRecipeHelp') : t('setup.addRecipeHelp')}</p>
+                </div>
+                {editingRecipe ? (
+                  <Link href={buildSetupHref({ supplier: editingSupplier?.id, material: editingMaterial?.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id })} className="button-secondary compact-button">
+                    {t('setup.actions.cancelEdit')}
+                  </Link>
+                ) : null}
+              </div>
+
+              <div className="grid-two">
+                <label>
+                  <span className="field-heading">{t('setup.fields.product')} <span className="required-dot">{t('common.required')}</span></span>
+                  <select name="productId" defaultValue={editingRecipe?.productId ?? ''} required>
+                    <option value="" disabled>{t('common.selectProduct')}</option>
+                    {data.products.map((product) => (
+                      <option key={product.id} value={product.id}>{product.name}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span className="field-heading">{t('setup.fields.variant')} <span className="optional-pill">{t('common.optional')}</span></span>
+                  <select name="productVariantId" defaultValue={editingRecipe?.productVariantId ?? ''}>
+                    <option value="">{t('setup.recipeLabels.productLevel')}</option>
+                    {data.products.map((product) => (
+                      <optgroup key={product.id} label={product.name}>
+                        {product.variants.map((variant) => (
+                          <option key={variant.id} value={variant.id}>{variant.name}</option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span className="field-heading">{t('setup.fields.recipeTitle')} <span className="optional-pill">{t('common.optional')}</span></span>
+                  <input name="title" placeholder={t('setup.placeholders.recipeTitle')} defaultValue={editingRecipe?.title ?? ''} />
+                </label>
+                <label>
+                  <span className="field-heading">{t('setup.fields.batchYieldQuantity')} <span className="optional-pill">{t('common.optional')}</span></span>
+                  <input name="batchYieldQuantity" type="number" min="0.01" step="0.01" placeholder={t('setup.placeholders.batchYieldQuantity')} defaultValue={editingRecipe?.batchYieldQuantity ?? ''} />
+                </label>
+                <label>
+                  <span className="field-heading">{t('setup.fields.batchYieldUnit')} <span className="optional-pill">{t('common.optional')}</span></span>
+                  <input name="batchYieldUnit" list="basic-unit-options" placeholder={t('setup.placeholders.batchYieldUnit')} defaultValue={editingRecipe?.batchYieldUnit ?? ''} />
+                </label>
+              </div>
+              <p className="helper-text">{t('setup.recipeYieldHelp')}</p>
+              <label>
+                <span className="field-heading">{t('setup.fields.instructions')} <span className="optional-pill">{t('common.optional')}</span></span>
+                <textarea name="instructions" placeholder={t('setup.placeholders.recipeInstructions')} defaultValue={editingRecipe?.instructions ?? ''} />
+              </label>
+              <label className="checkbox-row">
+                <input name="active" type="checkbox" defaultChecked={editingRecipe?.active ?? true} />
+                <span>
+                  <strong>{t('setup.fields.activeRecipe')}</strong>
+                  <span className="helper-text">{t('setup.fields.activeRecipeHelp')}</span>
+                </span>
+              </label>
+
+              <div className="recipe-lines-block page-stack">
+                <div>
+                  <h3>{t('setup.recipeLinesTitle')}</h3>
+                  <p className="helper-text">{t('setup.recipeLinesHelp')}</p>
+                </div>
+                <div className="recipe-line-list">
+                  {recipeLineRows.map((line, index) => (
+                    <div key={line.id || line.key || `line-${index}`} className="recipe-line-card">
+                      <input type="hidden" name="recipeLineId" value={line.id ?? ''} />
+                      <div className="grid-two">
+                        <label>
+                          <span className="field-heading">{t('setup.fields.rawMaterial')} {index < 2 ? <span className="optional-pill">{t('common.optional')}</span> : null}</span>
+                          <select name="lineRawMaterialId" defaultValue={line.rawMaterialId ?? ''}>
+                            <option value="">{t('setup.recipeLabels.selectMaterialOptional')}</option>
+                            {data.rawMaterials.map((material) => (
+                              <option key={material.id} value={material.id}>{material.name}</option>
+                            ))}
+                          </select>
+                        </label>
+                        <label>
+                          <span className="field-heading">{t('setup.fields.quantity')} <span className="optional-pill">{t('common.optional')}</span></span>
+                          <input name="lineQuantity" type="number" min="0.01" step="0.01" placeholder={t('setup.placeholders.recipeLineQuantity')} defaultValue={line.quantity ?? ''} />
+                        </label>
+                        <label>
+                          <span className="field-heading">{t('setup.fields.unit')} <span className="optional-pill">{t('common.optional')}</span></span>
+                          <input name="lineUnit" list="basic-unit-options" placeholder={t('setup.placeholders.recipeLineUnit')} defaultValue={line.unit ?? ''} />
+                        </label>
+                        <label>
+                          <span className="field-heading">{t('setup.fields.note')} <span className="optional-pill">{t('common.optional')}</span></span>
+                          <input name="lineNote" placeholder={t('setup.placeholders.recipeLineNote')} defaultValue={line.note ?? ''} />
+                        </label>
+                      </div>
+                      {!line.isBlank ? (
+                        <label className="checkbox-row recipe-remove-row">
+                          <input name="lineRemove" type="checkbox" value={`remove-${index}`} />
+                          <span>
+                            <strong>{t('setup.actions.removeLine')}</strong>
+                            <span className="helper-text">{t('setup.recipeRemoveLineHelp')}</span>
+                          </span>
+                        </label>
+                      ) : null}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <button type="submit" className="button-primary">
+                {editingRecipe ? t('setup.actions.updateRecipe') : t('setup.actions.saveRecipe')}
+              </button>
+            </form>
+
+            <article className="subpanel page-stack">
+              <div className="table-header-row">
+                <div>
+                  <h3>{t('setup.recipeCostingTitle')}</h3>
+                  <p>{t('setup.recipeCostingHelp')}</p>
+                </div>
+                <span className="summary-pill">{t('setup.recipeLabels.latestPricesOnly')}</span>
+              </div>
+              {editingRecipe && editingRecipeCost ? (
+                editingRecipeCost.lineCount > 0 ? (
+                  <>
+                    <div className="recipe-cost-summary">
+                      <strong>{formatCurrency(editingRecipeCost.totalEstimatedCost, locale)}</strong>
+                      <span>
+                        {editingRecipeCost.complete
+                          ? t('setup.recipeCostComplete')
+                          : `${editingRecipeCost.costedLineCount}/${editingRecipeCost.lineCount} ${t('setup.recipeLabels.linesCosted')}`}
+                      </span>
+                      {editingRecipe.batchYieldQuantity && editingRecipe.batchYieldUnit ? (
+                        <span>
+                          {t('setup.recipeLabels.approxPerYield')} {formatCurrency(editingRecipeCost.totalEstimatedCost / editingRecipe.batchYieldQuantity, locale)} / {editingRecipe.batchYieldUnit}
+                        </span>
+                      ) : null}
+                    </div>
+                    <ul className="stack-list compact-list">
+                      {editingRecipeCost.lines.map((line) => (
+                        <li key={line.line.id} className="history-list-item">
+                          <strong>
+                            {line.line.rawMaterialLabel} · {line.line.quantity} {line.line.unit}
+                          </strong>
+                          {line.status === 'costed' ? (
+                            <>
+                              <span>
+                                {line.latestPriceEntry?.supplierLabel} · {formatDateLabel(line.latestPriceEntry?.priceDate ?? today, locale)}
+                              </span>
+                              <span>
+                                {t('setup.recipeLabels.estimatedLineCost')} {formatCurrency(line.estimatedCost ?? 0, locale)}
+                                {line.latestPriceEntry ? ` · ${formatUnitRate(line.latestPriceEntry, locale)}` : ''}
+                              </span>
+                            </>
+                          ) : (
+                            <span>
+                              {line.status === 'missing_price'
+                                ? t('setup.recipeCostMissingPrice')
+                                : line.status === 'missing_package'
+                                  ? t('setup.recipeCostMissingPackage')
+                                  : t('setup.recipeCostUnitMismatch')}
+                            </span>
+                          )}
+                          {line.line.note ? <span className="helper-text">{line.line.note}</span> : null}
+                        </li>
+                      ))}
+                    </ul>
+                    {!editingRecipeCost.complete ? <p className="inline-warning">{t('setup.recipeCostIncomplete')}</p> : null}
+                  </>
+                ) : (
+                  <p className="empty-state">{t('setup.recipeCostEmpty')}</p>
+                )
+              ) : (
+                <p className="empty-state">{t('setup.recipeCostStart')}</p>
+              )}
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section className="panel page-stack">
+        <div className="table-header-row">
+          <div>
             <h2>{t('setup.supplierPriceMemory')}</h2>
             <p>{t('setup.supplierPriceMemoryHelp')}</p>
           </div>
@@ -480,7 +777,7 @@ export default async function SetupPage({
           {historySupplier ? <span className="summary-pill">{t('setup.history.supplierFilter')}: {historySupplier.name}</span> : null}
           {historyMaterial ? <span className="summary-pill">{t('setup.history.materialFilter')}: {historyMaterial.name}</span> : null}
           {historySupplier || historyMaterial ? (
-            <Link href={buildSetupHref({ supplier: editingSupplier?.id, material: editingMaterial?.id })} className="inline-link">
+            <Link href={buildSetupHref({ supplier: editingSupplier?.id, material: editingMaterial?.id, recipe: editingRecipe?.id })} className="inline-link">
               {t('setup.actions.clearHistoryFilters')}
             </Link>
           ) : (

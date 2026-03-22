@@ -2,7 +2,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { demoSeed } from '@/data/demo-seed';
 import { inferFulfillmentType } from '@/lib/domain/order-helpers';
-import type { AppData, Order, OrderLine, RecurringTemplate, WeekdayKey, WorkspacePreferences } from '@/lib/domain/types';
+import type { AppData, Order, OrderLine, Recipe, RecurringTemplate, WeekdayKey, WorkspacePreferences } from '@/lib/domain/types';
 import { defaultLocale, defaultPreset } from '@/lib/i18n/config';
 
 const storePath = path.join(process.cwd(), 'data', 'demo-store.json');
@@ -96,6 +96,33 @@ function normalizeTemplate(template: Partial<RecurringTemplate>): RecurringTempl
       quantity: Number(line.quantity ?? 0),
       unit: line.unit || 'pieces',
       note: line.note,
+    })),
+  };
+}
+
+
+function normalizeRecipe(recipe: Partial<Recipe>): Recipe {
+  const createdAt = recipe.createdAt ?? new Date().toISOString();
+  const updatedAt = recipe.updatedAt ?? createdAt;
+
+  return {
+    id: recipe.id ?? `recipe-${crypto.randomUUID()}`,
+    productId: recipe.productId ?? '',
+    productVariantId: recipe.productVariantId,
+    title: recipe.title?.trim() ?? 'Untitled recipe',
+    batchYieldQuantity: recipe.batchYieldQuantity !== undefined ? Number(recipe.batchYieldQuantity) : undefined,
+    batchYieldUnit: recipe.batchYieldUnit?.trim() || undefined,
+    instructions: recipe.instructions?.trim() || undefined,
+    active: recipe.active ?? true,
+    createdAt,
+    updatedAt,
+    lines: (recipe.lines ?? []).map((line) => ({
+      id: line.id ?? `recipe-line-${crypto.randomUUID()}`,
+      rawMaterialId: line.rawMaterialId,
+      rawMaterialLabel: line.rawMaterialLabel,
+      quantity: Number(line.quantity ?? 0),
+      unit: line.unit?.trim() || 'unit',
+      note: line.note?.trim() || undefined,
     })),
   };
 }
@@ -239,6 +266,7 @@ function hydrateStore(rawData: AppData): AppData {
     suppliers: rawData.suppliers ?? [],
     rawMaterials: rawData.rawMaterials ?? [],
     supplierPriceEntries: rawData.supplierPriceEntries ?? [],
+    recipes: (rawData.recipes ?? []).map((recipe) => normalizeRecipe(recipe as Partial<Recipe>)),
     wipEntries: rawData.wipEntries ?? [],
     shiftLogs: rawData.shiftLogs ?? [],
   };

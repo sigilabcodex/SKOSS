@@ -20,7 +20,8 @@ The first slice stays intentionally narrow:
 1. order fulfillment context
 2. suppliers
 3. raw materials
-4. supplier-specific historical price entries
+4. lightweight recipes / formulas linked to products and raw materials
+5. supplier-specific historical price entries
 
 This first procurement and costing slice should feel like a **buying notebook**, not a purchasing department system.
 
@@ -30,7 +31,9 @@ It should let a team:
 - keep a lightweight list of materials or ingredients
 - append supplier prices over time
 - review price history by supplier or by material
-- leave recipe costing and purchasing automation for later
+- link products to raw materials with lightweight recipes
+- see a small estimated material cost summary when pricing evidence is usable
+- leave inventory logic, planning automation, and purchasing workflows for later
 
 It does **not** include:
 
@@ -125,16 +128,31 @@ That allows future logic to:
 - feed recipe costing with dated supplier evidence instead of one hard-coded default
 - keep alternate suppliers visible without forcing immediate switching workflows
 
-## Future recipe costing compatibility
+## Lightweight recipe and costing foundation
 
-Recipe costing is intentionally **not** part of this slice yet.
+SKOSS now needs a small recipe or formula layer, but it should remain deliberately modest.
 
-However, the data should already support it later by making it possible to answer questions like:
+A recipe should:
+
+- attach to a product or variant
+- hold a short title and optional batch yield
+- contain simple ingredient lines pointing to raw materials
+- allow notes or instructions without becoming a process engine
+- stay optional for products that are still draft-first or loosely defined
+
+This makes it possible to answer practical questions like:
 
 - what was the latest known supplier price for butter?
 - what did flour cost last month compared with today?
 - what package size was used for the quoted price?
-- which supplier price should be used for a costing run on a given date?
+- which latest supplier price is usable for a rough material estimate right now?
+
+The first costing pass should stay intentionally lightweight:
+
+- use the latest available supplier price entry per raw material
+- estimate only when package quantity and unit make normalization reasonable
+- show incomplete costing honestly when a line has no usable price
+- avoid pretending to be inventory valuation, accounting, or full margin reporting
 
 For that reason, price history should stay:
 
@@ -201,5 +219,8 @@ It does not add:
 - invoice matching
 - accounting hooks
 - automatic costing runs
+- inventory consumption from recipes
+- automatic production planning or MRP
+- full BOM or manufacturing module behavior
 
 Those can build later on top of the same supplier, raw material, and price-history records once the operational model proves its value.

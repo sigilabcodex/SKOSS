@@ -108,7 +108,7 @@ A team should be able to create and track orders immediately, even if:
 - no customer directory exists yet
 - the product catalog is incomplete
 - ingredients and suppliers are not loaded
-- recipes are partially defined or missing
+- recipes are partially defined, lightweight, or missing
 - recurring patterns are still being discovered
 
 Structured data is still valuable, but it should refine real work rather than block it.
@@ -133,7 +133,7 @@ The initial product direction centers on the operational backbone of small kitch
 - recurring orders
 - recurring internal tasks
 - products and product variants
-- recipe and base recipe concepts
+- lightweight recipe and base recipe concepts
 - base doughs and process profiles
 - production batches
 - work in progress (WIP)
