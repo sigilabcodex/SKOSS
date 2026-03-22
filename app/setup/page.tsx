@@ -1,20 +1,23 @@
 import { formatCurrency, formatDateLabel, formatTemplateScheduleLabel, formatUnitRate } from '@/lib/domain/formatters';
 import { createRawMaterialAction, createSupplierAction, createSupplierPriceEntryAction } from '@/lib/server/actions';
 import { getSetupWorkspace } from '@/lib/server/demo-data';
+import { getServerTranslator } from '@/lib/i18n/server';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { SetupIcon, SparklesIcon } from '@/components/ui-icons';
 
-function SavedMessage({ saved }: { saved?: string }) {
+async function SavedMessage({ saved }: { saved?: string }) {
+  const { t } = await getServerTranslator();
+
   if (saved === 'supplier') {
-    return <p className="inline-success">Supplier saved. Keep growing structure only where it helps daily work.</p>;
+    return <p className="inline-success">{t('setup.saved.supplier')}</p>;
   }
 
   if (saved === 'raw-material') {
-    return <p className="inline-success">Raw material saved. Future recipe costing can now point to a real ingredient foundation.</p>;
+    return <p className="inline-success">{t('setup.saved.rawMaterial')}</p>;
   }
 
   if (saved === 'price') {
-    return <p className="inline-success">Supplier price saved. Historical comparisons are now available for future costing and buying choices.</p>;
+    return <p className="inline-success">{t('setup.saved.price')}</p>;
   }
 
   return null;
@@ -25,18 +28,15 @@ export default async function SetupPage({
 }: {
   searchParams?: Promise<{ error?: string; saved?: string }>;
 }) {
-  const [data, params] = await Promise.all([getSetupWorkspace(), searchParams]);
+  const [data, params, { t, locale, term }] = await Promise.all([getSetupWorkspace(), searchParams, getServerTranslator()]);
 
   return (
     <div className="page-stack">
       <section className="section-header page-hero-header">
         <div>
-          <p className="eyebrow">Setup workspace</p>
-          <h1>Lightweight organization</h1>
-          <p>
-            Setup still supports the work instead of blocking it. Orders, suppliers, raw materials,
-            and price memory stay visible without turning SKOSS into a huge back office.
-          </p>
+          <p className="eyebrow">{t('setup.workspace')}</p>
+          <h1>{t('setup.title')}</h1>
+          <p>{t('setup.description')}</p>
         </div>
       </section>
 
@@ -46,39 +46,37 @@ export default async function SetupPage({
       <section className="page-context-card">
         <SetupIcon className="callout-icon" />
         <div>
-          <strong>Keep setup practical.</strong>
-          <p className="helper-text no-margin">
-            These lists should help operators work faster, not force heavy data maintenance before first use.
-          </p>
+          <strong>{t('setup.calloutTitle')}</strong>
+          <p className="helper-text no-margin">{t('setup.calloutBody')}</p>
         </div>
       </section>
 
       <section className="panel page-stack">
         <div className="table-header-row">
           <div>
-            <h2>Appearance</h2>
-            <p>Global theme controls should stay available, but the fuller choice belongs in setup instead of dominating the header.</p>
+            <h2>{t('setup.appearance')}</h2>
+            <p>{t('setup.appearanceHelp')}</p>
           </div>
-          <span className="summary-pill">Quick switch in header</span>
+          <span className="summary-pill">{t('theme.quickSwitchHeader')}</span>
         </div>
         <ThemeSwitcher variant="panel" />
       </section>
 
       <section className="stats-grid compact-stats-grid">
         <article className="stat-card">
-          <span className="stat-label">Active suppliers</span>
+          <span className="stat-label">{t('setup.activeSuppliers')}</span>
           <strong>{data.suppliers.filter((supplier) => supplier.active).length}</strong>
-          <span>Practical vendor contacts ready for replenishment conversations.</span>
+          <span>{t('setup.activeSuppliersHelp')}</span>
         </article>
         <article className="stat-card stat-card-info">
-          <span className="stat-label">Raw materials</span>
+          <span className="stat-label">{t('setup.rawMaterials')}</span>
           <strong>{data.rawMaterials.length}</strong>
-          <span>Ingredient structure that future recipe costing can point to.</span>
+          <span>{t('setup.rawMaterialsHelp')}</span>
         </article>
         <article className="stat-card stat-card-success">
-          <span className="stat-label">Recorded prices</span>
+          <span className="stat-label">{t('setup.recordedPrices')}</span>
           <strong>{data.supplierPriceEntries.length}</strong>
-          <span>Historical supplier prices ready for later comparison and costing logic.</span>
+          <span>{t('setup.recordedPricesHelp')}</span>
         </article>
       </section>
 
@@ -86,10 +84,10 @@ export default async function SetupPage({
         <article className="panel page-stack">
           <div className="table-header-row">
             <div>
-              <h2>Products and variants</h2>
-              <p>Use practical names that operators already understand on the floor.</p>
+              <h2>{t('setup.productsAndVariants')}</h2>
+              <p>{t('setup.productsAndVariantsHelp')}</p>
             </div>
-            <span className="summary-pill">{data.products.length} products</span>
+            <span className="summary-pill">{data.products.length} {t('common.products')}</span>
           </div>
           <ul className="stack-list">
             {data.products.map((product) => (
@@ -104,10 +102,10 @@ export default async function SetupPage({
         <article className="panel page-stack">
           <div className="table-header-row">
             <div>
-              <h2>Destinations</h2>
-              <p>These should stay recognizable to both sales and kitchen teams.</p>
+              <h2>{t('setup.destinations')}</h2>
+              <p>{t('setup.destinationsHelp')}</p>
             </div>
-            <span className="summary-pill">{data.destinations.length} destinations</span>
+            <span className="summary-pill">{data.destinations.length} {term('destination', 'many')}</span>
           </div>
           <ul className="stack-list">
             {data.destinations.map((destination) => (
@@ -124,17 +122,17 @@ export default async function SetupPage({
         <article className="panel page-stack">
           <div className="table-header-row">
             <div>
-              <h2>Recurring rhythms</h2>
-              <p>Repeated work should stay explicit and easy to review.</p>
+              <h2>{t('setup.recurringRhythms')}</h2>
+              <p>{t('setup.recurringRhythmsHelp')}</p>
             </div>
-            <span className="summary-pill">{data.recurringTemplates.length} rhythms</span>
+            <span className="summary-pill">{data.recurringTemplates.length} {t('common.templates')}</span>
           </div>
           <ul className="stack-list">
             {data.recurringTemplates.map((template) => (
               <li key={template.id}>
                 <strong>{template.customerLabel}</strong>
                 <span>
-                  {formatTemplateScheduleLabel(template)} · next {formatDateLabel(template.nextOccurrenceDate)}
+                  {formatTemplateScheduleLabel(template, t)} · {t('orders.nextUp')} {formatDateLabel(template.nextOccurrenceDate, locale)}
                 </span>
               </li>
             ))}
@@ -144,10 +142,10 @@ export default async function SetupPage({
         <article className="panel page-stack">
           <div className="table-header-row">
             <div>
-              <h2>Users</h2>
-              <p>Visible roles support handoff and accountability without adding admin-heavy complexity.</p>
+              <h2>{t('setup.users')}</h2>
+              <p>{t('setup.usersHelp')}</p>
             </div>
-            <span className="summary-pill">{data.users.length} users</span>
+            <span className="summary-pill">{data.users.length} {t('common.users')}</span>
           </div>
           <ul className="stack-list">
             {data.users.map((user) => (
@@ -163,73 +161,70 @@ export default async function SetupPage({
       <section className="panel page-stack">
         <div className="table-header-row">
           <div>
-            <h2>Operational data layer</h2>
-            <p>
-              These records add just enough structure for supplier comparison, ingredient cleanup, and
-              future recipe costing without forcing a full procurement suite.
-            </p>
+            <h2>{t('setup.operationalDataLayer')}</h2>
+            <p>{t('setup.operationalDataLayerHelp')}</p>
           </div>
-          <span className="summary-pill">Draft-first friendly</span>
+          <span className="summary-pill">{t('setup.draftFirstFriendly')}</span>
         </div>
         <div className="grid-two">
           <article className="subpanel page-stack">
             <div className="table-header-row">
               <div>
-                <h3>Suppliers</h3>
-                <p>Keep the contact detail and operational note that the team actually uses.</p>
+                <h3>{t('setup.suppliers')}</h3>
+                <p>{t('setup.suppliersHelp')}</p>
               </div>
-              <span className="summary-pill">{data.suppliers.length} suppliers</span>
+              <span className="summary-pill">{data.suppliers.length} {t('common.suppliers')}</span>
             </div>
             <ul className="stack-list">
               {data.suppliers.map((supplier) => (
                 <li key={supplier.id}>
                   <strong>
                     {supplier.name}
-                    {!supplier.active ? ' · inactive' : ''}
+                    {!supplier.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
                   </strong>
-                  <span>{supplier.contact ?? supplier.notes ?? 'No extra contact detail yet.'}</span>
+                  <span>{supplier.contact ?? supplier.notes ?? t('setup.noExtraContactYet')}</span>
                 </li>
               ))}
             </ul>
             <form action={createSupplierAction} className="field-section page-stack">
               <div className="field-section-header">
                 <div>
-                  <h3>Add supplier</h3>
-                  <p className="helper-text">Simple enough to capture now, detailed enough to support future buying comparisons.</p>
+                  <h3>{t('setup.addSupplier')}</h3>
+                  <p className="helper-text">{t('setup.addSupplierHelp')}</p>
                 </div>
               </div>
               <div className="grid-two">
                 <label>
-                  <span className="field-heading">Supplier name <span className="required-dot">Required</span></span>
+                  <span className="field-heading">{t('setup.fields.supplierName')} <span className="required-dot">{t('common.required')}</span></span>
                   <input name="name" placeholder="Harina Viva" required />
                 </label>
                 <label>
-                  <span className="field-heading">Contact <span className="optional-pill">Optional</span></span>
-                  <input name="contact" placeholder="María · WhatsApp · phone" />
+                  <span className="field-heading">{t('setup.fields.contact')} <span className="optional-pill">{t('common.optional')}</span></span>
+                  <input name="contact" placeholder={t('setup.placeholders.contact')} />
                 </label>
               </div>
               <label>
-                <span className="field-heading">Notes <span className="optional-pill">Optional</span></span>
-                <textarea name="notes" placeholder="Delivery rhythm, minimum order, payment reminder, or route note" />
+                <span className="field-heading">{t('setup.fields.notes')} <span className="optional-pill">{t('common.optional')}</span></span>
+                <textarea name="notes" placeholder={t('setup.placeholders.supplierNotes')} />
               </label>
               <label className="checkbox-row">
                 <input name="active" type="checkbox" defaultChecked />
                 <span>
-                  <strong>Active supplier</strong>
-                  <span className="helper-text">Turn this off when the contact should stay in history but out of active choices.</span>
+                  <strong>{t('setup.fields.activeSupplier')}</strong>
+                  <span className="helper-text">{t('setup.fields.activeSupplierHelp')}</span>
                 </span>
               </label>
-              <button type="submit" className="button-primary">Save supplier</button>
+              <button type="submit" className="button-primary">{t('setup.actions.saveSupplier')}</button>
             </form>
           </article>
 
           <article className="subpanel page-stack">
             <div className="table-header-row">
               <div>
-                <h3>Raw materials</h3>
-                <p>Keep ingredient language practical so future costing can reference real kitchen inputs.</p>
+                <h3>{t('setup.rawMaterialsSection')}</h3>
+                <p>{t('setup.rawMaterialsSectionHelp')}</p>
               </div>
-              <span className="summary-pill">{data.rawMaterials.length} materials</span>
+              <span className="summary-pill">{data.rawMaterials.length} {t('common.materials')}</span>
             </div>
             <ul className="stack-list">
               {data.rawMaterials.map((material) => {
@@ -239,10 +234,10 @@ export default async function SetupPage({
                   <li key={material.id}>
                     <strong>
                       {material.name}
-                      {!material.active ? ' · inactive' : ''}
+                      {!material.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
                     </strong>
                     <span>
-                      {[material.category, `${material.defaultUnit} default`, latestPrice ? `latest ${formatUnitRate(latestPrice)}` : null]
+                      {[material.category, `${material.defaultUnit} ${t('setup.labels.defaultUnitSuffix')}`, latestPrice ? `${t('setup.labels.latest')} ${formatUnitRate(latestPrice, locale)}` : null]
                         .filter(Boolean)
                         .join(' · ')}
                     </span>
@@ -253,40 +248,40 @@ export default async function SetupPage({
             <form action={createRawMaterialAction} className="field-section page-stack">
               <div className="field-section-header">
                 <div>
-                  <h3>Add raw material</h3>
-                  <p className="helper-text">Keep defaults lightweight. Recipe and costing detail can grow later from this base.</p>
+                  <h3>{t('setup.addRawMaterial')}</h3>
+                  <p className="helper-text">{t('setup.addRawMaterialHelp')}</p>
                 </div>
               </div>
               <div className="grid-two">
                 <label>
-                  <span className="field-heading">Raw material name <span className="required-dot">Required</span></span>
-                  <input name="name" placeholder="Bread flour" required />
+                  <span className="field-heading">{t('setup.fields.rawMaterialName')} <span className="required-dot">{t('common.required')}</span></span>
+                  <input name="name" placeholder={t('setup.placeholders.rawMaterialName')} required />
                 </label>
                 <label>
-                  <span className="field-heading">Category <span className="optional-pill">Optional</span></span>
-                  <input name="category" placeholder="Flour, dairy, packaging" />
+                  <span className="field-heading">{t('setup.fields.category')} <span className="optional-pill">{t('common.optional')}</span></span>
+                  <input name="category" placeholder={t('setup.placeholders.category')} />
                 </label>
                 <label>
-                  <span className="field-heading">Default unit <span className="required-dot">Required</span></span>
+                  <span className="field-heading">{t('setup.fields.defaultUnit')} <span className="required-dot">{t('common.required')}</span></span>
                   <input name="defaultUnit" defaultValue="kg" required />
                 </label>
                 <label>
-                  <span className="field-heading">Brand <span className="optional-pill">Optional</span></span>
-                  <input name="brand" placeholder="Default or preferred brand" />
+                  <span className="field-heading">{t('setup.fields.brand')} <span className="optional-pill">{t('common.optional')}</span></span>
+                  <input name="brand" placeholder={t('setup.placeholders.brand')} />
                 </label>
               </div>
               <label>
-                <span className="field-heading">Notes <span className="optional-pill">Optional</span></span>
-                <textarea name="notes" placeholder="Strength, substitution note, or prep reminder" />
+                <span className="field-heading">{t('setup.fields.notes')} <span className="optional-pill">{t('common.optional')}</span></span>
+                <textarea name="notes" placeholder={t('setup.placeholders.rawMaterialNotes')} />
               </label>
               <label className="checkbox-row">
                 <input name="active" type="checkbox" defaultChecked />
                 <span>
-                  <strong>Active raw material</strong>
-                  <span className="helper-text">Inactive materials remain available in history for past prices and future costing traces.</span>
+                  <strong>{t('setup.fields.activeRawMaterial')}</strong>
+                  <span className="helper-text">{t('setup.fields.activeRawMaterialHelp')}</span>
                 </span>
               </label>
-              <button type="submit" className="button-primary">Save raw material</button>
+              <button type="submit" className="button-primary">{t('setup.actions.saveRawMaterial')}</button>
             </form>
           </article>
         </div>
@@ -295,13 +290,10 @@ export default async function SetupPage({
       <section className="panel page-stack">
         <div className="table-header-row">
           <div>
-            <h2>Supplier price memory</h2>
-            <p>
-              Record what was actually paid over time so SKOSS can later compare vendors and feed recipe
-              costing without guessing from one current price.
-            </p>
+            <h2>{t('setup.supplierPriceMemory')}</h2>
+            <p>{t('setup.supplierPriceMemoryHelp')}</p>
           </div>
-          <span className="summary-pill">{data.supplierPriceEntries.length} entries</span>
+          <span className="summary-pill">{data.supplierPriceEntries.length} {t('common.entries')}</span>
         </div>
 
         <div className="grid-two">
@@ -310,13 +302,13 @@ export default async function SetupPage({
               {data.supplierPriceEntries.map((entry) => (
                 <li key={entry.id}>
                   <strong>
-                    {entry.rawMaterialLabel} · {formatCurrency(entry.price)}
+                    {entry.rawMaterialLabel} · {formatCurrency(entry.price, locale)}
                   </strong>
                   <span>
                     {entry.supplierLabel} · {entry.packageQuantity} {entry.packageUnit}
                     {entry.presentation ? ` · ${entry.presentation}` : ''}
                     {' · '}
-                    {formatDateLabel(entry.priceDate)}
+                    {formatDateLabel(entry.priceDate, locale)}
                   </span>
                 </li>
               ))}
@@ -326,15 +318,15 @@ export default async function SetupPage({
           <form action={createSupplierPriceEntryAction} className="subpanel page-stack">
             <div className="field-section-header">
               <div>
-                <h3>Add supplier price</h3>
-                <p className="helper-text">Capture the supplier, package size, and date once. SKOSS can normalize rates later.</p>
+                <h3>{t('setup.addSupplierPrice')}</h3>
+                <p className="helper-text">{t('setup.addSupplierPriceHelp')}</p>
               </div>
             </div>
             <div className="grid-two">
               <label>
-                <span className="field-heading">Supplier <span className="required-dot">Required</span></span>
+                <span className="field-heading">{t('setup.fields.supplier')} <span className="required-dot">{t('common.required')}</span></span>
                 <select name="supplierId" defaultValue="" required>
-                  <option value="" disabled>Select supplier</option>
+                  <option value="" disabled>{t('common.selectSupplier')}</option>
                   {data.suppliers.map((supplier) => (
                     <option key={supplier.id} value={supplier.id}>
                       {supplier.name}
@@ -343,9 +335,9 @@ export default async function SetupPage({
                 </select>
               </label>
               <label>
-                <span className="field-heading">Raw material <span className="required-dot">Required</span></span>
+                <span className="field-heading">{t('setup.fields.rawMaterial')} <span className="required-dot">{t('common.required')}</span></span>
                 <select name="rawMaterialId" defaultValue="" required>
-                  <option value="" disabled>Select raw material</option>
+                  <option value="" disabled>{t('common.selectRawMaterial')}</option>
                   {data.rawMaterials.map((material) => (
                     <option key={material.id} value={material.id}>
                       {material.name}
@@ -354,35 +346,35 @@ export default async function SetupPage({
                 </select>
               </label>
               <label>
-                <span className="field-heading">Presentation <span className="optional-pill">Optional</span></span>
-                <input name="presentation" placeholder="25 kg sack, 5 kg block, tray" />
+                <span className="field-heading">{t('setup.fields.presentation')} <span className="optional-pill">{t('common.optional')}</span></span>
+                <input name="presentation" placeholder={t('setup.placeholders.presentation')} />
               </label>
               <label>
-                <span className="field-heading">Brand <span className="optional-pill">Optional</span></span>
-                <input name="brand" placeholder="Supplier brand or specific pack label" />
+                <span className="field-heading">{t('setup.fields.brand')} <span className="optional-pill">{t('common.optional')}</span></span>
+                <input name="brand" placeholder={t('setup.placeholders.supplierBrand')} />
               </label>
               <label>
-                <span className="field-heading">Package quantity <span className="required-dot">Required</span></span>
-                <input name="packageQuantity" type="number" min="0.01" step="0.01" placeholder="25" required />
+                <span className="field-heading">{t('setup.fields.packageQuantity')} <span className="required-dot">{t('common.required')}</span></span>
+                <input name="packageQuantity" type="number" min="0.01" step="0.01" placeholder={t('setup.placeholders.packageQuantity')} required />
               </label>
               <label>
-                <span className="field-heading">Package unit <span className="required-dot">Required</span></span>
-                <input name="packageUnit" placeholder="kg, L, dozen, eggs" required />
+                <span className="field-heading">{t('setup.fields.packageUnit')} <span className="required-dot">{t('common.required')}</span></span>
+                <input name="packageUnit" placeholder={t('setup.placeholders.packageUnit')} required />
               </label>
               <label>
-                <span className="field-heading">Price <span className="required-dot">Required</span></span>
-                <input name="price" type="number" min="0.01" step="0.01" placeholder="30" required />
+                <span className="field-heading">{t('setup.fields.price')} <span className="required-dot">{t('common.required')}</span></span>
+                <input name="price" type="number" min="0.01" step="0.01" placeholder={t('setup.placeholders.price')} required />
               </label>
               <label>
-                <span className="field-heading">Date <span className="required-dot">Required</span></span>
+                <span className="field-heading">{t('setup.fields.date')} <span className="required-dot">{t('common.required')}</span></span>
                 <input name="priceDate" type="date" defaultValue={data.supplierPriceEntries[0]?.priceDate ?? ''} required />
               </label>
             </div>
             <label>
-              <span className="field-heading">Note <span className="optional-pill">Optional</span></span>
-              <textarea name="note" placeholder="Promo, emergency buy, route change, or quality note" />
+              <span className="field-heading">{t('setup.fields.note')} <span className="optional-pill">{t('common.optional')}</span></span>
+              <textarea name="note" placeholder={t('setup.placeholders.priceNote')} />
             </label>
-            <button type="submit" className="button-primary">Save supplier price</button>
+            <button type="submit" className="button-primary">{t('setup.actions.saveSupplierPrice')}</button>
           </form>
         </div>
       </section>
@@ -390,10 +382,8 @@ export default async function SetupPage({
       <section className="page-context-card">
         <SparklesIcon className="callout-icon" />
         <div>
-          <strong>Future setup should follow repeated need.</strong>
-          <p className="helper-text no-margin">
-            The goal here is future costing compatibility and better buying memory, not a full accounting or procurement module.
-          </p>
+          <strong>{t('setup.futureTitle')}</strong>
+          <p className="helper-text no-margin">{t('setup.futureBody')}</p>
         </div>
       </section>
     </div>

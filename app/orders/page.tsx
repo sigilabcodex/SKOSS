@@ -1,57 +1,59 @@
 import Link from 'next/link';
 import { formatDateLabel, formatLineProgressLabel, formatStatusLabel, formatTemplateScheduleLabel } from '@/lib/domain/formatters';
 import { getOrderProgress, getOrdersWorkspace } from '@/lib/server/demo-data';
+import { getServerTranslator } from '@/lib/i18n/server';
 import { ArrowRightIcon, CheckIcon, OrdersIcon, SparklesIcon } from '@/components/ui-icons';
 
-function OrderCard({
+async function OrderCard({
   order,
 }: {
   key?: string;
   order: Awaited<ReturnType<typeof getOrdersWorkspace>>['orders'][number];
 }) {
   const progress = getOrderProgress(order);
+  const { t, locale } = await getServerTranslator();
 
   return (
     <article className={`order-card ${progress.partialLines > 0 ? 'order-card-partial' : ''}`}>
       <div className="order-card-header">
         <div>
           <strong>{order.customerLabel}</strong>
-          <p>{order.destinationLabel ?? 'Destination still open'}</p>
+          <p>{order.destinationLabel ?? t('common.destinationStillOpen')}</p>
         </div>
         <div className="page-stack compact-badge-stack align-end">
-          <span className={`badge badge-${order.status}`}>{formatStatusLabel(order.status)}</span>
-          {order.generatedFromTemplate ? <span className="badge badge-generated">recurring</span> : <span className="badge badge-manual">manual</span>}
-          {order.visibleOnProductionBoard === false ? <span className="badge badge-neutral">hidden from board</span> : null}
-          {order.changedInKitchen || order.templateEdited ? <span className="badge badge-changed">kitchen attention</span> : null}
-          {progress.partialLines > 0 ? <span className="badge badge-in_progress">partial work</span> : null}
+          <span className={`badge badge-${order.status}`}>{formatStatusLabel(order.status, t)}</span>
+          {order.generatedFromTemplate ? <span className="badge badge-generated">{t('common.recurring')}</span> : <span className="badge badge-manual">{t('common.manual')}</span>}
+          {order.visibleOnProductionBoard === false ? <span className="badge badge-neutral">{t('orders.hiddenFromBoard')}</span> : null}
+          {order.changedInKitchen || order.templateEdited ? <span className="badge badge-changed">{t('common.kitchenAttention')}</span> : null}
+          {progress.partialLines > 0 ? <span className="badge badge-in_progress">{t('common.partialWork')}</span> : null}
         </div>
       </div>
       <div className="order-meta-grid">
         <div>
-          <span className="field-label">Source</span>
-          <strong>{formatStatusLabel(order.source)}</strong>
+          <span className="field-label">{t('orders.source')}</span>
+          <strong>{formatStatusLabel(order.source, t)}</strong>
         </div>
         <div>
-          <span className="field-label">Fulfillment</span>
-          <strong>{formatStatusLabel(order.fulfillmentType)}</strong>
+          <span className="field-label">{t('orders.fulfillment')}</span>
+          <strong>{formatStatusLabel(order.fulfillmentType, t)}</strong>
         </div>
         <div>
-          <span className="field-label">Production</span>
-          <strong>{formatDateLabel(order.productionDate)}</strong>
+          <span className="field-label">{t('orders.production')}</span>
+          <strong>{formatDateLabel(order.productionDate, locale)}</strong>
         </div>
         <div>
-          <span className="field-label">Completion</span>
-          <strong>{progress.completedQuantity}/{progress.requiredQuantity || 0} ready</strong>
+          <span className="field-label">{t('orders.completion')}</span>
+          <strong>{progress.completedQuantity}/{progress.requiredQuantity || 0} {t('common.ready').toLowerCase()}</strong>
         </div>
         <div>
-          <span className="field-label">Notes</span>
-          <strong>{order.dispatchNotes || order.notes ? 'Has notes' : 'Clear'}</strong>
+          <span className="field-label">{t('orders.notes')}</span>
+          <strong>{order.dispatchNotes || order.notes ? t('common.hasNotes') : t('common.clear')}</strong>
         </div>
       </div>
       {order.deliveryProvider || order.deliveryAssignee ? (
         <p className="helper-text no-margin">
-          {order.deliveryProvider ? `Provider: ${order.deliveryProvider}. ` : ''}
-          {order.deliveryAssignee ? `Assignee: ${order.deliveryAssignee}.` : ''}
+          {order.deliveryProvider ? `${t('orders.provider')}: ${order.deliveryProvider}. ` : ''}
+          {order.deliveryAssignee ? `${t('orders.assignee')}: ${order.deliveryAssignee}.` : ''}
         </p>
       ) : null}
       <ul className="mini-line-list">
@@ -63,7 +65,7 @@ function OrderCard({
         ))}
       </ul>
       <Link href={`/orders/${order.id}`} className="button-secondary">
-        <span>Open order</span>
+        <span>{t('common.openOrder')}</span>
         <ArrowRightIcon className="button-icon" />
       </Link>
     </article>
@@ -75,27 +77,24 @@ export default async function OrdersPage({
 }: {
   searchParams?: Promise<{ saved?: string }>;
 }) {
-  const [view, params] = await Promise.all([getOrdersWorkspace(), searchParams]);
+  const [view, params, { t, locale }] = await Promise.all([getOrdersWorkspace(), searchParams, getServerTranslator()]);
 
   return (
     <div className="page-stack">
       <section className="section-header page-hero-header">
         <div>
-          <p className="eyebrow">Sales workspace</p>
-          <h1>Orders</h1>
-          <p>
-            Manual orders, generated recurring orders, partial completion, and kitchen-visible changes
-            all stay in one touch-friendly list.
-          </p>
+          <p className="eyebrow">{t('orders.workspace')}</p>
+          <h1>{t('orders.title')}</h1>
+          <p>{t('orders.description')}</p>
         </div>
         <div className="action-cluster">
           <Link href="/orders/templates/new" className="button-secondary">
             <SparklesIcon className="button-icon" />
-            <span>New recurring template</span>
+            <span>{t('orders.newRecurringTemplate')}</span>
           </Link>
           <Link href="/orders/new" className="button-primary">
             <OrdersIcon className="button-icon" />
-            <span>New order</span>
+            <span>{t('orders.newOrder')}</span>
           </Link>
         </div>
       </section>
@@ -103,17 +102,17 @@ export default async function OrdersPage({
       {params?.saved === 'template' ? (
         <p className="inline-success">
           <CheckIcon className="button-icon" />
-          Recurring template saved. Upcoming orders will generate automatically.
+          {t('orders.recurringSaved')}
         </p>
       ) : null}
 
       <section className="panel page-stack">
         <div className="table-header-row">
           <div>
-            <strong>Recurring demand</strong>
-            <p>Keep the next repeated work visible without adding a scheduling engine.</p>
+            <strong>{t('orders.recurringDemand')}</strong>
+            <p>{t('orders.recurringDemandHelp')}</p>
           </div>
-          <span className="summary-pill">{view.recurringTemplates.length} templates</span>
+          <span className="summary-pill">{view.recurringTemplates.length} {t('common.templates')}</span>
         </div>
         <div className="card-grid recurring-grid">
           {view.recurringTemplates.map((template) => (
@@ -121,12 +120,12 @@ export default async function OrdersPage({
               <div className="order-card-header">
                 <div>
                   <strong>{template.customerLabel}</strong>
-                  <p>{template.destinationLabel ?? 'Destination still open'}</p>
+                  <p>{template.destinationLabel ?? t('common.destinationStillOpen')}</p>
                 </div>
-                <span className="badge badge-generated">recurring</span>
+                <span className="badge badge-generated">{t('common.recurring')}</span>
               </div>
               <p>
-                {formatTemplateScheduleLabel(template)} · next up {formatDateLabel(template.nextOccurrenceDate)}
+                {formatTemplateScheduleLabel(template, t)} · {t('orders.nextUp')} {formatDateLabel(template.nextOccurrenceDate, locale)}
               </p>
               <ul className="mini-line-list">
                 {template.lines.map((line) => (
@@ -147,14 +146,14 @@ export default async function OrdersPage({
         <section key={group.productionDate} className="panel page-stack">
           <div className="table-header-row">
             <div>
-              <strong>{formatDateLabel(group.productionDate)}</strong>
+              <strong>{formatDateLabel(group.productionDate, locale)}</strong>
               <p>
                 {group.productionDate === view.focusDate
-                  ? 'Current production focus.'
-                  : 'Saved orders grouped by production day.'}
+                  ? t('orders.currentProductionFocus')
+                  : t('orders.savedOrdersByDay')}
               </p>
             </div>
-            <span className="summary-pill">{group.orders.length} orders</span>
+            <span className="summary-pill">{group.orders.length} {t('common.orders')}</span>
           </div>
           <div className="card-grid">
             {group.orders.map((order) => (

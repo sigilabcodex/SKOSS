@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { RecurringTemplateForm } from '@/components/orders/recurring-template-form';
 import { createRecurringTemplateAction } from '@/lib/server/actions';
 import { getRecurringTemplateEditor } from '@/lib/server/demo-data';
+import { getServerTranslator } from '@/lib/i18n/server';
 import { ArrowRightIcon, SparklesIcon } from '@/components/ui-icons';
 
 export default async function NewRecurringTemplatePage({
@@ -9,19 +10,19 @@ export default async function NewRecurringTemplatePage({
 }: {
   searchParams?: Promise<{ error?: string }>;
 }) {
-  const [view, params] = await Promise.all([getRecurringTemplateEditor(), searchParams]);
+  const [view, params, { t }] = await Promise.all([getRecurringTemplateEditor(), searchParams, getServerTranslator()]);
 
   return (
     <div className="page-stack">
       <section className="section-header page-hero-header">
         <div>
-          <p className="eyebrow">Sales workspace</p>
-          <h1>New recurring template</h1>
-          <p>Capture a repeatable order rhythm once, then let SKOSS generate the dated orders ahead.</p>
+          <p className="eyebrow">{t('orders.workspace')}</p>
+          <h1>{t('orders.recurringPage.title')}</h1>
+          <p>{t('orders.recurringPage.description')}</p>
         </div>
         <Link href="/orders" className="button-secondary">
           <ArrowRightIcon className="button-icon button-icon-reverse" />
-          <span>Back to orders</span>
+          <span>{t('common.backToOrders')}</span>
         </Link>
       </section>
 
@@ -30,8 +31,8 @@ export default async function NewRecurringTemplatePage({
       <section className="page-context-card">
         <SparklesIcon className="callout-icon" />
         <div>
-          <strong>Recurring demand should stay lightweight.</strong>
-          <p className="helper-text no-margin">This template creates useful repeated work without turning the workflow into a heavy scheduling system.</p>
+          <strong>{t('orders.recurringPage.calloutTitle')}</strong>
+          <p className="helper-text no-margin">{t('orders.recurringPage.calloutBody')}</p>
         </div>
       </section>
 

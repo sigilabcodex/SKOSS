@@ -6,6 +6,7 @@ import {
 } from '@/lib/domain/formatters';
 import { addShiftNoteAction, addWipEntryAction, saveShiftLogAction } from '@/lib/server/actions';
 import { getHandoffWorkspace } from '@/lib/server/demo-data';
+import { getServerTranslator } from '@/lib/i18n/server';
 import { SubmitButton } from '@/components/submit-button';
 import { CheckIcon, HandoffIcon } from '@/components/ui-icons';
 
@@ -19,7 +20,7 @@ export default async function HandoffPage({
 }: {
   searchParams?: Promise<{ error?: string; saved?: string }>;
 }) {
-  const [view, params] = await Promise.all([getHandoffWorkspace(), searchParams]);
+  const [view, params, { t, locale, term }] = await Promise.all([getHandoffWorkspace(), searchParams, getServerTranslator()]);
   const focusLog = view.shiftLogMap.get(`${view.focusDate}:night`);
   const focusWip = view.wipByDate.get(view.focusDate) ?? [];
 
@@ -27,35 +28,32 @@ export default async function HandoffPage({
     <div className="page-stack">
       <section className="section-header page-hero-header">
         <div>
-          <p className="eyebrow">WIP + shift handoff</p>
-          <h1>Morning review</h1>
-          <p>
-            Make prepared, shaped, baked, and ready work visible. Leave notes that the next shift can
-            understand in seconds.
-          </p>
+          <p className="eyebrow">{t('handoff.eyebrow')}</p>
+          <h1>{t('handoff.title')}</h1>
+          <p>{t('handoff.description')}</p>
         </div>
       </section>
 
-      {params?.saved ? <p className="inline-success"><CheckIcon className="button-icon" />Saved {params.saved} update.</p> : null}
+      {params?.saved ? <p className="inline-success"><CheckIcon className="button-icon" />{t('handoff.savedUpdate', { item: params.saved })}</p> : null}
       {params?.error ? <p className="inline-warning">{params.error}</p> : null}
 
       <section className="grid-two">
         <article className="panel page-stack">
           <div className="table-header-row">
             <div>
-              <h2>{formatDateLabel(view.focusDate)} handoff snapshot</h2>
-              <p>Main shift summary and open items for the current focus date.</p>
+              <h2>{formatDateLabel(view.focusDate, locale)} {t('handoff.snapshotTitle')}</h2>
+              <p>{t('handoff.snapshotHelp')}</p>
             </div>
-            <span className="summary-pill">Night shift</span>
+            <span className="summary-pill">{t('handoff.nightShift')}</span>
           </div>
           {focusLog ? (
             <div className="page-stack">
               <div>
-                <span className={`badge badge-${focusLog.status}`}>{formatStatusLabel(focusLog.status)}</span>
+                <span className={`badge badge-${focusLog.status}`}>{formatStatusLabel(focusLog.status, t)}</span>
                 <p className="top-gap">{focusLog.summary}</p>
               </div>
               <div>
-                <strong>Open items</strong>
+                <strong>{t('handoff.openItems')}</strong>
                 <ul className="stack-list muted-list top-gap-small">
                   {focusLog.openItems.map((item) => (
                     <li key={item}>{item}</li>
@@ -63,16 +61,16 @@ export default async function HandoffPage({
                 </ul>
               </div>
               <div>
-                <strong>Handoff note</strong>
-                <p className="top-gap-small">{focusLog.handoffNotes || 'No handoff note yet.'}</p>
+                <strong>{t('handoff.handoffNote')}</strong>
+                <p className="top-gap-small">{focusLog.handoffNotes || t('handoff.noHandoffNote')}</p>
               </div>
             </div>
           ) : (
             <section className="page-context-card">
               <HandoffIcon className="callout-icon" />
               <div>
-                <strong>No handoff summary yet for the focus date.</strong>
-                <p className="helper-text no-margin">Save the main handoff card below to create the first visible summary.</p>
+                <strong>{t('handoff.noSummaryTitle')}</strong>
+                <p className="helper-text no-margin">{t('handoff.noSummaryBody')}</p>
               </div>
             </section>
           )}
@@ -81,10 +79,10 @@ export default async function HandoffPage({
         <article className="panel page-stack">
           <div className="table-header-row">
             <div>
-              <h2>Ready or pending WIP</h2>
-              <p>The next shift should be able to scan this list fast on a phone or tablet.</p>
+              <h2>{t('handoff.readyOrPendingWip')}</h2>
+              <p>{t('handoff.readyOrPendingWipHelp')}</p>
             </div>
-            <span className="summary-pill">{focusWip.length} entries</span>
+            <span className="summary-pill">{focusWip.length} {t('common.entries')}</span>
           </div>
           <ul className="stack-list muted-list">
             {focusWip.map((entry) => (
@@ -93,8 +91,7 @@ export default async function HandoffPage({
                   {entry.referenceLabel} · {entry.quantity} {entry.unit}
                 </strong>
                 <span>
-                  {formatStatusLabel(entry.stage)} · {formatShiftKeyLabel(entry.shiftKey)} shift ·{' '}
-                  {entry.notes ?? 'No extra note'}
+                  {formatStatusLabel(entry.stage, t)} · {formatShiftKeyLabel(entry.shiftKey, t)} · {entry.notes ?? t('common.noExtraNote')}
                 </span>
               </li>
             ))}
@@ -105,115 +102,115 @@ export default async function HandoffPage({
       <section className="grid-two">
         <form action={addWipEntryAction} className="panel form-grid compact-form page-stack">
           <div>
-            <p className="eyebrow">Add WIP</p>
-            <h2>Record what is already in motion</h2>
+            <p className="eyebrow">{t('handoff.addWip')}</p>
+            <h2>{t('handoff.recordMotion')}</h2>
           </div>
           <label>
-            <span className="field-heading">Production day</span>
+            <span className="field-heading">{t('handoff.fields.productionDay')}</span>
             <input name="productionDate" type="date" defaultValue={view.focusDate} required />
           </label>
           <label>
-            <span className="field-heading">Shift</span>
+            <span className="field-heading">{t('handoff.fields.shift')}</span>
             <select name="shiftKey" defaultValue="night">
               {shiftOptions.map((option) => (
                 <option key={option} value={option}>
-                  {formatShiftKeyLabel(option)}
+                  {formatShiftKeyLabel(option, t)}
                 </option>
               ))}
             </select>
           </label>
           <label>
-            <span className="field-heading">WIP type</span>
+            <span className="field-heading">{t('handoff.fields.wipType')}</span>
             <select name="wipType" defaultValue="prep">
-              <option value="base_dough">Base dough</option>
-              <option value="prep">Prep</option>
-              <option value="baked_items">Baked items</option>
-              <option value="packed_items">Packed items</option>
-              <option value="other">Other</option>
+              <option value="base_dough">{t('handoff.wipTypes.base_dough')}</option>
+              <option value="prep">{t('handoff.wipTypes.prep')}</option>
+              <option value="baked_items">{t('handoff.wipTypes.baked_items')}</option>
+              <option value="packed_items">{t('handoff.wipTypes.packed_items')}</option>
+              <option value="other">{t('handoff.wipTypes.other')}</option>
             </select>
           </label>
           <label>
-            <span className="field-heading">Label</span>
-            <input name="referenceLabel" placeholder="Croissant dough" required />
+            <span className="field-heading">{t('handoff.fields.label')}</span>
+            <input name="referenceLabel" placeholder={t('handoff.placeholders.wipLabel')} required />
           </label>
           <label>
-            <span className="field-heading">Quantity</span>
+            <span className="field-heading">{t('handoff.fields.quantity')}</span>
             <input name="quantity" type="number" min="1" step="1" defaultValue="1" required />
           </label>
           <label>
-            <span className="field-heading">Unit</span>
+            <span className="field-heading">{t('handoff.fields.unit')}</span>
             <input name="unit" defaultValue="batch" />
           </label>
           <label>
-            <span className="field-heading">Stage</span>
+            <span className="field-heading">{t('handoff.fields.stage')}</span>
             <select name="stage" defaultValue="prepared">
               {stageOptions.map((option) => (
                 <option key={option} value={option}>
-                  {formatStatusLabel(option)}
+                  {formatStatusLabel(option, t)}
                 </option>
               ))}
             </select>
           </label>
           <label className="line-span-2">
-            <span className="field-heading">Notes</span>
-            <textarea name="notes" placeholder="What the next shift should know" />
+            <span className="field-heading">{t('handoff.fields.notes')}</span>
+            <textarea name="notes" placeholder={t('handoff.placeholders.wipNotes')} />
           </label>
           <SubmitButton
             className="button-primary button-reset"
-            pendingLabel="Saving WIP…"
+            pendingLabel={t('handoff.savingWip')}
             icon={<CheckIcon className="button-icon" />}
           >
-            Save WIP
+            {t('handoff.saveWip')}
           </SubmitButton>
         </form>
 
         <form action={saveShiftLogAction} className="panel form-grid compact-form page-stack">
           <div>
-            <p className="eyebrow">Shift handoff</p>
-            <h2>Update the main handoff card</h2>
+            <p className="eyebrow">{t('handoff.shiftHandoff')}</p>
+            <h2>{t('handoff.updateCard')}</h2>
           </div>
           <label>
-            <span className="field-heading">Production day</span>
+            <span className="field-heading">{t('handoff.fields.productionDay')}</span>
             <input name="productionDate" type="date" defaultValue={view.focusDate} required />
           </label>
           <label>
-            <span className="field-heading">Shift</span>
+            <span className="field-heading">{t('handoff.fields.shift')}</span>
             <select name="shiftKey" defaultValue="night">
               {shiftOptions.map((option) => (
                 <option key={option} value={option}>
-                  {formatShiftKeyLabel(option)}
+                  {formatShiftKeyLabel(option, t)}
                 </option>
               ))}
             </select>
           </label>
           <label>
-            <span className="field-heading">Status</span>
+            <span className="field-heading">{t('handoff.fields.status')}</span>
             <select name="status" defaultValue={focusLog?.status ?? 'open'}>
               {handoffStatusOptions.map((option) => (
                 <option key={option} value={option}>
-                  {formatStatusLabel(option)}
+                  {formatStatusLabel(option, t)}
                 </option>
               ))}
             </select>
           </label>
           <label className="line-span-2">
-            <span className="field-heading">Summary</span>
+            <span className="field-heading">{t('handoff.fields.summary')}</span>
             <textarea name="summary" defaultValue={focusLog?.summary ?? ''} required />
           </label>
           <label className="line-span-2">
-            <span className="field-heading">Open items (one per line)</span>
+            <span className="field-heading">{t('handoff.fields.openItems')}</span>
             <textarea name="openItems" defaultValue={focusLog?.openItems.join('\n') ?? ''} />
           </label>
           <label className="line-span-2">
-            <span className="field-heading">Handoff note</span>
+            <span className="field-heading">{t('handoff.fields.handoffNote')}</span>
             <textarea name="handoffNotes" defaultValue={focusLog?.handoffNotes ?? ''} />
           </label>
           <SubmitButton
             className="button-primary button-reset"
-            pendingLabel="Saving handoff…"
+            pendingLabel={t('handoff.savingHandoff')}
             icon={<CheckIcon className="button-icon" />}
           >
-            Save handoff
+            {t('handoff.saveHandoff')}
           </SubmitButton>
         </form>
       </section>
@@ -221,68 +218,68 @@ export default async function HandoffPage({
       <section className="grid-two">
         <form action={addShiftNoteAction} className="panel form-grid compact-form page-stack">
           <div>
-            <p className="eyebrow">Shift note</p>
-            <h2>Add a quick note to the timeline</h2>
+            <p className="eyebrow">{t('handoff.shiftNote')}</p>
+            <h2>{t('handoff.addQuickNote')}</h2>
           </div>
           <label>
-            <span className="field-heading">Production day</span>
+            <span className="field-heading">{t('handoff.fields.productionDay')}</span>
             <input name="productionDate" type="date" defaultValue={view.focusDate} required />
           </label>
           <label>
-            <span className="field-heading">Shift</span>
+            <span className="field-heading">{t('handoff.fields.shift')}</span>
             <select name="shiftKey" defaultValue="morning">
               {shiftOptions.map((option) => (
                 <option key={option} value={option}>
-                  {formatShiftKeyLabel(option)}
+                  {formatShiftKeyLabel(option, t)}
                 </option>
               ))}
             </select>
           </label>
           <label>
-            <span className="field-heading">Worker / role</span>
-            <input name="authorLabel" defaultValue="Amanecer" />
+            <span className="field-heading">{t('handoff.fields.workerRole')}</span>
+            <input name="authorLabel" defaultValue={t('handoff.placeholders.noteAuthor')} />
           </label>
           <label>
-            <span className="field-heading">State</span>
+            <span className="field-heading">{t('handoff.fields.state')}</span>
             <select name="state" defaultValue="info">
               {noteStateOptions.map((option) => (
                 <option key={option} value={option}>
-                  {formatStatusLabel(option)}
+                  {formatStatusLabel(option, t)}
                 </option>
               ))}
             </select>
           </label>
           <label className="line-span-2">
-            <span className="field-heading">Linked item or product</span>
-            <input name="linkedItemLabel" placeholder="Mini sweet tray or rack 2 croissants" />
+            <span className="field-heading">{t('handoff.fields.linkedItem')}</span>
+            <input name="linkedItemLabel" placeholder={t('handoff.placeholders.linkedItem')} />
           </label>
           <label className="line-span-2">
-            <span className="field-heading">Note</span>
-            <textarea name="note" placeholder="Ready trays on rack 1, sweet items still pending" required />
+            <span className="field-heading">{t('handoff.fields.note')}</span>
+            <textarea name="note" placeholder={t('handoff.placeholders.note')} required />
           </label>
           <SubmitButton
             className="button-primary button-reset"
-            pendingLabel="Adding note…"
+            pendingLabel={t('handoff.addingNote')}
             icon={<CheckIcon className="button-icon" />}
           >
-            Add shift note
+            {t('handoff.addShiftNote')}
           </SubmitButton>
         </form>
 
         <article className="panel page-stack">
-          <p className="eyebrow">Timeline</p>
-          <h2>Recent handoff activity</h2>
+          <p className="eyebrow">{t('handoff.timeline')}</p>
+          <h2>{t('handoff.recentActivity')}</h2>
           <div className="list-table">
             {view.shiftLogs.map((log) => (
               <article key={log.id} className="timeline-card">
                 <div className="order-card-header">
                   <div>
                     <strong>
-                      {formatDateLabel(log.productionDate)} · {formatShiftKeyLabel(log.shiftKey)} shift
+                      {formatDateLabel(log.productionDate, locale)} · {formatShiftKeyLabel(log.shiftKey, t)}
                     </strong>
-                    <p>{formatDateTimeLabel(log.updatedAt)}</p>
+                    <p>{formatDateTimeLabel(log.updatedAt, locale)}</p>
                   </div>
-                  <span className={`badge badge-${log.status}`}>{formatStatusLabel(log.status)}</span>
+                  <span className={`badge badge-${log.status}`}>{formatStatusLabel(log.status, t)}</span>
                 </div>
                 <p>{log.summary}</p>
                 <ul className="stack-list muted-list top-gap-small">
@@ -290,9 +287,9 @@ export default async function HandoffPage({
                     <li key={note.id}>
                       <strong>{note.authorLabel}</strong>
                       <span>
-                        {formatStatusLabel(note.state)}
+                        {formatStatusLabel(note.state, t)}
                         {note.linkedItemLabel ? ` · ${note.linkedItemLabel}` : ''}
-                        {` · ${note.note} · ${formatDateTimeLabel(note.createdAt)}`}
+                        {` · ${note.note} · ${formatDateTimeLabel(note.createdAt, locale)}`}
                       </span>
                     </li>
                   ))}
@@ -300,6 +297,7 @@ export default async function HandoffPage({
               </article>
             ))}
           </div>
+          <p className="helper-text no-margin">{t('handoff.termHint', { destinations: term('destination', 'many') })}</p>
         </article>
       </section>
     </div>

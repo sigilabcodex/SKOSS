@@ -2,26 +2,24 @@ import Link from 'next/link';
 import { formatDateLabel, formatLineProgressLabel, formatShiftKeyLabel, formatStatusLabel } from '@/lib/domain/formatters';
 import { getLineStatus, getOrderProgress, getProductionBoard } from '@/lib/server/demo-data';
 import { updateOrderLineProgressAction } from '@/lib/server/actions';
+import { getServerTranslator } from '@/lib/i18n/server';
 import { SubmitButton } from '@/components/submit-button';
 import { CheckIcon, HandoffIcon, ProductionIcon } from '@/components/ui-icons';
 
 export default async function ProductionPage() {
-  const view = await getProductionBoard();
+  const [view, { t, locale, term }] = await Promise.all([getProductionBoard(), getServerTranslator()]);
 
   return (
     <div className="page-stack">
       <section className="section-header page-hero-header">
         <div>
-          <p className="eyebrow">Kitchen workspace</p>
-          <h1>Production board</h1>
-          <p>
-            Demand now shows what is required, what is already done, what remains open, and which items
-            changed after the recurring baseline was generated.
-          </p>
+          <p className="eyebrow">{t('production.workspace')}</p>
+          <h1>{t('production.title')}</h1>
+          <p>{t('production.description')}</p>
         </div>
         <Link href="/handoff" className="button-secondary">
           <HandoffIcon className="button-icon" />
-          <span>Record WIP</span>
+          <span>{t('production.recordWip')}</span>
         </Link>
       </section>
 
@@ -29,35 +27,35 @@ export default async function ProductionPage() {
         <section key={board.productionDate} className="panel page-stack">
           <div className="table-header-row">
             <div>
-              <strong>{formatDateLabel(board.productionDate)}</strong>
+              <strong>{formatDateLabel(board.productionDate, locale)}</strong>
               <p>
-                {board.boardOrders.length} visible orders · {board.readyCount} ready WIP entries · {board.handoffCount}{' '}
-                handoff logs
+                {board.boardOrders.length} {t('production.boardSummary')} · {board.readyCount} {t('production.readyWipEntries')} · {board.handoffCount}{' '}
+                {t('production.handoffLogs')}
               </p>
             </div>
-            <span className="summary-pill">{board.changedOrders.length} changed / flagged orders</span>
+            <span className="summary-pill">{board.changedOrders.length} {t('production.changedFlaggedOrders')}</span>
           </div>
 
           <div className="stats-grid compact-stats-grid">
             <div className="stat-card">
-              <span className="stat-label">Total required</span>
+              <span className="stat-label">{t('production.totalRequired')}</span>
               <strong>{board.boardProgress.requiredQuantity}</strong>
-              <span>sum of visible grouped demand</span>
+              <span>{t('production.totalRequiredHelp')}</span>
             </div>
             <div className="stat-card stat-card-success">
-              <span className="stat-label">Already done</span>
+              <span className="stat-label">{t('production.alreadyDone')}</span>
               <strong>{board.boardProgress.completedQuantity}</strong>
-              <span>quantity marked complete so far</span>
+              <span>{t('production.alreadyDoneHelp')}</span>
             </div>
             <div className="stat-card stat-card-warn">
-              <span className="stat-label">Still pending</span>
+              <span className="stat-label">{t('production.stillPending')}</span>
               <strong>{board.boardProgress.remainingQuantity}</strong>
-              <span>remaining production work</span>
+              <span>{t('production.stillPendingHelp')}</span>
             </div>
             <div className="stat-card stat-card-info">
-              <span className="stat-label">Orders in progress</span>
+              <span className="stat-label">{t('production.ordersInProgress')}</span>
               <strong>{board.boardProgress.partialOrders}</strong>
-              <span>orders already partially completed</span>
+              <span>{t('production.ordersInProgressHelp')}</span>
             </div>
           </div>
 
@@ -67,16 +65,16 @@ export default async function ProductionPage() {
                 <div className="order-card-header">
                   <strong>{item.label}</strong>
                   <div className="action-cluster wrap-cluster">
-                    {item.draft ? <span className="badge badge-draft">draft</span> : null}
-                    {item.changed ? <span className="badge badge-changed">changed</span> : null}
-                    {item.partial ? <span className="badge badge-in_progress">partial</span> : null}
+                    {item.draft ? <span className="badge badge-draft">{t('common.draft')}</span> : null}
+                    {item.changed ? <span className="badge badge-changed">{t('common.changed')}</span> : null}
+                    {item.partial ? <span className="badge badge-in_progress">{t('common.partial')}</span> : null}
                   </div>
                 </div>
                 <p className="demand-qty">
                   {item.completedQuantity}/{item.quantity} {item.unit}
                 </p>
-                <p>{item.remainingQuantity} remaining · {item.orderCount} order lines</p>
-                <p>{item.destinations.join(', ') || 'No destination yet'}</p>
+                <p>{item.remainingQuantity} {t('production.stillPending').toLowerCase()} · {item.orderCount} {t('production.orderLines')}</p>
+                <p>{item.destinations.join(', ') || t('production.noDestinationYet')}</p>
               </article>
             ))}
           </div>
@@ -85,15 +83,15 @@ export default async function ProductionPage() {
             <article className="subpanel page-stack">
               <div className="table-header-row">
                 <div>
-                  <h2>Changed or draft-sensitive demand</h2>
-                  <p>Keep late edits and draft-driven work visible to the kitchen.</p>
+                  <h2>{t('production.changedDemand')}</h2>
+                  <p>{t('production.changedDemandHelp')}</p>
                 </div>
               </div>
               <ul className="stack-list muted-list">
                 {board.changedOrders.map((order) => (
                   <li key={order.id}>
                     <strong>{order.customerLabel}</strong>
-                    <span>{order.notes ?? 'Changed order'}</span>
+                    <span>{order.notes ?? t('common.changedOrder')}</span>
                   </li>
                 ))}
                 {board.draftLines.map((line) => (
@@ -112,8 +110,8 @@ export default async function ProductionPage() {
             <article className="subpanel page-stack">
               <div className="table-header-row">
                 <div>
-                  <h2>Current WIP snapshot</h2>
-                  <p>Use this as the fast read before moving into production updates.</p>
+                  <h2>{t('production.currentWipSnapshot')}</h2>
+                  <p>{t('production.currentWipSnapshotHelp')}</p>
                 </div>
               </div>
               <ul className="stack-list muted-list">
@@ -123,8 +121,7 @@ export default async function ProductionPage() {
                       {entry.referenceLabel} · {entry.quantity} {entry.unit}
                     </strong>
                     <span>
-                      {formatStatusLabel(entry.stage)} · {formatShiftKeyLabel(entry.shiftKey)} shift ·{' '}
-                      {entry.notes ?? 'No extra note'}
+                      {formatStatusLabel(entry.stage, t)} · {formatShiftKeyLabel(entry.shiftKey, t)} · {entry.notes ?? t('common.noExtraNote')}
                     </span>
                   </li>
                 ))}
@@ -135,10 +132,10 @@ export default async function ProductionPage() {
           <article className="subpanel page-stack">
             <div className="table-header-row">
               <div>
-                <h2>Fast line completion</h2>
-                <p>Tap into partial completion without leaving the production view.</p>
+                <h2>{t('production.fastLineCompletion')}</h2>
+                <p>{t('production.fastLineCompletionHelp')}</p>
               </div>
-              <span className="summary-pill">Live updates per line</span>
+              <span className="summary-pill">{t('production.liveUpdates')}</span>
             </div>
             <div className="line-grid-stack">
               {board.boardOrders.map((order) => {
@@ -150,13 +147,13 @@ export default async function ProductionPage() {
                       <div>
                         <strong>{order.customerLabel}</strong>
                         <p>
-                          {order.destinationLabel ?? 'Destination still open'} · {progress.completedQuantity}/{progress.requiredQuantity || 0} complete
+                          {order.destinationLabel ?? t('common.destinationStillOpen')} · {progress.completedQuantity}/{progress.requiredQuantity || 0} {t('production.complete')}
                         </p>
                       </div>
                       <div className="action-cluster wrap-cluster">
-                        <span className={`badge badge-${order.status}`}>{formatStatusLabel(order.status)}</span>
-                        {order.generatedFromTemplate ? <span className="badge badge-generated">recurring</span> : <span className="badge badge-manual">manual</span>}
-                        {order.templateEdited ? <span className="badge badge-changed">edited</span> : null}
+                        <span className={`badge badge-${order.status}`}>{formatStatusLabel(order.status, t)}</span>
+                        {order.generatedFromTemplate ? <span className="badge badge-generated">{t('common.recurring')}</span> : <span className="badge badge-manual">{t('common.manual')}</span>}
+                        {order.templateEdited ? <span className="badge badge-changed">{t('common.edited')}</span> : null}
                       </div>
                     </div>
                     <div className="line-grid-stack">
@@ -168,10 +165,10 @@ export default async function ProductionPage() {
                           <form key={line.id} action={action} className="progress-row">
                             <div>
                               <strong>{line.productLabel}</strong>
-                              <p>{line.note ?? 'No extra note'}</p>
+                              <p>{line.note ?? t('common.noExtraNote')}</p>
                             </div>
                             <label>
-                              <span className="field-heading">Completed</span>
+                              <span className="field-heading">{t('production.completedField')}</span>
                               <input
                                 name="completedQuantity"
                                 type="number"
@@ -181,15 +178,15 @@ export default async function ProductionPage() {
                               />
                             </label>
                             <div className="page-stack compact-badge-stack">
-                              <span className={`badge badge-${lineStatus}`}>{formatStatusLabel(lineStatus)}</span>
+                              <span className={`badge badge-${lineStatus}`}>{formatStatusLabel(lineStatus, t)}</span>
                               <span className="field-label progress-label">{formatLineProgressLabel(line)}</span>
                             </div>
                             <SubmitButton
                               className="button-secondary button-reset"
-                              pendingLabel="Saving…"
+                              pendingLabel={t('production.saving')}
                               icon={<CheckIcon className="button-icon" />}
                             >
-                              Save
+                              {t('production.save')}
                             </SubmitButton>
                           </form>
                         );
@@ -205,15 +202,15 @@ export default async function ProductionPage() {
             <article className="subpanel page-stack">
               <div className="table-header-row">
                 <div>
-                  <h2>Recent handoff notes</h2>
-                  <p>Surface the latest shift context next to current production demand.</p>
+                  <h2>{t('production.recentHandoffNotes')}</h2>
+                  <p>{t('production.recentHandoffNotesHelp')}</p>
                 </div>
               </div>
               <ul className="stack-list muted-list">
                 {board.handoffEntries.map((entry) => (
                   <li key={entry.id}>
                     <strong>
-                      {formatShiftKeyLabel(entry.shiftKey)} · {formatStatusLabel(entry.state)}
+                      {formatShiftKeyLabel(entry.shiftKey, t)} · {formatStatusLabel(entry.state, t)}
                     </strong>
                     <span>
                       {entry.linkedItemLabel ? `${entry.linkedItemLabel} · ` : ''}
@@ -227,15 +224,15 @@ export default async function ProductionPage() {
             <article className="subpanel page-stack">
               <div className="table-header-row">
                 <div>
-                  <h2>Hidden from board</h2>
-                  <p>Orders saved here stay out of grouped demand but remain visible to operators.</p>
+                  <h2>{t('production.hiddenFromBoard')}</h2>
+                  <p>{t('production.hiddenFromBoardHelp')}</p>
                 </div>
               </div>
               <ul className="stack-list muted-list">
                 {board.hiddenOrders.map((order) => (
                   <li key={order.id}>
                     <strong>{order.customerLabel}</strong>
-                    <span>{order.notes ?? 'Hidden from grouped demand but kept in saved orders.'}</span>
+                    <span>{order.notes ?? t('production.hiddenOrderHelp')}</span>
                   </li>
                 ))}
               </ul>
@@ -248,8 +245,9 @@ export default async function ProductionPage() {
         <section className="page-context-card">
           <ProductionIcon className="callout-icon" />
           <div>
-            <strong>No production boards yet.</strong>
-            <p className="helper-text no-margin">As soon as visible saved orders exist, grouped demand and fast completion will appear here.</p>
+            <strong>{t('production.emptyTitle')}</strong>
+            <p className="helper-text no-margin">{t('production.emptyBody')}</p>
+            <p className="helper-text no-margin">{t('production.termHint', { items: term('workItem', 'many') })}</p>
           </div>
         </section>
       ) : null}

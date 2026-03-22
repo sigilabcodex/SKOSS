@@ -1,5 +1,6 @@
 'use client';
 
+import { useI18n } from '@/components/i18n-provider';
 import { MinusIcon, PlusIcon } from '@/components/ui-icons';
 
 export type LineDraft = {
@@ -34,30 +35,29 @@ const emptyLine: LineDraft = {
   note: '',
 };
 
-function updateEditorState(editor: HTMLElement) {
+function updateEditorState(editor: HTMLElement, labels: { line: string; visibleRows: string; removeLine: string }) {
   const rows = Array.from(editor.querySelectorAll<HTMLElement>('[data-line-row]')).filter((row) => row.dataset.template !== 'true');
   const countLabel = editor.querySelector<HTMLElement>('[data-line-count]');
 
   rows.forEach((row, index) => {
     const number = row.querySelector<HTMLElement>('[data-line-number]');
     if (number) {
-      number.textContent = `Line ${index + 1}`;
+      number.textContent = `${labels.line} ${index + 1}`;
+    }
+
+    const removeButton = row.querySelector<HTMLButtonElement>('[data-remove-line]');
+    if (removeButton) {
+      removeButton.disabled = rows.length === 1;
+      removeButton.setAttribute('aria-label', `${labels.removeLine} ${index + 1}`);
     }
   });
 
   if (countLabel) {
-    countLabel.textContent = `${rows.length} visible rows`;
+    countLabel.textContent = `${rows.length} ${labels.visibleRows}`;
   }
-
-  rows.forEach((row) => {
-    const removeButton = row.querySelector<HTMLButtonElement>('[data-remove-line]');
-    if (removeButton) {
-      removeButton.disabled = rows.length === 1;
-    }
-  });
 }
 
-function addLine(editorId: string) {
+function addLine(editorId: string, labels: { line: string; visibleRows: string; removeLine: string }) {
   const editor = document.getElementById(editorId);
   const list = editor?.querySelector<HTMLElement>('[data-line-list]');
   const template = editor?.querySelector<HTMLElement>('[data-line-row-template] [data-line-row]');
@@ -73,10 +73,10 @@ function addLine(editorId: string) {
 
   clone.dataset.template = 'false';
   list.appendChild(clone);
-  updateEditorState(editor);
+  updateEditorState(editor, labels);
 }
 
-function removeLine(button: HTMLButtonElement) {
+function removeLine(button: HTMLButtonElement, labels: { line: string; visibleRows: string; removeLine: string }) {
   const editor = button.closest<HTMLElement>('[data-line-editor]');
   const row = button.closest<HTMLElement>('[data-line-row]');
 
@@ -90,7 +90,7 @@ function removeLine(button: HTMLButtonElement) {
   }
 
   row.remove();
-  updateEditorState(editor);
+  updateEditorState(editor, labels);
 }
 
 function LineRow({
@@ -106,6 +106,13 @@ function LineRow({
   status?: { label: string; tone: string };
   template?: boolean;
 }) {
+  const { t } = useI18n();
+  const labels = {
+    line: t('orders.lineEditor.line'),
+    remove: t('orders.lineEditor.remove'),
+    removeAria: t('orders.lineEditor.removeAria'),
+  };
+
   return (
     <div
       className="line-entry-card line-entry-card-structured"
@@ -114,8 +121,8 @@ function LineRow({
     >
       <div className="line-entry-top">
         <div>
-          <strong data-line-number>{`Line ${index + 1}`}</strong>
-          <p className="helper-text no-margin">Keep item naming practical. Blank rows can be removed.</p>
+          <strong data-line-number>{`${labels.line} ${index + 1}`}</strong>
+          <p className="helper-text no-margin">{t('orders.lineEditor.rowHelp')}</p>
         </div>
         <div className="action-cluster wrap-cluster compact-actions">
           {status ? <span className={`badge badge-${status.tone}`}>{status.label}</span> : null}
@@ -123,18 +130,22 @@ function LineRow({
             type="button"
             className="button-ghost button-reset"
             data-remove-line
-            onClick={(event) => removeLine(event.currentTarget)}
+            onClick={(event) => removeLine(event.currentTarget, {
+              line: labels.line,
+              visibleRows: t('orders.lineEditor.visibleRows'),
+              removeLine: labels.removeAria,
+            })}
             disabled={index === 0 && !template}
-            aria-label={`Remove line ${index + 1}`}
+            aria-label={`${labels.removeAria} ${index + 1}`}
           >
             <MinusIcon className="button-icon" />
-            <span>Remove</span>
+            <span>{labels.remove}</span>
           </button>
         </div>
       </div>
       <div className="line-grid">
         <label>
-          <span className="field-heading">Kind</span>
+          <span className="field-heading">{t('orders.lineEditor.kind')}</span>
           <select name="lineType" defaultValue={line.lineType}>
             {lineTypeOptions.map((option) => (
               <option key={option.value} value={option.value}>
@@ -144,28 +155,28 @@ function LineRow({
           </select>
         </label>
         <label className="line-span-2">
-          <span className="field-heading">Item name</span>
+          <span className="field-heading">{t('orders.lineEditor.itemName')}</span>
           <input
             name="productLabel"
             list="product-suggestions"
             defaultValue={line.productLabel}
-            placeholder="Country loaf / 800g or mini sweet tray"
+            placeholder={t('orders.lineEditor.placeholders.itemName')}
           />
         </label>
         <label>
-          <span className="field-heading">Quantity</span>
+          <span className="field-heading">{t('orders.lineEditor.quantity')}</span>
           <input name="quantity" type="number" min="0" step="1" defaultValue={line.quantity} />
         </label>
         <label>
-          <span className="field-heading">Unit</span>
-          <input name="unit" defaultValue={line.unit} placeholder="pieces" />
+          <span className="field-heading">{t('orders.lineEditor.unit')}</span>
+          <input name="unit" defaultValue={line.unit} placeholder={t('orders.lineEditor.placeholders.unit')} />
         </label>
         <label className="line-span-2">
-          <span className="field-heading">Line note</span>
+          <span className="field-heading">{t('orders.lineEditor.lineNote')}</span>
           <input
             name="lineNote"
             defaultValue={line.note}
-            placeholder="Packing reminder, flavor note, or exception"
+            placeholder={t('orders.lineEditor.placeholders.lineNote')}
           />
         </label>
       </div>
@@ -181,14 +192,20 @@ export function LineItemsEditor({
   existingStatuses,
   sectionLabel,
 }: LineItemsEditorProps) {
+  const { t } = useI18n();
   const lines = initialLines.length > 0 ? initialLines : [emptyLine];
   const visibleSuggestions = Array.from(new Set(productSuggestions)).sort();
+  const labels = {
+    line: t('orders.lineEditor.line'),
+    visibleRows: t('orders.lineEditor.visibleRows'),
+    removeLine: t('orders.lineEditor.removeAria'),
+  };
 
   return (
     <div className="line-editor-stack" id={editorId} data-line-editor>
       <div className="list-feedback-row">
         <p className="helper-text no-margin">{sectionLabel}</p>
-        <span className="inline-meta" data-line-count>{lines.length} visible rows</span>
+        <span className="inline-meta" data-line-count>{lines.length} {t('orders.lineEditor.visibleRows')}</span>
       </div>
 
       <div className="line-grid-stack" data-line-list>
@@ -204,9 +221,9 @@ export function LineItemsEditor({
       </div>
 
       <div className="action-row action-row-start">
-        <button type="button" className="button-secondary button-reset" onClick={() => addLine(editorId)}>
+        <button type="button" className="button-secondary button-reset" onClick={() => addLine(editorId, labels)}>
           <PlusIcon className="button-icon" />
-          <span>Add line</span>
+          <span>{t('orders.lineEditor.addLine')}</span>
         </button>
       </div>
 
