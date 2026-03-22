@@ -54,7 +54,7 @@ export interface SupplierFormValues {
 export interface RawMaterialFormValues {
   name: string;
   category?: string;
-  defaultUnit: string;
+  defaultUnit?: string;
   brand?: string;
   notes?: string;
   active: boolean;
@@ -65,8 +65,8 @@ export interface SupplierPriceEntryFormValues {
   rawMaterialId: string;
   presentation?: string;
   brand?: string;
-  packageQuantity: number;
-  packageUnit: string;
+  packageQuantity?: number;
+  packageUnit?: string;
   price: number;
   priceDate: string;
   note?: string;
@@ -671,16 +671,16 @@ export function validateSupplierForm(values: SupplierFormValues) {
   return null;
 }
 
-export function buildSupplierRecord(values: SupplierFormValues): Supplier {
+export function buildSupplierRecord(values: SupplierFormValues, existingSupplier?: Supplier): Supplier {
   const now = new Date().toISOString();
 
   return {
-    id: `supplier-${crypto.randomUUID()}`,
+    id: existingSupplier?.id ?? `supplier-${crypto.randomUUID()}`,
     name: values.name.trim(),
     contact: values.contact?.trim() || undefined,
     notes: values.notes?.trim() || undefined,
     active: values.active,
-    createdAt: now,
+    createdAt: existingSupplier?.createdAt ?? now,
     updatedAt: now,
   };
 }
@@ -689,7 +689,7 @@ export function normalizeRawMaterialForm(formData: FormData): RawMaterialFormVal
   return {
     name: String(formData.get('name') ?? ''),
     category: String(formData.get('category') ?? ''),
-    defaultUnit: String(formData.get('defaultUnit') ?? 'kg'),
+    defaultUnit: String(formData.get('defaultUnit') ?? ''),
     brand: String(formData.get('brand') ?? ''),
     notes: String(formData.get('notes') ?? ''),
     active: formData.get('active') !== null,
@@ -701,36 +701,34 @@ export function validateRawMaterialForm(values: RawMaterialFormValues) {
     return 'Raw material name is required.';
   }
 
-  if (!values.defaultUnit.trim()) {
-    return 'Default unit is required for raw materials.';
-  }
-
   return null;
 }
 
-export function buildRawMaterialRecord(values: RawMaterialFormValues): RawMaterial {
+export function buildRawMaterialRecord(values: RawMaterialFormValues, existingRawMaterial?: RawMaterial): RawMaterial {
   const now = new Date().toISOString();
 
   return {
-    id: `raw-material-${crypto.randomUUID()}`,
+    id: existingRawMaterial?.id ?? `raw-material-${crypto.randomUUID()}`,
     name: values.name.trim(),
     category: values.category?.trim() || undefined,
-    defaultUnit: values.defaultUnit.trim(),
+    defaultUnit: values.defaultUnit?.trim() || undefined,
     brand: values.brand?.trim() || undefined,
     notes: values.notes?.trim() || undefined,
     active: values.active,
-    createdAt: now,
+    createdAt: existingRawMaterial?.createdAt ?? now,
     updatedAt: now,
   };
 }
 
 export function normalizeSupplierPriceEntryForm(formData: FormData): SupplierPriceEntryFormValues {
+  const quantityValue = String(formData.get('packageQuantity') ?? '').trim();
+
   return {
     supplierId: String(formData.get('supplierId') ?? ''),
     rawMaterialId: String(formData.get('rawMaterialId') ?? ''),
     presentation: String(formData.get('presentation') ?? ''),
     brand: String(formData.get('brand') ?? ''),
-    packageQuantity: Number(formData.get('packageQuantity') ?? 0),
+    packageQuantity: quantityValue ? Number(quantityValue) : undefined,
     packageUnit: String(formData.get('packageUnit') ?? ''),
     price: Number(formData.get('price') ?? 0),
     priceDate: String(formData.get('priceDate') ?? ''),
@@ -750,8 +748,13 @@ export function validateSupplierPriceEntryForm(
     return 'Choose a raw material for the price entry.';
   }
 
-  if (values.packageQuantity <= 0 || !values.packageUnit.trim()) {
-    return 'Add a package size and package unit for the price entry.';
+  if (values.packageQuantity !== undefined && (!Number.isFinite(values.packageQuantity) || values.packageQuantity <= 0)) {
+    return 'Package quantity must be greater than zero when included.';
+  }
+
+  if ((values.packageQuantity !== undefined && !values.packageUnit?.trim())
+    || (values.packageUnit?.trim() && values.packageQuantity === undefined)) {
+    return 'Add both package quantity and package unit, or leave both blank.';
   }
 
   if (values.price <= 0) {
@@ -786,7 +789,7 @@ export function buildSupplierPriceEntryRecord(
     presentation: values.presentation?.trim() || undefined,
     brand: values.brand?.trim() || rawMaterial.brand || undefined,
     packageQuantity: values.packageQuantity,
-    packageUnit: values.packageUnit.trim(),
+    packageUnit: values.packageUnit?.trim() || undefined,
     price: values.price,
     priceDate: values.priceDate,
     note: values.note?.trim() || undefined,

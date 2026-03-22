@@ -142,6 +142,8 @@ Procurement+ could extend supplier and ingredient records with:
 - reorder support
 - deeper purchasing history
 
+The core foundation should still stop well before this point. A lightweight supplier list, raw material list, and append-only supplier price history belong in the base operational data layer because they support future costing and buying memory without forcing formal procurement workflows.
+
 This should remain optional because many small kitchens will not need formal procurement structure early.
 
 ### Delivery tracking+
