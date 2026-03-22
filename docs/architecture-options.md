@@ -11,20 +11,32 @@ It builds on the existing product constraints:
 - openness to local/LAN deployment
 - future offline-aware direction without pretending full sync is solved
 - maintainability for a small FOSS project
+- practical printing needs in real kitchen workflows
+
+## Architecture language
+
+This comparison should use precise project terms:
+
+- **SKOSS** = the core system, server-side platform, shared workflow engine, and system of record
+- **SKOSSina** = the worker-facing client layer that connects to SKOSS from browsers first and possibly PWA or packaged forms later
+
+The question is not whether to build many separate apps immediately. The question is how to keep SKOSS dependable while giving SKOSSina enough flexibility to serve operators on phones, tablets, desktops, and shared stations.
 
 ## Evaluation frame
 
 The strongest early architecture for SKOSS is the one that can:
 
 1. keep operator interactions fast on ordinary mobile devices
-2. stay deployable on modest infrastructure
-3. keep the system understandable for contributors
-4. tolerate degraded connectivity better than a fragile cloud-only design
-5. avoid premature distributed-systems complexity
+2. keep SKOSSina lightweight and worker-oriented
+3. stay deployable on modest infrastructure
+4. keep the system understandable for contributors
+5. tolerate degraded connectivity better than a fragile cloud-only design
+6. avoid premature distributed-systems complexity
+7. leave room for practical print-friendly workflows and future hardware compatibility
 
 ## Option 1: classic server-rendered web app
 
-A conventional web application served from one central server, with the browser acting mainly as a connected client.
+A conventional web application served from one central SKOSS server, with SKOSSina delivered mainly through the browser as a connected client.
 
 ### Strengths
 
@@ -34,6 +46,7 @@ A conventional web application served from one central server, with the browser 
 - straightforward deployment on a single VPS or local server
 - easy to reason about backups when the main system of record is centralized
 - good fit for progressive adoption because server-side forms and workflows can stay forgiving and incremental
+- browser printing flows are easier to introduce early than deeper native printer integration
 
 ### Weaknesses
 
@@ -73,15 +86,17 @@ A conventional web application served from one central server, with the browser 
 
 ## Option 2: PWA-first web app
 
-A web application optimized from the start as a progressive web app, usually with a richer client, installability, service worker support, and meaningful browser-side storage.
+A web application optimized from the start as a progressive web app, usually with a richer SKOSSina client, installability, service worker support, and meaningful browser-side storage.
 
 ### Strengths
 
 - stronger path toward mobile-first responsiveness
 - can feel more app-like on phones and tablets
+- can improve repeat-entry speed for staff using the same device every day
 - creates a cleaner foundation for eventual draft capture during weak connectivity
 - installable on devices without app-store overhead
 - can cache UI assets aggressively for better repeat performance on unstable networks
+- may later help with selected printer or device access depending on platform constraints
 
 ### Weaknesses
 
@@ -120,7 +135,7 @@ A web application optimized from the start as a progressive web app, usually wit
 
 ## Option 3: local/LAN-first deployment model
 
-A deployment-first posture where the primary expected use is a server running inside the business network, such as a bakery laptop, office mini-PC, or local Linux box, with phones and tablets connecting over Wi-Fi.
+A deployment-first posture where the primary expected use is a SKOSS server running inside the business network, such as a bakery laptop, office mini-PC, or local Linux box, with SKOSSina clients connecting over Wi-Fi.
 
 This is a deployment model more than a UI model. It can be combined with a classic web app or a modest PWA.
 
@@ -131,6 +146,7 @@ This is a deployment model more than a UI model. It can be combined with a class
 - increases operator trust for businesses that prefer local control
 - aligns well with single-site operations such as the first bakery target
 - fits the portability and self-hosting goals of the project
+- often aligns naturally with on-site ticket and label printer scenarios
 
 ### Weaknesses
 
@@ -225,15 +241,16 @@ A longer-term model where SKOSS can run centrally on a VPS, run locally on-premi
 
 ### Recommended direction for v0
 
-SKOSS should most likely pursue a **classic server-centered web application with deliberate support for both small VPS hosting and local/LAN deployment**, while leaving room for a **modest PWA layer later**.
+SKOSS should most likely pursue a **classic server-centered web application with deliberate support for both small VPS hosting and local/LAN deployment**, while leaving room for a **modest SKOSSina PWA layer later**.
 
 In practice, that means:
 
-- one authoritative server-side system of record
-- mobile-first browser UX
+- one authoritative SKOSS server-side system of record
+- mobile-first browser UX as the first SKOSSina form factor
 - deployment that works either on a modest VPS or on a local machine inside a bakery network
 - careful use of polling or lightweight push for live updates
 - no early promise of multi-device offline mutation sync
+- print-friendly workflows designed early enough to support real kitchen and counter operations
 
 ### Why this direction fits SKOSS best right now
 
@@ -241,7 +258,7 @@ In practice, that means:
 - it fits the first real target, Kalali, where one-site operations matter more than multi-site scale
 - it keeps backup and restore understandable
 - it supports progressive adoption without forcing a heavy client architecture
-- it leaves room to add cached assets and limited local draft persistence later if real usage proves the value
+- it leaves room to add cached assets, limited local draft persistence, and future packaged-client forms later if real usage proves the value
 
 ### What to avoid hard-locking yet
 
@@ -252,6 +269,8 @@ The repository should **not** yet hard-lock:
 - the database engine
 - the exact realtime transport
 - the exact offline storage mechanism
+- the final SKOSSina packaging model
+- the final printer integration stack
 
 Those choices should be made only after the next implementation pass can score them against the decision framework and actual workflow prototypes.
 
@@ -259,6 +278,7 @@ Those choices should be made only after the next implementation pass can score t
 
 A practical near-term stance is:
 
-> **server-first, mobile-first, LAN-capable, offline-aware, sync-skeptical**
-
-That posture is narrow enough to guide implementation later without pretending the hard parts of local-first distributed operation are already solved.
+- one shared SKOSS core serving browser-first SKOSSina clients
+- hosted and local/LAN deployment both treated as real targets
+- optional client packaging deferred until it improves proven workflows
+- printing treated as an operational requirement, with hardware depth added progressively

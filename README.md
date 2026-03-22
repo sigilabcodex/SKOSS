@@ -4,6 +4,21 @@ SKOSS stands for **Small Kitchen Operations and Services System**.
 
 It is an open-source operations system for small kitchens: bakeries, dark kitchens, food stalls, compact restaurant teams, and other food businesses that need clear daily coordination more than heavyweight enterprise software.
 
+## SKOSS and SKOSSina
+
+The project now uses two related names with different roles:
+
+- **SKOSS** = the core system, server-side platform, shared operational brain, and main system of record
+- **SKOSSina** = the worker-facing client experience that connects to SKOSS from phones, tablets, desktops, and browsers
+
+In practical terms:
+
+- SKOSS stores operational data, applies workflow rules, coordinates shared state, and serves connected clients
+- SKOSSina gives staff a lighter, role-oriented interface for daily work such as order capture, production review, WIP updates, handoff, and fulfillment checks
+- SKOSSina should remain usable across device types and may later exist as a browser-first experience, a PWA, and possibly packaged app forms
+
+This distinction matters because the project should not blur the operational core with every future client surface. One SKOSS core system should be able to serve multiple SKOSSina clients without turning the backend into a fragmented app suite.
+
 ## What SKOSS is
 
 SKOSS is not just a POS, not just inventory, and not just task management.
@@ -20,6 +35,8 @@ That means the system is designed around the actual flow of work in a kitchen:
 - tracking what is already in progress
 - handing work from one shift to another
 - keeping operators aligned without burying them in admin overhead
+
+SKOSSina should expose this flow through lightweight, worker-oriented screens rather than admin-heavy back-office forms.
 
 ## Who it is for
 
@@ -57,6 +74,8 @@ SKOSS exists to offer a lighter, more practical alternative:
 - **structured enough to support consistency**
 - **usable before setup is perfect**
 
+SKOSSina exists so those principles can reach workers directly through a practical client surface instead of making every task happen in a desktop-oriented admin UI.
+
 ## Project philosophy
 
 The project starts from a few strong beliefs:
@@ -75,7 +94,9 @@ The project starts from a few strong beliefs:
    Domain understanding comes before premature architecture.
 7. **Simple deployment matters.**
    The system should stay compatible with low-spec VPS hosting, small self-hosted servers, and practical local deployment.
-8. **FOSS maintainability matters.**
+8. **Printing is operational, not cosmetic.**
+   Kitchen tickets, paper handoff notes, receipts, labels, and print-friendly summaries matter in real bakery and kitchen workflows.
+9. **FOSS maintainability matters.**
    Early scope should stay disciplined, understandable, and implementation-agnostic.
 
 ## Progressive adoption
@@ -117,6 +138,7 @@ The initial product direction centers on the operational backbone of small kitch
 - shift logs and handoff
 - destinations and route-oriented output
 - role-based workspaces
+- print-friendly operational outputs such as tickets, summaries, and labels
 
 The near-term focus is the transformation engine that connects these concepts rather than trying to solve every business function at once.
 
@@ -126,11 +148,25 @@ SKOSS should aim to be practical for small operators, not only for well-funded t
 
 Target deployment directions:
 
-- **primary mode:** server-hosted use on a small Linux VPS or similar modest infrastructure
-- **secondary mode:** self-hosted use on a local server, small office machine, or low-spec laptop on the local network
-- **future direction:** offline-aware or degraded-network behavior when internet access is unstable
+- **primary mode:** SKOSS hosted on a small Linux VPS or similar modest infrastructure, with SKOSSina clients connecting over the network
+- **secondary mode:** SKOSS self-hosted on a local server, small office machine, or low-spec laptop on the local network, with SKOSSina clients connecting over LAN from multiple devices
+- **future direction:** offline-aware or degraded-network behavior when internet access is unstable, without pretending full sync is already solved
 
 This does **not** mean the project is promising full offline sync immediately. It means architecture decisions should leave room for local-first and reliability-friendly evolution later.
+
+## Cross-device and printing direction
+
+SKOSSina should be practical across phones, tablets, desktop browsers, and shared workstations.
+
+That cross-device direction should support:
+
+- quick worker access from browsers first
+- touch-friendly layouts for kitchen and front-of-house use
+- future PWA or packaged-app options where they improve deployment or reliability
+- lightweight paper workflows such as kitchen tickets, packing slips, order summaries, and label printing
+- future compatibility with common thermal-printer and label-printer scenarios
+
+Printing should be treated as part of real operations, not as a cosmetic reporting feature.
 
 ## Portability and trust
 
@@ -173,6 +209,7 @@ Kalali is a strong proving ground because it combines:
 - multiple sellable variants from the same dough
 - standardized processes shared across different workers
 - frequent need for handoff between shifts
+- real paper, ticket, and labeling needs during production and packing
 
 That makes Kalali a useful real-world domain for shaping the first version of SKOSS. It is narrow enough to stay grounded and specific, but rich enough to test the system's core ideas.
 
@@ -185,6 +222,7 @@ For now, **SKOSS** is the umbrella system and repository name.
 In simple terms:
 
 - **SKOSS** = the system name and broader operational framework
+- **SKOSSina** = the worker-facing client within that framework
 - **BAGET** = a possible future product/branding expression, especially for bakery use
 
 ## Current status
@@ -201,6 +239,7 @@ Before heavy implementation begins, the goal is to clarify:
 - production logic
 - progressive adoption behavior
 - lightweight deployment expectations
+- printing expectations for real kitchen workflows
 - portability and security baselines
 - a disciplined MVP
 
@@ -209,7 +248,8 @@ Before heavy implementation begins, the goal is to clarify:
 - `AGENTS.md` — guidance for future coding agents and contributors
 - `docs/vision.md` — project vision and scope boundaries
 - `docs/roadmap.md` — phased roadmap from v0 to a modular platform
-- `docs/modules.md` — core vs extension architecture direction
+- `docs/modules.md` — core, client, and extension architecture direction
+- `docs/printing.md` — operational printing requirements and future hardware direction
 - `docs/domain-glossary.md` — practical domain definitions
 - `docs/domain-model.md` — conceptual domain model
 - `docs/workspaces.md` — initial role-based workspace definitions
@@ -238,6 +278,7 @@ The best early contributions are not flashy abstractions. They are careful clari
 - what operators actually do
 - what information they need at each moment
 - what should remain optional
+
 - what should stay out of scope until the core loop works
 - what architecture assumptions would accidentally make the system heavier than its users need
 
@@ -256,6 +297,8 @@ The repository now includes a first implementation-oriented convergence pass.
 - mobile-first workspace UI for sales, kitchen, handoff, and setup
 - polling-first freshness strategy with room for selective SSE later
 - offline-aware but not offline-sync-first
+- browser-first SKOSSina access to one shared SKOSS core
+- print-friendly operational workflows as part of the product direction
 
 ### New v0 documents
 

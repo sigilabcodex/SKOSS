@@ -8,11 +8,12 @@ The goal is not to define packaging yet. The goal is to understand the operation
 
 Across all modes, SKOSS should aim for:
 
-- one understandable application deployment
+- one understandable core application deployment
 - modest infrastructure requirements
 - clear backup and restore steps
 - practical upgrades and rollback paths
 - no mandatory dependence on large managed cloud services
+- multiple SKOSSina clients able to connect to one shared SKOSS core
 
 ## Mode 1: small VPS
 
@@ -20,15 +21,16 @@ A hosted Linux VPS is the most likely default deployment for many small business
 
 ### Typical profile
 
-- one low-cost Linux VM
+- one low-cost Linux VM runs the SKOSS core
 - public HTTPS access
 - app process plus database on the same machine in early stages
 - routine backups to independent storage
+- SKOSSina clients connect from phones, tablets, or desktops over the network
 
 ### Strengths
 
 - easiest way to provide access from anywhere
-- no on-site hardware dependency for daily availability
+- simple way for multiple devices to share one operational system
 - simple to document as a default deployment path
 - good fit for small teams with occasional remote access needs
 - upgrades and backups can be centralized
@@ -36,7 +38,7 @@ A hosted Linux VPS is the most likely default deployment for many small business
 ### Weaknesses
 
 - depends on internet quality for day-to-day use
-- poor WAN connectivity can hurt operator experience if the app is too round-trip heavy
+- poor WAN connectivity can hurt SKOSSina responsiveness if the client is too round-trip heavy
 - a bakery may still need local fallback procedures during internet outages
 - public internet exposure raises the importance of secure defaults and updates
 
@@ -45,6 +47,7 @@ A hosted Linux VPS is the most likely default deployment for many small business
 - easiest shared-access mode
 - usually simplest for certificate management and remote support
 - requires stronger hosting hygiene than a LAN-only install
+- printing workflows may need local-network printer bridges or browser/app print behavior on the client side
 
 ### Best fit
 
@@ -54,13 +57,15 @@ A hosted Linux VPS is the most likely default deployment for many small business
 
 ## Mode 2: local laptop or local server on LAN
 
-SKOSS runs on-site on a bakery laptop, mini-PC, or small office server, and operators connect over the local network.
+SKOSS runs on-site on a bakery laptop, mini-PC, or small office server, and SKOSSina clients connect over the local network.
 
 ### Typical profile
 
-- one local machine hosts the application
+- one local machine hosts the SKOSS application
 - phones and tablets connect through local Wi-Fi
+- desktop stations may connect through browser or future packaged-client forms
 - internet may be optional for daily operation if the local host stays up
+- local printers can be reached more directly for ticket or label workflows
 
 ### Strengths
 
@@ -69,6 +74,7 @@ SKOSS runs on-site on a bakery laptop, mini-PC, or small office server, and oper
 - good fit for a single-site bakery or kitchen
 - supports operator trust for teams that want local control
 - aligns with low-cloud and self-hosting goals
+- often fits thermal-printer and label-printer workflows more naturally
 
 ### Weaknesses
 
@@ -83,11 +89,13 @@ SKOSS runs on-site on a bakery laptop, mini-PC, or small office server, and oper
 - better day-to-day resilience in poor internet environments
 - higher burden for physical device care and local support
 - documentation must explain backup, replacement, and restart procedures clearly
+- print handling may be easier, but printer setup can still be deployment-specific
 
 ### Best fit
 
 - single-site operators with unreliable internet
 - teams that strongly prefer local control
+- kitchens where multiple devices and local printers share one network
 - temporary fallback deployments during outages or migration
 
 ## Mode 3: future hybrid backup/sync model
@@ -98,7 +106,7 @@ This should be treated carefully because "hybrid" can mean very different things
 
 ## Version A: local primary with remote backup
 
-The local server is authoritative and pushes backups or replicas outward.
+The local SKOSS server is authoritative and pushes backups or replicas outward.
 
 ### Strengths
 
@@ -118,7 +126,7 @@ The local server is authoritative and pushes backups or replicas outward.
 
 ## Version B: hosted primary with local standby cache or mirror
 
-A hosted system remains authoritative, with some local resilience mechanism added later.
+A hosted SKOSS system remains authoritative, with some local resilience mechanism added later.
 
 ### Strengths
 
@@ -172,6 +180,7 @@ Needs:
 - routine off-machine backups
 - documented restore onto a new host
 - attention to secure upgrade procedures
+- clear explanation of how SKOSSina clients reconnect after host or DNS changes
 
 ## Local/LAN server
 
@@ -181,6 +190,7 @@ Needs:
 - explicit instructions for replacing failed hardware
 - simple service restart procedure
 - optional export path that an owner can trigger manually
+- clear handling for local printer dependencies during host replacement
 
 ## Hybrid backup model
 
@@ -204,7 +214,9 @@ This matches the product goals better than forcing cloud-only assumptions or ove
 - it covers both always-online and unreliable-internet environments
 - it respects small-operator self-hosting preferences
 - it keeps implementation pressure focused on one application architecture rather than many infrastructure roles
-- it allows the same core product to be evaluated in both hosted and on-premises contexts
+- it allows one SKOSS core to be evaluated in both hosted and on-premises contexts
+- it supports a lightweight SKOSSina client across multiple devices without demanding native packaging first
+- it keeps room for practical ticket and label printing on either hosted or LAN deployments
 
 ## What should wait
 
@@ -214,5 +226,6 @@ The following should remain future work until real usage justifies them:
 - active multi-site replication semantics
 - complex deployment control planes
 - dependency on orchestration platforms that small operators do not need
+- hardware-specific printer management beyond clear operational priorities
 
 A good deployment story for SKOSS should feel boring, predictable, and recoverable.
