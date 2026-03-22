@@ -14,6 +14,7 @@ import type {
   WorkspacePreferences,
 } from '@/lib/domain/types';
 import { defaultLocale, defaultPreset } from '@/lib/i18n/config';
+import { resolveThemePreference } from '@/lib/theme';
 import { getDefaultWorkspaceForRole } from '@/lib/workspaces';
 
 const storePath = path.join(process.cwd(), 'data', 'demo-store.json');
@@ -177,7 +178,12 @@ function normalizeUser(user: Partial<User> & { email?: string; role?: string }, 
     workspaceId: user.workspaceId ?? workspaceId,
     defaultWorkspace: user.defaultWorkspace ?? user.preferences?.defaultWorkspace ?? getDefaultWorkspaceForRole(role),
     active: user.active ?? true,
-    preferences: user.preferences,
+    preferences: user.preferences
+      ? {
+          ...user.preferences,
+          theme: user.preferences.theme ? resolveThemePreference(user.preferences.theme, 'system') : undefined,
+        }
+      : undefined,
     createdAt,
     updatedAt,
   };
@@ -292,7 +298,7 @@ function hydrateStore(rawData: AppData): AppData {
     locale: rawData.preferences?.locale ?? defaultLocale,
     preset: rawData.preferences?.preset ?? defaultPreset,
     operatingMode: rawData.preferences?.operatingMode ?? 'mixed',
-    theme: rawData.preferences?.theme ?? 'light',
+    theme: resolveThemePreference(rawData.preferences?.theme, 'system'),
     onboardingCompleted: rawData.preferences?.onboardingCompleted ?? false,
     completedAt: rawData.preferences?.completedAt,
     updatedAt: rawData.preferences?.updatedAt,

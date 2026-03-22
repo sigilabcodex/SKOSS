@@ -1,7 +1,7 @@
 import type { AppLocale, AppPreset } from '@/lib/i18n/config';
 
 export type UserRole = 'admin' | 'manager' | 'production' | 'frontdesk' | 'delivery';
-export type ThemeName = 'light' | 'dark' | 'garden';
+export type ThemeName = 'light' | 'dark' | 'system';
 export type OperatingMode = 'pickup' | 'delivery' | 'mixed';
 export type WorkspaceSurface = 'home' | 'orders' | 'production' | 'handoff' | 'preferences' | 'setup';
 

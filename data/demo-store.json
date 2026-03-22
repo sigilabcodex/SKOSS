@@ -17,7 +17,7 @@
       "active": true,
       "preferences": {
         "defaultWorkspace": "setup",
-        "theme": "garden"
+        "theme": "system"
       },
       "createdAt": "2026-03-10T09:00:00Z",
       "updatedAt": "2026-03-21T18:00:00Z"
@@ -887,7 +887,7 @@
     "locale": "en",
     "preset": "generic",
     "operatingMode": "mixed",
-    "theme": "garden",
+    "theme": "system",
     "onboardingCompleted": false
   },
   "recipes": [
