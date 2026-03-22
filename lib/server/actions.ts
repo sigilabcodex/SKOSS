@@ -12,6 +12,7 @@ import {
   buildShiftNote,
   buildSupplierPriceEntryRecord,
   buildSupplierRecord,
+  buildUserRecord,
   buildWipEntry,
   getLineStatus,
   normalizeRawMaterialForm,
@@ -20,6 +21,7 @@ import {
   normalizeRecurringTemplateForm,
   normalizeSupplierForm,
   normalizeSupplierPriceEntryForm,
+  normalizeUserForm,
   validateRawMaterialForm,
   validateRecipeForm,
   validateOrderForm,
@@ -28,11 +30,14 @@ import {
   validateShiftNote,
   validateSupplierForm,
   validateSupplierPriceEntryForm,
+  validateUserForm,
   validateWipEntry,
 } from '@/lib/server/demo-data';
+import { getCurrentUserContext, loggedOutSessionValue, sessionUserCookieName } from '@/lib/server/auth';
 import { readStore, writeStore } from '@/lib/server/store';
 import { isSupportedLocale, isSupportedPreset, localeCookieName, supportedLocales, presetCookieName, supportedPresets } from '@/lib/i18n/config';
 import { themeCookieName } from '@/lib/theme';
+import { getDefaultWorkspaceForRole } from '@/lib/workspaces';
 
 function sortOrders(left: { productionDate: string; updatedAt: string }, right: { productionDate: string; updatedAt: string }) {
   return left.productionDate === right.productionDate
@@ -42,6 +47,25 @@ function sortOrders(left: { productionDate: string; updatedAt: string }, right: 
 
 const supportedThemes = ['light', 'dark', 'garden'] as const;
 const supportedOperatingModes = ['pickup', 'delivery', 'mixed'] as const;
+
+function sortUsers(left: { displayName: string }, right: { displayName: string }) {
+  return left.displayName.localeCompare(right.displayName);
+}
+
+async function getActorUserId(data: Awaited<ReturnType<typeof readStore>>) {
+  const { currentUser } = await getCurrentUserContext(data);
+  return currentUser?.id;
+}
+
+function revalidateAllWorkspaces() {
+  revalidatePath('/');
+  revalidatePath('/orders');
+  revalidatePath('/production');
+  revalidatePath('/handoff');
+  revalidatePath('/preferences');
+  revalidatePath('/setup');
+  revalidatePath('/login');
+}
 
 export async function saveOnboardingPreferencesAction(formData: FormData) {
   const data = await readStore();
@@ -104,6 +128,136 @@ export async function saveOnboardingPreferencesAction(formData: FormData) {
   redirect('/?welcome=1');
 }
 
+
+export async function saveUserPreferencesAction(formData: FormData) {
+  const data = await readStore();
+  const { currentUser } = await getCurrentUserContext(data);
+
+  if (!currentUser) {
+    redirect('/login?error=missing-user');
+  }
+
+  const locale = String(formData.get('locale') ?? '');
+  const theme = String(formData.get('theme') ?? '');
+  const defaultWorkspaceValue = String(formData.get('defaultWorkspace') ?? '');
+
+  if (!isSupportedLocale(locale) || !supportedLocales.includes(locale)) {
+    redirect('/preferences?error=' + encodeURIComponent('Choose a supported language.'));
+  }
+
+  if (!supportedThemes.includes(theme as (typeof supportedThemes)[number])) {
+    redirect('/preferences?error=' + encodeURIComponent('Choose an appearance theme.'));
+  }
+
+  const defaultWorkspace = (defaultWorkspaceValue || currentUser.defaultWorkspace || getDefaultWorkspaceForRole(currentUser.role)) as typeof currentUser.defaultWorkspace;
+  const nextUpdatedAt = new Date().toISOString();
+
+  data.users = data.users.map((user) => user.id === currentUser.id
+    ? {
+        ...user,
+        defaultWorkspace,
+        preferences: {
+          ...user.preferences,
+          locale,
+          theme: theme as (typeof supportedThemes)[number],
+          defaultWorkspace,
+        },
+        updatedAt: nextUpdatedAt,
+      }
+    : user);
+
+  await writeStore(data);
+
+  const cookieStore = await cookies();
+  cookieStore.set(localeCookieName, locale, { path: '/', maxAge: 31536000, sameSite: 'lax' });
+  cookieStore.set(themeCookieName, theme, { path: '/', maxAge: 31536000, sameSite: 'lax' });
+
+  revalidateAllWorkspaces();
+  redirect('/preferences?saved=preferences');
+}
+
+export async function loginAction(formData: FormData) {
+  const data = await readStore();
+  const requestedIdentifier = String(formData.get('loginIdentifier') ?? '').trim().toLowerCase();
+  const redirectTo = String(formData.get('redirectTo') ?? '/');
+  const user = data.users.find((entry) => entry.active && entry.loginIdentifier.trim().toLowerCase() === requestedIdentifier);
+
+  if (!user) {
+    redirect(`/login?error=${encodeURIComponent('Choose an active user to continue.')}`);
+  }
+
+  const now = new Date().toISOString();
+  data.session.currentUserId = user.id;
+  data.session.lastLoginAt = now;
+  await writeStore(data);
+
+  const cookieStore = await cookies();
+  cookieStore.set(sessionUserCookieName, user.id, { path: '/', maxAge: 31536000, sameSite: 'lax' });
+  if (user.preferences?.locale) {
+    cookieStore.set(localeCookieName, user.preferences.locale, { path: '/', maxAge: 31536000, sameSite: 'lax' });
+  }
+  if (user.preferences?.theme) {
+    cookieStore.set(themeCookieName, user.preferences.theme, { path: '/', maxAge: 31536000, sameSite: 'lax' });
+  }
+
+  revalidateAllWorkspaces();
+  redirect(redirectTo.startsWith('/') ? redirectTo : '/');
+}
+
+export async function logoutAction() {
+  const data = await readStore();
+  data.session.currentUserId = undefined;
+  await writeStore(data);
+
+  const cookieStore = await cookies();
+  cookieStore.set(sessionUserCookieName, loggedOutSessionValue, { path: '/', maxAge: 31536000, sameSite: 'lax' });
+  revalidateAllWorkspaces();
+  redirect('/login');
+}
+
+export async function createUserAction(formData: FormData) {
+  const data = await readStore();
+  const values = normalizeUserForm(formData);
+  const error = validateUserForm(values, data);
+
+  if (error) {
+    redirect(`/setup?error=${encodeURIComponent(error)}`);
+  }
+
+  const user = buildUserRecord(values, data);
+  data.users = [...data.users, user].sort(sortUsers);
+  await writeStore(data);
+  revalidateAllWorkspaces();
+  redirect('/setup?saved=user');
+}
+
+export async function updateUserAction(userId: string, formData: FormData) {
+  const data = await readStore();
+  const existing = data.users.find((entry) => entry.id === userId);
+
+  if (!existing) {
+    redirect('/setup?error=missing-user');
+  }
+
+  const values = normalizeUserForm(formData);
+  const error = validateUserForm(values, data, userId);
+
+  if (error) {
+    redirect(`/setup?user=${userId}&error=${encodeURIComponent(error)}`);
+  }
+
+  const user = buildUserRecord(values, data, existing);
+  data.users = data.users.map((entry) => (entry.id === userId ? user : entry)).sort(sortUsers);
+
+  if (!user.active && data.session.currentUserId === userId) {
+    data.session.currentUserId = data.users.find((entry) => entry.active && entry.id !== userId)?.id;
+  }
+
+  await writeStore(data);
+  revalidateAllWorkspaces();
+  redirect('/setup?saved=user');
+}
+
 export async function createOrderAction(formData: FormData) {
   const data = await readStore();
   const values = normalizeOrderForm(formData);
@@ -113,7 +267,8 @@ export async function createOrderAction(formData: FormData) {
     redirect(`/orders/new?error=${encodeURIComponent(error)}`);
   }
 
-  const order = buildOrderRecord(data, values);
+  const actorUserId = await getActorUserId(data);
+  const order = buildOrderRecord(data, values, actorUserId);
   data.orders = [...data.orders, order].sort(sortOrders);
   await writeStore(data);
   revalidatePath('/');
@@ -137,7 +292,8 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
     redirect(`/orders/${orderId}?error=${encodeURIComponent(error)}`);
   }
 
-  const updated = buildOrderRecord(data, values, existing);
+  const actorUserId = await getActorUserId(data);
+  const updated = buildOrderRecord(data, values, actorUserId, existing);
   data.orders = data.orders.map((entry) => (entry.id === orderId ? updated : entry)).sort(sortOrders);
   await writeStore(data);
   revalidatePath('/');
@@ -157,7 +313,8 @@ export async function createRecurringTemplateAction(formData: FormData) {
     redirect(`/orders/templates/new?error=${encodeURIComponent(error)}`);
   }
 
-  const template = buildRecurringTemplateRecord(values);
+  const actorUserId = await getActorUserId(data);
+  const template = buildRecurringTemplateRecord(values, actorUserId);
   data.recurringTemplates = [...data.recurringTemplates, template].sort((left, right) =>
     left.nextOccurrenceDate === right.nextOccurrenceDate
       ? left.customerLabel.localeCompare(right.customerLabel)
@@ -184,6 +341,7 @@ export async function updateOrderLineProgressAction(orderId: string, lineId: str
     redirect(`/orders/${orderId}?error=missing-line`);
   }
 
+  const actorUserId = await getActorUserId(data);
   const requestedCompletedQuantity = Number(formData.get('completedQuantity') ?? line.completedQuantity ?? 0);
   const completedQuantity = Math.max(0, Math.min(line.quantity, requestedCompletedQuantity));
   line.completedQuantity = completedQuantity;
@@ -193,6 +351,7 @@ export async function updateOrderLineProgressAction(orderId: string, lineId: str
     lineStatus: line.lineStatus,
   });
   order.updatedAt = new Date().toISOString();
+  order.updatedByUserId = actorUserId ?? order.updatedByUserId;
 
   const activeLines = order.lines.filter((entry) => entry.lineType !== 'note_item' && entry.lineStatus !== 'cancelled');
   const allDone = activeLines.length > 0 && activeLines.every((entry) => entry.lineStatus === 'done');
@@ -215,7 +374,8 @@ export async function updateOrderLineProgressAction(orderId: string, lineId: str
 
 export async function addWipEntryAction(formData: FormData) {
   const data = await readStore();
-  const entry = buildWipEntry(formData);
+  const actorUserId = await getActorUserId(data);
+  const entry = buildWipEntry(formData, actorUserId);
   const error = validateWipEntry(entry);
 
   if (error) {
@@ -239,7 +399,8 @@ export async function createSupplierAction(formData: FormData) {
     redirect(`/setup?error=${encodeURIComponent(error)}`);
   }
 
-  const supplier = buildSupplierRecord(values);
+  const actorUserId = await getActorUserId(data);
+  const supplier = buildSupplierRecord(values, actorUserId);
   data.suppliers = [...data.suppliers, supplier].sort((left, right) => left.name.localeCompare(right.name));
   await writeStore(data);
   revalidatePath('/');
@@ -262,7 +423,8 @@ export async function updateSupplierAction(supplierId: string, formData: FormDat
     redirect(`/setup?supplier=${supplierId}&error=${encodeURIComponent(error)}`);
   }
 
-  const supplier = buildSupplierRecord(values, existing);
+  const actorUserId = await getActorUserId(data);
+  const supplier = buildSupplierRecord(values, actorUserId, existing);
   data.suppliers = data.suppliers
     .map((entry) => (entry.id === supplierId ? supplier : entry))
     .sort((left, right) => left.name.localeCompare(right.name));
@@ -281,7 +443,8 @@ export async function createRawMaterialAction(formData: FormData) {
     redirect(`/setup?error=${encodeURIComponent(error)}`);
   }
 
-  const rawMaterial = buildRawMaterialRecord(values);
+  const actorUserId = await getActorUserId(data);
+  const rawMaterial = buildRawMaterialRecord(values, actorUserId);
   data.rawMaterials = [...data.rawMaterials, rawMaterial].sort((left, right) => left.name.localeCompare(right.name));
   await writeStore(data);
   revalidatePath('/');
@@ -304,7 +467,8 @@ export async function updateRawMaterialAction(rawMaterialId: string, formData: F
     redirect(`/setup?material=${rawMaterialId}&error=${encodeURIComponent(error)}`);
   }
 
-  const rawMaterial = buildRawMaterialRecord(values, existing);
+  const actorUserId = await getActorUserId(data);
+  const rawMaterial = buildRawMaterialRecord(values, actorUserId, existing);
   data.rawMaterials = data.rawMaterials
     .map((entry) => (entry.id === rawMaterialId ? rawMaterial : entry))
     .sort((left, right) => left.name.localeCompare(right.name));
@@ -323,7 +487,8 @@ export async function createRecipeAction(formData: FormData) {
     redirect(`/setup?error=${encodeURIComponent(error)}`);
   }
 
-  const recipe = buildRecipeRecord(values, data);
+  const actorUserId = await getActorUserId(data);
+  const recipe = buildRecipeRecord(values, data, actorUserId);
   data.recipes = [...data.recipes, recipe].sort((left, right) => left.title.localeCompare(right.title));
   await writeStore(data);
   revalidatePath('/');
@@ -346,7 +511,8 @@ export async function updateRecipeAction(recipeId: string, formData: FormData) {
     redirect(`/setup?recipe=${recipeId}&error=${encodeURIComponent(error)}`);
   }
 
-  const recipe = buildRecipeRecord(values, data, existing);
+  const actorUserId = await getActorUserId(data);
+  const recipe = buildRecipeRecord(values, data, actorUserId, existing);
   data.recipes = data.recipes
     .map((entry) => (entry.id === recipeId ? recipe : entry))
     .sort((left, right) => left.title.localeCompare(right.title));
@@ -365,7 +531,8 @@ export async function createSupplierPriceEntryAction(formData: FormData) {
     redirect(`/setup?error=${encodeURIComponent(error)}`);
   }
 
-  const priceEntry = buildSupplierPriceEntryRecord(values, data);
+  const actorUserId = await getActorUserId(data);
+  const priceEntry = buildSupplierPriceEntryRecord(values, data, actorUserId);
   data.supplierPriceEntries = [...data.supplierPriceEntries, priceEntry].sort((left, right) =>
     left.priceDate === right.priceDate
       ? left.rawMaterialLabel.localeCompare(right.rawMaterialLabel)
@@ -385,7 +552,8 @@ export async function saveShiftLogAction(formData: FormData) {
     (entry) => entry.productionDate === productionDate && entry.shiftKey === shiftKey,
   );
 
-  const nextLog = buildShiftLog(existing, formData);
+  const actorUserId = await getActorUserId(data);
+  const nextLog = buildShiftLog(existing, formData, actorUserId);
   const error = validateShiftLog(nextLog);
 
   if (error) {
@@ -409,7 +577,8 @@ export async function addShiftNoteAction(formData: FormData) {
   const data = await readStore();
   const productionDate = String(formData.get('productionDate') ?? '');
   const shiftKey = String(formData.get('shiftKey') ?? 'night');
-  const shiftNote = buildShiftNote(formData);
+  const actorUserId = await getActorUserId(data);
+  const shiftNote = buildShiftNote(formData, actorUserId);
   const error = validateShiftNote(shiftNote, productionDate);
 
   if (error) {
@@ -423,6 +592,7 @@ export async function addShiftNoteAction(formData: FormData) {
   if (targetLog) {
     targetLog.shiftNotes = [shiftNote, ...targetLog.shiftNotes];
     targetLog.updatedAt = shiftNote.createdAt;
+    targetLog.updatedByUserId = actorUserId ?? targetLog.updatedByUserId;
   } else {
     data.shiftLogs = [
       {
@@ -434,6 +604,8 @@ export async function addShiftNoteAction(formData: FormData) {
         openItems: [],
         handoffNotes: '',
         updatedAt: shiftNote.createdAt,
+        createdByUserId: actorUserId,
+        updatedByUserId: actorUserId,
         shiftNotes: [shiftNote],
       },
       ...data.shiftLogs,

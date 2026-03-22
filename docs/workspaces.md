@@ -142,3 +142,33 @@ At the moment this preset layer stays intentionally light:
 - it can show starter suggestions and example setup hints that match the chosen operating style
 
 It does **not** yet hide major parts of the product, fork business logic, or force a team into one workspace model permanently.
+
+
+## Role-shaped attention foundation
+
+The project now starts applying workspace shaping through a lightweight user and role foundation.
+
+This is intentionally modest:
+
+- navigation can be filtered so each user sees the surfaces most relevant to their role first
+- each user can have a default workspace or home surface
+- shared-device login can choose who is active without enterprise auth weight
+- personal **Preferences** are now starting to separate from shared **Settings**
+
+This is not meant to lock the product into rigid permissions.
+
+At this stage, the main goal is to reduce noise and keep attention aligned with the work a person is most likely to do next.
+
+## Attention is not the same as permission
+
+A person may still need to cross into another workspace sometimes.
+
+The early role model exists mainly to answer questions like:
+
+- what should this person land on first?
+- what should stay visible in primary navigation?
+- which surfaces should feel closest for this shift or role?
+
+That is different from a full permission engine.
+
+SKOSS should resist pretending it needs enterprise RBAC before it has proven the smaller operator-first workflow layer.

@@ -2,8 +2,19 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { demoSeed } from '@/data/demo-seed';
 import { inferFulfillmentType } from '@/lib/domain/order-helpers';
-import type { AppData, Order, OrderLine, Recipe, RecurringTemplate, WeekdayKey, WorkspacePreferences } from '@/lib/domain/types';
+import type {
+  AppData,
+  Order,
+  OrderLine,
+  Recipe,
+  RecurringTemplate,
+  User,
+  UserRole,
+  WeekdayKey,
+  WorkspacePreferences,
+} from '@/lib/domain/types';
 import { defaultLocale, defaultPreset } from '@/lib/i18n/config';
+import { getDefaultWorkspaceForRole } from '@/lib/workspaces';
 
 const storePath = path.join(process.cwd(), 'data', 'demo-store.json');
 const generationHorizonDays = 10;
@@ -89,6 +100,8 @@ function normalizeTemplate(template: Partial<RecurringTemplate>): RecurringTempl
     active: template.active ?? true,
     createdAt,
     updatedAt,
+    createdByUserId: template.createdByUserId,
+    updatedByUserId: template.updatedByUserId,
     lines: (template.lines ?? []).map((line) => ({
       id: line.id ?? `template-line-${crypto.randomUUID()}`,
       lineType: line.lineType,
@@ -99,7 +112,6 @@ function normalizeTemplate(template: Partial<RecurringTemplate>): RecurringTempl
     })),
   };
 }
-
 
 function normalizeRecipe(recipe: Partial<Recipe>): Recipe {
   const createdAt = recipe.createdAt ?? new Date().toISOString();
@@ -116,6 +128,8 @@ function normalizeRecipe(recipe: Partial<Recipe>): Recipe {
     active: recipe.active ?? true,
     createdAt,
     updatedAt,
+    createdByUserId: recipe.createdByUserId,
+    updatedByUserId: recipe.updatedByUserId,
     lines: (recipe.lines ?? []).map((line) => ({
       id: line.id ?? `recipe-line-${crypto.randomUUID()}`,
       rawMaterialId: line.rawMaterialId,
@@ -124,6 +138,48 @@ function normalizeRecipe(recipe: Partial<Recipe>): Recipe {
       unit: line.unit?.trim() || 'unit',
       note: line.note?.trim() || undefined,
     })),
+  };
+}
+
+function normalizeRole(role: string | undefined): UserRole {
+  switch (role) {
+    case 'owner_admin':
+    case 'admin':
+      return 'admin';
+    case 'shift_lead':
+    case 'manager':
+      return 'manager';
+    case 'kitchen':
+    case 'production':
+      return 'production';
+    case 'sales':
+    case 'frontdesk':
+    case 'pos':
+      return 'frontdesk';
+    case 'delivery':
+      return 'delivery';
+    default:
+      return 'frontdesk';
+  }
+}
+
+function normalizeUser(user: Partial<User> & { email?: string; role?: string }, workspaceId: string): User {
+  const now = new Date().toISOString();
+  const role = normalizeRole(user.role);
+  const createdAt = user.createdAt ?? now;
+  const updatedAt = user.updatedAt ?? createdAt;
+
+  return {
+    id: user.id ?? `user-${crypto.randomUUID()}`,
+    displayName: user.displayName?.trim() || 'Team member',
+    loginIdentifier: user.loginIdentifier?.trim() || user.email?.trim() || `user-${crypto.randomUUID()}@local`,
+    role,
+    workspaceId: user.workspaceId ?? workspaceId,
+    defaultWorkspace: user.defaultWorkspace ?? user.preferences?.defaultWorkspace ?? getDefaultWorkspaceForRole(role),
+    active: user.active ?? true,
+    preferences: user.preferences,
+    createdAt,
+    updatedAt,
   };
 }
 
@@ -167,6 +223,8 @@ function buildGeneratedOrder(template: RecurringTemplate, productionDate: string
     notes: template.notes,
     createdAt: timestamp,
     updatedAt: timestamp,
+    createdByUserId: template.createdByUserId,
+    updatedByUserId: template.updatedByUserId,
     changedInKitchen: false,
     visibleOnProductionBoard: true,
     templateId: template.id,
@@ -240,9 +298,19 @@ function hydrateStore(rawData: AppData): AppData {
     updatedAt: rawData.preferences?.updatedAt,
   };
 
+  const users = (rawData.users ?? []).map((user) => normalizeUser(user as Partial<User> & { email?: string; role?: string }, rawData.workspace.id));
+  const currentUserId = rawData.session?.currentUserId && users.find((user) => user.id === rawData.session.currentUserId && user.active)
+    ? rawData.session.currentUserId
+    : users.find((user) => user.active)?.id;
+
   const data: AppData = {
     ...rawData,
     preferences,
+    session: {
+      currentUserId,
+      lastLoginAt: rawData.session?.lastLoginAt,
+    },
+    users,
     recurringTemplates: (rawData.recurringTemplates ?? []).map((template) =>
       normalizeTemplate(template as Partial<RecurringTemplate>),
     ),
@@ -263,12 +331,15 @@ function hydrateStore(rawData: AppData): AppData {
       templateEdited: order.templateEdited ?? false,
       lines: normalizeLines(order.lines),
     })),
-    suppliers: rawData.suppliers ?? [],
-    rawMaterials: rawData.rawMaterials ?? [],
-    supplierPriceEntries: rawData.supplierPriceEntries ?? [],
+    suppliers: (rawData.suppliers ?? []).map((supplier) => ({ ...supplier })),
+    rawMaterials: (rawData.rawMaterials ?? []).map((material) => ({ ...material })),
+    supplierPriceEntries: (rawData.supplierPriceEntries ?? []).map((entry) => ({ ...entry })),
     recipes: (rawData.recipes ?? []).map((recipe) => normalizeRecipe(recipe as Partial<Recipe>)),
-    wipEntries: rawData.wipEntries ?? [],
-    shiftLogs: rawData.shiftLogs ?? [],
+    wipEntries: (rawData.wipEntries ?? []).map((entry) => ({ ...entry })),
+    shiftLogs: (rawData.shiftLogs ?? []).map((log) => ({
+      ...log,
+      shiftNotes: (log.shiftNotes ?? []).map((note) => ({ ...note })),
+    })),
   };
 
   return data;
