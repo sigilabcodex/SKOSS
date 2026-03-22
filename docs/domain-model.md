@@ -24,6 +24,31 @@ The model should support:
 - progressive enrichment into more structured records
 - clear relationships between lightweight records and richer future data
 
+## Generic naming and domain neutrality
+
+The core domain model should use generic operational names whenever possible.
+
+Examples of preferred core concepts include:
+
+- `order`
+- `orderLine`
+- `workItem` or `internalTask`
+- `productionBatch`
+- `shiftLog`
+- `handoff`
+- `destination`
+
+These concepts should describe operational meaning that survives across multiple business types. Bakery-specific, cafe-specific, or restaurant-specific wording can still exist, but it should usually live in presets, UI terminology, examples, or optional sub-models rather than in the universal core language.
+
+This means the model should avoid assumptions such as:
+
+- every business has dough as a first-class concept
+- every output is baked
+- every station maps to bakery process stages
+- one pilot business's terminology defines the base schema
+
+A pilot implementation may still validate the model with a specific kitchen type, but the resulting shared entities should remain generic enough to support multiple operational presets.
+
 ## Progressive structuring
 
 SKOSS should distinguish between operational capture and structured reference data.
@@ -196,13 +221,15 @@ Responsibilities:
 
 ### BaseDough
 
-A base dough represents a shared upstream preparation family.
+A base dough represents one example of a shared upstream preparation family.
 
 Responsibilities:
 
-- group work by what is actually mixed or fermented
-- support bakery-style aggregation across multiple final variants
-- reflect real kitchen preparation structure
+- group work by what is actually mixed or fermented in bakery-style presets
+- support aggregation across multiple final variants when one upstream preparation feeds them
+- demonstrate how preset-specific preparation concepts can extend the generic model
+
+This concept is useful for bakery workflows, but it should remain optional and must not become a universal assumption for every business type.
 
 ### Recipe
 
@@ -225,6 +252,8 @@ Responsibilities:
 - reflect stages, checkpoints, and timing logic
 - distinguish items that share inputs but differ in workflow
 - help translate demand into executable work
+
+Process profiles should stay generic enough to represent proofing, prep, chilling, assembly, cooking, finishing, packing, or similar steps depending on the preset in use.
 
 ### Fulfillment metadata
 
@@ -353,6 +382,8 @@ As the model grows, it should preserve a few constraints:
 
 - core workflows must still work with partially structured data
 - richer entities should extend the model without forcing all businesses into heavy setup
+- optional preset-specific concepts should map onto the shared model without redefining it
+- stored entities should preserve stable operational meaning regardless of display language or preset terminology
 - historical operational truth should not be erased when records are later formalized
 - advanced capabilities such as CRM+, procurement, costing, and deep delivery tracking should build on these entities rather than replacing them
 
