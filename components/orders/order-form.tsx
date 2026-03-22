@@ -25,6 +25,12 @@ const sourceOptions = [
   { value: 'walk_in', label: 'Walk-in' },
 ] as const;
 
+const fulfillmentOptions = [
+  { value: 'pickup', label: 'Pickup' },
+  { value: 'own_delivery', label: 'Own delivery' },
+  { value: 'app_delivery', label: 'App delivery' },
+] as const;
+
 const statusOptions = [
   { value: 'draft', label: 'Draft' },
   { value: 'active', label: 'Active' },
@@ -37,6 +43,12 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
   const lineDrafts = getDefaultLineDrafts(order?.lines);
   const visibleOnProductionBoard = order?.visibleOnProductionBoard ?? true;
   const changedInKitchen = order?.changedInKitchen ?? order?.status === 'changed';
+  const fulfillmentType = order?.fulfillmentType
+    ?? ((order?.destinationLabel?.toLowerCase().includes('counter') || order?.destinationLabel?.toLowerCase().includes('pickup'))
+      ? 'pickup'
+      : order?.destinationLabel
+        ? 'own_delivery'
+        : 'pickup');
   const progress = order ? getOrderProgress(order) : null;
   const existingStatuses = order?.lines.map((line) => ({
     label: `${line.completedQuantity}/${line.quantity} done`,
@@ -128,6 +140,17 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
                 </datalist>
               </label>
               <label>
+                <span className="field-heading">Fulfillment</span>
+                <select name="fulfillmentType" defaultValue={fulfillmentType}>
+                  {fulfillmentOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+                <span className="helper-text">Pickup stays simple. Delivery fields only need lightweight routing detail.</span>
+              </label>
+              <label>
                 <span className="field-heading">Source</span>
                 <select name="source" defaultValue={order?.generatedFromTemplate ? 'generated' : order?.source ?? 'manual'}>
                   {sourceOptions.map((option) => (
@@ -143,10 +166,46 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
                 <input name="productionDate" type="date" defaultValue={order?.productionDate ?? focusDate} required />
               </label>
               <label>
-                <span className="field-heading">Due / delivery day <span className="required-dot">Required</span></span>
+                <span className="field-heading">Due / fulfillment day <span className="required-dot">Required</span></span>
                 <input name="dueDate" type="date" defaultValue={order?.dueDate ?? focusDate} required />
               </label>
             </div>
+          </section>
+
+          <section className="field-section">
+            <div className="field-section-header">
+              <div>
+                <h3>Dispatch details</h3>
+                <p className="helper-text">Keep routing lightweight, but visible when the order leaves the kitchen.</p>
+              </div>
+            </div>
+            <div className="grid-two">
+              <label>
+                <span className="field-heading">Delivery provider / source <span className="optional-pill">Optional</span></span>
+                <input
+                  name="deliveryProvider"
+                  defaultValue={order?.deliveryProvider ?? ''}
+                  placeholder="Rappi, Uber Eats, in-house van"
+                />
+                <span className="helper-text">Useful for app delivery channels or naming the route source.</span>
+              </label>
+              <label>
+                <span className="field-heading">Delivery assignee <span className="optional-pill">Optional</span></span>
+                <input
+                  name="deliveryAssignee"
+                  defaultValue={order?.deliveryAssignee ?? ''}
+                  placeholder="Lucía, morning route, rider pending"
+                />
+              </label>
+            </div>
+            <label>
+              <span className="field-heading">Dispatch notes <span className="optional-pill">Optional</span></span>
+              <textarea
+                name="dispatchNotes"
+                defaultValue={order?.dispatchNotes ?? ''}
+                placeholder="Call before arrival, handoff point, app courier instructions, or packing reminder"
+              />
+            </label>
           </section>
 
           <section className="field-section">

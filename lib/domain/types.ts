@@ -3,6 +3,7 @@ export type UserRole = 'owner_admin' | 'sales' | 'kitchen' | 'shift_lead';
 export type OrderStatus = 'draft' | 'active' | 'changed' | 'cancelled' | 'completed';
 export type OrderLineStatus = 'pending' | 'in_progress' | 'done' | 'cancelled';
 export type OrderSource = 'manual' | 'whatsapp' | 'phone' | 'walk_in' | 'generated';
+export type FulfillmentType = 'pickup' | 'own_delivery' | 'app_delivery';
 export type DestinationKind = 'pickup' | 'delivery_stop' | 'counter' | 'internal';
 export type WipStatus = 'planned' | 'in_progress' | 'ready' | 'consumed' | 'discarded';
 export type WipStage = 'prepared' | 'shaped' | 'baked' | 'ready';
@@ -69,9 +70,13 @@ export interface Order {
   id: string;
   source: OrderSource;
   status: OrderStatus;
+  fulfillmentType: FulfillmentType;
   customerLabel: string;
   customerPhone?: string;
   destinationLabel?: string;
+  deliveryProvider?: string;
+  deliveryAssignee?: string;
+  dispatchNotes?: string;
   dueDate: string;
   productionDate: string;
   notes?: string;
@@ -85,6 +90,45 @@ export interface Order {
   generatedFromTemplate: boolean;
   templateEdited: boolean;
   lines: OrderLine[];
+}
+
+export interface Supplier {
+  id: string;
+  name: string;
+  contact?: string;
+  notes?: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface RawMaterial {
+  id: string;
+  name: string;
+  category?: string;
+  defaultUnit: string;
+  brand?: string;
+  notes?: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SupplierPriceEntry {
+  id: string;
+  supplierId: string;
+  supplierLabel: string;
+  rawMaterialId: string;
+  rawMaterialLabel: string;
+  presentation?: string;
+  brand?: string;
+  packageQuantity: number;
+  packageUnit: string;
+  price: number;
+  priceDate: string;
+  note?: string;
+  createdAt: string;
+  updatedAt: string;
 }
 
 export interface RecurringTemplateLine {
@@ -152,6 +196,9 @@ export interface AppData {
   users: User[];
   destinations: Destination[];
   products: Product[];
+  suppliers: Supplier[];
+  rawMaterials: RawMaterial[];
+  supplierPriceEntries: SupplierPriceEntry[];
   recurringTemplates: RecurringTemplate[];
   orders: Order[];
   wipEntries: WipEntry[];

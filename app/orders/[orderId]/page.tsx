@@ -33,7 +33,10 @@ export default async function EditOrderPage({
         <div>
           <p className="eyebrow">Sales workspace</p>
           <h1>{view.order.customerLabel}</h1>
-          <p>Edit quantities, notes, recurrence-generated demand, or quick completion updates without leaving the workspace.</p>
+          <p>
+            {formatStatusLabel(view.order.fulfillmentType)} · edit quantities, dispatch details, and quick completion
+            updates without leaving the workspace.
+          </p>
         </div>
         <Link href="/orders" className="button-secondary">
           <ArrowRightIcon className="button-icon button-icon-reverse" />
