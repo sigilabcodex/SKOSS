@@ -116,6 +116,12 @@ Personal or session-facing behavior, such as:
 
 These should follow the signed-in person when possible and should usually live behind a compact user/preferences entry point rather than in the main navigation strip.
 
+The result is deliberate:
+
+- the primary header stays centered on operational wayfinding
+- switching user, logging out, language, and appearance stay together in one quieter secondary surface
+- the fuller preferences page remains available for longer-lived personal defaults without turning it into a primary workspace tab
+
 ### Settings
 
 Shared business or system structure, such as:

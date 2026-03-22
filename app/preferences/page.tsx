@@ -3,9 +3,10 @@ import { redirect } from 'next/navigation';
 import { saveUserPreferencesAction } from '@/lib/server/actions';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { getCurrentUserContext } from '@/lib/server/auth';
+import { getDefaultWorkspaceForRole } from '@/lib/workspaces';
 
 import { themeOptions } from '@/lib/theme';
-const workspaceOptions = ['orders', 'production', 'handoff', 'preferences', 'setup'] as const;
+const workspaceOptions = ['orders', 'production', 'handoff', 'setup'] as const;
 
 export default async function PreferencesPage({
   searchParams,
@@ -18,6 +19,10 @@ export default async function PreferencesPage({
   if (!currentUser) {
     redirect('/login');
   }
+
+  const selectedWorkspace = currentUser.preferences?.defaultWorkspace === 'preferences'
+    ? getDefaultWorkspaceForRole(currentUser.role)
+    : currentUser.preferences?.defaultWorkspace ?? currentUser.defaultWorkspace;
 
   return (
     <div className="page-stack">
@@ -48,7 +53,7 @@ export default async function PreferencesPage({
             </li>
             <li>
               <strong>{t('preferences.defaultWorkspace')}</strong>
-              <span>{t(`nav.${currentUser.preferences?.defaultWorkspace ?? currentUser.defaultWorkspace}`)}</span>
+              <span>{t(`nav.${selectedWorkspace}`)}</span>
             </li>
             <li>
               <strong>{t('preferences.settingsBoundaryTitle')}</strong>
@@ -64,7 +69,7 @@ export default async function PreferencesPage({
               <h2>{t('preferences.formTitle')}</h2>
               <p>{t('preferences.formHelp')}</p>
             </div>
-            <span className="summary-pill">{t('nav.preferences')}</span>
+            <span className="summary-pill">{t('shell.preferencesSection')}</span>
           </div>
           <label>
             <span className="field-heading">{t('preferences.fields.language')} <span className="setup-required-mark" aria-hidden="true">*</span></span>
@@ -84,7 +89,7 @@ export default async function PreferencesPage({
           </label>
           <label>
             <span className="field-heading">{t('preferences.fields.defaultWorkspace')} <span className="setup-required-mark" aria-hidden="true">*</span></span>
-            <select name="defaultWorkspace" defaultValue={currentUser.preferences?.defaultWorkspace ?? currentUser.defaultWorkspace}>
+            <select name="defaultWorkspace" defaultValue={selectedWorkspace}>
               {workspaceOptions.map((workspace) => (
                 <option key={workspace} value={workspace}>{t(`nav.${workspace}`)}</option>
               ))}
