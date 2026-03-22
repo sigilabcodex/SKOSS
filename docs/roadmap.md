@@ -12,9 +12,25 @@ SKOSS now has a stable first operational slice focused on the daily coordination
 
 This v0 slice proves the core value of SKOSS: helping a small kitchen move from incoming demand to coordinated production without requiring heavy admin setup first.
 
+It also clarifies the product split going forward:
+
+- **SKOSS** remains the core system and shared operational backend
+- **SKOSSina** becomes the worker-facing client direction for daily access across devices
+
 ## Short-term (next iterations)
 
 The next iterations should strengthen fulfillment clarity and daily operator visibility without making the product heavier.
+
+### SKOSSina browser-first client direction
+
+The near-term client goal should be a lightweight, browser-first SKOSSina experience that works well on:
+
+- phones used during active shifts
+- tablets shared in kitchen or sales areas
+- desktop browsers where leads or admins need more screen space
+- mixed-device local/LAN environments where multiple workers connect to the same SKOSS core
+
+This should stay focused on worker speed, role-based visibility, and low-friction interactions rather than rich-client complexity for its own sake.
 
 ### Fulfillment modes
 
@@ -48,6 +64,19 @@ Order records should gain a small amount of additional structure where it improv
 - clearer order tags or priority markers when they reduce confusion
 
 This metadata should improve visibility for operators without turning order capture into an admin form.
+
+### First printing workflows
+
+Printing should enter the roadmap as an explicit operational requirement.
+
+Near-term printing priorities should include:
+
+- kitchen-ticket output for production and packing queues
+- order summary prints for handoff or delivery prep
+- receipt or ticket-printer friendly formats where front-of-house speed benefits
+- print-friendly layouts that can be triggered from SKOSSina without desktop-only assumptions
+
+The emphasis should be lightweight operational output, not a complex reporting subsystem.
 
 ### UI refinements where needed
 
@@ -124,6 +153,35 @@ The goal is to make later costing possible by establishing:
 
 This stage should stop short of building full costing, margin engines, or inventory accounting.
 
+### Cross-device SKOSSina progression
+
+Once the browser-first client is stable, medium-term client work can explore:
+
+- installable PWA behavior where it clearly improves repeat access
+- packaged desktop or mobile wrappers only if they simplify deployment or hardware integration
+- shared-device login and role-switching flows
+- better local caching of static assets and selected draft interactions without promising full offline sync
+
+These should remain directionally open, not treated as already-solved packaging decisions.
+
+### LAN and local-server milestones
+
+Medium-term deployment and client milestones should include:
+
+- clearer local/LAN discovery and setup guidance
+- practical multi-device access against one on-site SKOSS host
+- admin-light configuration for single-site kitchens running on local hardware
+- stronger degraded-network behavior when SKOSSina can still reach a local server during internet outages
+
+### Printing expansion
+
+After initial print workflows exist, medium-term printing work should include:
+
+- label-printing support for trays, boxes, dough, or packaged outputs
+- thermal-printer friendly layouts for common kitchen and counter scenarios
+- explicit printer-targeted templates for ticket, summary, and label use cases
+- practical print queues or print actions that do not overload the core workflow model
+
 ## Medium-term extensions (still lightweight)
 
 After the first structured data layer is stable, SKOSS can add higher-value operational extensions that still preserve core simplicity.
@@ -163,6 +221,17 @@ The purpose is to help operators and leads see patterns, not to create a broad B
 ## Long-term vision (modular ecosystem)
 
 Longer term, SKOSS should evolve into a modular ecosystem built around a disciplined operational core.
+
+### SKOSSina beyond the first browser client
+
+Long-term client direction may include:
+
+- a mature multifunction SKOSSina client rather than many fragmented single-purpose apps
+- optional packaged forms for platforms where browser delivery is not enough
+- role-focused sub-experiences layered on one shared client foundation
+- hardware-specific adaptations for printing, shared kiosks, or station devices where justified
+
+The project should stay careful not to overpromise native/mobile packaging details before real use proves the need.
 
 ### Plugin / module system
 
@@ -209,6 +278,7 @@ Integration modules may later connect SKOSS to:
 - delivery platforms
 - GPS or route tools
 - messaging tools
+- printer integrations and hardware adapters
 - other practical operational services
 
 ### Multi-location support
@@ -216,6 +286,14 @@ Integration modules may later connect SKOSS to:
 Multi-location coordination may later become a major extension area, especially for businesses that share templates, products, or reporting across sites.
 
 This should be treated as a deliberate expansion area, not as an assumption built into the earliest product core.
+
+### Hosted/local portability direction
+
+Longer term, SKOSS should preserve the ability to move between:
+
+- server-hosted deployments
+- local/LAN deployments
+- future backup-or-mirror patterns that improve resilience without jumping too early into active bidirectional sync
 
 ## Core vs extension philosophy
 
@@ -229,6 +307,8 @@ Core should remain focused on:
 - shift handoff
 - practical fulfillment context
 - role-oriented operator workflows
+- core printing actions that directly support daily execution
+- one shared backend that can serve multiple SKOSSina clients
 
 Extensions should be used for features that are valuable but not essential for every small kitchen, especially when they add setup burden, data depth, or workflow ceremony.
 
@@ -266,9 +346,9 @@ The goal is faster activation, not template rigidity.
 
 SKOSS should evolve from a stable v0 operational slice into a modular operational platform by expanding in layers:
 
-1. strengthen fulfillment and daily workflow clarity
+1. strengthen fulfillment, printing, and daily workflow clarity
 2. add lightweight structured data for customers, suppliers, and ingredients
-3. introduce optional operational intelligence and analytics
+3. introduce cross-device SKOSSina growth, local/LAN maturity, and optional operational intelligence
 4. grow advanced capabilities through modules instead of bloating the core
 
-Complexity stays controlled by keeping the operator workflow small, making deeper structure progressive, and moving advanced business functions into optional modules rather than forcing every kitchen into ERP-style depth.
+Complexity stays controlled by keeping the operator workflow small, making deeper structure progressive, preserving a clear SKOSS core plus SKOSSina client split, and moving advanced business functions into optional modules rather than forcing every kitchen into ERP-style depth.

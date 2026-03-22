@@ -10,6 +10,38 @@ A core principle is simple:
 
 **adapt to the workflow, do not force the workflow to adapt to the software.**
 
+## SKOSS and SKOSSina
+
+The project should now distinguish clearly between two layers:
+
+- **SKOSS** is the core system: the server-side platform, shared operational logic, and main system of record
+- **SKOSSina** is the worker-facing client layer: the lighter app experience used by staff across phones, tablets, desktops, and browsers
+
+This separation matters because the project should keep one dependable operational core while still allowing the worker experience to evolve.
+
+In practice, that means:
+
+- SKOSS owns data storage, workflow rules, shared state, coordination, and integrations
+- SKOSSina focuses on fast access to role-shaped work such as order capture, production review, WIP updates, handoff, fulfillment checks, and print-triggering actions
+- the core should not become bloated by every client-specific experiment
+- the client should not become an admin-heavy shell that forces operators through setup-driven flows
+
+SKOSSina may later exist as a browser-first experience, a PWA, or a packaged wrapper, but that packaging choice is still a direction rather than a settled product decision.
+
+## Why this separation matters
+
+A small kitchen often needs one shared operational brain and many lightweight access points.
+
+This distinction helps the project preserve:
+
+- a single source of truth for orders, production state, WIP, handoff, and fulfillment
+- multiple device types connected to the same operational picture
+- simpler deployment because one SKOSS core can serve many SKOSSina clients over WAN or LAN
+- future flexibility to add richer client behaviors without turning the backend into many fragmented services
+- clear product language for contributors, operators, and future module design
+
+It also protects the operator-first philosophy. Workers should interact mainly through a lightweight SKOSSina experience, while deeper setup and administration remain supportive rather than dominant.
+
 ## Operator-first systems
 
 SKOSS is explicitly an operator-first system, not an admin-first one.
@@ -22,6 +54,14 @@ That means the product should be shaped around people doing real work during act
 - small teams switching roles during the same day
 
 The software should reduce friction in the kitchen rhythm instead of asking operators to behave like office administrators.
+
+SKOSSina should therefore stay:
+
+- lightweight on ordinary phones and tablets
+- clear under time pressure
+- touch-friendly for kitchen use
+- role-oriented rather than one-size-fits-all
+- practical for shared-device and browser-based access
 
 ## Progressive complexity
 
@@ -63,7 +103,7 @@ Primary users:
 - shift leads and supervisors coordinating handoff
 - admins configuring products, schedules, and recurring work
 
-These users are not assumed to be system specialists. Many will use the product quickly, under time pressure, on a phone or tablet.
+These users are not assumed to be system specialists. Many will use SKOSSina quickly, under time pressure, on a phone or tablet.
 
 ## Target businesses
 
@@ -97,6 +137,7 @@ The system should stay shaped by:
 - role-based visibility
 - handoff reality
 - notes, substitutions, and partial completion
+- paper and print-based touchpoints where operations still rely on them
 
 ## Core problems solved
 
@@ -110,6 +151,7 @@ SKOSS is intended to solve a small kitchen's operational coordination problems, 
 - reducing the mental overhead required to understand what needs to happen next
 - keeping role-based views focused on the work at hand
 - allowing teams to start using the system before setup is complete
+- supporting practical printed outputs such as tickets, labels, and summaries where that improves execution
 
 ## Product boundary
 
@@ -124,6 +166,7 @@ That includes:
 - shift logs and handoff visibility
 - destination-aware output views
 - lightweight administration needed to keep the above usable
+- print-friendly operational outputs and printer-oriented workflows where they directly support work
 
 It does not need to own every business function.
 
@@ -174,6 +217,7 @@ A likely long-term path includes:
 - optional modules for richer CRM, procurement, analytics, integrations, and delivery depth
 - a domain model stable enough to support presets and future product-facing skins
 - architecture that stays practical for small self-hosted deployments
+- a SKOSSina client direction that stays worker-oriented even as client packaging options expand
 
 The long-term goal is breadth through a strong operational core, not breadth through indiscriminate feature sprawl.
 
@@ -183,12 +227,27 @@ SKOSS should aspire to be deployable in ways that match the realities of small b
 
 Preferred direction:
 
-- run well on a modest Linux VPS
-- remain feasible on a small self-hosted server
-- leave room for local-network use on a laptop or office machine
+- run SKOSS well on a modest Linux VPS
+- remain feasible on a small self-hosted server or local machine
+- leave room for local-network use where SKOSSina clients connect over Wi-Fi or LAN
+- support multiple client devices against one shared operational core
 - avoid unnecessary dependence on heavyweight cloud infrastructure
 
 A future offline-capable or degraded-network mode is desirable, but the project should be honest that reliable sync and conflict handling are hard problems. The vision is to design with that future in mind without pretending it is already solved.
+
+## Printing as an operational requirement
+
+Printing should be treated as a practical workflow requirement, not as a cosmetic report feature.
+
+Important directions include:
+
+- kitchen tickets that surface what needs to be made or packed
+- order summaries and handoff sheets that can travel with work
+- receipt or ticket-printer scenarios for fast front-of-house output
+- label printing for trays, boxes, dough, or packaged items
+- print-friendly SKOSSina views that work with lightweight thermal and label hardware later
+
+Many bakeries and kitchens still rely on paper at key moments. A credible operational system should support that reality instead of pretending every handoff is screen-only.
 
 ## Why bakery is a strong first domain
 
@@ -199,6 +258,7 @@ Bakery operations highlight the exact coordination problems SKOSS is meant to so
 - the same base dough can feed multiple product variants
 - night and morning shifts depend on reliable handoff
 - small process changes can affect quality, timing, and yield
+- printed tickets and labels often matter in prep, baking, and packing
 
 If SKOSS can work well for a bakery like Kalali, it has a realistic chance of supporting other compact production kitchens later.
 

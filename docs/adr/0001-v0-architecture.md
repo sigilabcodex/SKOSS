@@ -17,6 +17,16 @@ That path must respect the repo's documented constraints:
 - low-spec VPS and local/LAN hosting viability
 - small-team FOSS maintainability
 - no premature distributed systems or offline-sync complexity
+- room for practical ticket, receipt, and label-printing workflows
+
+## Terminology
+
+For architecture decisions in this repository:
+
+- **SKOSS** means the core system: the server-side platform, domain logic, shared workflow engine, and system of record
+- **SKOSSina** means the worker-facing client layer: the lighter experience used from browsers first and possibly PWA or packaged forms later
+
+This ADR therefore chooses how SKOSS is deployed and how the first SKOSSina form accesses it.
 
 ## Decision
 
@@ -25,10 +35,11 @@ For v0, SKOSS will use a **single deployable monolithic web application** with a
 ### Recommended architecture style
 
 - One application repository.
-- One deployable web app process.
+- One deployable SKOSS web app process.
 - One relational database file/service.
 - Clear internal module boundaries by domain, not microservices.
 - Server remains the system of record.
+- Browser-first SKOSSina access from phones, tablets, and desktops.
 
 This is intentionally boring. The product still needs operational learning more than infrastructure novelty.
 
@@ -57,7 +68,7 @@ Tradeoff:
 
 ### Frontend approach
 
-Use a **mobile-first server-rendered React web app** with **Next.js + TypeScript**.
+Use a **mobile-first server-rendered React web app** with **Next.js + TypeScript** as the first SKOSSina form.
 
 Concretely:
 
@@ -72,12 +83,14 @@ Why:
 - easy to ship on phones, tablets, and desktop browsers from one codebase
 - server rendering reduces initial client complexity
 - supports touch-first UI without committing to native apps
+- keeps the first SKOSSina form lightweight and browser-first
 - avoids the overhead of a separate SPA API architecture early
 
 Tradeoff:
 
 - some highly interactive screens may later need more client-side behavior
 - visual system maturity will need deliberate iteration because we are not adopting a full design system now
+- deeper app packaging decisions remain open for later
 
 ### Database choice
 
@@ -115,12 +128,14 @@ Concretely:
 - one Node.js app process
 - one SQLite database file on local disk
 - reverse proxy and TLS handled outside the app in production
+- multiple SKOSSina clients connect through browser access to the same host
 
 Why:
 
 - matches the repo's portability goals
 - keeps backup and restore understandable
 - avoids introducing managed-cloud dependencies
+- supports both hosted and local/LAN kitchens without separate architectures
 
 ### Realtime strategy for v0
 
@@ -160,6 +175,22 @@ Why:
 - keeps implementation honest
 - avoids inventing sync semantics before real workflow learning
 - still supports practical degraded operation through local hosting
+
+### Printing stance for v0
+
+Treat printing as a real operational requirement, but keep hardware depth modest.
+
+Concretely:
+
+- support print-friendly layouts for kitchen tickets, order summaries, and early label scenarios
+- prefer browser-friendly printing first
+- leave room for thermal-printer or label-printer integrations later
+- avoid committing v0 to one vendor-specific print stack
+
+Why:
+
+- bakeries and kitchens often rely on paper during production, packing, and handoff
+- browser-first printing keeps the first implementation simpler while still serving real workflows
 
 ### Auth and roles scope for v0
 
@@ -201,6 +232,7 @@ The following are out of scope for v0 architecture:
 - websocket-first realtime infrastructure
 - offline mutation sync between multiple devices
 - native mobile apps
+- hardware-specific printer fleet management
 - advanced inventory, costing, accounting, payroll, or BPM/workflow engines
 - complex multi-tenant organization hierarchy
 - granular enterprise permission matrices
@@ -215,6 +247,8 @@ The following are out of scope for v0 architecture:
 - portable for small self-hosted installations
 - easy to reason about backups and restore
 - domain logic can evolve without distributed-systems drag
+- one SKOSS core can serve many browser-first SKOSSina clients
+- printing can start with pragmatic browser workflows instead of blocking on hardware integration
 
 ### Negative
 
@@ -222,6 +256,8 @@ The following are out of scope for v0 architecture:
 - SQLite may eventually be replaced in larger deployments
 - polling is less elegant than richer realtime models
 - single-app architecture requires discipline to keep module boundaries clean
+- browser-first SKOSSina access may not cover every future device-specific need
+- richer printer workflows may need additional architecture later
 
 ## Review trigger
 
@@ -231,4 +267,5 @@ Revisit this ADR when any of the following becomes true:
 - production coordination needs sub-second live updates across many users
 - offline queueing becomes a proven requirement for a specific workflow
 - multiple independent sites/workspaces require stronger tenancy boundaries
+- printer workflows require deeper hardware-specific architecture
 - the app has enough validated domain stability to justify deeper infrastructure separation
