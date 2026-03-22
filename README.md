@@ -246,12 +246,14 @@ Before heavy implementation begins, the goal is to clarify:
 ## Repository map
 
 - `AGENTS.md` — guidance for future coding agents and contributors
-- `docs/vision.md` — project vision and scope boundaries
+- `docs/product-vision.md` — project vision, domain-neutral scope, presets, and language strategy
+- `docs/vision.md` — compatibility pointer to the main product vision document
 - `docs/roadmap.md` — phased roadmap from v0 to a modular platform
 - `docs/modules.md` — core, client, and extension architecture direction
 - `docs/printing.md` — operational printing requirements and future hardware direction
 - `docs/domain-glossary.md` — practical domain definitions
 - `docs/domain-model.md` — conceptual domain model
+- `docs/i18n.md` — internationalization principles, dictionary strategy, and language-layer boundaries
 - `docs/workspaces.md` — initial role-based workspace definitions
 - `docs/operational-data-layer.md` — lightweight suppliers, raw materials, fulfillment context, and price-history direction
 - `docs/recurring-logic.md` — recurrence model and editing rules

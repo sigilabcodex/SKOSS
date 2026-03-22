@@ -10,7 +10,7 @@ SKOSS now has a stable first operational slice focused on the daily coordination
 - WIP visibility and shift handoff support
 - an initial UI/UX system shaped for mobile-first operator use
 
-This v0 slice proves the core value of SKOSS: helping a small kitchen move from incoming demand to coordinated production without requiring heavy admin setup first.
+This v0 slice proves the core value of SKOSS: helping a small food operation move from incoming demand to coordinated production without requiring heavy admin setup first.
 
 It also clarifies the product split going forward:
 
@@ -20,6 +20,28 @@ It also clarifies the product split going forward:
 ## Short-term (next iterations)
 
 The next iterations should strengthen fulfillment clarity and daily operator visibility without making the product heavier.
+
+### Domain-neutral foundation and presets
+
+The next iterations should make the domain-neutral foundation explicit across product and technical work.
+
+Near-term priorities should include:
+
+- keeping core workflow concepts generic across bakery, cafe, restaurant, dark-kitchen, and similar food operations
+- introducing presets as the preferred way to express business-specific terminology and startup defaults
+- making sure example data, onboarding copy, and default workflows can vary by preset without fragmenting the core model
+- validating that preset choice is a starting template rather than a lock-in mechanism
+
+### Internationalization as a foundational requirement
+
+Internationalization should be treated as part of the product foundation rather than deferred UI polish.
+
+Near-term i18n priorities should include:
+
+- English, Spanish, and Portuguese support in SKOSSina
+- key-based translation dictionaries for UI strings
+- consistent separation between system language, preset terminology, and user-entered content
+- avoiding hardcoded interface strings in new client work
 
 ### SKOSSina browser-first client direction
 
@@ -177,10 +199,37 @@ Medium-term deployment and client milestones should include:
 
 After initial print workflows exist, medium-term printing work should include:
 
-- label-printing support for trays, boxes, dough, or packaged outputs
+- label-printing support for trays, boxes, prep containers, or packaged outputs
 - thermal-printer friendly layouts for common kitchen and counter scenarios
 - explicit printer-targeted templates for ticket, summary, and label use cases
 - practical print queues or print actions that do not overload the core workflow model
+
+### Preset system maturation
+
+Once the initial preset approach is proven, medium-term work should include:
+
+- preset packages for bakery, cafe, restaurant, dark-kitchen, and similar business types
+- editable terminology and workflow-emphasis settings per preset
+- preset-managed starter data such as default units, example destinations, and role-oriented workspace hints
+- migration-safe ways to evolve presets without rewriting stored operational data
+
+### Broader kitchen coverage
+
+The roadmap should explicitly extend beyond bakery-first discovery. Medium-term product validation should test whether the same core model works for:
+
+- cafes with light production and service coordination
+- restaurants with recurring prep and handoff needs
+- dark kitchens with order-driven batching and dispatch flow
+- mixed operations that combine retail, prep, and delivery modes
+
+### Language expansion and governance
+
+After the launch set of English, Spanish, and Portuguese is stable, medium-term i18n work should include:
+
+- translation review workflows for new languages
+- dictionary organization that scales without duplicating business logic
+- terminology overrides where presets need business-specific wording without forking component code
+- clear fallback behavior when translations are incomplete
 
 ## Medium-term extensions (still lightweight)
 
@@ -327,15 +376,16 @@ A first-run flow should ask only for a few practical choices:
 
 - business name
 - business type, such as bakery, cafe, restaurant, dark kitchen, or food stall
-- operating mode, such as pickup, delivery, or mixed
+- operating mode, such as pickup, delivery, dine-in support, or mixed
 - default features enabled
+- preferred system language
 
 ### Preset behavior
 
 Presets should:
 
 - guide initial setup
-- adjust vocabulary, defaults, and visible features where useful
+- adjust vocabulary, defaults, visible features, and starter terminology where useful
 - recommend a sensible starting module set
 - remain fully editable after setup
 - never lock the business into one model
