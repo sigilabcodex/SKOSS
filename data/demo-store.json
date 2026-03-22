@@ -236,7 +236,9 @@
       "fulfillmentType": "pickup",
       "deliveryProvider": null,
       "deliveryAssignee": null,
-      "dispatchNotes": null
+      "dispatchNotes": null,
+      "promisedTime": null,
+      "deliveryProviderLabel": null
     },
     {
       "id": "order-sofia-birthday",
@@ -279,7 +281,45 @@
       "fulfillmentType": "pickup",
       "deliveryProvider": null,
       "deliveryAssignee": null,
-      "dispatchNotes": "Call on arrival"
+      "dispatchNotes": "Call on arrival",
+      "promisedTime": "09:30",
+      "deliveryProviderLabel": null
+    },
+    {
+      "id": "order-valeria-app",
+      "source": "phone",
+      "status": "active",
+      "customerLabel": "Valeria office lunch",
+      "customerPhone": "+52 555 010 2991",
+      "destinationLabel": "Roma Norte office drop",
+      "dueDate": "2026-03-28",
+      "productionDate": "2026-03-28",
+      "notes": "App order packed separately from front counter pickup.",
+      "createdAt": "2026-03-21T05:15:00Z",
+      "updatedAt": "2026-03-21T05:15:00Z",
+      "changedInKitchen": false,
+      "visibleOnProductionBoard": true,
+      "generatedFromTemplate": false,
+      "templateEdited": false,
+      "lines": [
+        {
+          "id": "line-valeria-croissant",
+          "lineType": "product_variant",
+          "productLabel": "Croissant / Butter",
+          "quantity": 8,
+          "completedQuantity": 0,
+          "unit": "pieces",
+          "lineStatus": "pending",
+          "note": "Pack in two bags for courier handoff."
+        }
+      ],
+      "generatedOccurrenceDate": "2026-03-28",
+      "fulfillmentType": "app_delivery",
+      "deliveryProvider": "uber",
+      "deliveryProviderLabel": null,
+      "deliveryAssignee": "App courier pending",
+      "promisedTime": "10:15",
+      "dispatchNotes": "Leave near dispatch shelf once packed."
     },
     {
       "id": "order-template-front-counter-daily-2026-03-28",
@@ -322,7 +362,9 @@
       "fulfillmentType": "pickup",
       "deliveryProvider": null,
       "deliveryAssignee": null,
-      "dispatchNotes": null
+      "dispatchNotes": null,
+      "promisedTime": null,
+      "deliveryProviderLabel": null
     },
     {
       "id": "order-template-cafe-luna-saturday-2026-03-28",
@@ -365,9 +407,11 @@
         }
       ],
       "fulfillmentType": "own_delivery",
-      "deliveryProvider": "Kalali route",
-      "deliveryAssignee": "Morning route",
-      "dispatchNotes": "Recurring Saturday delivery. Bag loaves in pairs for dispatch."
+      "deliveryProvider": "internal",
+      "deliveryAssignee": null,
+      "dispatchNotes": "Bag loaves in pairs. Assign a morning route runner before packing finishes.",
+      "deliveryProviderLabel": null,
+      "promisedTime": "07:00"
     },
     {
       "id": "order-template-front-counter-daily-2026-03-29",
@@ -410,7 +454,9 @@
       "fulfillmentType": "pickup",
       "deliveryProvider": null,
       "deliveryAssignee": null,
-      "dispatchNotes": null
+      "dispatchNotes": null,
+      "promisedTime": null,
+      "deliveryProviderLabel": null
     },
     {
       "id": "order-template-market-sunday-2026-03-29",
@@ -453,9 +499,11 @@
         }
       ],
       "fulfillmentType": "own_delivery",
-      "deliveryProvider": "Kalali route",
-      "deliveryAssignee": "Morning route",
-      "dispatchNotes": "Weekly market stock. Keep sweet tray count flexible if Saturday sells out."
+      "deliveryProvider": "internal",
+      "deliveryAssignee": "Mateo",
+      "dispatchNotes": "Weekly market stock. Keep sweet tray count flexible if Saturday sells out.",
+      "deliveryProviderLabel": null,
+      "promisedTime": "06:45"
     },
     {
       "id": "order-template-front-counter-daily-2026-03-30",
@@ -498,7 +546,9 @@
       "fulfillmentType": "pickup",
       "deliveryProvider": null,
       "deliveryAssignee": null,
-      "dispatchNotes": null
+      "dispatchNotes": null,
+      "promisedTime": null,
+      "deliveryProviderLabel": null
     },
     {
       "id": "order-template-front-counter-daily-2026-03-31",
@@ -541,7 +591,9 @@
       "fulfillmentType": "pickup",
       "deliveryProvider": null,
       "deliveryAssignee": null,
-      "dispatchNotes": null
+      "dispatchNotes": null,
+      "promisedTime": null,
+      "deliveryProviderLabel": null
     },
     {
       "id": "order-template-front-counter-daily-2026-04-01",
@@ -582,7 +634,9 @@
           "unit": "pieces",
           "lineStatus": "pending"
         }
-      ]
+      ],
+      "promisedTime": null,
+      "deliveryProviderLabel": null
     }
   ],
   "wipEntries": [

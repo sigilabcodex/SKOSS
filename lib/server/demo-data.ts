@@ -1,9 +1,9 @@
 import type {
   AppData,
+  DeliveryProvider,
   FulfillmentType,
   Order,
   OrderLine,
-  Product,
   RawMaterial,
   RecurringTemplate,
   ShiftLog,
@@ -13,15 +13,20 @@ import type {
   WeekdayKey,
   WipEntry,
 } from '@/lib/domain/types';
+import { deliveryProviderValues, getFocusDate, getLineCompletion, getLineStatus, getOrderProgress, getAllProductionDates, resolveDeliveryProviderLabel } from '@/lib/domain/order-helpers';
 import { readStore } from '@/lib/server/store';
+
+export { getLineStatus, getOrderProgress } from '@/lib/domain/order-helpers';
 
 export interface OrderFormValues {
   customerLabel: string;
   customerPhone?: string;
   destinationLabel?: string;
   fulfillmentType: FulfillmentType;
-  deliveryProvider?: string;
+  deliveryProvider?: DeliveryProvider;
+  deliveryProviderCustom?: string;
   deliveryAssignee?: string;
+  promisedTime?: string;
   dispatchNotes?: string;
   dueDate: string;
   productionDate: string;
@@ -104,93 +109,12 @@ function sortShiftLogs(left: ShiftLog, right: ShiftLog) {
   return right.updatedAt.localeCompare(left.updatedAt);
 }
 
-export function getProductSuggestions(products: Product[]) {
-  return products.flatMap((product) =>
-    product.variants.map((variant) => `${product.name} / ${variant.name}`),
-  );
-}
-
-export function getAllProductionDates(data: Pick<AppData, 'orders' | 'wipEntries' | 'shiftLogs' | 'recurringTemplates'>) {
-  return [...new Set([
-    ...data.orders.map((order) => order.productionDate),
-    ...data.wipEntries.map((entry) => entry.productionDate),
-    ...data.shiftLogs.map((log) => log.productionDate),
-    ...data.recurringTemplates.map((template) => template.nextOccurrenceDate),
-  ])].sort();
-}
-
-export function getFocusDate(data: Pick<AppData, 'orders' | 'wipEntries' | 'shiftLogs' | 'recurringTemplates'>) {
-  const today = new Date().toISOString().slice(0, 10);
-  const dates = getAllProductionDates(data);
-  return dates.find((date) => date >= today) ?? dates[0] ?? today;
-}
-
-export function getDefaultLineDrafts(
-  existingLines: Array<Pick<OrderLine, 'lineType' | 'productLabel' | 'quantity' | 'unit' | 'note'>> = [],
-  desiredCount = 5,
-) {
-  const drafts = existingLines.map((line) => ({
-    lineType: line.lineType,
-    productLabel: line.productLabel,
-    quantity: String(line.quantity),
-    unit: line.unit,
-    note: line.note ?? '',
-  }));
-
-  while (drafts.length < desiredCount) {
-    drafts.push({
-      lineType: 'draft_product',
-      productLabel: '',
-      quantity: '',
-      unit: 'pieces',
-      note: '',
-    });
-  }
-
-  return drafts;
+function getProductSuggestions(products: Array<{ name: string; variants: Array<{ name: string }> }>) {
+  return products.flatMap((product) => product.variants.map((variant) => `${product.name} / ${variant.name}`));
 }
 
 function toStageStatus(stage: WipEntry['stage']): WipEntry['status'] {
   return stage === 'ready' || stage === 'baked' ? 'ready' : 'in_progress';
-}
-
-export function getLineCompletion(line: Pick<OrderLine, 'quantity' | 'completedQuantity'>) {
-  return Math.max(0, Math.min(line.quantity, line.completedQuantity));
-}
-
-export function getLineStatus(line: Pick<OrderLine, 'quantity' | 'completedQuantity' | 'lineStatus'>): OrderLine['lineStatus'] {
-  if (line.lineStatus === 'cancelled') {
-    return 'cancelled';
-  }
-
-  const completedQuantity = getLineCompletion(line);
-  if (completedQuantity <= 0) {
-    return 'pending';
-  }
-
-  if (completedQuantity >= line.quantity) {
-    return 'done';
-  }
-
-  return 'in_progress';
-}
-
-export function getOrderProgress(order: Pick<Order, 'lines'>) {
-  const workableLines = order.lines.filter((line) => line.lineType !== 'note_item');
-  const requiredQuantity = workableLines.reduce((sum, line) => sum + line.quantity, 0);
-  const completedQuantity = workableLines.reduce((sum, line) => sum + getLineCompletion(line), 0);
-  const remainingQuantity = Math.max(0, requiredQuantity - completedQuantity);
-  const partialLines = workableLines.filter((line) => getLineStatus(line) === 'in_progress').length;
-  const doneLines = workableLines.filter((line) => getLineStatus(line) === 'done').length;
-
-  return {
-    requiredQuantity,
-    completedQuantity,
-    remainingQuantity,
-    partialLines,
-    doneLines,
-    lineCount: workableLines.length,
-  };
 }
 
 function hasOrderCoreChanges(existingOrder: Order, values: OrderFormValues) {
@@ -199,8 +123,10 @@ function hasOrderCoreChanges(existingOrder: Order, values: OrderFormValues) {
     (existingOrder.customerPhone ?? '') !== (values.customerPhone?.trim() ?? '') ||
     (existingOrder.destinationLabel ?? '') !== (values.destinationLabel?.trim() ?? '') ||
     existingOrder.fulfillmentType !== values.fulfillmentType ||
-    (existingOrder.deliveryProvider ?? '') !== (values.deliveryProvider?.trim() ?? '') ||
+    (existingOrder.deliveryProvider ?? '') !== (values.deliveryProvider ?? '') ||
+    (existingOrder.deliveryProviderLabel ?? '') !== (values.deliveryProviderCustom?.trim() ?? '') ||
     (existingOrder.deliveryAssignee ?? '') !== (values.deliveryAssignee?.trim() ?? '') ||
+    (existingOrder.promisedTime ?? '') !== (values.promisedTime ?? '') ||
     (existingOrder.dispatchNotes ?? '') !== (values.dispatchNotes?.trim() ?? '') ||
     existingOrder.productionDate !== values.productionDate ||
     existingOrder.dueDate !== values.dueDate ||
@@ -259,8 +185,10 @@ export function buildOrderRecord(data: AppData, values: OrderFormValues, existin
     customerLabel: values.customerLabel.trim() || 'Walk-in customer',
     customerPhone: values.customerPhone?.trim() || undefined,
     destinationLabel: values.destinationLabel?.trim() || undefined,
-    deliveryProvider: values.deliveryProvider?.trim() || undefined,
+    deliveryProvider: values.deliveryProvider || undefined,
+    deliveryProviderLabel: values.deliveryProvider === 'other' ? values.deliveryProviderCustom?.trim() || undefined : undefined,
     deliveryAssignee: values.deliveryAssignee?.trim() || undefined,
+    promisedTime: values.promisedTime || undefined,
     dispatchNotes: values.dispatchNotes?.trim() || undefined,
     dueDate: values.dueDate,
     productionDate: values.productionDate,
@@ -381,6 +309,19 @@ export async function getRecurringTemplateEditor() {
   };
 }
 
+function getOrderFulfillmentState(order: Order) {
+  const progress = getOrderProgress(order);
+  const providerLabel = resolveDeliveryProviderLabel(order);
+
+  return {
+    progress,
+    providerLabel,
+    needsPacking: (order.fulfillmentType === 'own_delivery' || order.fulfillmentType === 'app_delivery') && progress.remainingQuantity > 0,
+    needsAssignment: order.fulfillmentType === 'own_delivery' && !order.deliveryAssignee?.trim(),
+    waitingForPickup: order.fulfillmentType === 'pickup' && progress.remainingQuantity === 0 && order.status !== 'cancelled',
+  };
+}
+
 export async function getProductionBoard() {
   const data = await readStore();
   const dates = getAllProductionDates(data);
@@ -477,6 +418,22 @@ function buildProductionDayView(data: AppData, productionDate: string) {
     },
     { requiredQuantity: 0, completedQuantity: 0, remainingQuantity: 0, partialOrders: 0 },
   );
+  const fulfillmentSummary = productionOrders.reduce(
+    (summary, order) => {
+      summary[order.fulfillmentType] += 1;
+      return summary;
+    },
+    { standard: 0, pickup: 0, own_delivery: 0, app_delivery: 0 },
+  );
+  const deliveryPackingQueue = boardOrders
+    .map((order) => ({ order, state: getOrderFulfillmentState(order) }))
+    .filter(({ state }) => state.needsPacking);
+  const assignmentNeededOrders = boardOrders
+    .map((order) => ({ order, state: getOrderFulfillmentState(order) }))
+    .filter(({ state }) => state.needsAssignment);
+  const pickupReadyOrders = boardOrders
+    .map((order) => ({ order, state: getOrderFulfillmentState(order) }))
+    .filter(({ state }) => state.waitingForPickup);
 
   return {
     productionDate,
@@ -505,6 +462,33 @@ function buildProductionDayView(data: AppData, productionDate: string) {
     hiddenOrders: productionOrders.filter((order) => order.visibleOnProductionBoard === false),
     wipEntries,
     handoffEntries,
+    fulfillmentSummary,
+    deliveryPackingQueue: deliveryPackingQueue.map(({ order, state }) => ({
+      id: order.id,
+      customerLabel: order.customerLabel,
+      destinationLabel: order.destinationLabel,
+      deliveryProvider: order.deliveryProvider,
+      providerLabel: state.providerLabel,
+      promisedTime: order.promisedTime,
+      remainingQuantity: state.progress.remainingQuantity,
+      dispatchNotes: order.dispatchNotes,
+    })),
+    assignmentNeededOrders: assignmentNeededOrders.map(({ order, state }) => ({
+      id: order.id,
+      customerLabel: order.customerLabel,
+      destinationLabel: order.destinationLabel,
+      deliveryProvider: order.deliveryProvider,
+      providerLabel: state.providerLabel,
+      promisedTime: order.promisedTime,
+      dispatchNotes: order.dispatchNotes,
+    })),
+    pickupReadyOrders: pickupReadyOrders.map(({ order }) => ({
+      id: order.id,
+      customerLabel: order.customerLabel,
+      destinationLabel: order.destinationLabel,
+      promisedTime: order.promisedTime,
+      dispatchNotes: order.dispatchNotes,
+    })),
     readyCount: wipEntries.filter((entry) => entry.status === 'ready').length,
     handoffCount: shiftLogs.length,
     boardProgress,
@@ -524,12 +508,30 @@ export async function getHandoffWorkspace() {
     wipByDate.set(entry.productionDate, existing);
   }
 
+  const focusOrders = data.orders.filter((order) => order.productionDate === focusDate);
+  const handoffFulfillment = focusOrders.map((order) => ({
+    id: order.id,
+    customerLabel: order.customerLabel,
+    destinationLabel: order.destinationLabel,
+    fulfillmentType: order.fulfillmentType,
+    deliveryProvider: order.deliveryProvider,
+    providerLabel: resolveDeliveryProviderLabel(order),
+    deliveryAssignee: order.deliveryAssignee,
+    promisedTime: order.promisedTime,
+    dispatchNotes: order.dispatchNotes,
+    remainingQuantity: getOrderProgress(order).remainingQuantity,
+  }));
+
   return {
     focusDate,
     dates,
     shiftLogs: logs,
     shiftLogMap: new Map(logs.map((log) => [`${log.productionDate}:${log.shiftKey}`, log])),
     wipByDate,
+    focusOrders,
+    packingWatch: handoffFulfillment.filter((order) => (order.fulfillmentType === 'own_delivery' || order.fulfillmentType === 'app_delivery') && order.remainingQuantity > 0),
+    assignmentWatch: handoffFulfillment.filter((order) => order.fulfillmentType === 'own_delivery' && !order.deliveryAssignee),
+    pickupWatch: handoffFulfillment.filter((order) => order.fulfillmentType === 'pickup' && order.remainingQuantity === 0),
   };
 }
 
@@ -571,13 +573,20 @@ export function normalizeOrderForm(formData: FormData): OrderFormValues {
     note: String(lineNotes[index] ?? ''),
   }));
 
+  const requestedProvider = String(formData.get('deliveryProvider') ?? '');
+  const deliveryProvider = deliveryProviderValues.includes(requestedProvider as DeliveryProvider)
+    ? requestedProvider as DeliveryProvider
+    : undefined;
+
   return {
     customerLabel: String(formData.get('customerLabel') ?? ''),
     customerPhone: String(formData.get('customerPhone') ?? ''),
     destinationLabel: String(formData.get('destinationLabel') ?? ''),
-    fulfillmentType: String(formData.get('fulfillmentType') ?? 'pickup') as FulfillmentType,
-    deliveryProvider: String(formData.get('deliveryProvider') ?? ''),
+    fulfillmentType: String(formData.get('fulfillmentType') ?? 'standard') as FulfillmentType,
+    deliveryProvider,
+    deliveryProviderCustom: String(formData.get('deliveryProviderCustom') ?? ''),
     deliveryAssignee: String(formData.get('deliveryAssignee') ?? ''),
+    promisedTime: String(formData.get('promisedTime') ?? ''),
     dispatchNotes: String(formData.get('dispatchNotes') ?? ''),
     dueDate: String(formData.get('dueDate') ?? ''),
     productionDate: String(formData.get('productionDate') ?? ''),
@@ -621,12 +630,16 @@ export function validateOrderForm(values: OrderFormValues) {
     return 'Production and delivery dates are required.';
   }
 
-  if (values.fulfillmentType !== 'pickup' && !values.destinationLabel?.trim()) {
+  if ((values.fulfillmentType === 'own_delivery' || values.fulfillmentType === 'app_delivery') && !values.destinationLabel?.trim()) {
     return 'Add a destination or route label for delivery orders.';
   }
 
-  if (values.fulfillmentType === 'app_delivery' && !values.deliveryProvider?.trim()) {
+  if (values.fulfillmentType === 'app_delivery' && !values.deliveryProvider) {
     return 'Add the app delivery source when using app delivery.';
+  }
+
+  if (values.deliveryProvider === 'other' && !values.deliveryProviderCustom?.trim()) {
+    return 'Add a short custom provider label when choosing other.';
   }
 
   const usableLines = values.lines.filter((line) => line.productLabel.trim() && line.quantity > 0);

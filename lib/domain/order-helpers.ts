@@ -1,4 +1,4 @@
-import type { AppData, Order, OrderLine, WeekdayKey, WipEntry } from '@/lib/domain/types';
+import type { AppData, DeliveryProvider, Order, OrderLine, WeekdayKey, WipEntry } from '@/lib/domain/types';
 
 export const weekdayOptions: Array<{ value: WeekdayKey; label: string; index: number }> = [
   { value: 'sun', label: 'Sun', index: 0 },
@@ -9,6 +9,9 @@ export const weekdayOptions: Array<{ value: WeekdayKey; label: string; index: nu
   { value: 'fri', label: 'Fri', index: 5 },
   { value: 'sat', label: 'Sat', index: 6 },
 ];
+
+export const fulfillmentTypeValues = ['standard', 'pickup', 'own_delivery', 'app_delivery'] as const;
+export const deliveryProviderValues = ['internal', 'uber', 'rappi', 'didi', 'other'] as const satisfies readonly DeliveryProvider[];
 
 export function getAllProductionDates(data: Pick<AppData, 'orders' | 'wipEntries' | 'shiftLogs' | 'recurringTemplates'>) {
   const dateSet = new Set<string>();
@@ -104,4 +107,33 @@ export function getOrderProgress(order: Pick<Order, 'lines'>) {
     doneLines,
     lineCount: workableLines.length,
   };
+}
+
+export function inferFulfillmentType(destinationLabel?: string) {
+  const label = destinationLabel?.toLowerCase() ?? '';
+  if (!label) {
+    return 'standard' as const;
+  }
+
+  if (label.includes('counter') || label.includes('pickup')) {
+    return 'pickup' as const;
+  }
+
+  return 'own_delivery' as const;
+}
+
+export function resolveDeliveryProviderLabel(order: { deliveryProvider?: string; deliveryProviderLabel?: string }) {
+  if (order.deliveryProvider === 'other') {
+    return order.deliveryProviderLabel?.trim() || 'other';
+  }
+
+  return order.deliveryProvider ?? order.deliveryProviderLabel;
+}
+
+export function isDeliveryOrder(order: Pick<Order, 'fulfillmentType'>) {
+  return order.fulfillmentType === 'own_delivery' || order.fulfillmentType === 'app_delivery';
+}
+
+export function isPickupOrder(order: Pick<Order, 'fulfillmentType'>) {
+  return order.fulfillmentType === 'pickup';
 }

@@ -165,6 +165,12 @@ Fields:
 - `customerId` nullable
 - `draftCustomerName` nullable
 - `destinationId` nullable
+- `fulfillmentType` (`standard`, `pickup`, `own_delivery`, `app_delivery`)
+- `deliveryProvider` nullable (`internal`, `uber`, `rappi`, `didi`, `other`)
+- `deliveryProviderLabel` nullable for custom providers
+- `deliveryAssignee` nullable
+- `promisedTime` nullable
+- `dispatchNotes` nullable
 - `dueDate`
 - `productionDate`
 - `recurringTemplateId` nullable
@@ -173,7 +179,7 @@ Fields:
 - `createdByUserId`
 - `updatedAt`
 
-The first usable order intake flow should also tolerate a lightweight contact field such as phone or message handle stored directly on the order until customer setup is formalized.
+The first usable order intake flow should also tolerate a lightweight contact field such as phone or message handle stored directly on the order until customer setup is formalized. Fulfillment fields must stay optional so teams can keep capturing orders even when pickup or delivery detail is still incomplete.
 
 ### Order line
 
@@ -364,6 +370,9 @@ Must show:
 - source
 - customer or draft customer label
 - destination
+- pickup vs delivery mode at a glance
+- own delivery vs app delivery at a glance
+- optional assignee, promised time, and dispatch notes when present
 - due/production dates
 - warnings for changed/cancelled orders
 
@@ -389,6 +398,11 @@ Must support:
 ### Production workspace
 
 Must show:
+
+- lightweight fulfillment awareness alongside grouped demand
+- delivery orders still needing packing
+- own-delivery orders still needing assignment
+- pickup orders waiting for collection
 
 - grouped demand for selected production date
 - unresolved draft lines

@@ -10,6 +10,7 @@ declare module 'react' {
   export function createContext<T>(value: T): any;
   export function useContext<T>(context: any): T;
   export function useMemo<T>(factory: () => T, deps: any[]): T;
+  export function useState<T>(value: T): [T, (value: T) => void];
 }
 
 declare module 'next' {

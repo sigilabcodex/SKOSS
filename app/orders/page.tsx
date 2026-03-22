@@ -1,8 +1,26 @@
 import Link from 'next/link';
-import { formatDateLabel, formatLineProgressLabel, formatStatusLabel, formatTemplateScheduleLabel } from '@/lib/domain/formatters';
+import { formatDateLabel, formatLineProgressLabel, formatStatusLabel } from '@/lib/domain/formatters';
+import { inferFulfillmentType, resolveDeliveryProviderLabel } from '@/lib/domain/order-helpers';
 import { getOrderProgress, getOrdersWorkspace } from '@/lib/server/demo-data';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { ArrowRightIcon, CheckIcon, OrdersIcon, SparklesIcon } from '@/components/ui-icons';
+
+function getTranslatedProviderLabel(
+  order: { deliveryProvider?: string; deliveryProviderLabel?: string },
+  t: (key: string) => string,
+) {
+  const providerLabel = resolveDeliveryProviderLabel(order);
+
+  if (!providerLabel) {
+    return null;
+  }
+
+  if (order.deliveryProvider === 'other' && order.deliveryProviderLabel) {
+    return order.deliveryProviderLabel;
+  }
+
+  return order.deliveryProvider ? t(`orders.providerOptions.${order.deliveryProvider}`) : providerLabel;
+}
 
 async function OrderCard({
   order,
@@ -12,6 +30,7 @@ async function OrderCard({
 }) {
   const progress = getOrderProgress(order);
   const { t, locale } = await getServerTranslator();
+  const providerLabel = getTranslatedProviderLabel(order, t);
 
   return (
     <article className={`order-card ${progress.partialLines > 0 ? 'order-card-partial' : ''}`}>
@@ -22,6 +41,9 @@ async function OrderCard({
         </div>
         <div className="page-stack compact-badge-stack align-end">
           <span className={`badge badge-${order.status}`}>{formatStatusLabel(order.status, t)}</span>
+          <span className={`badge badge-${order.fulfillmentType === 'pickup' ? 'ready' : order.fulfillmentType === 'app_delivery' ? 'in_progress' : 'active'}`}>
+            {formatStatusLabel(order.fulfillmentType, t)}
+          </span>
           {order.generatedFromTemplate ? <span className="badge badge-generated">{t('common.recurring')}</span> : <span className="badge badge-manual">{t('common.manual')}</span>}
           {order.visibleOnProductionBoard === false ? <span className="badge badge-neutral">{t('orders.hiddenFromBoard')}</span> : null}
           {order.changedInKitchen || order.templateEdited ? <span className="badge badge-changed">{t('common.kitchenAttention')}</span> : null}
@@ -46,15 +68,24 @@ async function OrderCard({
           <strong>{progress.completedQuantity}/{progress.requiredQuantity || 0} {t('common.ready').toLowerCase()}</strong>
         </div>
         <div>
+          <span className="field-label">{t('orders.promise')}</span>
+          <strong>{order.promisedTime || t('common.clear')}</strong>
+        </div>
+        <div>
           <span className="field-label">{t('orders.notes')}</span>
           <strong>{order.dispatchNotes || order.notes ? t('common.hasNotes') : t('common.clear')}</strong>
         </div>
       </div>
-      {order.deliveryProvider || order.deliveryAssignee ? (
-        <p className="helper-text no-margin">
-          {order.deliveryProvider ? `${t('orders.provider')}: ${order.deliveryProvider}. ` : ''}
-          {order.deliveryAssignee ? `${t('orders.assignee')}: ${order.deliveryAssignee}.` : ''}
-        </p>
+      {providerLabel || order.deliveryAssignee || order.dispatchNotes ? (
+        <div className="page-stack top-gap-small">
+          {providerLabel || order.deliveryAssignee ? (
+            <p className="helper-text no-margin">
+              {providerLabel ? `${t('orders.provider')}: ${providerLabel}. ` : ''}
+              {order.deliveryAssignee ? `${t('orders.assignee')}: ${order.deliveryAssignee}.` : ''}
+            </p>
+          ) : null}
+          {order.dispatchNotes ? <p className="helper-text no-margin">{order.dispatchNotes}</p> : null}
+        </div>
       ) : null}
       <ul className="mini-line-list">
         {order.lines.map((line) => (
@@ -125,7 +156,7 @@ export default async function OrdersPage({
                 <span className="badge badge-generated">{t('common.recurring')}</span>
               </div>
               <p>
-                {formatTemplateScheduleLabel(template, t)} · {t('orders.nextUp')} {formatDateLabel(template.nextOccurrenceDate, locale)}
+                {formatStatusLabel(inferFulfillmentType(template.destinationLabel), t)} · {t('orders.nextUp')} {formatDateLabel(template.nextOccurrenceDate, locale)}
               </p>
               <ul className="mini-line-list">
                 {template.lines.map((line) => (

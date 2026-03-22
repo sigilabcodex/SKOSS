@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { OrderForm } from '@/components/orders/order-form';
 import { SubmitButton } from '@/components/submit-button';
 import { formatLineProgressLabel, formatStatusLabel } from '@/lib/domain/formatters';
+import { resolveDeliveryProviderLabel } from '@/lib/domain/order-helpers';
 import { updateOrderAction, updateOrderLineProgressAction } from '@/lib/server/actions';
 import { getLineStatus, getOrderEditor, getOrderProgress } from '@/lib/server/demo-data';
 import { getServerTranslator } from '@/lib/i18n/server';
@@ -28,6 +29,7 @@ export default async function EditOrderPage({
 
   const action = updateOrderAction.bind(null, view.order.id);
   const progress = getOrderProgress(view.order);
+  const providerLabel = resolveDeliveryProviderLabel(view.order);
 
   return (
     <div className="page-stack">
@@ -58,6 +60,24 @@ export default async function EditOrderPage({
           <span className="summary-pill">
             {progress.completedQuantity}/{progress.requiredQuantity || 0} {t('common.completed').toLowerCase()}
           </span>
+        </div>
+
+        <div className="stats-grid compact-stats-grid">
+          <div className="stat-card">
+            <span className="stat-label">{t('orders.fulfillment')}</span>
+            <strong>{formatStatusLabel(view.order.fulfillmentType, t)}</strong>
+            <span>{view.order.destinationLabel ?? t('common.destinationStillOpen')}</span>
+          </div>
+          <div className="stat-card stat-card-info">
+            <span className="stat-label">{t('orders.provider')}</span>
+            <strong>{providerLabel ? (view.order.deliveryProvider && view.order.deliveryProvider !== 'other' ? t(`orders.providerOptions.${view.order.deliveryProvider}`) : providerLabel) : t('common.clear')}</strong>
+            <span>{view.order.deliveryAssignee ?? t('orders.editPage.noDeliveryAssignee')}</span>
+          </div>
+          <div className="stat-card stat-card-warn">
+            <span className="stat-label">{t('orders.promise')}</span>
+            <strong>{view.order.promisedTime ?? t('common.clear')}</strong>
+            <span>{view.order.dispatchNotes ?? t('orders.editPage.noDispatchNotes')}</span>
+          </div>
         </div>
 
         <div className="line-grid-stack">

@@ -15,6 +15,18 @@ const stageOptions = ['prepared', 'shaped', 'baked', 'ready'] as const;
 const handoffStatusOptions = ['open', 'ready_for_handoff', 'acknowledged', 'closed'] as const;
 const noteStateOptions = ['info', 'watch', 'blocked', 'done'] as const;
 
+function getProviderLabel(entry: { deliveryProvider?: string; providerLabel?: string }, t: (key: string) => string) {
+  if (!entry.providerLabel) {
+    return null;
+  }
+
+  if (entry.deliveryProvider && entry.deliveryProvider !== 'other') {
+    return t(`orders.providerOptions.${entry.deliveryProvider}`);
+  }
+
+  return entry.providerLabel;
+}
+
 export default async function HandoffPage({
   searchParams,
 }: {
@@ -87,11 +99,106 @@ export default async function HandoffPage({
           <ul className="stack-list muted-list">
             {focusWip.map((entry) => (
               <li key={entry.id}>
-                <strong>
-                  {entry.referenceLabel} · {entry.quantity} {entry.unit}
-                </strong>
+                <strong>{entry.referenceLabel} · {entry.quantity} {entry.unit}</strong>
+                <span>{formatStatusLabel(entry.stage, t)} · {formatShiftKeyLabel(entry.shiftKey, t)} · {entry.notes ?? t('common.noExtraNote')}</span>
+              </li>
+            ))}
+          </ul>
+        </article>
+      </section>
+
+      <section className="grid-two">
+        <article className="panel page-stack">
+          <div className="table-header-row">
+            <div>
+              <h2>{t('handoff.fulfillmentWatch.pack')}</h2>
+              <p>{t('handoff.fulfillmentWatch.packHelp')}</p>
+            </div>
+            <span className="summary-pill">{view.packingWatch.length}</span>
+          </div>
+          <ul className="stack-list muted-list">
+            {view.packingWatch.map((order) => {
+              const providerLabel = getProviderLabel(order, t);
+              return (
+                <li key={order.id}>
+                  <strong>{order.customerLabel}</strong>
+                  <span>
+                    {formatStatusLabel(order.fulfillmentType, t)}
+                    {order.destinationLabel ? ` · ${order.destinationLabel}` : ''}
+                    {providerLabel ? ` · ${providerLabel}` : ''}
+                    {order.promisedTime ? ` · ${order.promisedTime}` : ''}
+                    {` · ${order.remainingQuantity} ${t('handoff.fulfillmentWatch.remaining').toLowerCase()}`}
+                    {order.dispatchNotes ? ` · ${order.dispatchNotes}` : ''}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        </article>
+
+        <article className="panel page-stack">
+          <div className="table-header-row">
+            <div>
+              <h2>{t('handoff.fulfillmentWatch.assign')}</h2>
+              <p>{t('handoff.fulfillmentWatch.assignHelp')}</p>
+            </div>
+            <span className="summary-pill">{view.assignmentWatch.length}</span>
+          </div>
+          <ul className="stack-list muted-list">
+            {view.assignmentWatch.map((order) => (
+              <li key={order.id}>
+                <strong>{order.customerLabel}</strong>
                 <span>
-                  {formatStatusLabel(entry.stage, t)} · {formatShiftKeyLabel(entry.shiftKey, t)} · {entry.notes ?? t('common.noExtraNote')}
+                  {order.destinationLabel ?? t('common.destinationStillOpen')}
+                  {order.promisedTime ? ` · ${order.promisedTime}` : ''}
+                  {order.dispatchNotes ? ` · ${order.dispatchNotes}` : ''}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </article>
+      </section>
+
+      <section className="grid-two">
+        <article className="panel page-stack">
+          <div className="table-header-row">
+            <div>
+              <h2>{t('handoff.fulfillmentWatch.pickup')}</h2>
+              <p>{t('handoff.fulfillmentWatch.pickupHelp')}</p>
+            </div>
+            <span className="summary-pill">{view.pickupWatch.length}</span>
+          </div>
+          <ul className="stack-list muted-list">
+            {view.pickupWatch.map((order) => (
+              <li key={order.id}>
+                <strong>{order.customerLabel}</strong>
+                <span>
+                  {order.destinationLabel ?? t('common.destinationStillOpen')}
+                  {order.promisedTime ? ` · ${order.promisedTime}` : ''}
+                  {order.dispatchNotes ? ` · ${order.dispatchNotes}` : ''}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </article>
+
+        <article className="panel page-stack">
+          <div className="table-header-row">
+            <div>
+              <h2>{t('handoff.fulfillmentWatch.all')}</h2>
+              <p>{t('handoff.fulfillmentWatch.allHelp')}</p>
+            </div>
+            <span className="summary-pill">{view.focusOrders.length} {t('common.orders')}</span>
+          </div>
+          <ul className="stack-list muted-list">
+            {view.focusOrders.map((order) => (
+              <li key={order.id}>
+                <strong>{order.customerLabel}</strong>
+                <span>
+                  {formatStatusLabel(order.fulfillmentType, t)}
+                  {order.destinationLabel ? ` · ${order.destinationLabel}` : ''}
+                  {order.deliveryAssignee ? ` · ${order.deliveryAssignee}` : ''}
+                  {order.promisedTime ? ` · ${order.promisedTime}` : ''}
                 </span>
               </li>
             ))}
@@ -113,9 +220,7 @@ export default async function HandoffPage({
             <span className="field-heading">{t('handoff.fields.shift')}</span>
             <select name="shiftKey" defaultValue="night">
               {shiftOptions.map((option) => (
-                <option key={option} value={option}>
-                  {formatShiftKeyLabel(option, t)}
-                </option>
+                <option key={option} value={option}>{formatShiftKeyLabel(option, t)}</option>
               ))}
             </select>
           </label>
@@ -145,9 +250,7 @@ export default async function HandoffPage({
             <span className="field-heading">{t('handoff.fields.stage')}</span>
             <select name="stage" defaultValue="prepared">
               {stageOptions.map((option) => (
-                <option key={option} value={option}>
-                  {formatStatusLabel(option, t)}
-                </option>
+                <option key={option} value={option}>{formatStatusLabel(option, t)}</option>
               ))}
             </select>
           </label>
@@ -155,11 +258,7 @@ export default async function HandoffPage({
             <span className="field-heading">{t('handoff.fields.notes')}</span>
             <textarea name="notes" placeholder={t('handoff.placeholders.wipNotes')} />
           </label>
-          <SubmitButton
-            className="button-primary button-reset"
-            pendingLabel={t('handoff.savingWip')}
-            icon={<CheckIcon className="button-icon" />}
-          >
+          <SubmitButton className="button-primary button-reset" pendingLabel={t('handoff.savingWip')} icon={<CheckIcon className="button-icon" />}>
             {t('handoff.saveWip')}
           </SubmitButton>
         </form>
@@ -177,9 +276,7 @@ export default async function HandoffPage({
             <span className="field-heading">{t('handoff.fields.shift')}</span>
             <select name="shiftKey" defaultValue="night">
               {shiftOptions.map((option) => (
-                <option key={option} value={option}>
-                  {formatShiftKeyLabel(option, t)}
-                </option>
+                <option key={option} value={option}>{formatShiftKeyLabel(option, t)}</option>
               ))}
             </select>
           </label>
@@ -187,9 +284,7 @@ export default async function HandoffPage({
             <span className="field-heading">{t('handoff.fields.status')}</span>
             <select name="status" defaultValue={focusLog?.status ?? 'open'}>
               {handoffStatusOptions.map((option) => (
-                <option key={option} value={option}>
-                  {formatStatusLabel(option, t)}
-                </option>
+                <option key={option} value={option}>{formatStatusLabel(option, t)}</option>
               ))}
             </select>
           </label>
@@ -205,11 +300,7 @@ export default async function HandoffPage({
             <span className="field-heading">{t('handoff.fields.handoffNote')}</span>
             <textarea name="handoffNotes" defaultValue={focusLog?.handoffNotes ?? ''} />
           </label>
-          <SubmitButton
-            className="button-primary button-reset"
-            pendingLabel={t('handoff.savingHandoff')}
-            icon={<CheckIcon className="button-icon" />}
-          >
+          <SubmitButton className="button-primary button-reset" pendingLabel={t('handoff.savingHandoff')} icon={<CheckIcon className="button-icon" />}>
             {t('handoff.saveHandoff')}
           </SubmitButton>
         </form>
@@ -229,9 +320,7 @@ export default async function HandoffPage({
             <span className="field-heading">{t('handoff.fields.shift')}</span>
             <select name="shiftKey" defaultValue="morning">
               {shiftOptions.map((option) => (
-                <option key={option} value={option}>
-                  {formatShiftKeyLabel(option, t)}
-                </option>
+                <option key={option} value={option}>{formatShiftKeyLabel(option, t)}</option>
               ))}
             </select>
           </label>
@@ -243,9 +332,7 @@ export default async function HandoffPage({
             <span className="field-heading">{t('handoff.fields.state')}</span>
             <select name="state" defaultValue="info">
               {noteStateOptions.map((option) => (
-                <option key={option} value={option}>
-                  {formatStatusLabel(option, t)}
-                </option>
+                <option key={option} value={option}>{formatStatusLabel(option, t)}</option>
               ))}
             </select>
           </label>
@@ -257,11 +344,7 @@ export default async function HandoffPage({
             <span className="field-heading">{t('handoff.fields.note')}</span>
             <textarea name="note" placeholder={t('handoff.placeholders.note')} required />
           </label>
-          <SubmitButton
-            className="button-primary button-reset"
-            pendingLabel={t('handoff.addingNote')}
-            icon={<CheckIcon className="button-icon" />}
-          >
+          <SubmitButton className="button-primary button-reset" pendingLabel={t('handoff.addingNote')} icon={<CheckIcon className="button-icon" />}>
             {t('handoff.addShiftNote')}
           </SubmitButton>
         </form>
@@ -274,9 +357,7 @@ export default async function HandoffPage({
               <article key={log.id} className="timeline-card">
                 <div className="order-card-header">
                   <div>
-                    <strong>
-                      {formatDateLabel(log.productionDate, locale)} · {formatShiftKeyLabel(log.shiftKey, t)}
-                    </strong>
+                    <strong>{formatDateLabel(log.productionDate, locale)} · {formatShiftKeyLabel(log.shiftKey, t)}</strong>
                     <p>{formatDateTimeLabel(log.updatedAt, locale)}</p>
                   </div>
                   <span className={`badge badge-${log.status}`}>{formatStatusLabel(log.status, t)}</span>
@@ -286,11 +367,7 @@ export default async function HandoffPage({
                   {log.shiftNotes.map((note) => (
                     <li key={note.id}>
                       <strong>{note.authorLabel}</strong>
-                      <span>
-                        {formatStatusLabel(note.state, t)}
-                        {note.linkedItemLabel ? ` · ${note.linkedItemLabel}` : ''}
-                        {` · ${note.note} · ${formatDateTimeLabel(note.createdAt, locale)}`}
-                      </span>
+                      <span>{formatStatusLabel(note.state, t)}{note.linkedItemLabel ? ` · ${note.linkedItemLabel}` : ''}{` · ${note.note} · ${formatDateTimeLabel(note.createdAt, locale)}`}</span>
                     </li>
                   ))}
                 </ul>

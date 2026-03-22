@@ -353,7 +353,8 @@ The first implementation scaffold includes:
 
 The scaffold now also starts a lightweight operational data layer for:
 
-- fulfillment distinctions on orders
+- fulfillment distinctions on orders (`standard`, `pickup`, `own_delivery`, `app_delivery`)
+- delivery metadata such as provider/source, optional assignee, promised time, and dispatch notes
 - suppliers
 - raw materials
 - supplier-specific historical prices
@@ -361,3 +362,6 @@ The scaffold now also starts a lightweight operational data layer for:
 This remains intentionally narrow so future recipe costing and supplier comparison can grow without turning the early product into a full procurement suite.
 
 This scaffold is intentionally light. It now supports a first persisted operational loop without pretending the whole application is already designed.
+
+
+Current fulfillment support is intentionally lightweight. SKOSS can now show pickup vs delivery, own delivery vs app delivery, and practical handoff/packing context. It still intentionally defers routing, GPS, live courier tracking, dispatch optimization, and marketplace API integrations.
