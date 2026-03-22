@@ -1,7 +1,7 @@
 'use client';
 
 import type { Destination, Order } from '@/lib/domain/types';
-import { getDefaultLineDrafts, getOrderProgress } from '@/lib/domain/order-helpers';
+import { deliveryProviderValues, getDefaultLineDrafts, getOrderProgress, inferFulfillmentType } from '@/lib/domain/order-helpers';
 import { useI18n } from '@/components/i18n-provider';
 import { LineItemsEditor } from '@/components/orders/line-items-editor';
 import { SubmitButton } from '@/components/submit-button';
@@ -29,6 +29,7 @@ const sourceOptions = [
 ] as const;
 
 const fulfillmentOptions = [
+  { value: 'standard', key: 'standard' },
   { value: 'pickup', key: 'pickup' },
   { value: 'own_delivery', key: 'own_delivery' },
   { value: 'app_delivery', key: 'app_delivery' },
@@ -41,12 +42,7 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
   const lineDrafts = getDefaultLineDrafts(order?.lines);
   const visibleOnProductionBoard = order?.visibleOnProductionBoard ?? true;
   const changedInKitchen = order?.changedInKitchen ?? order?.status === 'changed';
-  const fulfillmentType = order?.fulfillmentType
-    ?? ((order?.destinationLabel?.toLowerCase().includes('counter') || order?.destinationLabel?.toLowerCase().includes('pickup'))
-      ? 'pickup'
-      : order?.destinationLabel
-        ? 'own_delivery'
-        : 'pickup');
+  const initialFulfillmentType = order?.fulfillmentType ?? inferFulfillmentType(order?.destinationLabel);
   const progress = order ? getOrderProgress(order) : null;
   const existingStatuses = order?.lines.map((line) => ({
     label: `${line.completedQuantity}/${line.quantity} ${t('status.done').toLowerCase()}`,
@@ -55,6 +51,10 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
   const lineTypeOptions = lineTypeValues.map((option) => ({
     value: option.value,
     label: t(`orders.lineEditor.kinds.${option.key}`),
+  }));
+  const providerOptions = deliveryProviderValues.map((value) => ({
+    value,
+    label: t(`orders.providerOptions.${value}`),
   }));
 
   return (
@@ -69,6 +69,9 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
           {order ? (
             <div className="page-stack compact-badge-stack align-end">
               <span className={`badge badge-${order.status}`}>{t(`status.${order.status}`)}</span>
+              <span className={`badge badge-${order.fulfillmentType === 'pickup' ? 'ready' : order.fulfillmentType === 'app_delivery' ? 'in_progress' : 'active'}`}>
+                {t(`status.${order.fulfillmentType}`)}
+              </span>
               {order.generatedFromTemplate ? <span className="badge badge-generated">{t('common.recurring')}</span> : <span className="badge badge-manual">{t('common.manual')}</span>}
               {order.templateEdited ? <span className="badge badge-changed">{t('orders.orderForm.editedFromRhythm')}</span> : null}
               {progress && progress.partialLines > 0 ? <span className="badge badge-in_progress">{t('common.partialWork')}</span> : null}
@@ -108,30 +111,16 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
             <div className="grid-two">
               <label>
                 <span className="field-heading">{t('orders.orderForm.fields.customerLabel')} <span className="required-dot">{t('common.required')}</span></span>
-                <input
-                  name="customerLabel"
-                  defaultValue={order?.customerLabel ?? ''}
-                  placeholder={t('orders.orderForm.placeholders.customerLabel')}
-                  required
-                />
+                <input name="customerLabel" defaultValue={order?.customerLabel ?? ''} placeholder={t('orders.orderForm.placeholders.customerLabel')} required />
                 <span className="helper-text">{t('orders.orderForm.fields.customerLabelHelp')}</span>
               </label>
               <label>
                 <span className="field-heading">{t('orders.orderForm.fields.customerPhone')} <span className="optional-pill">{t('common.optional')}</span></span>
-                <input
-                  name="customerPhone"
-                  defaultValue={order?.customerPhone ?? ''}
-                  placeholder={t('common.optional')}
-                />
+                <input name="customerPhone" defaultValue={order?.customerPhone ?? ''} placeholder={t('common.optional')} />
               </label>
               <label>
                 <span className="field-heading">{t('orders.orderForm.fields.destination')} <span className="optional-pill">{t('common.optional')}</span></span>
-                <input
-                  name="destinationLabel"
-                  list="destinations"
-                  defaultValue={order?.destinationLabel ?? ''}
-                  placeholder={t('orders.orderForm.placeholders.destination')}
-                />
+                <input name="destinationLabel" list="destinations" defaultValue={order?.destinationLabel ?? ''} placeholder={t('orders.orderForm.placeholders.destination')} />
                 <datalist id="destinations">
                   {destinations.map((destination) => (
                     <option key={destination.id} value={destination.name} />
@@ -140,11 +129,9 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
               </label>
               <label>
                 <span className="field-heading">{t('orders.orderForm.fields.fulfillment')}</span>
-                <select name="fulfillmentType" defaultValue={fulfillmentType}>
+                <select name="fulfillmentType" defaultValue={initialFulfillmentType}>
                   {fulfillmentOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {t(`orders.fulfillmentOptions.${option.key}`)}
-                    </option>
+                    <option key={option.value} value={option.value}>{t(`orders.fulfillmentOptions.${option.key}`)}</option>
                   ))}
                 </select>
                 <span className="helper-text">{t('orders.orderForm.fields.fulfillmentHelp')}</span>
@@ -153,9 +140,7 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
                 <span className="field-heading">{t('orders.orderForm.fields.source')}</span>
                 <select name="source" defaultValue={order?.generatedFromTemplate ? 'generated' : order?.source ?? 'manual'}>
                   {sourceOptions.map((option) => (
-                    <option key={option.value} value={option.value}>
-                      {t(`orders.sources.${option.key}`)}
-                    </option>
+                    <option key={option.value} value={option.value}>{t(`orders.sources.${option.key}`)}</option>
                   ))}
                   {order?.generatedFromTemplate ? <option value="generated">{t('orders.sources.generated')}</option> : null}
                 </select>
@@ -181,30 +166,37 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
             <div className="grid-two">
               <label>
                 <span className="field-heading">{t('orders.orderForm.fields.deliveryProvider')} <span className="optional-pill">{t('common.optional')}</span></span>
-                <input
-                  name="deliveryProvider"
-                  defaultValue={order?.deliveryProvider ?? ''}
-                  placeholder={t('orders.orderForm.placeholders.deliveryProvider')}
-                />
+                <select name="deliveryProvider" defaultValue={order?.deliveryProvider ?? ''}>
+                  <option value="">{t('orders.orderForm.placeholders.noneSelected')}</option>
+                  {providerOptions.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
                 <span className="helper-text">{t('orders.orderForm.fields.deliveryProviderHelp')}</span>
               </label>
               <label>
                 <span className="field-heading">{t('orders.orderForm.fields.deliveryAssignee')} <span className="optional-pill">{t('common.optional')}</span></span>
+                <input name="deliveryAssignee" defaultValue={order?.deliveryAssignee ?? ''} placeholder={t('orders.orderForm.placeholders.deliveryAssignee')} />
+              </label>
+              <label>
+                <span className="field-heading">{t('orders.orderForm.fields.promisedTime')} <span className="optional-pill">{t('common.optional')}</span></span>
+                <input name="promisedTime" type="time" defaultValue={order?.promisedTime ?? ''} />
+                <span className="helper-text">{t('orders.orderForm.fields.promisedTimeHelp')}</span>
+              </label>
+              <label>
+                <span className="field-heading">{t('orders.orderForm.fields.deliveryProviderCustom')} <span className="optional-pill">{t('common.optional')}</span></span>
                 <input
-                  name="deliveryAssignee"
-                  defaultValue={order?.deliveryAssignee ?? ''}
-                  placeholder={t('orders.orderForm.placeholders.deliveryAssignee')}
+                  name="deliveryProviderCustom"
+                  defaultValue={order?.deliveryProvider === 'other' ? order.deliveryProviderLabel ?? '' : ''}
+                  placeholder={t('orders.orderForm.placeholders.deliveryProviderCustom')}
                 />
               </label>
             </div>
             <label>
               <span className="field-heading">{t('orders.orderForm.fields.dispatchNotes')} <span className="optional-pill">{t('common.optional')}</span></span>
-              <textarea
-                name="dispatchNotes"
-                defaultValue={order?.dispatchNotes ?? ''}
-                placeholder={t('orders.orderForm.placeholders.dispatchNotes')}
-              />
+              <textarea name="dispatchNotes" defaultValue={order?.dispatchNotes ?? ''} placeholder={t('orders.orderForm.placeholders.dispatchNotes')} />
             </label>
+            <p className="helper-text no-margin">{t('orders.orderForm.dispatchHint.delivery')}</p>
           </section>
 
           <section className="field-section">
@@ -219,9 +211,7 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
                 <span className="field-heading">{t('orders.orderForm.fields.orderStatus')}</span>
                 <select name="status" defaultValue={order?.status ?? 'active'}>
                   {statusOptions.map((option) => (
-                    <option key={option} value={option}>
-                      {t(`status.${option}`)}
-                    </option>
+                    <option key={option} value={option}>{t(`status.${option}`)}</option>
                   ))}
                 </select>
               </label>
@@ -242,11 +232,7 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
                 </span>
               </label>
               <label className="checkbox-row">
-                <input
-                  name="visibleOnProductionBoard"
-                  type="checkbox"
-                  defaultChecked={visibleOnProductionBoard}
-                />
+                <input name="visibleOnProductionBoard" type="checkbox" defaultChecked={visibleOnProductionBoard} />
                 <span>
                   <strong>{t('orders.orderForm.fields.showOnBoard')}</strong>
                   <span className="helper-text">{t('orders.orderForm.fields.showOnBoardHelp')}</span>

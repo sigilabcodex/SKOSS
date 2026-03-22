@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { demoSeed } from '@/data/demo-seed';
+import { inferFulfillmentType } from '@/lib/domain/order-helpers';
 import type { AppData, Order, OrderLine, RecurringTemplate, WeekdayKey, WorkspacePreferences } from '@/lib/domain/types';
 import { defaultLocale, defaultPreset } from '@/lib/i18n/config';
 
@@ -32,19 +33,6 @@ function addDays(date: string, days: number) {
   const next = new Date(`${date}T00:00:00Z`);
   next.setUTCDate(next.getUTCDate() + days);
   return isoDateFromDate(next);
-}
-
-function inferFulfillmentType(destinationLabel?: string) {
-  const label = destinationLabel?.toLowerCase() ?? '';
-  if (!label) {
-    return 'pickup' as const;
-  }
-
-  if (label.includes('counter') || label.includes('pickup')) {
-    return 'pickup' as const;
-  }
-
-  return 'own_delivery' as const;
 }
 
 function weekdayToIndex(day: WeekdayKey) {
@@ -143,7 +131,9 @@ function buildGeneratedOrder(template: RecurringTemplate, productionDate: string
     customerPhone: template.customerPhone,
     destinationLabel: template.destinationLabel,
     deliveryProvider: undefined,
+    deliveryProviderLabel: undefined,
     deliveryAssignee: undefined,
+    promisedTime: undefined,
     dispatchNotes: template.notes,
     dueDate: productionDate,
     productionDate,
@@ -233,7 +223,9 @@ function hydrateStore(rawData: AppData): AppData {
       ...order,
       fulfillmentType: order.fulfillmentType ?? inferFulfillmentType(order.destinationLabel),
       deliveryProvider: order.deliveryProvider,
+      deliveryProviderLabel: order.deliveryProviderLabel,
       deliveryAssignee: order.deliveryAssignee,
+      promisedTime: order.promisedTime,
       dispatchNotes: order.dispatchNotes,
       changedInKitchen: order.changedInKitchen ?? false,
       visibleOnProductionBoard: order.visibleOnProductionBoard ?? true,

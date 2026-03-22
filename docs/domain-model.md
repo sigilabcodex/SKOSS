@@ -261,12 +261,20 @@ Fulfillment metadata describes how an order is expected to reach the customer.
 
 Responsibilities:
 
-- distinguish fulfillment mode such as pickup, own delivery, or app delivery
-- preserve dispatch notes and promised timing context
+- distinguish fulfillment mode such as standard, pickup, own delivery, or app delivery
+- preserve provider/source, dispatch notes, and promised timing context
 - support assignment and status visibility where relevant
 - remain lightweight until a fuller delivery module exists
 
-This metadata may live directly on the order in early stages.
+In the current v0 direction this metadata can live directly on the order and stay intentionally small:
+
+- `fulfillmentType`
+- optional `deliveryProvider` or custom provider label
+- optional `deliveryAssignee`
+- optional `promisedTime`
+- optional `dispatchNotes`
+
+This is enough for packing, pickup, and handoff awareness without implying routing, GPS, or courier lifecycle tracking yet.
 
 ### Destination
 
