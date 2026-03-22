@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import {
   buildRawMaterialRecord,
+  buildRecipeRecord,
   buildOrderRecord,
   buildRecurringTemplateRecord,
   buildShiftLog,
@@ -14,11 +15,13 @@ import {
   buildWipEntry,
   getLineStatus,
   normalizeRawMaterialForm,
+  normalizeRecipeForm,
   normalizeOrderForm,
   normalizeRecurringTemplateForm,
   normalizeSupplierForm,
   normalizeSupplierPriceEntryForm,
   validateRawMaterialForm,
+  validateRecipeForm,
   validateOrderForm,
   validateRecurringTemplateForm,
   validateShiftLog,
@@ -309,6 +312,48 @@ export async function updateRawMaterialAction(rawMaterialId: string, formData: F
   revalidatePath('/');
   revalidatePath('/setup');
   redirect('/setup?saved=raw-material');
+}
+
+export async function createRecipeAction(formData: FormData) {
+  const data = await readStore();
+  const values = normalizeRecipeForm(formData);
+  const error = validateRecipeForm(values, data);
+
+  if (error) {
+    redirect(`/setup?error=${encodeURIComponent(error)}`);
+  }
+
+  const recipe = buildRecipeRecord(values, data);
+  data.recipes = [...data.recipes, recipe].sort((left, right) => left.title.localeCompare(right.title));
+  await writeStore(data);
+  revalidatePath('/');
+  revalidatePath('/setup');
+  redirect(`/setup?recipe=${recipe.id}&saved=recipe`);
+}
+
+export async function updateRecipeAction(recipeId: string, formData: FormData) {
+  const data = await readStore();
+  const existing = data.recipes.find((entry) => entry.id === recipeId);
+
+  if (!existing) {
+    redirect('/setup?error=missing-recipe');
+  }
+
+  const values = normalizeRecipeForm(formData);
+  const error = validateRecipeForm(values, data);
+
+  if (error) {
+    redirect(`/setup?recipe=${recipeId}&error=${encodeURIComponent(error)}`);
+  }
+
+  const recipe = buildRecipeRecord(values, data, existing);
+  data.recipes = data.recipes
+    .map((entry) => (entry.id === recipeId ? recipe : entry))
+    .sort((left, right) => left.title.localeCompare(right.title));
+  await writeStore(data);
+  revalidatePath('/');
+  revalidatePath('/setup');
+  redirect(`/setup?recipe=${recipe.id}&saved=recipe`);
 }
 
 export async function createSupplierPriceEntryAction(formData: FormData) {

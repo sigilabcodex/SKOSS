@@ -5,14 +5,17 @@ import type {
   Order,
   OrderLine,
   RawMaterial,
+  Recipe,
   RecurringTemplate,
   ShiftLog,
   ShiftNote,
   Supplier,
   SupplierPriceEntry,
+  Product,
   WeekdayKey,
   WipEntry,
 } from '@/lib/domain/types';
+import { calculateRecipeEstimatedMaterialCost } from '@/lib/domain/recipe-costing';
 import { deliveryProviderValues, getFocusDate, getLineCompletion, getLineStatus, getOrderProgress, getAllProductionDates, resolveDeliveryProviderLabel } from '@/lib/domain/order-helpers';
 import { readStore } from '@/lib/server/store';
 
@@ -58,6 +61,24 @@ export interface RawMaterialFormValues {
   brand?: string;
   notes?: string;
   active: boolean;
+}
+
+export interface RecipeFormValues {
+  productId: string;
+  productVariantId?: string;
+  title?: string;
+  batchYieldQuantity?: number;
+  batchYieldUnit?: string;
+  instructions?: string;
+  active: boolean;
+  lines: Array<{
+    id?: string;
+    rawMaterialId: string;
+    quantity?: number;
+    unit?: string;
+    note?: string;
+    remove: boolean;
+  }>;
 }
 
 export interface SupplierPriceEntryFormValues {
@@ -107,6 +128,10 @@ function sortOrders(left: Order, right: Order) {
 
 function sortShiftLogs(left: ShiftLog, right: ShiftLog) {
   return right.updatedAt.localeCompare(left.updatedAt);
+}
+
+function getProductLabel(product: Pick<Product, 'name'>, variant?: { name: string } | null) {
+  return variant ? `${product.name} / ${variant.name}` : product.name;
 }
 
 function getProductSuggestions(products: Array<{ name: string; variants: Array<{ name: string }> }>) {
@@ -545,16 +570,20 @@ export async function getSetupWorkspace() {
     }
   }
 
+  const recipes = [...data.recipes].sort((left, right) => left.title.localeCompare(right.title));
+
   return {
     ...data,
     suppliers: [...data.suppliers].sort((left, right) => left.name.localeCompare(right.name)),
     rawMaterials: [...data.rawMaterials].sort((left, right) => left.name.localeCompare(right.name)),
+    recipes,
     supplierPriceEntries: [...data.supplierPriceEntries].sort((left, right) =>
       left.priceDate === right.priceDate
         ? left.rawMaterialLabel.localeCompare(right.rawMaterialLabel)
         : right.priceDate.localeCompare(left.priceDate),
     ),
     latestPriceByMaterial,
+    recipeCostById: new Map(recipes.map((recipe) => [recipe.id, calculateRecipeEstimatedMaterialCost(recipe, latestPriceByMaterial)])),
   };
 }
 
@@ -795,6 +824,142 @@ export function buildSupplierPriceEntryRecord(
     note: values.note?.trim() || undefined,
     createdAt: now,
     updatedAt: now,
+  };
+}
+
+export function normalizeRecipeForm(formData: FormData): RecipeFormValues {
+  const lineIds = formData.getAll('recipeLineId');
+  const rawMaterialIds = formData.getAll('lineRawMaterialId');
+  const quantities = formData.getAll('lineQuantity');
+  const units = formData.getAll('lineUnit');
+  const notes = formData.getAll('lineNote');
+  const removeIndexes = new Set(
+    formData.getAll('lineRemove').map((value) => Number(String(value).replace('remove-', ''))).filter(Number.isFinite),
+  );
+  const batchYieldQuantity = String(formData.get('batchYieldQuantity') ?? '').trim();
+
+  return {
+    productId: String(formData.get('productId') ?? ''),
+    productVariantId: String(formData.get('productVariantId') ?? ''),
+    title: String(formData.get('title') ?? ''),
+    batchYieldQuantity: batchYieldQuantity ? Number(batchYieldQuantity) : undefined,
+    batchYieldUnit: String(formData.get('batchYieldUnit') ?? ''),
+    instructions: String(formData.get('instructions') ?? ''),
+    active: formData.get('active') !== null,
+    lines: rawMaterialIds.map((value, index) => ({
+      id: String(lineIds[index] ?? ''),
+      rawMaterialId: String(value),
+      quantity: String(quantities[index] ?? '').trim() ? Number(quantities[index]) : undefined,
+      unit: String(units[index] ?? ''),
+      note: String(notes[index] ?? ''),
+      remove: removeIndexes.has(index),
+    })),
+  };
+}
+
+export function validateRecipeForm(
+  values: RecipeFormValues,
+  data: Pick<AppData, 'products' | 'rawMaterials'>,
+) {
+  const product = data.products.find((entry) => entry.id === values.productId);
+  if (!product) {
+    return 'Choose the product this recipe supports.';
+  }
+
+  if (values.productVariantId) {
+    const variant = product.variants.find((entry) => entry.id === values.productVariantId);
+    if (!variant) {
+      return 'Choose a variant that belongs to the selected product, or leave variant blank.';
+    }
+  }
+
+  if (values.batchYieldQuantity !== undefined && (!Number.isFinite(values.batchYieldQuantity) || values.batchYieldQuantity <= 0)) {
+    return 'Batch yield quantity must be greater than zero when included.';
+  }
+
+  if ((values.batchYieldQuantity !== undefined && !values.batchYieldUnit?.trim())
+    || (values.batchYieldUnit?.trim() && values.batchYieldQuantity === undefined)) {
+    return 'Add both batch yield quantity and unit, or leave both blank.';
+  }
+
+  for (const line of values.lines.filter((entry) => !entry.remove)) {
+    const hasMaterial = Boolean(line.rawMaterialId);
+    const hasQuantity = line.quantity !== undefined;
+    const hasUnit = Boolean(line.unit?.trim());
+
+    if (!hasMaterial && !hasQuantity && !hasUnit && !line.note?.trim()) {
+      continue;
+    }
+
+    if (!hasMaterial) {
+      return 'Choose a raw material for each recipe line you keep.';
+    }
+
+    if (!data.rawMaterials.find((entry) => entry.id === line.rawMaterialId)) {
+      return 'One recipe line points to a raw material that no longer exists.';
+    }
+
+    if (!hasQuantity || !Number.isFinite(line.quantity) || Number(line.quantity) <= 0) {
+      return 'Recipe line quantity must be greater than zero.';
+    }
+
+    if (!hasUnit) {
+      return 'Add a unit for each recipe line you keep.';
+    }
+  }
+
+  return null;
+}
+
+export function buildRecipeRecord(
+  values: RecipeFormValues,
+  data: Pick<AppData, 'products' | 'rawMaterials'>,
+  existingRecipe?: Recipe,
+): Recipe {
+  const now = new Date().toISOString();
+  const product = data.products.find((entry) => entry.id === values.productId);
+
+  if (!product) {
+    throw new Error('Product missing when building recipe.');
+  }
+
+  const variant = values.productVariantId
+    ? product.variants.find((entry) => entry.id === values.productVariantId)
+    : undefined;
+
+  const title = values.title?.trim() || getProductLabel(product, variant);
+
+  const lines = values.lines
+    .filter((line) => !line.remove)
+    .filter((line) => line.rawMaterialId && line.quantity !== undefined && Number(line.quantity) > 0 && line.unit?.trim())
+    .map((line) => {
+      const material = data.rawMaterials.find((entry) => entry.id === line.rawMaterialId);
+      if (!material) {
+        throw new Error('Raw material missing when building recipe line.');
+      }
+
+      return {
+        id: line.id?.trim() || `recipe-line-${crypto.randomUUID()}`,
+        rawMaterialId: material.id,
+        rawMaterialLabel: material.name,
+        quantity: Number(line.quantity),
+        unit: line.unit?.trim() || material.defaultUnit || 'unit',
+        note: line.note?.trim() || undefined,
+      };
+    });
+
+  return {
+    id: existingRecipe?.id ?? `recipe-${crypto.randomUUID()}`,
+    productId: product.id,
+    productVariantId: variant?.id,
+    title,
+    batchYieldQuantity: values.batchYieldQuantity,
+    batchYieldUnit: values.batchYieldUnit?.trim() || undefined,
+    instructions: values.instructions?.trim() || undefined,
+    active: values.active,
+    createdAt: existingRecipe?.createdAt ?? now,
+    updatedAt: now,
+    lines,
   };
 }
 

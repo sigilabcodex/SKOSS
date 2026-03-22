@@ -148,6 +148,29 @@ export interface SupplierPriceEntry {
   updatedAt: string;
 }
 
+export interface RecipeLine {
+  id: string;
+  rawMaterialId: string;
+  rawMaterialLabel: string;
+  quantity: number;
+  unit: string;
+  note?: string;
+}
+
+export interface Recipe {
+  id: string;
+  productId: string;
+  productVariantId?: string;
+  title: string;
+  batchYieldQuantity?: number;
+  batchYieldUnit?: string;
+  instructions?: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+  lines: RecipeLine[];
+}
+
 export interface RecurringTemplateLine {
   id: string;
   lineType: OrderLine['lineType'];
@@ -217,6 +240,7 @@ export interface AppData {
   suppliers: Supplier[];
   rawMaterials: RawMaterial[];
   supplierPriceEntries: SupplierPriceEntry[];
+  recipes: Recipe[];
   recurringTemplates: RecurringTemplate[];
   orders: Order[];
   wipEntries: WipEntry[];

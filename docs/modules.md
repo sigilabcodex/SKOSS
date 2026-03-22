@@ -32,6 +32,7 @@ Core should include the workflows that define SKOSS's operational backbone:
 - WIP tracking
 - shift handoff
 - practical fulfillment context
+- lightweight product-to-raw-material recipe links for costing and print foundations
 - role-oriented workspaces
 - lightweight draft-first behavior
 - core print-oriented actions such as tickets, summaries, or labels where they directly support operations
@@ -142,7 +143,7 @@ Procurement+ could extend supplier and ingredient records with:
 - reorder support
 - deeper purchasing history
 
-The core foundation should still stop well before this point. A lightweight supplier list, raw material list, and append-only supplier price history belong in the base operational data layer because they support future costing and buying memory without forcing formal procurement workflows.
+The core foundation should still stop well before this point. A lightweight supplier list, raw material list, recipe/formula links, and append-only supplier price history belong in the base operational data layer because they support future costing and buying memory without forcing formal procurement workflows.
 
 This should remain optional because many small kitchens will not need formal procurement structure early.
 

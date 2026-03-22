@@ -23,6 +23,7 @@ Printing remains important for workflows such as:
 - packing or dispatch slips that summarize what must be handed off
 - front-of-house ticket or receipt output where speed matters
 - labels for trays, dough containers, boxes, or packaged items
+- future recipe or formula reference prints that list practical ingredient lines
 - fallback paper references during shift overlap, congestion, or device contention
 
 For many kitchens, paper is still part of the handoff chain. Ignoring it would make the product less credible in real operations.
@@ -46,6 +47,7 @@ Kitchen-facing prints should emphasize:
 
 - what needs to be made
 - quantities and variants
+- recipe or formula notes only when they support execution without clutter
 - timing or due context where useful
 - destination or order grouping when it prevents confusion
 - notes or exceptions that affect execution

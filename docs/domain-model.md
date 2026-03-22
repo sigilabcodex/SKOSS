@@ -205,6 +205,25 @@ Modeling notes:
 - duplicated supplier/material labels on the entry are acceptable when they preserve historical context cheaply
 - the record should remain useful even when the supplier card or raw material card is still lightweight
 
+### Recipe / Formula
+
+A recipe or formula represents a lightweight material definition for how a product or variant is usually made.
+
+Responsibilities:
+
+- connect a product or variant to reusable raw materials
+- preserve practical ingredient quantities, units, and notes
+- optionally describe a batch yield without forcing every product into strict manufacturing structure
+- support future estimated material costing and print-friendly production references
+- remain optional so teams can keep working before setup is complete
+
+Modeling notes:
+
+- a recipe should stay lighter than a full manufacturing BOM
+- ingredient labels may be snapshotted on lines when that preserves historical readability cheaply
+- instructions should remain practical notes, not workflow automation
+- recipe presence must not be mandatory for order capture or production updates
+
 ### Product
 
 A product represents a recognizable sellable or operational item.
