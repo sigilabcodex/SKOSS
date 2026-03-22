@@ -13,7 +13,7 @@ function NavLink({ href, label, active, children }: { href: '/' | '/orders' | '/
       aria-current={active ? 'page' : undefined}
     >
       {children}
-      <span>{label}</span>
+      <span className="nav-label">{label}</span>
     </Link>
   );
 }
@@ -27,41 +27,23 @@ export function PrimaryNav() {
   const isHandoff = pathname.startsWith('/handoff');
   const isSetup = pathname.startsWith('/setup');
 
-  const activeLabel = isHome
-    ? 'Home'
-    : isOrders
-      ? 'Orders'
-      : isProduction
-        ? 'Production'
-        : isHandoff
-          ? 'WIP / Handoff'
-          : isSetup
-            ? 'Setup'
-            : 'Workspace';
-
   return (
-    <div className="nav-stack">
-      <nav className="shell-nav" aria-label="Primary">
-        <NavLink href="/" label="Home" active={isHome}>
-          <HomeIcon className="nav-icon" />
-        </NavLink>
-        <NavLink href="/orders" label="Orders" active={isOrders}>
-          <OrdersIcon className="nav-icon" />
-        </NavLink>
-        <NavLink href="/production" label="Production" active={isProduction}>
-          <ProductionIcon className="nav-icon" />
-        </NavLink>
-        <NavLink href="/handoff" label="WIP / Handoff" active={isHandoff}>
-          <HandoffIcon className="nav-icon" />
-        </NavLink>
-        <NavLink href="/setup" label="Setup" active={isSetup}>
-          <SetupIcon className="nav-icon" />
-        </NavLink>
-      </nav>
-      <div className="workspace-indicator" aria-live="polite">
-        <span className="workspace-label">Current workspace</span>
-        <strong>{activeLabel}</strong>
-      </div>
-    </div>
+    <nav className="shell-nav" aria-label="Primary">
+      <NavLink href="/" label="Home" active={isHome}>
+        <HomeIcon className="nav-icon" />
+      </NavLink>
+      <NavLink href="/orders" label="Orders" active={isOrders}>
+        <OrdersIcon className="nav-icon" />
+      </NavLink>
+      <NavLink href="/production" label="Production" active={isProduction}>
+        <ProductionIcon className="nav-icon" />
+      </NavLink>
+      <NavLink href="/handoff" label="WIP / Handoff" active={isHandoff}>
+        <HandoffIcon className="nav-icon" />
+      </NavLink>
+      <NavLink href="/setup" label="Setup" active={isSetup}>
+        <SetupIcon className="nav-icon" />
+      </NavLink>
+    </nav>
   );
 }
