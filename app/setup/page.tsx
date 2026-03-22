@@ -7,11 +7,14 @@ import {
   createRecipeAction,
   createSupplierAction,
   createSupplierPriceEntryAction,
+  createUserAction,
   updateRawMaterialAction,
   updateRecipeAction,
   updateSupplierAction,
+  updateUserAction,
 } from '@/lib/server/actions';
 import { getSetupWorkspace } from '@/lib/server/demo-data';
+import { getCurrentUserContext } from '@/lib/server/auth';
 import { getPresetExperience } from '@/lib/business-presets';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { OnboardingAssistant } from '@/components/setup/onboarding-assistant';
@@ -28,6 +31,7 @@ type SetupSearchParams = {
   historySupplier?: string;
   historyMaterial?: string;
   recipe?: string;
+  user?: string;
   costingStatus?: 'all' | 'fully_costed' | 'partially_costed' | 'missing_cost_evidence' | 'no_recipe';
   costingItem?: string;
 };
@@ -106,6 +110,10 @@ async function SavedMessage({ saved }: { saved?: string }) {
     return <p className="inline-success">{t('setup.saved.preferences')}</p>;
   }
 
+  if (saved === 'user') {
+    return <p className="inline-success">{t('setup.saved.user')}</p>;
+  }
+
   return null;
 }
 
@@ -114,7 +122,7 @@ export default async function SetupPage({
 }: {
   searchParams?: Promise<SetupSearchParams>;
 }) {
-  const [data, params, { t, locale, term }] = await Promise.all([getSetupWorkspace(), searchParams, getServerTranslator()]);
+  const [data, params, { t, locale, term }, userContext] = await Promise.all([getSetupWorkspace(), searchParams, getServerTranslator(), getCurrentUserContext()]);
   const presetExperience = getPresetExperience(data.preferences.preset, data.preferences.operatingMode);
   const today = new Date().toISOString().slice(0, 10);
 
@@ -126,6 +134,9 @@ export default async function SetupPage({
     : null;
   const editingRecipe = params?.recipe
     ? data.recipes.find((recipe) => recipe.id === params.recipe) ?? null
+    : null;
+  const editingUser = params?.user
+    ? data.users.find((user) => user.id === params.user) ?? null
     : null;
   const historySupplier = params?.historySupplier
     ? data.suppliers.find((supplier) => supplier.id === params.historySupplier) ?? null
@@ -143,6 +154,9 @@ export default async function SetupPage({
   const recipeFormAction = editingRecipe
     ? updateRecipeAction.bind(null, editingRecipe.id)
     : createRecipeAction;
+  const userFormAction = editingUser
+    ? updateUserAction.bind(null, editingUser.id)
+    : createUserAction;
 
   const supplierPriceCounts = new Map<string, number>();
   const materialPriceCounts = new Map<string, number>();
@@ -244,6 +258,10 @@ export default async function SetupPage({
         </div>
       </section>
 
+      {!userContext.canManageSettings ? (
+        <p className="inline-warning">{t('setup.roleShapingNote')}</p>
+      ) : null}
+
       <section className="grid-two">
         <article className="panel page-stack">
           <div className="table-header-row">
@@ -285,15 +303,38 @@ export default async function SetupPage({
         </article>
       </section>
 
-      <section className="panel page-stack">
-        <div className="table-header-row">
-          <div>
-            <h2>{t('setup.appearance')}</h2>
-            <p>{t('setup.appearanceHelp')}</p>
+      <section className="grid-two">
+        <article className="panel page-stack">
+          <div className="table-header-row">
+            <div>
+              <h2>{t('setup.settingsSplitTitle')}</h2>
+              <p>{t('setup.settingsSplitBody')}</p>
+            </div>
+            <span className="summary-pill">{t('setup.title')}</span>
           </div>
-          <span className="summary-pill">{t('theme.quickSwitchHeader')}</span>
-        </div>
-        <ThemeSwitcher variant="panel" />
+          <ul className="stack-list compact-list">
+            <li>
+              <strong>{t('setup.settingsAreaTitle')}</strong>
+              <span>{t('setup.settingsAreaBody')}</span>
+            </li>
+            <li>
+              <strong>{t('setup.preferencesAreaTitle')}</strong>
+              <span>{t('setup.preferencesAreaBody')}</span>
+            </li>
+          </ul>
+          <Link href="/preferences" className="button-secondary compact-button">{t('setup.openPreferences')}</Link>
+        </article>
+
+        <article className="panel page-stack">
+          <div className="table-header-row">
+            <div>
+              <h2>{t('setup.appearance')}</h2>
+              <p>{t('setup.appearanceHelp')}</p>
+            </div>
+            <span className="summary-pill">{userContext.currentUser ? userContext.currentUser.displayName : t('nav.preferences')}</span>
+          </div>
+          <ThemeSwitcher variant="panel" />
+        </article>
       </section>
 
       <section className="stats-grid compact-stats-grid">
@@ -386,14 +427,76 @@ export default async function SetupPage({
             </div>
             <span className="summary-pill">{data.users.length} {t('common.users')}</span>
           </div>
-          <ul className="stack-list">
+          <ul className="stack-list compact-list">
             {data.users.map((user) => (
-              <li key={user.id}>
-                <strong>{user.displayName}</strong>
-                <span>{user.role}</span>
+              <li key={user.id} className="list-with-actions">
+                <div>
+                  <strong>
+                    {user.displayName}
+                    {!user.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
+                  </strong>
+                  <span>{t(`roles.${user.role}.label`)} · {user.loginIdentifier}</span>
+                  <span className="inline-meta">{t('setup.labels.defaultWorkspace')}: {t(`nav.${user.preferences?.defaultWorkspace ?? user.defaultWorkspace}`)}</span>
+                </div>
+                <div className="inline-action-row">
+                  <Link href={buildSetupHref({ user: user.id, supplier: editingSupplier?.id, material: editingMaterial?.id, recipe: editingRecipe?.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, costingStatus: costingStatusFilter, costingItem: selectedCostingItem?.id })} className="inline-link">
+                    {t('setup.actions.edit')}
+                  </Link>
+                </div>
               </li>
             ))}
           </ul>
+          <form action={userFormAction} className="field-section page-stack">
+            <div className="field-section-header">
+              <div>
+                <h3>{editingUser ? t('setup.editUser') : t('setup.addUser')}</h3>
+                <p className="helper-text">{editingUser ? t('setup.editUserHelp') : t('setup.addUserHelp')}</p>
+              </div>
+              {editingUser ? (
+                <Link href={buildSetupHref({ supplier: editingSupplier?.id, material: editingMaterial?.id, recipe: editingRecipe?.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, costingStatus: costingStatusFilter, costingItem: selectedCostingItem?.id })} className="button-secondary compact-button">
+                  {t('setup.actions.cancelEdit')}
+                </Link>
+              ) : null}
+            </div>
+            <div className="grid-two">
+              <label>
+                <span className="field-heading">{t('setup.fields.userDisplayName')} {renderRequiredMark()}</span>
+                <input name="displayName" placeholder={t('setup.placeholders.userDisplayName')} defaultValue={editingUser?.displayName ?? ''} required />
+              </label>
+              <label>
+                <span className="field-heading">{t('setup.fields.loginIdentifier')} {renderRequiredMark()}</span>
+                <input name="loginIdentifier" placeholder="lucia@example.com" defaultValue={editingUser?.loginIdentifier ?? ''} required />
+              </label>
+            </div>
+            <div className="grid-two">
+              <label>
+                <span className="field-heading">{t('setup.fields.role')} {renderRequiredMark()}</span>
+                <select name="role" defaultValue={editingUser?.role ?? 'frontdesk'}>
+                  {['admin', 'manager', 'production', 'frontdesk', 'delivery'].map((role) => (
+                    <option key={role} value={role}>{t(`roles.${role}.label`)}</option>
+                  ))}
+                </select>
+              </label>
+              <label>
+                <span className="field-heading">{t('setup.fields.defaultWorkspace')} {renderRequiredMark()}</span>
+                <select name="defaultWorkspace" defaultValue={editingUser?.preferences?.defaultWorkspace ?? editingUser?.defaultWorkspace ?? 'orders'}>
+                  {['orders', 'production', 'handoff', 'preferences', 'setup'].map((workspace) => (
+                    <option key={workspace} value={workspace}>{t(`nav.${workspace}`)}</option>
+                  ))}
+                </select>
+              </label>
+            </div>
+            <label className="checkbox-row">
+              <input name="active" type="checkbox" defaultChecked={editingUser?.active ?? true} />
+              <span>
+                <strong>{t('setup.fields.userActive')}</strong>
+                <span className="helper-text">{t('setup.fields.userActiveHelp')}</span>
+              </span>
+            </label>
+            <button type="submit" className="button-primary">
+              {editingUser ? t('setup.actions.updateUser') : t('setup.actions.saveUser')}
+            </button>
+          </form>
         </article>
       </section>
 

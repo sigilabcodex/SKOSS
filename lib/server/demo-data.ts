@@ -4,6 +4,7 @@ import type {
   FulfillmentType,
   Order,
   OrderLine,
+  Product,
   RawMaterial,
   Recipe,
   RecurringTemplate,
@@ -11,13 +12,16 @@ import type {
   ShiftNote,
   Supplier,
   SupplierPriceEntry,
-  Product,
+  User,
+  UserRole,
   WeekdayKey,
   WipEntry,
+  WorkspaceSurface,
 } from '@/lib/domain/types';
 import { calculateRecipeEstimatedMaterialCost } from '@/lib/domain/recipe-costing';
 import { deliveryProviderValues, getFocusDate, getLineCompletion, getLineStatus, getOrderProgress, getAllProductionDates, resolveDeliveryProviderLabel } from '@/lib/domain/order-helpers';
 import { readStore } from '@/lib/server/store';
+import { getDefaultWorkspaceForRole } from '@/lib/workspaces';
 
 export { getLineStatus, getOrderProgress } from '@/lib/domain/order-helpers';
 
@@ -110,6 +114,14 @@ export interface RecurringTemplateFormValues {
   }>;
 }
 
+export interface UserFormValues {
+  displayName: string;
+  loginIdentifier: string;
+  role: UserRole;
+  defaultWorkspace: WorkspaceSurface;
+  active: boolean;
+}
+
 export const weekdayOptions: Array<{ value: WeekdayKey; label: string; index: number }> = [
   { value: 'sun', label: 'Sun', index: 0 },
   { value: 'mon', label: 'Mon', index: 1 },
@@ -172,7 +184,7 @@ function hasOrderCoreChanges(existingOrder: Order, values: OrderFormValues) {
   );
 }
 
-export function buildOrderRecord(data: AppData, values: OrderFormValues, existingOrder?: Order): Order {
+export function buildOrderRecord(data: AppData, values: OrderFormValues, actorUserId?: string, existingOrder?: Order): Order {
   const now = new Date().toISOString();
   const cleanInputLines = values.lines.filter((line) => line.productLabel.trim() && line.quantity > 0);
   const cleanLines: OrderLine[] = cleanInputLines.map((line, index) => {
@@ -220,6 +232,8 @@ export function buildOrderRecord(data: AppData, values: OrderFormValues, existin
     notes: values.notes?.trim() || undefined,
     createdAt: existingOrder?.createdAt ?? now,
     updatedAt: now,
+    createdByUserId: existingOrder?.createdByUserId ?? actorUserId,
+    updatedByUserId: actorUserId ?? existingOrder?.updatedByUserId,
     changedInKitchen,
     visibleOnProductionBoard: values.visibleOnProductionBoard,
     templateId: existingOrder?.templateId,
@@ -231,7 +245,7 @@ export function buildOrderRecord(data: AppData, values: OrderFormValues, existin
   };
 }
 
-export function buildRecurringTemplateRecord(values: RecurringTemplateFormValues): RecurringTemplate {
+export function buildRecurringTemplateRecord(values: RecurringTemplateFormValues, actorUserId?: string): RecurringTemplate {
   const now = new Date().toISOString();
 
   return {
@@ -247,6 +261,8 @@ export function buildRecurringTemplateRecord(values: RecurringTemplateFormValues
     active: true,
     createdAt: now,
     updatedAt: now,
+    createdByUserId: actorUserId,
+    updatedByUserId: actorUserId,
     lines: values.lines
       .filter((line) => line.productLabel.trim() && line.quantity > 0)
       .map((line) => ({
@@ -257,6 +273,68 @@ export function buildRecurringTemplateRecord(values: RecurringTemplateFormValues
         unit: line.unit.trim() || 'pieces',
         note: line.note?.trim() || undefined,
       })),
+  };
+}
+
+const supportedUserRoles: UserRole[] = ['admin', 'manager', 'production', 'frontdesk', 'delivery'];
+const supportedWorkspaceDefaults: WorkspaceSurface[] = ['home', 'orders', 'production', 'handoff', 'preferences', 'setup'];
+
+export function normalizeUserForm(formData: FormData): UserFormValues {
+  const requestedRole = String(formData.get('role') ?? 'frontdesk') as UserRole;
+  const requestedWorkspace = String(formData.get('defaultWorkspace') ?? '') as WorkspaceSurface;
+  const role = supportedUserRoles.includes(requestedRole) ? requestedRole : 'frontdesk';
+
+  return {
+    displayName: String(formData.get('displayName') ?? ''),
+    loginIdentifier: String(formData.get('loginIdentifier') ?? ''),
+    role,
+    defaultWorkspace: supportedWorkspaceDefaults.includes(requestedWorkspace)
+      ? requestedWorkspace
+      : getDefaultWorkspaceForRole(role),
+    active: formData.get('active') !== null,
+  };
+}
+
+export function validateUserForm(values: UserFormValues, data: Pick<AppData, 'users'>, existingUserId?: string) {
+  if (!values.displayName.trim()) {
+    return 'User name is required.';
+  }
+
+  if (!values.loginIdentifier.trim()) {
+    return 'Login identifier is required.';
+  }
+
+  const normalizedIdentifier = values.loginIdentifier.trim().toLowerCase();
+  const duplicate = data.users.find((user) => user.loginIdentifier.trim().toLowerCase() === normalizedIdentifier && user.id !== existingUserId);
+  if (duplicate) {
+    return 'Login identifier must stay unique.';
+  }
+
+  return null;
+}
+
+export function buildUserRecord(
+  values: UserFormValues,
+  data: Pick<AppData, 'workspace'>,
+  existingUser?: User,
+): User {
+  const now = new Date().toISOString();
+  const defaultWorkspace = values.defaultWorkspace || getDefaultWorkspaceForRole(values.role);
+
+  return {
+    id: existingUser?.id ?? `user-${crypto.randomUUID()}` ,
+    displayName: values.displayName.trim(),
+    loginIdentifier: values.loginIdentifier.trim().toLowerCase(),
+    role: values.role,
+    workspaceId: existingUser?.workspaceId ?? data.workspace.id,
+    defaultWorkspace,
+    active: values.active,
+    preferences: {
+      ...existingUser?.preferences,
+      defaultWorkspace,
+    },
+    createdAt: existingUser?.createdAt ?? now,
+    updatedAt: now,
   };
 }
 
@@ -700,7 +778,7 @@ export function validateSupplierForm(values: SupplierFormValues) {
   return null;
 }
 
-export function buildSupplierRecord(values: SupplierFormValues, existingSupplier?: Supplier): Supplier {
+export function buildSupplierRecord(values: SupplierFormValues, actorUserId?: string, existingSupplier?: Supplier): Supplier {
   const now = new Date().toISOString();
 
   return {
@@ -711,6 +789,8 @@ export function buildSupplierRecord(values: SupplierFormValues, existingSupplier
     active: values.active,
     createdAt: existingSupplier?.createdAt ?? now,
     updatedAt: now,
+    createdByUserId: existingSupplier?.createdByUserId ?? actorUserId,
+    updatedByUserId: actorUserId ?? existingSupplier?.updatedByUserId,
   };
 }
 
@@ -733,7 +813,7 @@ export function validateRawMaterialForm(values: RawMaterialFormValues) {
   return null;
 }
 
-export function buildRawMaterialRecord(values: RawMaterialFormValues, existingRawMaterial?: RawMaterial): RawMaterial {
+export function buildRawMaterialRecord(values: RawMaterialFormValues, actorUserId?: string, existingRawMaterial?: RawMaterial): RawMaterial {
   const now = new Date().toISOString();
 
   return {
@@ -746,6 +826,8 @@ export function buildRawMaterialRecord(values: RawMaterialFormValues, existingRa
     active: values.active,
     createdAt: existingRawMaterial?.createdAt ?? now,
     updatedAt: now,
+    createdByUserId: existingRawMaterial?.createdByUserId ?? actorUserId,
+    updatedByUserId: actorUserId ?? existingRawMaterial?.updatedByUserId,
   };
 }
 
@@ -800,6 +882,7 @@ export function validateSupplierPriceEntryForm(
 export function buildSupplierPriceEntryRecord(
   values: SupplierPriceEntryFormValues,
   data: Pick<AppData, 'suppliers' | 'rawMaterials'>,
+  actorUserId?: string,
 ): SupplierPriceEntry {
   const now = new Date().toISOString();
   const supplier = data.suppliers.find((entry) => entry.id === values.supplierId);
@@ -824,6 +907,8 @@ export function buildSupplierPriceEntryRecord(
     note: values.note?.trim() || undefined,
     createdAt: now,
     updatedAt: now,
+    createdByUserId: actorUserId,
+    updatedByUserId: actorUserId,
   };
 }
 
@@ -914,6 +999,7 @@ export function validateRecipeForm(
 export function buildRecipeRecord(
   values: RecipeFormValues,
   data: Pick<AppData, 'products' | 'rawMaterials'>,
+  actorUserId?: string,
   existingRecipe?: Recipe,
 ): Recipe {
   const now = new Date().toISOString();
@@ -959,6 +1045,8 @@ export function buildRecipeRecord(
     active: values.active,
     createdAt: existingRecipe?.createdAt ?? now,
     updatedAt: now,
+    createdByUserId: existingRecipe?.createdByUserId ?? actorUserId,
+    updatedByUserId: actorUserId ?? existingRecipe?.updatedByUserId,
     lines,
   };
 }
@@ -984,7 +1072,7 @@ export function validateRecurringTemplateForm(values: RecurringTemplateFormValue
   return null;
 }
 
-export function buildWipEntry(formData: FormData): WipEntry {
+export function buildWipEntry(formData: FormData, actorUserId?: string): WipEntry {
   const stage = String(formData.get('stage') ?? 'prepared') as WipEntry['stage'];
 
   return {
@@ -999,6 +1087,8 @@ export function buildWipEntry(formData: FormData): WipEntry {
     status: toStageStatus(stage),
     notes: String(formData.get('notes') ?? '').trim() || undefined,
     updatedAt: new Date().toISOString(),
+    createdByUserId: actorUserId,
+    updatedByUserId: actorUserId,
   };
 }
 
@@ -1010,7 +1100,7 @@ export function validateWipEntry(entry: WipEntry) {
   return null;
 }
 
-export function buildShiftLog(existing: ShiftLog | undefined, formData: FormData): ShiftLog {
+export function buildShiftLog(existing: ShiftLog | undefined, formData: FormData, actorUserId?: string): ShiftLog {
   return {
     id: existing?.id ?? `shift-${crypto.randomUUID()}`,
     productionDate: String(formData.get('productionDate') ?? ''),
@@ -1023,6 +1113,8 @@ export function buildShiftLog(existing: ShiftLog | undefined, formData: FormData
       .filter(Boolean),
     handoffNotes: String(formData.get('handoffNotes') ?? '').trim(),
     updatedAt: new Date().toISOString(),
+    createdByUserId: existing?.createdByUserId ?? actorUserId,
+    updatedByUserId: actorUserId ?? existing?.updatedByUserId,
     shiftNotes: existing?.shiftNotes ?? [],
   };
 }
@@ -1035,10 +1127,11 @@ export function validateShiftLog(log: ShiftLog) {
   return null;
 }
 
-export function buildShiftNote(formData: FormData): ShiftNote {
+export function buildShiftNote(formData: FormData, actorUserId?: string): ShiftNote {
   return {
     id: `shift-note-${crypto.randomUUID()}`,
     authorLabel: String(formData.get('authorLabel') ?? '').trim() || 'Shift note',
+    authorUserId: actorUserId,
     note: String(formData.get('note') ?? '').trim(),
     state: String(formData.get('state') ?? 'info') as ShiftNote['state'],
     linkedItemLabel: String(formData.get('linkedItemLabel') ?? '').trim() || undefined,

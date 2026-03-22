@@ -1,8 +1,9 @@
 import type { AppLocale, AppPreset } from '@/lib/i18n/config';
 
-export type UserRole = 'owner_admin' | 'sales' | 'kitchen' | 'shift_lead';
+export type UserRole = 'admin' | 'manager' | 'production' | 'frontdesk' | 'delivery';
 export type ThemeName = 'light' | 'dark' | 'garden';
 export type OperatingMode = 'pickup' | 'delivery' | 'mixed';
+export type WorkspaceSurface = 'home' | 'orders' | 'production' | 'handoff' | 'preferences' | 'setup';
 
 export type OrderStatus = 'draft' | 'active' | 'changed' | 'cancelled' | 'completed';
 export type OrderLineStatus = 'pending' | 'in_progress' | 'done' | 'cancelled';
@@ -35,13 +36,33 @@ export interface WorkspacePreferences {
   updatedAt?: string;
 }
 
+export interface UserPreferences {
+  locale?: AppLocale;
+  theme?: ThemeName;
+  defaultWorkspace?: WorkspaceSurface;
+}
+
 export interface User {
   id: string;
   displayName: string;
-  email: string;
+  loginIdentifier: string;
   role: UserRole;
   workspaceId: string;
+  defaultWorkspace: WorkspaceSurface;
   active: boolean;
+  preferences?: UserPreferences;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SessionState {
+  currentUserId?: string;
+  lastLoginAt?: string;
+}
+
+export interface AuditFields {
+  createdByUserId?: string;
+  updatedByUserId?: string;
 }
 
 export interface Destination {
@@ -81,7 +102,7 @@ export interface OrderLine {
   note?: string;
 }
 
-export interface Order {
+export interface Order extends AuditFields {
   id: string;
   source: OrderSource;
   status: OrderStatus;
@@ -109,7 +130,7 @@ export interface Order {
   lines: OrderLine[];
 }
 
-export interface Supplier {
+export interface Supplier extends AuditFields {
   id: string;
   name: string;
   contact?: string;
@@ -119,7 +140,7 @@ export interface Supplier {
   updatedAt: string;
 }
 
-export interface RawMaterial {
+export interface RawMaterial extends AuditFields {
   id: string;
   name: string;
   category?: string;
@@ -131,7 +152,7 @@ export interface RawMaterial {
   updatedAt: string;
 }
 
-export interface SupplierPriceEntry {
+export interface SupplierPriceEntry extends AuditFields {
   id: string;
   supplierId: string;
   supplierLabel: string;
@@ -157,7 +178,7 @@ export interface RecipeLine {
   note?: string;
 }
 
-export interface Recipe {
+export interface Recipe extends AuditFields {
   id: string;
   productId: string;
   productVariantId?: string;
@@ -180,7 +201,7 @@ export interface RecurringTemplateLine {
   note?: string;
 }
 
-export interface RecurringTemplate {
+export interface RecurringTemplate extends AuditFields {
   id: string;
   templateType: 'customer_order';
   customerLabel: string;
@@ -196,7 +217,7 @@ export interface RecurringTemplate {
   lines: RecurringTemplateLine[];
 }
 
-export interface WipEntry {
+export interface WipEntry extends AuditFields {
   id: string;
   productionDate: string;
   shiftKey: 'night' | 'morning' | 'afternoon';
@@ -213,13 +234,14 @@ export interface WipEntry {
 export interface ShiftNote {
   id: string;
   authorLabel: string;
+  authorUserId?: string;
   note: string;
   state: ShiftNoteState;
   linkedItemLabel?: string;
   createdAt: string;
 }
 
-export interface ShiftLog {
+export interface ShiftLog extends AuditFields {
   id: string;
   productionDate: string;
   shiftKey: 'night' | 'morning' | 'afternoon';
@@ -234,6 +256,7 @@ export interface ShiftLog {
 export interface AppData {
   workspace: Workspace;
   preferences: WorkspacePreferences;
+  session: SessionState;
   users: User[];
   destinations: Destination[];
   products: Product[];

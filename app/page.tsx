@@ -3,8 +3,9 @@ import { OnboardingAssistant } from '@/components/setup/onboarding-assistant';
 import { formatDateLabel } from '@/lib/domain/formatters';
 import { getPresetExperience, type WorkspaceLinkKey } from '@/lib/business-presets';
 import { getWorkspaceSummary } from '@/lib/server/demo-data';
+import { getCurrentUserContext } from '@/lib/server/auth';
 import { getRequestPreferences, getServerTranslator } from '@/lib/i18n/server';
-import { ArrowRightIcon, HandoffIcon, OrdersIcon, ProductionIcon, SetupIcon, SparklesIcon } from '@/components/ui-icons';
+import { ArrowRightIcon, HandoffIcon, OrdersIcon, PreferencesIcon, ProductionIcon, SetupIcon, SparklesIcon } from '@/components/ui-icons';
 
 type QuickLink = {
   href: Parameters<typeof Link>[0]['href'];
@@ -19,8 +20,9 @@ export default async function HomePage() {
     getServerTranslator(),
     getRequestPreferences(),
   ]);
+  const { currentUser, visibleWorkspaces, homeWorkspace } = await getCurrentUserContext();
 
-  const quickLinkMap: Record<WorkspaceLinkKey, QuickLink> = {
+  const quickLinkMap: Record<WorkspaceLinkKey | 'preferences', QuickLink> = {
     orders: {
       href: '/orders',
       title: t('home.quickLinks.orders.title'),
@@ -45,10 +47,19 @@ export default async function HomePage() {
       description: t('home.quickLinks.setup.description'),
       icon: SetupIcon,
     },
+    preferences: {
+      href: '/preferences',
+      title: t('preferences.title'),
+      description: t('preferences.description'),
+      icon: PreferencesIcon,
+    },
   };
 
   const presetExperience = getPresetExperience(preset, summary.preferences.operatingMode);
-  const quickLinks = presetExperience.featuredWorkspaces.map((key) => quickLinkMap[key]);
+  const quickLinks = visibleWorkspaces
+    .filter((key): key is WorkspaceLinkKey | 'preferences' => key in quickLinkMap)
+    .map((key) => quickLinkMap[key])
+    .filter(Boolean);
 
   if (!summary.preferences.onboardingCompleted) {
     return (
@@ -99,7 +110,8 @@ export default async function HomePage() {
         <div className="summary-pill-row">
           <span className="summary-pill">{t(`presets.${preset}.label`)}</span>
           <span className="summary-pill">{t(`operatingModes.${summary.preferences.operatingMode}.label`)}</span>
-          <span className="summary-pill">{t(`nav.${presetExperience.emphasisWorkspace}`)} · {t('home.recommendedFirst')}</span>
+          {currentUser ? <span className="summary-pill">{currentUser.displayName} · {t(`roles.${currentUser.role}.label`)}</span> : null}
+          <span className="summary-pill">{t(`nav.${homeWorkspace === 'home' ? presetExperience.emphasisWorkspace : homeWorkspace}`)} · {t('home.recommendedFirst')}</span>
         </div>
         <div className="stats-grid">
           <div className="stat-card">
@@ -173,6 +185,21 @@ export default async function HomePage() {
         </article>
       </section>
 
+      <section className="page-context-card">
+        <SparklesIcon className="callout-icon" />
+        <div>
+          <strong>{t('home.roleFocusTitle')}</strong>
+          <p className="helper-text no-margin">
+            {currentUser
+              ? t('home.roleFocusBody', {
+                  role: t(`roles.${currentUser.role}.label`),
+                  workspace: t(`nav.${homeWorkspace === 'home' ? presetExperience.emphasisWorkspace : homeWorkspace}`),
+                })
+              : t('home.roleFocusFallback')}
+          </p>
+        </div>
+      </section>
+
       <section className="grid-cards">
         {quickLinks.map((link, index) => {
           const Icon = link.icon;
@@ -185,7 +212,7 @@ export default async function HomePage() {
                 </div>
                 <ArrowRightIcon className="panel-link-arrow" />
               </div>
-              {index === 0 ? <span className="summary-pill">{t('home.recommendedFirst')}</span> : null}
+              {(homeWorkspace === 'home' ? index === 0 : link.href === `/${homeWorkspace}` || (homeWorkspace === 'orders' && link.href === '/orders') || (homeWorkspace === 'production' && link.href === '/production') || (homeWorkspace === 'handoff' && link.href === '/handoff') || (homeWorkspace === 'setup' && link.href === '/setup') || (homeWorkspace === 'preferences' && link.href === '/preferences')) ? <span className="summary-pill">{t('home.recommendedFirst')}</span> : null}
               <h2>{link.title}</h2>
               <p>{link.description}</p>
             </Link>

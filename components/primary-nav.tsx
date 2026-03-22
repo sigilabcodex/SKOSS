@@ -4,9 +4,27 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { useI18n } from '@/components/i18n-provider';
-import { HandoffIcon, HomeIcon, OrdersIcon, ProductionIcon, SetupIcon } from '@/components/ui-icons';
+import {
+  HandoffIcon,
+  HomeIcon,
+  OrdersIcon,
+  PreferencesIcon,
+  ProductionIcon,
+  SetupIcon,
+} from '@/components/ui-icons';
+import type { WorkspaceSurface } from '@/lib/domain/types';
 
-function NavLink({ href, label, active, children }: { href: '/' | '/orders' | '/production' | '/handoff' | '/setup'; label: string; active: boolean; children: ReactNode }) {
+type NavHref = '/' | '/orders' | '/production' | '/handoff' | '/preferences' | '/setup';
+
+type NavItem = {
+  key: WorkspaceSurface;
+  href: NavHref;
+  labelKey: string;
+  icon: typeof HomeIcon;
+  active: (pathname: string) => boolean;
+};
+
+function NavLink({ href, label, active, children }: { href: NavHref; label: string; active: boolean; children: ReactNode }) {
   return (
     <Link
       href={href}
@@ -19,33 +37,67 @@ function NavLink({ href, label, active, children }: { href: '/' | '/orders' | '/
   );
 }
 
-export function PrimaryNav() {
+const navItems: NavItem[] = [
+  {
+    key: 'home',
+    href: '/',
+    labelKey: 'nav.home',
+    icon: HomeIcon,
+    active: (pathname) => pathname === '/',
+  },
+  {
+    key: 'orders',
+    href: '/orders',
+    labelKey: 'nav.orders',
+    icon: OrdersIcon,
+    active: (pathname) => pathname.startsWith('/orders'),
+  },
+  {
+    key: 'production',
+    href: '/production',
+    labelKey: 'nav.production',
+    icon: ProductionIcon,
+    active: (pathname) => pathname.startsWith('/production'),
+  },
+  {
+    key: 'handoff',
+    href: '/handoff',
+    labelKey: 'nav.handoff',
+    icon: HandoffIcon,
+    active: (pathname) => pathname.startsWith('/handoff'),
+  },
+  {
+    key: 'preferences',
+    href: '/preferences',
+    labelKey: 'nav.preferences',
+    icon: PreferencesIcon,
+    active: (pathname) => pathname.startsWith('/preferences'),
+  },
+  {
+    key: 'setup',
+    href: '/setup',
+    labelKey: 'nav.setup',
+    icon: SetupIcon,
+    active: (pathname) => pathname.startsWith('/setup'),
+  },
+];
+
+export function PrimaryNav({ visibleWorkspaces }: { visibleWorkspaces: WorkspaceSurface[] }) {
   const pathname = usePathname();
   const { t } = useI18n();
-
-  const isHome = pathname === '/';
-  const isOrders = pathname.startsWith('/orders');
-  const isProduction = pathname.startsWith('/production');
-  const isHandoff = pathname.startsWith('/handoff');
-  const isSetup = pathname.startsWith('/setup');
+  const items = navItems.filter((item) => visibleWorkspaces.includes(item.key));
 
   return (
     <nav className="shell-nav" aria-label={t('common.primaryNav')}>
-      <NavLink href="/" label={t('nav.home')} active={isHome}>
-        <HomeIcon className="nav-icon" />
-      </NavLink>
-      <NavLink href="/orders" label={t('nav.orders')} active={isOrders}>
-        <OrdersIcon className="nav-icon" />
-      </NavLink>
-      <NavLink href="/production" label={t('nav.production')} active={isProduction}>
-        <ProductionIcon className="nav-icon" />
-      </NavLink>
-      <NavLink href="/handoff" label={t('nav.handoff')} active={isHandoff}>
-        <HandoffIcon className="nav-icon" />
-      </NavLink>
-      <NavLink href="/setup" label={t('nav.setup')} active={isSetup}>
-        <SetupIcon className="nav-icon" />
-      </NavLink>
+      {items.map((item) => {
+        const Icon = item.icon;
+
+        return (
+          <NavLink key={item.key} href={item.href} label={t(item.labelKey)} active={item.active(pathname)}>
+            <Icon className="nav-icon" />
+          </NavLink>
+        );
+      })}
     </nav>
   );
 }

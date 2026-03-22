@@ -71,6 +71,31 @@ export function SetupIcon(props: IconProps) {
   );
 }
 
+
+export function PreferencesIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M4 7h10" />
+      <path d="M4 17h16" />
+      <path d="M18 7h2" />
+      <path d="M4 12h4" />
+      <path d="M12 12h8" />
+      <circle cx="10" cy="12" r="2" />
+      <circle cx="16" cy="7" r="2" />
+      <circle cx="8" cy="17" r="2" />
+    </IconBase>
+  );
+}
+
+export function UserIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <circle cx="12" cy="8" r="3.5" />
+      <path d="M4.5 20a7.5 7.5 0 0 1 15 0" />
+    </IconBase>
+  );
+}
+
 export function SunIcon(props: IconProps) {
   return (
     <IconBase {...props}>
