@@ -1,13 +1,10 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { logoutAction } from '@/lib/server/actions';
 import { PrimaryNav } from '@/components/primary-nav';
-import { ThemeSwitcher } from '@/components/theme-switcher';
-import { LanguageSwitcher } from '@/components/language-switcher';
+import { UserMenu } from '@/components/user-menu';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { readStore } from '@/lib/server/store';
 import { getCurrentUserContext } from '@/lib/server/auth';
-import { UserIcon } from '@/components/ui-icons';
 
 export async function AppShell({ children }: { children?: ReactNode }) {
   const [{ t }, data] = await Promise.all([getServerTranslator(), readStore()]);
@@ -23,27 +20,7 @@ export async function AppShell({ children }: { children?: ReactNode }) {
         </Link>
         <div className="shell-controls">
           <PrimaryNav visibleWorkspaces={visibleWorkspaces} />
-          <div className="shell-user-cluster">
-            {currentUser ? (
-              <>
-                <Link href="/preferences" className="shell-user-card">
-                  <UserIcon className="shell-user-icon" />
-                  <span>
-                    <strong>{currentUser.displayName}</strong>
-                    <span className="shell-user-meta">{t(`roles.${currentUser.role}.label`)}</span>
-                  </span>
-                </Link>
-                <Link href="/login" className="shell-inline-link">{t('shell.switchUser')}</Link>
-                <form action={logoutAction}>
-                  <button type="submit" className="shell-inline-button">{t('shell.logout')}</button>
-                </form>
-              </>
-            ) : (
-              <Link href="/login" className="shell-inline-link">{t('shell.login')}</Link>
-            )}
-          </div>
-          <LanguageSwitcher />
-          <ThemeSwitcher />
+          <UserMenu currentUser={currentUser} t={t} />
         </div>
       </header>
       <main className="shell-main">{children}</main>

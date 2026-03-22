@@ -45,7 +45,7 @@ function sortOrders(left: { productionDate: string; updatedAt: string }, right: 
     : left.productionDate.localeCompare(right.productionDate);
 }
 
-const supportedThemes = ['light', 'dark', 'garden'] as const;
+const supportedThemes = ['light', 'dark', 'system'] as const;
 const supportedOperatingModes = ['pickup', 'delivery', 'mixed'] as const;
 
 function sortUsers(left: { displayName: string }, right: { displayName: string }) {

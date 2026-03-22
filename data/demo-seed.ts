@@ -13,7 +13,7 @@ export const demoSeed: AppData = {
     locale: defaultLocale,
     preset: defaultPreset,
     operatingMode: 'mixed',
-    theme: 'garden',
+    theme: 'system',
     onboardingCompleted: false,
   },
   session: {
@@ -31,7 +31,7 @@ export const demoSeed: AppData = {
       active: true,
       preferences: {
         defaultWorkspace: 'setup',
-        theme: 'garden',
+        theme: 'system',
       },
       createdAt: '2026-03-10T09:00:00Z',
       updatedAt: '2026-03-21T18:00:00Z',

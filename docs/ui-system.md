@@ -32,11 +32,11 @@ Core intent:
 
 SKOSS now uses CSS-variable themes.
 
-Implemented themes:
+Implemented appearance modes:
 
 - `light`
 - `dark`
-- `garden` (sage / kitchen-garden)
+- `system`
 
 Guidance:
 
@@ -45,14 +45,14 @@ Guidance:
 - keep contrast strong enough for busy kitchens and imperfect lighting
 - avoid theme-specific component overrides unless absolutely necessary
 - keep theme accent colors distinct from semantic success colors so completed states still scan immediately
-- treat the green theme as an intentional palette, not a simple token swap from the default accent
+- keep light and dark surfaces consistent enough that the same workspace still feels familiar across devices
 
 Persistence:
 
-- theme choice is stored locally in the browser
-- the shell applies the saved theme on initial load before the app renders
-- the header should expose only a low-emphasis quick switch, while full theme selection lives in Setup / Appearance
-- future themes should follow the same token contract instead of adding ad hoc classes
+- appearance preference is stored locally in the browser
+- the shell applies the saved preference on initial load before the app renders
+- the header should expose only one compact user entry point, with language and appearance grouped inside the user/preferences menu
+- a fuller preferences page can still hold longer-lived personal defaults without crowding the shell
 
 ## 3. Tokens and layout rules
 
@@ -213,7 +213,7 @@ Guidance:
 - separate product identity from page context
 - avoid long descriptive copy in the global shell
 - keep global controls secondary to navigation and page work
-- prefer a compact appearance control over a large persistent switcher
+- group session and personal controls behind one compact user trigger instead of scattering them across the header
 - preserve touch-friendly hit areas, but reduce unnecessary bulk in pills and chips
 
 A good shell helps operators orient quickly, then gets out of the way.

@@ -7,7 +7,7 @@ import { I18nProvider } from '@/components/i18n-provider';
 import { createTranslator } from '@/lib/i18n';
 import { localeCookieName, localeStorageKey, supportedLocales } from '@/lib/i18n/config';
 import { getRequestPreferences } from '@/lib/i18n/server';
-import { storageKey as themeStorageKey, themeCookieName } from '@/lib/theme';
+import { resolveThemePreference, resolveAppliedTheme, storageKey as themeStorageKey, themeCookieName } from '@/lib/theme';
 
 export const metadata: Metadata = {
   title: 'SKOSS operational slice',
@@ -23,9 +23,14 @@ const themeInitScript = `
     .split('; ')
     .find((entry) => entry.startsWith(cookieKey + '='))
     ?.split('=')[1];
-  const nextTheme = savedTheme || cookieTheme || document.documentElement.dataset.theme || 'light';
-  document.documentElement.dataset.theme = nextTheme;
-  window.localStorage.setItem(storageKey, nextTheme);
+  const nextPreference = savedTheme || cookieTheme || document.documentElement.dataset.themePreference || 'system';
+  const resolvedTheme = nextPreference === 'system'
+    ? (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')
+    : nextPreference;
+
+  document.documentElement.dataset.themePreference = nextPreference;
+  document.documentElement.dataset.theme = resolvedTheme;
+  window.localStorage.setItem(storageKey, nextPreference);
 })();
 `;
 
@@ -51,10 +56,12 @@ export default async function RootLayout({
   children: ReactNode;
 }>) {
   const { locale, preset, theme } = await getRequestPreferences();
+  const themePreference = resolveThemePreference(theme);
+  const appliedTheme = resolveAppliedTheme(themePreference);
   const translator = createTranslator({ locale, preset });
 
   return (
-    <html lang={locale} data-theme={theme} suppressHydrationWarning>
+    <html lang={locale} data-theme={appliedTheme} data-theme-preference={themePreference} suppressHydrationWarning>
       <body>
         <Script id="skoss-theme-init" strategy="beforeInteractive">
           {themeInitScript}

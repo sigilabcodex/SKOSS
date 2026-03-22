@@ -4,7 +4,7 @@ import { saveUserPreferencesAction } from '@/lib/server/actions';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { getCurrentUserContext } from '@/lib/server/auth';
 
-const themeOptions = ['light', 'dark', 'garden'] as const;
+import { themeOptions } from '@/lib/theme';
 const workspaceOptions = ['orders', 'production', 'handoff', 'preferences', 'setup'] as const;
 
 export default async function PreferencesPage({
@@ -76,9 +76,9 @@ export default async function PreferencesPage({
           </label>
           <label>
             <span className="field-heading">{t('preferences.fields.theme')} <span className="setup-required-mark" aria-hidden="true">*</span></span>
-            <select name="theme" defaultValue={currentUser.preferences?.theme ?? 'light'}>
-              {themeOptions.map((theme) => (
-                <option key={theme} value={theme}>{t(`themes.${theme}.label`)}</option>
+            <select name="theme" defaultValue={currentUser.preferences?.theme ?? 'system'}>
+              {themeOptions.map((option) => (
+                <option key={option.name} value={option.name}>{t(`theme.${option.name}.label`)}</option>
               ))}
             </select>
           </label>

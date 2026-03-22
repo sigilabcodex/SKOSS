@@ -111,10 +111,10 @@ The project now starts separating two kinds of configuration.
 Personal or session-facing behavior, such as:
 
 - language
-- theme
+- appearance
 - default workspace / home surface
 
-These should follow the signed-in person when possible.
+These should follow the signed-in person when possible and should usually live behind a compact user/preferences entry point rather than in the main navigation strip.
 
 ### Settings
 

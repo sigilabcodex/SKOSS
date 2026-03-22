@@ -19,8 +19,8 @@ export function LanguageSwitcher() {
   };
 
   return (
-    <label className="language-switcher">
-      <span className="visually-hidden">{t('language.label')}</span>
+    <label className="menu-select-field language-switcher">
+      <span className="field-heading">{t('language.label')}</span>
       <select aria-label={t('language.switcherAria')} value={locale} onChange={handleChange}>
         {localeOptions.map((option) => (
           <option key={option.value} value={option.value}>
@@ -28,6 +28,7 @@ export function LanguageSwitcher() {
           </option>
         ))}
       </select>
+      <span className="helper-text">{t('shell.languageHelp')}</span>
     </label>
   );
 }
