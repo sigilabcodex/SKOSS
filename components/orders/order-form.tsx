@@ -1,16 +1,20 @@
 'use client';
 
+import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import type { Customer, Destination, Order } from '@/lib/domain/types';
+import type { CustomerOrderContext } from '@/lib/server/demo-data';
+import { formatDateLabel, formatStatusLabel } from '@/lib/domain/formatters';
 import { deliveryProviderValues, getDefaultLineDrafts, getOrderProgress, inferFulfillmentType } from '@/lib/domain/order-helpers';
 import { useI18n } from '@/components/i18n-provider';
 import { LineItemsEditor } from '@/components/orders/line-items-editor';
 import { SubmitButton } from '@/components/submit-button';
-import { AlertIcon, CheckIcon } from '@/components/ui-icons';
+import { AlertIcon, CheckIcon, CustomersIcon } from '@/components/ui-icons';
 
 interface OrderFormProps {
   action: (formData: FormData) => void | Promise<void>;
   customers: Customer[];
+  customerContextById: Record<string, CustomerOrderContext>;
   destinations: Destination[];
   order?: Order | null;
   productSuggestions: string[];
@@ -39,10 +43,24 @@ const fulfillmentOptions = [
 
 const statusOptions = ['draft', 'active', 'changed', 'cancelled', 'completed'] as const;
 
-export function OrderForm({ action, customers, destinations, order, productSuggestions, focusDate }: OrderFormProps) {
-  const { t } = useI18n();
+export function OrderForm({
+  action,
+  customers,
+  customerContextById,
+  destinations,
+  order,
+  productSuggestions,
+  focusDate,
+}: OrderFormProps) {
+  const { t, locale } = useI18n();
+  const [selectedCustomerId, setSelectedCustomerId] = useState(order?.customerId ?? '');
   const lineDrafts = getDefaultLineDrafts(order?.lines);
   const visibleCustomers = customers.filter((customer) => customer.active || customer.id === order?.customerId);
+  const selectedCustomer = useMemo(
+    () => visibleCustomers.find((customer) => customer.id === selectedCustomerId) ?? null,
+    [selectedCustomerId, visibleCustomers],
+  );
+  const selectedCustomerContext = selectedCustomer ? customerContextById[selectedCustomer.id] : undefined;
   const visibleOnProductionBoard = order?.visibleOnProductionBoard ?? true;
   const changedInKitchen = order?.changedInKitchen ?? order?.status === 'changed';
   const initialFulfillmentType = order?.fulfillmentType ?? inferFulfillmentType(order?.destinationLabel);
@@ -59,6 +77,32 @@ export function OrderForm({ action, customers, destinations, order, productSugge
     value,
     label: t(`orders.providerOptions.${value}`),
   }));
+
+  function handleCustomerChange(event: React.ChangeEvent<HTMLSelectElement>) {
+    const nextCustomerId = event.target.value;
+    setSelectedCustomerId(nextCustomerId);
+
+    if (!nextCustomerId) {
+      return;
+    }
+
+    const nextCustomer = customers.find((customer) => customer.id === nextCustomerId);
+    if (!nextCustomer) {
+      return;
+    }
+
+    const form = event.currentTarget.form;
+    const customerLabelInput = form?.elements.namedItem('customerLabel');
+    const customerPhoneInput = form?.elements.namedItem('customerPhone');
+
+    if (customerLabelInput instanceof HTMLInputElement && !customerLabelInput.value.trim()) {
+      customerLabelInput.value = nextCustomer.displayName;
+    }
+
+    if (customerPhoneInput instanceof HTMLInputElement && !customerPhoneInput.value.trim() && nextCustomer.phone) {
+      customerPhoneInput.value = nextCustomer.phone;
+    }
+  }
 
   return (
     <form action={action} className="page-stack">
@@ -114,7 +158,7 @@ export function OrderForm({ action, customers, destinations, order, productSugge
             <div className="grid-two">
               <label>
                 <span className="field-heading">{t('orders.orderForm.fields.customerMemory')} <span className="optional-pill">{t('common.optional')}</span></span>
-                <select name="customerId" defaultValue={order?.customerId ?? ''}>
+                <select name="customerId" defaultValue={order?.customerId ?? ''} onChange={handleCustomerChange}>
                   <option value="">{t('orders.orderForm.placeholders.noSavedCustomer')}</option>
                   {visibleCustomers.map((customer) => (
                     <option key={customer.id} value={customer.id}>
@@ -169,10 +213,80 @@ export function OrderForm({ action, customers, destinations, order, productSugge
                 <input name="dueDate" type="date" defaultValue={order?.dueDate ?? focusDate} required />
               </label>
             </div>
-            {order?.customerId ? (
+            {selectedCustomer ? (
+              <section className="page-context-card">
+                <CustomersIcon className="callout-icon" />
+                <div className="page-stack compact-gap">
+                  <div>
+                    <strong>{selectedCustomer.displayName}</strong>
+                    <p className="helper-text no-margin">
+                      {selectedCustomer.phone ?? selectedCustomer.email ?? t('customers.noContactYet')}
+                    </p>
+                  </div>
+                  <p className="helper-text no-margin">
+                    {selectedCustomer.preferredContactMethod
+                      ? t('customers.preferredContactSummary', { method: t(`customers.contactMethods.${selectedCustomer.preferredContactMethod}`) })
+                      : t('customers.noPreferredContact')}
+                  </p>
+                  {(selectedCustomer.address || selectedCustomer.deliveryNote || selectedCustomer.internalNote) ? (
+                    <ul className="stack-list compact-list">
+                      {selectedCustomer.address ? (
+                        <li>
+                          <strong>{t('customers.fields.address')}</strong>
+                          <span>{selectedCustomer.address}</span>
+                        </li>
+                      ) : null}
+                      {selectedCustomer.deliveryNote ? (
+                        <li>
+                          <strong>{t('customers.fields.deliveryNote')}</strong>
+                          <span>{selectedCustomer.deliveryNote}</span>
+                        </li>
+                      ) : null}
+                      {selectedCustomer.internalNote ? (
+                        <li>
+                          <strong>{t('customers.fields.internalNote')}</strong>
+                          <span>{selectedCustomer.internalNote}</span>
+                        </li>
+                      ) : null}
+                    </ul>
+                  ) : null}
+                  {selectedCustomerContext ? (
+                    <div className="page-stack compact-gap">
+                      <p className="helper-text no-margin">
+                        {t('orders.orderForm.customerContext.summary', {
+                          count: String(selectedCustomerContext.linkedOrderCount),
+                          date: selectedCustomerContext.lastOrderDate
+                            ? formatDateLabel(selectedCustomerContext.lastOrderDate, locale)
+                            : t('common.clear').toLowerCase(),
+                        })}
+                      </p>
+                      {selectedCustomerContext.recentOrders.length > 0 ? (
+                        <ul className="stack-list muted-list compact-list">
+                          {selectedCustomerContext.recentOrders.map((entry) => (
+                            <li key={entry.id}>
+                              <strong>
+                                <Link href={`/orders/${entry.id}`} className="inline-link">
+                                  {formatDateLabel(entry.productionDate, locale)}
+                                </Link>
+                              </strong>
+                              <span>
+                                {formatStatusLabel(entry.fulfillmentType, t)}
+                                {entry.destinationLabel ? ` · ${entry.destinationLabel}` : ''}
+                                {entry.promisedTime ? ` · ${entry.promisedTime}` : ''}
+                              </span>
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
+                    </div>
+                  ) : null}
+                </div>
+              </section>
+            ) : null}
+            {selectedCustomer ? (
               <p className="helper-text no-margin">
                 {t('orders.orderForm.linkedCustomerHint')}{' '}
-                <Link href={`/customers?customer=${order.customerId}`} className="inline-link">
+                <Link href={`/customers?customer=${selectedCustomer.id}`} className="inline-link">
                   {t('orders.orderForm.openCustomer')}
                 </Link>
               </p>

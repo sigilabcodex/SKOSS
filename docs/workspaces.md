@@ -18,6 +18,7 @@ The purpose of a workspace is to reduce noise and show each role the information
 - today's and upcoming orders
 - simple order creation and editing
 - recurring order management at a practical level
+- lightweight saved customer context visible during capture when repeat contact, address, or delivery notes matter
 - destinations, pickup times, and customer notes
 - lightweight customer memory when repeat contact or delivery context matters
 - line items in clear product language

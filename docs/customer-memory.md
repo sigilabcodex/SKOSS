@@ -79,16 +79,28 @@ SKOSS should still support:
 
 This keeps customer structure useful without making it mandatory too early.
 
-## What this PR adds
+## Current foundation
 
-This PR adds a first operational customer foundation:
+The current repository foundation includes:
 
 - a lightweight `Customer` model
 - optional order-to-customer linkage
 - a compact customer surface for create, edit, activate/deactivate, and recent context
 - quiet customer context in order, fulfillment, and handoff-adjacent surfaces
+- a compact order-intake preview of linked customer memory so operators can reuse delivery and contact context without leaving the order flow
 - simple recent linked order history on the customer detail view
 - i18n coverage in English, Spanish, and Portuguese
+
+## How it fits the current operational model
+
+Customer memory is intentionally attached to the parts of SKOSS where operational context already matters:
+
+- **orders** use customer memory to reduce retyping and keep draft-first capture tolerant
+- **fulfillment and handoff** reuse phone, address, and delivery-note context when packing, assigning, or handing work across shifts
+- **printing** can include the practical customer context that helps paper still work as part of execution
+- **customer cards** stay lightweight and recent-history-oriented instead of becoming a separate sales workflow
+
+This keeps the layer close to the existing order → fulfillment → handoff flow rather than turning it into a standalone CRM module.
 
 ## Explicit non-goals
 
@@ -111,6 +123,7 @@ The main tradeoff is deliberate:
 
 - keep reusable customer memory in the system
 - keep order capture tolerant of drafts and partial data
+- keep customer context visible in operational surfaces instead of hiding it in a separate admin area
 - avoid building a second product inside SKOSS
 
 That tradeoff fits the current stage of the repository better than a larger CRM model.

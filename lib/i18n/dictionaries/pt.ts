@@ -441,6 +441,9 @@ const pt = {
       },
       linkedCustomerHint: 'Este pedido está vinculado à memória salva do cliente.',
       openCustomer: 'Abrir detalhe do cliente',
+      customerContext: {
+        summary: '{{count}} pedidos vinculados até agora. Último pedido vinculado: {{date}}.',
+      },
       dispatchHint: {
         pickup: 'Use esta seção só quando o horário ou a nota da retirada importar.',
         delivery: 'Mantenha origem, atribuição, hora prometida e notas visíveis sem virar um sistema de despacho.',
