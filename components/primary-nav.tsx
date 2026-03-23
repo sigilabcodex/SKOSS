@@ -11,10 +11,11 @@ import {
   OrdersIcon,
   ProductionIcon,
   SetupIcon,
+  TimelineIcon,
 } from '@/components/ui-icons';
 import type { WorkspaceSurface } from '@/lib/domain/types';
 
-type NavHref = '/' | '/orders' | '/customers' | '/production' | '/handoff' | '/setup';
+type NavHref = '/' | '/timeline' | '/orders' | '/customers' | '/production' | '/handoff' | '/setup';
 
 type NavItem = {
   key: WorkspaceSurface;
@@ -44,6 +45,13 @@ const navItems: NavItem[] = [
     labelKey: 'nav.home',
     icon: HomeIcon,
     active: (pathname) => pathname === '/',
+  },
+  {
+    key: 'timeline',
+    href: '/timeline',
+    labelKey: 'nav.timeline',
+    icon: TimelineIcon,
+    active: (pathname) => pathname.startsWith('/timeline'),
   },
   {
     key: 'orders',

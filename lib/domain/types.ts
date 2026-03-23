@@ -3,7 +3,7 @@ import type { AppLocale, AppPreset } from '@/lib/i18n/config';
 export type UserRole = 'admin' | 'manager' | 'production' | 'frontdesk' | 'delivery';
 export type ThemeName = 'light' | 'dark' | 'system';
 export type OperatingMode = 'pickup' | 'delivery' | 'mixed';
-export type WorkspaceSurface = 'home' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup';
+export type WorkspaceSurface = 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup';
 export type CustomerContactMethod = 'phone' | 'email' | 'whatsapp';
 
 export type OrderStatus = 'draft' | 'active' | 'changed' | 'cancelled' | 'completed';

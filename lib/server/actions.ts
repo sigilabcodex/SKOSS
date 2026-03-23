@@ -50,7 +50,7 @@ function sortOrders(left: { productionDate: string; updatedAt: string }, right: 
 
 const supportedThemes = ['light', 'dark', 'system'] as const;
 const supportedOperatingModes = ['pickup', 'delivery', 'mixed'] as const;
-const supportedPreferenceWorkspaces = ['orders', 'customers', 'production', 'handoff', 'setup'] as const;
+const supportedPreferenceWorkspaces = ['timeline', 'orders', 'customers', 'production', 'handoff', 'setup'] as const;
 
 function sortUsers(left: { displayName: string }, right: { displayName: string }) {
   return left.displayName.localeCompare(right.displayName);
@@ -63,6 +63,7 @@ async function getActorUserId(data: Awaited<ReturnType<typeof readStore>>) {
 
 function revalidateAllWorkspaces() {
   revalidatePath('/');
+  revalidatePath('/timeline');
   revalidatePath('/orders');
   revalidatePath('/customers');
   revalidatePath('/production');
@@ -122,6 +123,7 @@ export async function saveOnboardingPreferencesAction(formData: FormData) {
 
   revalidatePath('/');
   revalidatePath('/setup');
+  revalidatePath('/timeline');
   revalidatePath('/orders');
   revalidatePath('/production');
   revalidatePath('/handoff');
@@ -328,6 +330,7 @@ export async function createOrderAction(formData: FormData) {
   data.orders = [...data.orders, order].sort(sortOrders);
   await writeStore(data);
   revalidatePath('/');
+  revalidatePath('/timeline');
   revalidatePath('/orders');
   revalidatePath('/customers');
   revalidatePath('/production');

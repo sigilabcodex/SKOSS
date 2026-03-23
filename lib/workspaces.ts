@@ -1,6 +1,6 @@
 import type { UserRole, WorkspaceSurface } from '@/lib/domain/types';
 
-export const workspaceSurfaceOrder: WorkspaceSurface[] = ['home', 'orders', 'customers', 'production', 'handoff', 'preferences', 'setup'];
+export const workspaceSurfaceOrder: WorkspaceSurface[] = ['home', 'timeline', 'orders', 'customers', 'production', 'handoff', 'preferences', 'setup'];
 
 export function isPrimaryWorkspaceSurface(workspace: WorkspaceSurface): workspace is Exclude<WorkspaceSurface, 'preferences'> {
   return workspace !== 'preferences';
@@ -26,17 +26,17 @@ export function getDefaultWorkspaceForRole(role: UserRole): WorkspaceSurface {
 export function getWorkspacePriorityForRole(role: UserRole): WorkspaceSurface[] {
   switch (role) {
     case 'admin':
-      return ['setup', 'customers', 'orders', 'production', 'handoff', 'home'];
+      return ['setup', 'timeline', 'customers', 'orders', 'production', 'handoff', 'home'];
     case 'manager':
-      return ['orders', 'customers', 'production', 'handoff', 'setup', 'home'];
+      return ['timeline', 'orders', 'production', 'handoff', 'customers', 'setup', 'home'];
     case 'production':
-      return ['production', 'handoff', 'orders', 'home'];
+      return ['timeline', 'production', 'handoff', 'orders', 'home'];
     case 'frontdesk':
-      return ['orders', 'customers', 'handoff', 'home'];
+      return ['timeline', 'orders', 'customers', 'handoff', 'home'];
     case 'delivery':
-      return ['handoff', 'customers', 'orders', 'home'];
+      return ['timeline', 'handoff', 'customers', 'orders', 'home'];
     default:
-      return ['home', 'orders', 'customers', 'production', 'handoff', 'setup'];
+      return ['home', 'timeline', 'orders', 'customers', 'production', 'handoff', 'setup'];
   }
 }
 
