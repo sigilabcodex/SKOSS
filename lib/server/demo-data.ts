@@ -189,6 +189,8 @@ function toStageStatus(stage: WipEntry['stage']): WipEntry['status'] {
 }
 
 function hasOrderCoreChanges(existingOrder: Order, values: OrderFormValues) {
+  const nextLines = values.lines.filter((line) => line.productLabel.trim() && line.quantity > 0);
+
   return (
     (existingOrder.customerId ?? '') !== (values.customerId ?? '') ||
     existingOrder.customerLabel !== values.customerLabel.trim() ||
@@ -204,9 +206,9 @@ function hasOrderCoreChanges(existingOrder: Order, values: OrderFormValues) {
     existingOrder.dueDate !== values.dueDate ||
     (existingOrder.notes ?? '') !== (values.notes?.trim() ?? '') ||
     existingOrder.visibleOnProductionBoard !== values.visibleOnProductionBoard ||
-    existingOrder.lines.length !== values.lines.filter((line) => line.productLabel.trim() && line.quantity > 0).length ||
+    existingOrder.lines.length !== nextLines.length ||
     existingOrder.lines.some((line, index) => {
-      const nextLine = values.lines.filter((entry) => entry.productLabel.trim() && entry.quantity > 0)[index];
+      const nextLine = nextLines[index];
       return (
         !nextLine ||
         line.lineType !== nextLine.lineType ||

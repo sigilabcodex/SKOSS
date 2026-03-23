@@ -5,7 +5,7 @@ import Link from 'next/link';
 import type { Customer, Destination, Order } from '@/lib/domain/types';
 import type { CustomerOrderContext } from '@/lib/server/demo-data';
 import { formatDateLabel, formatStatusLabel } from '@/lib/domain/formatters';
-import { deliveryProviderValues, getDefaultLineDrafts, getOrderProgress, inferFulfillmentType } from '@/lib/domain/order-helpers';
+import { deliveryProviderValues, getDefaultLineDrafts, getOrderLineTypeLabelKey, getOrderProgress, inferFulfillmentType, orderLineTypeValues } from '@/lib/domain/order-helpers';
 import { useI18n } from '@/components/i18n-provider';
 import { LineItemsEditor } from '@/components/orders/line-items-editor';
 import { SubmitButton } from '@/components/submit-button';
@@ -20,12 +20,6 @@ interface OrderFormProps {
   productSuggestions: string[];
   focusDate: string;
 }
-
-const lineTypeValues = [
-  { value: 'product_variant', key: 'structuredItem' },
-  { value: 'draft_product', key: 'draftItem' },
-  { value: 'note_item', key: 'noteItem' },
-] as const;
 
 const sourceOptions = [
   { value: 'manual', key: 'manual' },
@@ -69,9 +63,9 @@ export function OrderForm({
     label: `${line.completedQuantity}/${line.quantity} ${t('status.done').toLowerCase()}`,
     tone: line.lineStatus,
   }));
-  const lineTypeOptions = lineTypeValues.map((option) => ({
-    value: option.value,
-    label: t(`orders.lineEditor.kinds.${option.key}`),
+  const lineTypeOptions = orderLineTypeValues.map((option) => ({
+    value: option,
+    label: t(`orders.lineEditor.kinds.${getOrderLineTypeLabelKey(option)}`),
   }));
   const providerOptions = deliveryProviderValues.map((value) => ({
     value,

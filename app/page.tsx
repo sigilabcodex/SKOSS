@@ -64,9 +64,11 @@ export default async function HomePage() {
   };
 
   const quickLinks = visibleWorkspaces
-    .filter((key): key is WorkspaceLinkKey => key in quickLinkMap)
-    .map((key) => quickLinkMap[key])
-    .filter(Boolean);
+    .filter((key): key is WorkspaceLinkKey => key in quickLinkMap);
+  const featuredQuickLinkKeys = presetExperience.featuredWorkspaces.filter((key) => quickLinks.includes(key));
+  const remainingQuickLinkKeys = quickLinks.filter((key) => !featuredQuickLinkKeys.includes(key));
+  const orderedQuickLinkKeys = [...featuredQuickLinkKeys, ...remainingQuickLinkKeys];
+  const orderedQuickLinks = orderedQuickLinkKeys.map((key) => quickLinkMap[key]);
 
   if (!summary.preferences.onboardingCompleted) {
     return (
@@ -208,7 +210,7 @@ export default async function HomePage() {
       </section>
 
       <section className="grid-cards">
-        {quickLinks.map((link, index) => {
+        {orderedQuickLinks.map((link, index) => {
           const Icon = link.icon;
           const isRecommended = homeWorkspace === 'home' ? index === 0 : link.href === `/${recommendedWorkspace}`;
 

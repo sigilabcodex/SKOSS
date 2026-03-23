@@ -12,6 +12,20 @@ export const weekdayOptions: Array<{ value: WeekdayKey; label: string; index: nu
 
 export const fulfillmentTypeValues = ['standard', 'pickup', 'own_delivery', 'app_delivery'] as const;
 export const deliveryProviderValues = ['internal', 'uber', 'rappi', 'didi', 'other'] as const satisfies readonly DeliveryProvider[];
+export const orderLineTypeValues = ['product_variant', 'draft_product', 'note_item'] as const satisfies readonly OrderLine['lineType'][];
+
+export function getOrderLineTypeLabelKey(lineType: OrderLine['lineType']) {
+  switch (lineType) {
+    case 'product_variant':
+      return 'structuredItem';
+    case 'draft_product':
+      return 'draftItem';
+    case 'note_item':
+      return 'noteItem';
+    default:
+      return 'draftItem';
+  }
+}
 
 export function getAllProductionDates(data: Pick<AppData, 'orders' | 'wipEntries' | 'shiftLogs' | 'recurringTemplates'>) {
   const dateSet = new Set<string>();
@@ -92,12 +106,30 @@ export function getLineStatus(line: Pick<OrderLine, 'quantity' | 'completedQuant
 }
 
 export function getOrderProgress(order: Pick<Order, 'lines'>) {
-  const workableLines = order.lines.filter((line) => line.lineType !== 'note_item');
-  const requiredQuantity = workableLines.reduce((sum, line) => sum + line.quantity, 0);
-  const completedQuantity = workableLines.reduce((sum, line) => sum + getLineCompletion(line), 0);
+  let requiredQuantity = 0;
+  let completedQuantity = 0;
+  let partialLines = 0;
+  let doneLines = 0;
+  let lineCount = 0;
+
+  for (const line of order.lines) {
+    if (line.lineType === 'note_item') {
+      continue;
+    }
+
+    lineCount += 1;
+    requiredQuantity += line.quantity;
+    completedQuantity += getLineCompletion(line);
+
+    const lineStatus = getLineStatus(line);
+    if (lineStatus === 'in_progress') {
+      partialLines += 1;
+    } else if (lineStatus === 'done') {
+      doneLines += 1;
+    }
+  }
+
   const remainingQuantity = Math.max(0, requiredQuantity - completedQuantity);
-  const partialLines = workableLines.filter((line) => getLineStatus(line) === 'in_progress').length;
-  const doneLines = workableLines.filter((line) => getLineStatus(line) === 'done').length;
 
   return {
     requiredQuantity,
@@ -105,7 +137,7 @@ export function getOrderProgress(order: Pick<Order, 'lines'>) {
     remainingQuantity,
     partialLines,
     doneLines,
-    lineCount: workableLines.length,
+    lineCount,
   };
 }
 
