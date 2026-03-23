@@ -1,6 +1,7 @@
 'use client';
 
-import type { Destination, Order } from '@/lib/domain/types';
+import Link from 'next/link';
+import type { Customer, Destination, Order } from '@/lib/domain/types';
 import { deliveryProviderValues, getDefaultLineDrafts, getOrderProgress, inferFulfillmentType } from '@/lib/domain/order-helpers';
 import { useI18n } from '@/components/i18n-provider';
 import { LineItemsEditor } from '@/components/orders/line-items-editor';
@@ -9,6 +10,7 @@ import { AlertIcon, CheckIcon } from '@/components/ui-icons';
 
 interface OrderFormProps {
   action: (formData: FormData) => void | Promise<void>;
+  customers: Customer[];
   destinations: Destination[];
   order?: Order | null;
   productSuggestions: string[];
@@ -37,9 +39,10 @@ const fulfillmentOptions = [
 
 const statusOptions = ['draft', 'active', 'changed', 'cancelled', 'completed'] as const;
 
-export function OrderForm({ action, destinations, order, productSuggestions, focusDate }: OrderFormProps) {
+export function OrderForm({ action, customers, destinations, order, productSuggestions, focusDate }: OrderFormProps) {
   const { t } = useI18n();
   const lineDrafts = getDefaultLineDrafts(order?.lines);
+  const visibleCustomers = customers.filter((customer) => customer.active || customer.id === order?.customerId);
   const visibleOnProductionBoard = order?.visibleOnProductionBoard ?? true;
   const changedInKitchen = order?.changedInKitchen ?? order?.status === 'changed';
   const initialFulfillmentType = order?.fulfillmentType ?? inferFulfillmentType(order?.destinationLabel);
@@ -110,8 +113,20 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
             </div>
             <div className="grid-two">
               <label>
+                <span className="field-heading">{t('orders.orderForm.fields.customerMemory')} <span className="optional-pill">{t('common.optional')}</span></span>
+                <select name="customerId" defaultValue={order?.customerId ?? ''}>
+                  <option value="">{t('orders.orderForm.placeholders.noSavedCustomer')}</option>
+                  {visibleCustomers.map((customer) => (
+                    <option key={customer.id} value={customer.id}>
+                      {customer.displayName}{customer.active ? '' : ` · ${t('common.inactive').toLowerCase()}`}
+                    </option>
+                  ))}
+                </select>
+                <span className="helper-text">{t('orders.orderForm.fields.customerMemoryHelp')}</span>
+              </label>
+              <label>
                 <span className="field-heading">{t('orders.orderForm.fields.customerLabel')} <span className="required-dot">{t('common.required')}</span></span>
-                <input name="customerLabel" defaultValue={order?.customerLabel ?? ''} placeholder={t('orders.orderForm.placeholders.customerLabel')} required />
+                <input name="customerLabel" defaultValue={order?.customerLabel ?? ''} placeholder={t('orders.orderForm.placeholders.customerLabel')} />
                 <span className="helper-text">{t('orders.orderForm.fields.customerLabelHelp')}</span>
               </label>
               <label>
@@ -154,6 +169,14 @@ export function OrderForm({ action, destinations, order, productSuggestions, foc
                 <input name="dueDate" type="date" defaultValue={order?.dueDate ?? focusDate} required />
               </label>
             </div>
+            {order?.customerId ? (
+              <p className="helper-text no-margin">
+                {t('orders.orderForm.linkedCustomerHint')}{' '}
+                <Link href={`/customers?customer=${order.customerId}`} className="inline-link">
+                  {t('orders.orderForm.openCustomer')}
+                </Link>
+              </p>
+            ) : null}
           </section>
 
           <section className="field-section">

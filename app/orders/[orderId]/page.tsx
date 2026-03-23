@@ -27,26 +27,30 @@ export default async function EditOrderPage({
     notFound();
   }
 
-  const action = updateOrderAction.bind(null, view.order.id);
-  const progress = getOrderProgress(view.order);
-  const providerLabel = resolveDeliveryProviderLabel(view.order);
+  const order = view.order;
+  const action = updateOrderAction.bind(null, order.id);
+  const progress = getOrderProgress(order);
+  const providerLabel = resolveDeliveryProviderLabel(order);
+  const linkedCustomer = order.customerId
+    ? view.customers.find((customer) => customer.id === order.customerId) ?? null
+    : null;
 
   return (
     <div className="page-stack">
       <section className="section-header page-hero-header">
         <div>
           <p className="eyebrow">{t('orders.workspace')}</p>
-          <h1>{view.order.customerLabel}</h1>
+          <h1>{order.customerLabel}</h1>
           <p>
-            {formatStatusLabel(view.order.fulfillmentType, t)} {t('orders.editPage.descriptionSeparator')} {t('orders.editPage.editDescription')}
+            {formatStatusLabel(order.fulfillmentType, t)} {t('orders.editPage.descriptionSeparator')} {t('orders.editPage.editDescription')}
           </p>
         </div>
         <div className="action-cluster compact-actions">
-          <Link href={`/orders/${view.order.id}/print`} className="button-secondary" target="_blank" rel="noreferrer">
+          <Link href={`/orders/${order.id}/print`} className="button-secondary" target="_blank" rel="noreferrer">
             <PrinterIcon className="button-icon" />
             <span>{t('printing.actions.orderTicket')}</span>
           </Link>
-          <Link href={`/orders/${view.order.id}/label`} className="button-secondary" target="_blank" rel="noreferrer">
+          <Link href={`/orders/${order.id}/label`} className="button-secondary" target="_blank" rel="noreferrer">
             <PrinterIcon className="button-icon" />
             <span>{t('printing.actions.simpleLabel')}</span>
           </Link>
@@ -75,24 +79,40 @@ export default async function EditOrderPage({
         <div className="stats-grid compact-stats-grid">
           <div className="stat-card">
             <span className="stat-label">{t('orders.fulfillment')}</span>
-            <strong>{formatStatusLabel(view.order.fulfillmentType, t)}</strong>
-            <span>{view.order.destinationLabel ?? t('common.destinationStillOpen')}</span>
+            <strong>{formatStatusLabel(order.fulfillmentType, t)}</strong>
+            <span>{order.destinationLabel ?? t('common.destinationStillOpen')}</span>
           </div>
           <div className="stat-card stat-card-info">
             <span className="stat-label">{t('orders.provider')}</span>
-            <strong>{providerLabel ? (view.order.deliveryProvider && view.order.deliveryProvider !== 'other' ? t(`orders.providerOptions.${view.order.deliveryProvider}`) : providerLabel) : t('common.clear')}</strong>
-            <span>{view.order.deliveryAssignee ?? t('orders.editPage.noDeliveryAssignee')}</span>
+            <strong>{providerLabel ? (order.deliveryProvider && order.deliveryProvider !== 'other' ? t(`orders.providerOptions.${order.deliveryProvider}`) : providerLabel) : t('common.clear')}</strong>
+            <span>{order.deliveryAssignee ?? t('orders.editPage.noDeliveryAssignee')}</span>
           </div>
           <div className="stat-card stat-card-warn">
             <span className="stat-label">{t('orders.promise')}</span>
-            <strong>{view.order.promisedTime ?? t('common.clear')}</strong>
-            <span>{view.order.dispatchNotes ?? t('orders.editPage.noDispatchNotes')}</span>
+            <strong>{order.promisedTime ?? t('common.clear')}</strong>
+            <span>{order.dispatchNotes ?? t('orders.editPage.noDispatchNotes')}</span>
+          </div>
+          <div className="stat-card stat-card-neutral">
+            <span className="stat-label">{t('orders.editPage.customerMemory')}</span>
+            <strong>{linkedCustomer ? linkedCustomer.displayName : t('orders.editPage.noSavedCustomer')}</strong>
+            <span>
+              {linkedCustomer
+                ? (linkedCustomer.phone ?? linkedCustomer.email ?? linkedCustomer.deliveryNote ?? t('orders.editPage.customerMemoryHelp'))
+                : (order.customerPhone ?? t('orders.editPage.customerMemoryHelp'))}
+            </span>
           </div>
         </div>
+        {linkedCustomer ? (
+          <p className="helper-text no-margin">
+            <Link href={`/customers?customer=${linkedCustomer.id}`} className="inline-link">
+              {t('orders.editPage.openCustomer')}
+            </Link>
+          </p>
+        ) : null}
 
         <div className="line-grid-stack">
-          {view.order.lines.filter((line) => line.lineType !== 'note_item').map((line) => {
-            const progressAction = updateOrderLineProgressAction.bind(null, view.order!.id, line.id);
+          {order.lines.filter((line) => line.lineType !== 'note_item').map((line) => {
+            const progressAction = updateOrderLineProgressAction.bind(null, order.id, line.id);
             const lineStatus = getLineStatus(line);
 
             return (
@@ -138,8 +158,9 @@ export default async function EditOrderPage({
 
       <OrderForm
         action={action}
+        customers={view.customers}
         destinations={view.destinations}
-        order={view.order}
+        order={order}
         productSuggestions={view.productSuggestions}
         focusDate={view.focusDate}
       />

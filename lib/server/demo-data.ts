@@ -1,5 +1,7 @@
 import type {
   AppData,
+  Customer,
+  CustomerContactMethod,
   DeliveryProvider,
   FulfillmentType,
   Order,
@@ -26,6 +28,7 @@ import { getDefaultWorkspaceForRole } from '@/lib/workspaces';
 export { getLineStatus, getOrderProgress } from '@/lib/domain/order-helpers';
 
 export interface OrderFormValues {
+  customerId?: string;
   customerLabel: string;
   customerPhone?: string;
   destinationLabel?: string;
@@ -55,6 +58,17 @@ export interface SupplierFormValues {
   name: string;
   contact?: string;
   notes?: string;
+  active: boolean;
+}
+
+export interface CustomerFormValues {
+  displayName: string;
+  phone?: string;
+  email?: string;
+  preferredContactMethod?: CustomerContactMethod;
+  address?: string;
+  deliveryNote?: string;
+  internalNote?: string;
   active: boolean;
 }
 
@@ -150,12 +164,21 @@ function getProductSuggestions(products: Array<{ name: string; variants: Array<{
   return products.flatMap((product) => product.variants.map((variant) => `${product.name} / ${variant.name}`));
 }
 
+function getCustomerById(customers: Customer[], customerId?: string) {
+  if (!customerId) {
+    return null;
+  }
+
+  return customers.find((customer) => customer.id === customerId) ?? null;
+}
+
 function toStageStatus(stage: WipEntry['stage']): WipEntry['status'] {
   return stage === 'ready' || stage === 'baked' ? 'ready' : 'in_progress';
 }
 
 function hasOrderCoreChanges(existingOrder: Order, values: OrderFormValues) {
   return (
+    (existingOrder.customerId ?? '') !== (values.customerId ?? '') ||
     existingOrder.customerLabel !== values.customerLabel.trim() ||
     (existingOrder.customerPhone ?? '') !== (values.customerPhone?.trim() ?? '') ||
     (existingOrder.destinationLabel ?? '') !== (values.destinationLabel?.trim() ?? '') ||
@@ -186,6 +209,7 @@ function hasOrderCoreChanges(existingOrder: Order, values: OrderFormValues) {
 
 export function buildOrderRecord(data: AppData, values: OrderFormValues, actorUserId?: string, existingOrder?: Order): Order {
   const now = new Date().toISOString();
+  const customer = getCustomerById(data.customers, values.customerId);
   const cleanInputLines = values.lines.filter((line) => line.productLabel.trim() && line.quantity > 0);
   const cleanLines: OrderLine[] = cleanInputLines.map((line, index) => {
     const previousLine = existingOrder?.lines[index];
@@ -219,8 +243,9 @@ export function buildOrderRecord(data: AppData, values: OrderFormValues, actorUs
     source: values.source,
     status: nextStatus,
     fulfillmentType: values.fulfillmentType,
-    customerLabel: values.customerLabel.trim() || 'Walk-in customer',
-    customerPhone: values.customerPhone?.trim() || undefined,
+    customerId: customer?.id,
+    customerLabel: values.customerLabel.trim() || customer?.displayName || 'Walk-in customer',
+    customerPhone: values.customerPhone?.trim() || customer?.phone || undefined,
     destinationLabel: values.destinationLabel?.trim() || undefined,
     deliveryProvider: values.deliveryProvider || undefined,
     deliveryProviderLabel: values.deliveryProvider === 'other' ? values.deliveryProviderCustom?.trim() || undefined : undefined,
@@ -366,6 +391,7 @@ export async function getOrdersWorkspace() {
   const dates = getAllProductionDates(data);
   const focusDate = getFocusDate(data);
   const orders = [...data.orders].sort(sortOrders);
+  const customers = [...data.customers].sort((left, right) => left.displayName.localeCompare(right.displayName));
   const recurringTemplates = [...data.recurringTemplates].sort((left, right) =>
     left.nextOccurrenceDate === right.nextOccurrenceDate
       ? left.customerLabel.localeCompare(right.customerLabel)
@@ -376,6 +402,7 @@ export async function getOrdersWorkspace() {
     focusDate,
     dates,
     orders,
+    customers,
     recurringTemplates,
     orderGroups: dates
       .map((productionDate) => ({
@@ -389,12 +416,50 @@ export async function getOrdersWorkspace() {
   };
 }
 
+export async function getCustomersWorkspace(selectedCustomerId?: string) {
+  const data = await readStore();
+  const customers = [...data.customers].sort((left, right) => left.displayName.localeCompare(right.displayName));
+  const orderCountByCustomer = new Map<string, number>();
+  const lastOrderDateByCustomer = new Map<string, string>();
+  for (const order of [...data.orders].sort(sortOrders)) {
+    if (!order.customerId) {
+      continue;
+    }
+
+    orderCountByCustomer.set(order.customerId, (orderCountByCustomer.get(order.customerId) ?? 0) + 1);
+    if (!lastOrderDateByCustomer.has(order.customerId)) {
+      lastOrderDateByCustomer.set(order.customerId, order.productionDate);
+    }
+  }
+  const selectedCustomer = (selectedCustomerId
+    ? customers.find((customer) => customer.id === selectedCustomerId) ?? null
+    : customers[0] ?? null);
+  const customerOrderHistory = selectedCustomer
+    ? [...data.orders]
+      .filter((order) => order.customerId === selectedCustomer.id)
+      .sort(sortOrders)
+      .slice(0, 8)
+    : [];
+
+  return {
+    customers,
+    selectedCustomer,
+    customerOrderHistory,
+    orderCountByCustomer,
+    lastOrderDateByCustomer,
+    activeCustomers: customers.filter((customer) => customer.active).length,
+    inactiveCustomers: customers.filter((customer) => !customer.active).length,
+    linkedOrders: data.orders.filter((order) => order.customerId).length,
+  };
+}
+
 export async function getOrderEditor(orderId?: string) {
   const data = await readStore();
   const order = orderId ? data.orders.find((entry) => entry.id === orderId) ?? null : null;
 
   return {
     order,
+    customers: [...data.customers].sort((left, right) => left.displayName.localeCompare(right.displayName)),
     destinations: data.destinations,
     productSuggestions: getProductSuggestions(data.products),
     focusDate: getFocusDate(data),
@@ -550,6 +615,7 @@ function buildProductionDayView(data: AppData, productionDate: string) {
       order.lines
         .filter((line) => line.lineType === 'draft_product' || line.lineType === 'note_item')
         .map((line) => ({
+          customerId: order.customerId,
           id: line.id,
           label: line.productLabel,
           quantity: line.quantity,
@@ -567,8 +633,11 @@ function buildProductionDayView(data: AppData, productionDate: string) {
     handoffEntries,
     fulfillmentSummary,
     deliveryPackingQueue: deliveryPackingQueue.map(({ order, state }) => ({
+      customerId: order.customerId,
       id: order.id,
       customerLabel: order.customerLabel,
+      customerPhone: order.customerPhone ?? getCustomerById(data.customers, order.customerId)?.phone,
+      deliveryNote: getCustomerById(data.customers, order.customerId)?.deliveryNote,
       destinationLabel: order.destinationLabel,
       deliveryProvider: order.deliveryProvider,
       providerLabel: state.providerLabel,
@@ -577,8 +646,11 @@ function buildProductionDayView(data: AppData, productionDate: string) {
       dispatchNotes: order.dispatchNotes,
     })),
     assignmentNeededOrders: assignmentNeededOrders.map(({ order, state }) => ({
+      customerId: order.customerId,
       id: order.id,
       customerLabel: order.customerLabel,
+      customerPhone: order.customerPhone ?? getCustomerById(data.customers, order.customerId)?.phone,
+      deliveryNote: getCustomerById(data.customers, order.customerId)?.deliveryNote,
       destinationLabel: order.destinationLabel,
       deliveryProvider: order.deliveryProvider,
       providerLabel: state.providerLabel,
@@ -586,8 +658,10 @@ function buildProductionDayView(data: AppData, productionDate: string) {
       dispatchNotes: order.dispatchNotes,
     })),
     pickupReadyOrders: pickupReadyOrders.map(({ order }) => ({
+      customerId: order.customerId,
       id: order.id,
       customerLabel: order.customerLabel,
+      customerPhone: order.customerPhone ?? getCustomerById(data.customers, order.customerId)?.phone,
       destinationLabel: order.destinationLabel,
       promisedTime: order.promisedTime,
       dispatchNotes: order.dispatchNotes,
@@ -613,8 +687,11 @@ export async function getHandoffWorkspace() {
 
   const focusOrders = data.orders.filter((order) => order.productionDate === focusDate);
   const handoffFulfillment = focusOrders.map((order) => ({
+    customerId: order.customerId,
     id: order.id,
     customerLabel: order.customerLabel,
+    customerPhone: order.customerPhone ?? getCustomerById(data.customers, order.customerId)?.phone,
+    deliveryNote: getCustomerById(data.customers, order.customerId)?.deliveryNote,
     destinationLabel: order.destinationLabel,
     fulfillmentType: order.fulfillmentType,
     deliveryProvider: order.deliveryProvider,
@@ -686,6 +763,7 @@ export function normalizeOrderForm(formData: FormData): OrderFormValues {
     : undefined;
 
   return {
+    customerId: String(formData.get('customerId') ?? ''),
     customerLabel: String(formData.get('customerLabel') ?? ''),
     customerPhone: String(formData.get('customerPhone') ?? ''),
     destinationLabel: String(formData.get('destinationLabel') ?? ''),
@@ -733,6 +811,10 @@ export function normalizeRecurringTemplateForm(formData: FormData): RecurringTem
 }
 
 export function validateOrderForm(values: OrderFormValues) {
+  if (!values.customerId?.trim() && !values.customerLabel.trim()) {
+    return 'Add a customer name now, or link a saved customer.';
+  }
+
   if (!values.productionDate || !values.dueDate) {
     return 'Production and delivery dates are required.';
   }
@@ -759,6 +841,51 @@ export function validateOrderForm(values: OrderFormValues) {
   }
 
   return null;
+}
+
+const supportedCustomerContactMethods: CustomerContactMethod[] = ['phone', 'email', 'whatsapp'];
+
+export function normalizeCustomerForm(formData: FormData): CustomerFormValues {
+  const requestedMethod = String(formData.get('preferredContactMethod') ?? '') as CustomerContactMethod;
+
+  return {
+    displayName: String(formData.get('displayName') ?? ''),
+    phone: String(formData.get('phone') ?? ''),
+    email: String(formData.get('email') ?? ''),
+    preferredContactMethod: supportedCustomerContactMethods.includes(requestedMethod) ? requestedMethod : undefined,
+    address: String(formData.get('address') ?? ''),
+    deliveryNote: String(formData.get('deliveryNote') ?? ''),
+    internalNote: String(formData.get('internalNote') ?? ''),
+    active: formData.get('active') !== null,
+  };
+}
+
+export function validateCustomerForm(values: CustomerFormValues) {
+  if (!values.displayName.trim()) {
+    return 'Customer name is required.';
+  }
+
+  return null;
+}
+
+export function buildCustomerRecord(values: CustomerFormValues, actorUserId?: string, existingCustomer?: Customer): Customer {
+  const now = new Date().toISOString();
+
+  return {
+    id: existingCustomer?.id ?? `customer-${crypto.randomUUID()}`,
+    displayName: values.displayName.trim(),
+    phone: values.phone?.trim() || undefined,
+    email: values.email?.trim() || undefined,
+    preferredContactMethod: values.preferredContactMethod,
+    address: values.address?.trim() || undefined,
+    deliveryNote: values.deliveryNote?.trim() || undefined,
+    internalNote: values.internalNote?.trim() || undefined,
+    active: values.active,
+    createdAt: existingCustomer?.createdAt ?? now,
+    updatedAt: now,
+    createdByUserId: existingCustomer?.createdByUserId ?? actorUserId,
+    updatedByUserId: actorUserId ?? existingCustomer?.updatedByUserId,
+  };
 }
 
 export function normalizeSupplierForm(formData: FormData): SupplierFormValues {

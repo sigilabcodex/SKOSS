@@ -96,6 +96,17 @@ export function UserIcon(props: IconProps) {
   );
 }
 
+export function CustomersIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <circle cx="9" cy="8" r="3" />
+      <path d="M4.5 18a4.5 4.5 0 0 1 9 0" />
+      <circle cx="17" cy="9" r="2.5" />
+      <path d="M14.5 18a4 4 0 0 1 5 0" />
+    </IconBase>
+  );
+}
+
 export function ChevronDownIcon(props: IconProps) {
   return (
     <IconBase {...props}>

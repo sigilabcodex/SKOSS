@@ -24,19 +24,26 @@ function getTranslatedProviderLabel(
 
 async function OrderCard({
   order,
+  customers,
 }: {
   key?: string;
   order: Awaited<ReturnType<typeof getOrdersWorkspace>>['orders'][number];
+  customers: Awaited<ReturnType<typeof getOrdersWorkspace>>['customers'];
 }) {
   const progress = getOrderProgress(order);
   const { t, locale } = await getServerTranslator();
   const providerLabel = getTranslatedProviderLabel(order, t);
+  const linkedCustomer = order.customerId ? customers.find((customer) => customer.id === order.customerId) ?? null : null;
 
   return (
     <article className={`order-card ${progress.partialLines > 0 ? 'order-card-partial' : ''}`}>
       <div className="order-card-header">
         <div>
-          <strong>{order.customerLabel}</strong>
+          <strong>{linkedCustomer ? (
+            <Link href={`/customers?customer=${linkedCustomer.id}`} className="inline-link">
+              {order.customerLabel}
+            </Link>
+          ) : order.customerLabel}</strong>
           <p>{order.destinationLabel ?? t('common.destinationStillOpen')}</p>
         </div>
         <div className="page-stack compact-badge-stack align-end">
@@ -86,6 +93,13 @@ async function OrderCard({
           ) : null}
           {order.dispatchNotes ? <p className="helper-text no-margin">{order.dispatchNotes}</p> : null}
         </div>
+      ) : null}
+      {linkedCustomer || order.customerPhone ? (
+        <p className="helper-text no-margin">
+          {linkedCustomer ? `${t('orders.customerMemory.linked')}: ${linkedCustomer.displayName}. ` : ''}
+          {order.customerPhone ? `${t('orders.customerMemory.phone')}: ${order.customerPhone}. ` : ''}
+          {linkedCustomer?.deliveryNote ? `${t('orders.customerMemory.deliveryNote')}: ${linkedCustomer.deliveryNote}` : ''}
+        </p>
       ) : null}
       <ul className="mini-line-list">
         {order.lines.map((line) => (
@@ -188,7 +202,7 @@ export default async function OrdersPage({
           </div>
           <div className="card-grid">
             {group.orders.map((order) => (
-              <OrderCard key={order.id} order={order} />
+              <OrderCard key={order.id} order={order} customers={view.customers} />
             ))}
           </div>
         </section>

@@ -5,6 +5,7 @@ import type { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { useI18n } from '@/components/i18n-provider';
 import {
+  CustomersIcon,
   HandoffIcon,
   HomeIcon,
   OrdersIcon,
@@ -13,7 +14,7 @@ import {
 } from '@/components/ui-icons';
 import type { WorkspaceSurface } from '@/lib/domain/types';
 
-type NavHref = '/' | '/orders' | '/production' | '/handoff' | '/setup';
+type NavHref = '/' | '/orders' | '/customers' | '/production' | '/handoff' | '/setup';
 
 type NavItem = {
   key: WorkspaceSurface;
@@ -50,6 +51,13 @@ const navItems: NavItem[] = [
     labelKey: 'nav.orders',
     icon: OrdersIcon,
     active: (pathname) => pathname.startsWith('/orders'),
+  },
+  {
+    key: 'customers',
+    href: '/customers',
+    labelKey: 'nav.customers',
+    icon: CustomersIcon,
+    active: (pathname) => pathname.startsWith('/customers'),
   },
   {
     key: 'production',

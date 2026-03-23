@@ -19,6 +19,7 @@ The purpose of a workspace is to reduce noise and show each role the information
 - simple order creation and editing
 - recurring order management at a practical level
 - destinations, pickup times, and customer notes
+- lightweight customer memory when repeat contact or delivery context matters
 - line items in clear product language
 - obvious flags for special requests or changes
 - visibility into whether an order is new, adjusted, confirmed, or already affecting production
@@ -55,6 +56,7 @@ The sales workspace should prioritize speed, clarity, and low-friction order cap
 ### What they should not be burdened with
 
 - full customer management details unless relevant
+- sales-style CRM workflow noise
 - configuration screens
 - unnecessary back-office metadata
 - abstract reports detached from current work

@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import {
+  buildCustomerRecord,
   buildRawMaterialRecord,
   buildRecipeRecord,
   buildOrderRecord,
@@ -15,6 +16,7 @@ import {
   buildUserRecord,
   buildWipEntry,
   getLineStatus,
+  normalizeCustomerForm,
   normalizeRawMaterialForm,
   normalizeRecipeForm,
   normalizeOrderForm,
@@ -22,6 +24,7 @@ import {
   normalizeSupplierForm,
   normalizeSupplierPriceEntryForm,
   normalizeUserForm,
+  validateCustomerForm,
   validateRawMaterialForm,
   validateRecipeForm,
   validateOrderForm,
@@ -47,7 +50,7 @@ function sortOrders(left: { productionDate: string; updatedAt: string }, right: 
 
 const supportedThemes = ['light', 'dark', 'system'] as const;
 const supportedOperatingModes = ['pickup', 'delivery', 'mixed'] as const;
-const supportedPreferenceWorkspaces = ['orders', 'production', 'handoff', 'setup'] as const;
+const supportedPreferenceWorkspaces = ['orders', 'customers', 'production', 'handoff', 'setup'] as const;
 
 function sortUsers(left: { displayName: string }, right: { displayName: string }) {
   return left.displayName.localeCompare(right.displayName);
@@ -61,6 +64,7 @@ async function getActorUserId(data: Awaited<ReturnType<typeof readStore>>) {
 function revalidateAllWorkspaces() {
   revalidatePath('/');
   revalidatePath('/orders');
+  revalidatePath('/customers');
   revalidatePath('/production');
   revalidatePath('/handoff');
   revalidatePath('/preferences');
@@ -269,6 +273,47 @@ export async function updateUserAction(userId: string, formData: FormData) {
   redirect('/setup?saved=user');
 }
 
+export async function createCustomerAction(formData: FormData) {
+  const data = await readStore();
+  const values = normalizeCustomerForm(formData);
+  const error = validateCustomerForm(values);
+
+  if (error) {
+    redirect(`/customers?error=${encodeURIComponent(error)}`);
+  }
+
+  const actorUserId = await getActorUserId(data);
+  const customer = buildCustomerRecord(values, actorUserId);
+  data.customers = [...data.customers, customer].sort((left, right) => left.displayName.localeCompare(right.displayName));
+  await writeStore(data);
+  revalidateAllWorkspaces();
+  redirect(`/customers?customer=${customer.id}&saved=customer`);
+}
+
+export async function updateCustomerAction(customerId: string, formData: FormData) {
+  const data = await readStore();
+  const existing = data.customers.find((entry) => entry.id === customerId);
+
+  if (!existing) {
+    redirect('/customers?error=missing-customer');
+  }
+
+  const values = normalizeCustomerForm(formData);
+  const error = validateCustomerForm(values);
+
+  if (error) {
+    redirect(`/customers?customer=${customerId}&error=${encodeURIComponent(error)}`);
+  }
+
+  const actorUserId = await getActorUserId(data);
+  const customer = buildCustomerRecord(values, actorUserId, existing);
+  data.customers = data.customers.map((entry) => (entry.id === customerId ? customer : entry))
+    .sort((left, right) => left.displayName.localeCompare(right.displayName));
+  await writeStore(data);
+  revalidateAllWorkspaces();
+  redirect(`/customers?customer=${customer.id}&saved=customer`);
+}
+
 export async function createOrderAction(formData: FormData) {
   const data = await readStore();
   const values = normalizeOrderForm(formData);
@@ -284,6 +329,7 @@ export async function createOrderAction(formData: FormData) {
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/orders');
+  revalidatePath('/customers');
   revalidatePath('/production');
   revalidatePath('/handoff');
   redirect(`/orders/${order.id}?saved=1`);
@@ -310,6 +356,7 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
   revalidatePath('/');
   revalidatePath('/orders');
   revalidatePath(`/orders/${orderId}`);
+  revalidatePath('/customers');
   revalidatePath('/production');
   revalidatePath('/handoff');
   redirect(`/orders/${orderId}?saved=1`);
@@ -378,6 +425,7 @@ export async function updateOrderLineProgressAction(orderId: string, lineId: str
   revalidatePath('/');
   revalidatePath('/orders');
   revalidatePath(`/orders/${orderId}`);
+  revalidatePath('/customers');
   revalidatePath('/production');
   revalidatePath('/handoff');
   redirect(`/orders/${orderId}?saved=progress`);
