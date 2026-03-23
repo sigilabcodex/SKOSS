@@ -1,7 +1,7 @@
 import type { OperatingMode } from '@/lib/domain/types';
 import type { AppPreset } from '@/lib/i18n/config';
 
-export type WorkspaceLinkKey = 'orders' | 'customers' | 'production' | 'handoff' | 'setup';
+export type WorkspaceLinkKey = 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'setup';
 
 type PresetExperience = {
   featuredWorkspaces: WorkspaceLinkKey[];

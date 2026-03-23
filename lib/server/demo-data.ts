@@ -314,7 +314,7 @@ export function buildRecurringTemplateRecord(values: RecurringTemplateFormValues
 }
 
 const supportedUserRoles: UserRole[] = ['admin', 'manager', 'production', 'frontdesk', 'delivery'];
-const supportedWorkspaceDefaults: WorkspaceSurface[] = ['home', 'orders', 'production', 'handoff', 'preferences', 'setup'];
+const supportedWorkspaceDefaults: WorkspaceSurface[] = ['home', 'timeline', 'orders', 'customers', 'production', 'handoff', 'preferences', 'setup'];
 
 export function normalizeUserForm(formData: FormData): UserFormValues {
   const requestedRole = String(formData.get('role') ?? 'frontdesk') as UserRole;
@@ -519,6 +519,162 @@ function getOrderFulfillmentState(order: Order) {
     needsPacking: (order.fulfillmentType === 'own_delivery' || order.fulfillmentType === 'app_delivery') && progress.remainingQuantity > 0,
     needsAssignment: order.fulfillmentType === 'own_delivery' && !order.deliveryAssignee?.trim(),
     waitingForPickup: order.fulfillmentType === 'pickup' && progress.remainingQuantity === 0 && order.status !== 'cancelled',
+  };
+}
+
+function parsePromisedTimeMinutes(promisedTime?: string) {
+  if (!promisedTime || !/^\d{2}:\d{2}$/.test(promisedTime)) {
+    return null;
+  }
+
+  const [hours, minutes] = promisedTime.split(':').map(Number);
+  return Number.isFinite(hours) && Number.isFinite(minutes) ? hours * 60 + minutes : null;
+}
+
+function groupOrdersByDate(orders: Order[]) {
+  const grouped = new Map<string, Order[]>();
+
+  for (const order of orders) {
+    const existing = grouped.get(order.productionDate) ?? [];
+    existing.push(order);
+    grouped.set(order.productionDate, existing);
+  }
+
+  return grouped;
+}
+
+export async function getTimelineWorkspace() {
+  const data = await readStore();
+  const focusDate = getFocusDate(data);
+  const today = new Date().toISOString().slice(0, 10);
+  const currentMinutes = new Date().getUTCHours() * 60 + new Date().getUTCMinutes();
+  const activeOrders = [...data.orders]
+    .filter((order) => order.status !== 'cancelled')
+    .sort(sortOrders);
+  const groupedByDate = groupOrdersByDate(activeOrders);
+  const focusOrders = groupedByDate.get(focusDate) ?? [];
+  const firstTimedFocusOrder = focusOrders
+    .filter((order) => parsePromisedTimeMinutes(order.promisedTime) !== null)
+    .sort((left, right) => (parsePromisedTimeMinutes(left.promisedTime) ?? 1440) - (parsePromisedTimeMinutes(right.promisedTime) ?? 1440))[0];
+  const referenceMinutes = focusDate === today
+    ? currentMinutes
+    : parsePromisedTimeMinutes(firstTimedFocusOrder?.promisedTime) ?? 8 * 60;
+  const dueNowEnd = referenceMinutes + 30;
+  const comingSoonEnd = referenceMinutes + 180;
+
+  const entries = activeOrders.map((order) => {
+    const progress = getOrderProgress(order);
+    const customer = getCustomerById(data.customers, order.customerId);
+    const promisedMinutes = parsePromisedTimeMinutes(order.promisedTime);
+    const isPastDate = order.productionDate < focusDate;
+    const isSameDay = order.productionDate === focusDate;
+    const isOverdueOnFocusDay = focusDate === today
+      && isSameDay
+      && promisedMinutes !== null
+      && promisedMinutes < referenceMinutes
+      && order.status !== 'completed';
+    const isOverdue = isPastDate || isOverdueOnFocusDay;
+    const dueNow = isSameDay
+      && !isOverdue
+      && promisedMinutes !== null
+      && promisedMinutes <= dueNowEnd;
+    const comingSoon = isSameDay
+      && !isOverdue
+      && promisedMinutes !== null
+      && promisedMinutes > dueNowEnd
+      && promisedMinutes <= comingSoonEnd;
+    const timingBucket = isOverdue
+      ? 'overdue'
+      : dueNow
+        ? 'due_now'
+        : comingSoon
+          ? 'coming_soon'
+          : isSameDay
+            ? 'later_today'
+            : order.productionDate > focusDate
+              ? 'upcoming'
+              : 'unscheduled';
+
+    return {
+      id: order.id,
+      orderId: order.id,
+      customerId: order.customerId,
+      customerLabel: order.customerLabel,
+      customerPhone: order.customerPhone ?? customer?.phone,
+      customerDeliveryNote: customer?.deliveryNote,
+      destinationLabel: order.destinationLabel,
+      fulfillmentType: order.fulfillmentType,
+      deliveryProvider: order.deliveryProvider,
+      providerLabel: resolveDeliveryProviderLabel(order),
+      deliveryAssignee: order.deliveryAssignee,
+      promisedTime: order.promisedTime,
+      promisedMinutes,
+      productionDate: order.productionDate,
+      dueDate: order.dueDate,
+      status: order.status,
+      changed: order.status === 'changed' || order.changedInKitchen || order.templateEdited,
+      generatedFromTemplate: order.generatedFromTemplate,
+      visibleOnProductionBoard: order.visibleOnProductionBoard,
+      dispatchNotes: order.dispatchNotes,
+      notes: order.notes,
+      remainingQuantity: progress.remainingQuantity,
+      completedQuantity: progress.completedQuantity,
+      requiredQuantity: progress.requiredQuantity,
+      partialLines: progress.partialLines,
+      lineSummary: order.lines
+        .filter((line) => line.lineType !== 'note_item')
+        .slice(0, 2)
+        .map((line) => `${line.quantity} ${line.unit} ${line.productLabel}`),
+      extraLineCount: Math.max(0, order.lines.filter((line) => line.lineType !== 'note_item').length - 2),
+      timingBucket,
+      dueNow,
+      comingSoon,
+      isOverdue,
+      needsAssignment: order.fulfillmentType === 'own_delivery' && !order.deliveryAssignee?.trim(),
+      readyForPickup: order.fulfillmentType === 'pickup' && progress.remainingQuantity === 0 && order.status !== 'completed',
+      readyForDispatch: (order.fulfillmentType === 'own_delivery' || order.fulfillmentType === 'app_delivery') && progress.remainingQuantity === 0,
+    };
+  });
+
+  const focusEntries = entries
+    .filter((entry) => entry.productionDate === focusDate)
+    .sort((left, right) => (left.promisedMinutes ?? 1440) - (right.promisedMinutes ?? 1440));
+  const overdueEntries = entries.filter((entry) => entry.isOverdue);
+  const dueNowEntries = focusEntries.filter((entry) => entry.timingBucket === 'due_now');
+  const comingSoonEntries = focusEntries.filter((entry) => entry.timingBucket === 'coming_soon');
+  const laterTodayEntries = focusEntries.filter((entry) => entry.timingBucket === 'later_today');
+  const upcomingEntries = entries.filter((entry) => entry.timingBucket === 'upcoming');
+  const upcomingEntriesByDate = new Map<string, typeof upcomingEntries>();
+
+  for (const entry of upcomingEntries) {
+    const existing = upcomingEntriesByDate.get(entry.productionDate) ?? [];
+    existing.push(entry);
+    upcomingEntriesByDate.set(entry.productionDate, existing);
+  }
+
+  return {
+    focusDate,
+    today,
+    referenceMinutes,
+    focusEntries,
+    overdueEntries,
+    dueNowEntries,
+    comingSoonEntries,
+    laterTodayEntries,
+    upcomingDateGroups: Array.from(upcomingEntriesByDate.entries()).map(([productionDate, groupedEntries]) => ({
+      productionDate,
+      entries: [...groupedEntries].sort((left, right) => (left.promisedMinutes ?? 1440) - (right.promisedMinutes ?? 1440)),
+      count: groupedEntries.length,
+    })),
+    summary: {
+      overdue: overdueEntries.length,
+      dueNow: dueNowEntries.length,
+      comingSoon: comingSoonEntries.length,
+      laterToday: laterTodayEntries.length,
+      needsAssignment: focusEntries.filter((entry) => entry.needsAssignment).length,
+      readyForPickup: focusEntries.filter((entry) => entry.readyForPickup).length,
+      readyForDispatch: focusEntries.filter((entry) => entry.readyForDispatch).length,
+    },
   };
 }
 

@@ -480,7 +480,7 @@ export default async function SetupPage({
               <label>
                 <span className="field-heading">{t('setup.fields.defaultWorkspace')} {renderRequiredMark()}</span>
                 <select name="defaultWorkspace" defaultValue={editingUser?.preferences?.defaultWorkspace ?? editingUser?.defaultWorkspace ?? 'orders'}>
-                  {['orders', 'customers', 'production', 'handoff', 'preferences', 'setup'].map((workspace) => (
+                  {['timeline', 'orders', 'customers', 'production', 'handoff', 'preferences', 'setup'].map((workspace) => (
                     <option key={workspace} value={workspace}>{t(`nav.${workspace}`)}</option>
                   ))}
                 </select>

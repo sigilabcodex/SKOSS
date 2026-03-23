@@ -5,7 +5,7 @@ import { getPresetExperience, type WorkspaceLinkKey } from '@/lib/business-prese
 import { getWorkspaceSummary } from '@/lib/server/demo-data';
 import { getCurrentUserContext } from '@/lib/server/auth';
 import { getRequestPreferences, getServerTranslator } from '@/lib/i18n/server';
-import { ArrowRightIcon, CustomersIcon, HandoffIcon, OrdersIcon, ProductionIcon, SetupIcon, SparklesIcon } from '@/components/ui-icons';
+import { ArrowRightIcon, CustomersIcon, HandoffIcon, OrdersIcon, ProductionIcon, SetupIcon, SparklesIcon, TimelineIcon } from '@/components/ui-icons';
 
 type QuickLink = {
   href: Parameters<typeof Link>[0]['href'];
@@ -25,6 +25,12 @@ export default async function HomePage() {
   const recommendedWorkspace = homeWorkspace === 'home' ? presetExperience.emphasisWorkspace : homeWorkspace;
 
   const quickLinkMap: Record<WorkspaceLinkKey, QuickLink> = {
+    timeline: {
+      href: '/timeline',
+      title: t('home.quickLinks.timeline.title'),
+      description: t('home.quickLinks.timeline.description'),
+      icon: TimelineIcon,
+    },
     orders: {
       href: '/orders',
       title: t('home.quickLinks.orders.title'),

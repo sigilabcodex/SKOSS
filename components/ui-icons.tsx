@@ -42,6 +42,17 @@ export function OrdersIcon(props: IconProps) {
   );
 }
 
+export function TimelineIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <circle cx="12" cy="12" r="8" />
+      <path d="M12 7v5l3 2" />
+      <path d="M7 4.5 5.2 3" />
+      <path d="M17 4.5 18.8 3" />
+    </IconBase>
+  );
+}
+
 export function ProductionIcon(props: IconProps) {
   return (
     <IconBase {...props}>

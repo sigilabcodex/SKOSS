@@ -64,6 +64,36 @@ The sales workspace should prioritize speed, clarity, and low-friction order cap
 
 The kitchen workspace should help an operator answer: **What do I need to do now, what is already in progress, and what changed?**
 
+## Operational timeline / day attention
+
+### Primary user
+
+- shift leads
+- frontdesk operators checking upcoming pickups
+- production leads checking what lands next
+- delivery-adjacent staff checking promised windows and assignment gaps
+
+### What they need to see
+
+- what is overdue
+- what is due now or next
+- what is coming soon later in the day
+- promised pickup or delivery timing when it exists
+- enough customer, destination, fulfillment, and note context to act without opening every order
+- role-shaped emphasis so production, frontdesk, and delivery do not all scan the same details first
+
+### What it should not become
+
+- a generic month-view calendar
+- a staff scheduler
+- a route-planning board
+- a project-management or kanban system
+- a second admin-heavy planning module
+
+This surface should stay practical and lightweight.
+
+Its job is not to create abstract events. Its job is to organize **real operational work across time** using the orders, fulfillment promises, and handoff-sensitive context the system already knows.
+
 ## 3. Shift Handoff / Morning Review
 
 ### Primary user

@@ -142,6 +142,7 @@ The initial product direction centers on the operational backbone of small kitch
 - role-based workspaces
 - print-friendly operational outputs such as tickets, summaries, and labels
 - lightweight customer memory for repeat order-taking, fulfillment context, and handoff visibility
+- a lightweight operational timeline surface for seeing due, overdue, and upcoming work across the day
 - a browser-print-first foundation that keeps current printing practical without early printer-system bloat
 
 The near-term focus is the transformation engine that connects these concepts rather than trying to solve every business function at once.
@@ -255,6 +256,7 @@ Before heavy implementation begins, the goal is to clarify:
 - `docs/roadmap.md` — phased roadmap from v0 to a modular platform
 - `docs/modules.md` — core, client, and extension architecture direction
 - `docs/printing.md` — operational printing requirements and future hardware direction
+- `docs/operational-time-surface.md` — why the timeline exists and how it stays intentionally lighter than a generic calendar
 - `docs/domain-glossary.md` — practical domain definitions
 - `docs/domain-model.md` — conceptual domain model
 - `docs/i18n.md` — internationalization principles, dictionary strategy, and language-layer boundaries
