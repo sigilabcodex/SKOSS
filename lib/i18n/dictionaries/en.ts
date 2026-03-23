@@ -935,6 +935,68 @@ const en = {
       estimatedLineCost: 'Estimated line cost:',
     },
   },
+
+  printing: {
+    browserFirstBadge: 'Browser print first',
+    browserFirstHelp: 'Open this view on the device near the paper workflow, then use the browser print dialog. Future printer routing can stay modular.',
+    labels: {
+      artifact: 'Artifact',
+      purpose: 'Purpose',
+      sourceWorkspace: 'Source workspace',
+    },
+    actions: {
+      printNow: 'Print now',
+      orderTicket: 'Order ticket',
+      productionTicket: 'Production / prep ticket',
+      handoffSlip: 'WIP / handoff slip',
+      simpleLabel: 'Simple label',
+      backToOrder: 'Back to order',
+      backToProduction: 'Back to production',
+      backToHandoff: 'Back to handoff',
+    },
+    artifacts: {
+      order_ticket: 'Order ticket',
+      production_ticket: 'Production / prep ticket',
+      handoff_slip: 'WIP / handoff slip',
+      simple_label: 'Simple label',
+    },
+    purposes: {
+      kitchen_execution: 'Kitchen execution',
+      frontdesk_handoff: 'Front-desk handoff',
+      shift_handoff: 'Shift handoff',
+      item_identification: 'Item identification',
+    },
+    documents: {
+      shared: {
+        lines: 'Lines',
+        notes: 'Notes',
+        wipSnapshot: 'WIP snapshot',
+        recentNotes: 'Recent notes',
+        handoffDay: 'Handoff day',
+        openItems: 'Open items',
+        fulfillmentWatch: 'Fulfillment watch',
+        shiftSummary: 'Shift summary',
+      },
+      orderTicket: {
+        title: 'Order ticket',
+        description: 'Compact order detail for kitchen, packing, or counter handoff without full app chrome.',
+      },
+      productionTicket: {
+        title: 'Production / prep ticket',
+        description: 'A print-friendly demand snapshot for the active production day, with WIP and handoff context kept close.',
+      },
+      handoffSlip: {
+        title: 'WIP / handoff slip',
+        description: 'A concise shift-to-shift paper snapshot for open work, WIP, and fulfillment watch items.',
+      },
+      simpleLabel: {
+        title: 'Simple label',
+        description: 'A lightweight browser-print-first label for trays, bags, boxes, or other operational handoff points.',
+        badge: 'Label',
+      },
+    },
+  },
+
   preferences: {
     workspace: 'Personal preferences',
     title: 'Preferences',

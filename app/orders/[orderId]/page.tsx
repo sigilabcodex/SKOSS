@@ -7,7 +7,7 @@ import { resolveDeliveryProviderLabel } from '@/lib/domain/order-helpers';
 import { updateOrderAction, updateOrderLineProgressAction } from '@/lib/server/actions';
 import { getLineStatus, getOrderEditor, getOrderProgress } from '@/lib/server/demo-data';
 import { getServerTranslator } from '@/lib/i18n/server';
-import { ArrowRightIcon, CheckIcon } from '@/components/ui-icons';
+import { ArrowRightIcon, CheckIcon, PrinterIcon } from '@/components/ui-icons';
 
 export default async function EditOrderPage({
   params,
@@ -41,10 +41,20 @@ export default async function EditOrderPage({
             {formatStatusLabel(view.order.fulfillmentType, t)} {t('orders.editPage.descriptionSeparator')} {t('orders.editPage.editDescription')}
           </p>
         </div>
-        <Link href="/orders" className="button-secondary">
-          <ArrowRightIcon className="button-icon button-icon-reverse" />
-          <span>{t('common.backToOrders')}</span>
-        </Link>
+        <div className="action-cluster compact-actions">
+          <Link href={`/orders/${view.order.id}/print`} className="button-secondary" target="_blank" rel="noreferrer">
+            <PrinterIcon className="button-icon" />
+            <span>{t('printing.actions.orderTicket')}</span>
+          </Link>
+          <Link href={`/orders/${view.order.id}/label`} className="button-secondary" target="_blank" rel="noreferrer">
+            <PrinterIcon className="button-icon" />
+            <span>{t('printing.actions.simpleLabel')}</span>
+          </Link>
+          <Link href="/orders" className="button-secondary">
+            <ArrowRightIcon className="button-icon button-icon-reverse" />
+            <span>{t('common.backToOrders')}</span>
+          </Link>
+        </div>
       </section>
 
       {pageParams?.saved === '1' ? <p className="inline-success"><CheckIcon className="button-icon" />{t('orders.editPage.saved')}</p> : null}
