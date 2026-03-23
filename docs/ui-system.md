@@ -173,7 +173,7 @@ Header rule:
 When adding or editing forms:
 
 - group fields by operator intent, not by raw data model shape
-- mark required items clearly
+- mark required items clearly with a light asterisk instead of a heavy status chip
 - mark optional items quietly
 - use helper text only when it reduces confusion
 - keep notes and exceptions easy to reach

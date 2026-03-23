@@ -1,10 +1,11 @@
 'use client';
 
+import type { OrderLine } from '@/lib/domain/types';
 import { useI18n } from '@/components/i18n-provider';
 import { MinusIcon, PlusIcon } from '@/components/ui-icons';
 
 export type LineDraft = {
-  lineType: string;
+  lineType: OrderLine['lineType'];
   productLabel: string;
   quantity: number | string;
   unit: string;
@@ -14,7 +15,7 @@ export type LineDraft = {
 };
 
 interface LineOption {
-  value: string;
+  value: OrderLine['lineType'];
   label: string;
 }
 
@@ -97,12 +98,14 @@ function LineRow({
   line,
   index,
   lineTypeOptions,
+  suggestionListId,
   status,
   template = false,
 }: {
   line: LineDraft;
   index: number;
   lineTypeOptions: readonly LineOption[];
+  suggestionListId: string;
   status?: { label: string; tone: string };
   template?: boolean;
 }) {
@@ -158,7 +161,7 @@ function LineRow({
           <span className="field-heading">{t('orders.lineEditor.itemName')}</span>
           <input
             name="productLabel"
-            list="product-suggestions"
+            list={suggestionListId}
             defaultValue={line.productLabel}
             placeholder={t('orders.lineEditor.placeholders.itemName')}
           />
@@ -195,6 +198,7 @@ export function LineItemsEditor({
   const { t } = useI18n();
   const lines = initialLines.length > 0 ? initialLines : [emptyLine];
   const visibleSuggestions = Array.from(new Set(productSuggestions)).sort();
+  const suggestionListId = `${editorId}-suggestions`;
   const labels = {
     line: t('orders.lineEditor.line'),
     visibleRows: t('orders.lineEditor.visibleRows'),
@@ -215,6 +219,7 @@ export function LineItemsEditor({
             line={line}
             index={index}
             lineTypeOptions={lineTypeOptions}
+            suggestionListId={suggestionListId}
             status={existingStatuses?.[index]}
           />
         ))}
@@ -228,10 +233,16 @@ export function LineItemsEditor({
       </div>
 
       <div className="visually-hidden" data-line-row-template>
-        <LineRow line={emptyLine} index={lines.length} lineTypeOptions={lineTypeOptions} template />
+        <LineRow
+          line={emptyLine}
+          index={lines.length}
+          lineTypeOptions={lineTypeOptions}
+          suggestionListId={suggestionListId}
+          template
+        />
       </div>
 
-      <datalist id="product-suggestions">
+      <datalist id={suggestionListId}>
         {visibleSuggestions.map((suggestion) => (
           <option key={suggestion} value={suggestion} />
         ))}

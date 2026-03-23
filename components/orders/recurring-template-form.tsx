@@ -1,7 +1,7 @@
 'use client';
 
 import type { Destination } from '@/lib/domain/types';
-import { getDefaultLineDrafts, weekdayOptions } from '@/lib/domain/order-helpers';
+import { getDefaultLineDrafts, getOrderLineTypeLabelKey, orderLineTypeValues, weekdayOptions } from '@/lib/domain/order-helpers';
 import { formatWeekdayLabel } from '@/lib/domain/formatters';
 import { useI18n } from '@/components/i18n-provider';
 import { LineItemsEditor } from '@/components/orders/line-items-editor';
@@ -15,12 +15,6 @@ interface RecurringTemplateFormProps {
   focusDate: string;
 }
 
-const lineTypeValues = [
-  { value: 'product_variant', key: 'structuredItem' },
-  { value: 'draft_product', key: 'draftItem' },
-  { value: 'note_item', key: 'noteItem' },
-] as const;
-
 export function RecurringTemplateForm({
   action,
   destinations,
@@ -29,9 +23,9 @@ export function RecurringTemplateForm({
 }: RecurringTemplateFormProps) {
   const { t } = useI18n();
   const lineDrafts = getDefaultLineDrafts([], 4);
-  const lineTypeOptions = lineTypeValues.map((option) => ({
-    value: option.value,
-    label: t(`orders.lineEditor.kinds.${option.key}`),
+  const lineTypeOptions = orderLineTypeValues.map((option) => ({
+    value: option,
+    label: t(`orders.lineEditor.kinds.${getOrderLineTypeLabelKey(option)}`),
   }));
 
   return (

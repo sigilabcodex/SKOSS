@@ -179,12 +179,14 @@ export function buildCostingSnapshotItems(
 ): CostingSnapshotItem[] {
   const items: CostingSnapshotItem[] = [];
   const coveredTargets = new Set<string>();
+  const productsById = new Map(products.map((product) => [product.id, product]));
+  const variantsById = new Map(
+    products.flatMap((product) => product.variants.map((variant) => [variant.id, variant] as const)),
+  );
 
   for (const recipe of recipes) {
-    const product = products.find((entry) => entry.id === recipe.productId);
-    const variant = recipe.productVariantId
-      ? product?.variants.find((entry) => entry.id === recipe.productVariantId) ?? null
-      : null;
+    const product = productsById.get(recipe.productId);
+    const variant = recipe.productVariantId ? variantsById.get(recipe.productVariantId) ?? null : null;
     const productLabel = product ? getProductLabel(product, variant) : recipe.title;
     const targetKey = recipe.productVariantId ?? recipe.productId;
     const recipeCost = recipeCostById.get(recipe.id);
