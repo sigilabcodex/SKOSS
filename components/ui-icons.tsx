@@ -181,6 +181,19 @@ export function ArrowRightIcon(props: IconProps) {
   );
 }
 
+export function PrinterIcon(props: IconProps) {
+  return (
+    <IconBase {...props}>
+      <path d="M7 8V4h10v4" />
+      <rect x="5" y="14" width="14" height="7" rx="2" />
+      <path d="M5 10H4a2 2 0 0 0-2 2v4h3" />
+      <path d="M19 10h1a2 2 0 0 1 2 2v4h-3" />
+      <path d="M8 17h8" />
+      <path d="M8 11h.01" />
+    </IconBase>
+  );
+}
+
 export function SparklesIcon(props: IconProps) {
   return (
     <IconBase {...props}>

@@ -934,6 +934,68 @@ const pt = {
       estimatedLineCost: 'Custo estimado da linha:',
     },
   },
+
+  printing: {
+    browserFirstBadge: 'Impressão via navegador primeiro',
+    browserFirstHelp: 'Abra esta visualização no dispositivo perto do fluxo em papel e depois use a caixa de impressão do navegador. O roteamento futuro de impressoras pode continuar modular.',
+    labels: {
+      artifact: 'Artefato',
+      purpose: 'Propósito',
+      sourceWorkspace: 'Espaço de origem',
+    },
+    actions: {
+      printNow: 'Imprimir agora',
+      orderTicket: 'Ticket do pedido',
+      productionTicket: 'Ticket de produção / preparo',
+      handoffSlip: 'Slip de WIP / passagem',
+      simpleLabel: 'Rótulo simples',
+      backToOrder: 'Voltar ao pedido',
+      backToProduction: 'Voltar à produção',
+      backToHandoff: 'Voltar à passagem',
+    },
+    artifacts: {
+      order_ticket: 'Ticket do pedido',
+      production_ticket: 'Ticket de produção / preparo',
+      handoff_slip: 'Slip de WIP / passagem',
+      simple_label: 'Rótulo simples',
+    },
+    purposes: {
+      kitchen_execution: 'Execução de cozinha',
+      frontdesk_handoff: 'Passagem de balcão',
+      shift_handoff: 'Passagem de turno',
+      item_identification: 'Identificação de item',
+    },
+    documents: {
+      shared: {
+        lines: 'Linhas',
+        notes: 'Notas',
+        wipSnapshot: 'Resumo de WIP',
+        recentNotes: 'Notas recentes',
+        handoffDay: 'Dia de passagem',
+        openItems: 'Itens abertos',
+        fulfillmentWatch: 'Acompanhamento de conclusão',
+        shiftSummary: 'Resumo do turno',
+      },
+      orderTicket: {
+        title: 'Ticket do pedido',
+        description: 'Detalhe compacto do pedido para cozinha, embalagem ou passagem de balcão sem toda a interface do app.',
+      },
+      productionTicket: {
+        title: 'Ticket de produção / preparo',
+        description: 'Um resumo de demanda amigável para impressão do dia de produção ativo, com WIP e contexto de passagem por perto.',
+      },
+      handoffSlip: {
+        title: 'Slip de WIP / passagem',
+        description: 'Um resumo curto em papel para passagem entre turnos com trabalho aberto, WIP e itens de acompanhamento de conclusão.',
+      },
+      simpleLabel: {
+        title: 'Rótulo simples',
+        description: 'Um rótulo leve com impressão via navegador primeiro para bandejas, sacolas, caixas ou outros pontos operacionais de passagem.',
+        badge: 'Rótulo',
+      },
+    },
+  },
+
   preferences: {
     workspace: 'Preferências pessoais',
     title: 'Preferências',

@@ -934,6 +934,68 @@ const es = {
       estimatedLineCost: 'Costo estimado de línea:',
     },
   },
+
+  printing: {
+    browserFirstBadge: 'Impresión desde navegador primero',
+    browserFirstHelp: 'Abre esta vista en el dispositivo cercano al flujo en papel y luego usa el diálogo de impresión del navegador. El enrutamiento futuro de impresoras puede seguir modular.',
+    labels: {
+      artifact: 'Artefacto',
+      purpose: 'Propósito',
+      sourceWorkspace: 'Espacio de origen',
+    },
+    actions: {
+      printNow: 'Imprimir ahora',
+      orderTicket: 'Ticket de pedido',
+      productionTicket: 'Ticket de producción / preparación',
+      handoffSlip: 'Slip de WIP / relevo',
+      simpleLabel: 'Etiqueta simple',
+      backToOrder: 'Volver al pedido',
+      backToProduction: 'Volver a producción',
+      backToHandoff: 'Volver a relevo',
+    },
+    artifacts: {
+      order_ticket: 'Ticket de pedido',
+      production_ticket: 'Ticket de producción / preparación',
+      handoff_slip: 'Slip de WIP / relevo',
+      simple_label: 'Etiqueta simple',
+    },
+    purposes: {
+      kitchen_execution: 'Ejecución de cocina',
+      frontdesk_handoff: 'Handoff de mostrador',
+      shift_handoff: 'Relevo de turno',
+      item_identification: 'Identificación de ítem',
+    },
+    documents: {
+      shared: {
+        lines: 'Líneas',
+        notes: 'Notas',
+        wipSnapshot: 'Resumen de WIP',
+        recentNotes: 'Notas recientes',
+        handoffDay: 'Día de relevo',
+        openItems: 'Pendientes',
+        fulfillmentWatch: 'Seguimiento de cumplimiento',
+        shiftSummary: 'Resumen de turno',
+      },
+      orderTicket: {
+        title: 'Ticket de pedido',
+        description: 'Detalle compacto del pedido para cocina, empaque o relevo de mostrador sin todo el cromo de la app.',
+      },
+      productionTicket: {
+        title: 'Ticket de producción / preparación',
+        description: 'Un resumen imprimible de demanda para el día de producción activo, con WIP y contexto de relevo cerca.',
+      },
+      handoffSlip: {
+        title: 'Slip de WIP / relevo',
+        description: 'Un resumen breve en papel para pasar entre turnos con trabajo abierto, WIP y seguimiento de cumplimiento.',
+      },
+      simpleLabel: {
+        title: 'Etiqueta simple',
+        description: 'Una etiqueta liviana pensada primero para impresión de navegador en bandejas, bolsas, cajas u otros puntos operativos de relevo.',
+        badge: 'Etiqueta',
+      },
+    },
+  },
+
   preferences: {
     workspace: 'Preferencias personales',
     title: 'Preferencias',

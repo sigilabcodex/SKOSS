@@ -8,7 +8,8 @@ import { addShiftNoteAction, addWipEntryAction, saveShiftLogAction } from '@/lib
 import { getHandoffWorkspace } from '@/lib/server/demo-data';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { SubmitButton } from '@/components/submit-button';
-import { CheckIcon, HandoffIcon } from '@/components/ui-icons';
+import Link from 'next/link';
+import { CheckIcon, HandoffIcon, PrinterIcon } from '@/components/ui-icons';
 
 const shiftOptions = ['night', 'morning', 'afternoon'] as const;
 const stageOptions = ['prepared', 'shaped', 'baked', 'ready'] as const;
@@ -44,6 +45,10 @@ export default async function HandoffPage({
           <h1>{t('handoff.title')}</h1>
           <p>{t('handoff.description')}</p>
         </div>
+        <Link href="/handoff/print" className="button-secondary" target="_blank" rel="noreferrer">
+          <PrinterIcon className="button-icon" />
+          <span>{t('printing.actions.handoffSlip')}</span>
+        </Link>
       </section>
 
       {params?.saved ? <p className="inline-success"><CheckIcon className="button-icon" />{t('handoff.savedUpdate', { item: params.saved })}</p> : null}

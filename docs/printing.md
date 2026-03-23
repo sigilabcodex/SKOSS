@@ -135,6 +135,63 @@ When SKOSS runs on-site:
 
 This is one reason LAN-friendly deployment remains strategically important.
 
+
+## Current foundation
+
+The current implementation should stay intentionally modest and browser-first.
+
+### What the foundation means right now
+
+The current printing foundation is meant to answer a practical question:
+
+**how does SKOSS / SKOSSina print useful operational artifacts now without forcing early printer-system architecture?**
+
+The answer for the current stage is:
+
+- define a lightweight internal print intent so the system knows **what** is being printed and **why**
+- add clean dedicated print views for the first operational artifacts
+- let workers open those views from the operational surfaces where the paper is needed
+- rely on normal browser printing first
+- keep future printer routing or integration work separate from the base artifact model
+
+This gives the product a real print workflow without pretending that printer orchestration is already solved.
+
+### Initial supported artifact types
+
+The current foundation should support a small first set of operational artifacts:
+
+- **order ticket** for kitchen, packing, or counter handoff
+- **production / prep ticket** for grouped demand and current-day execution
+- **WIP / handoff slip** for shift-to-shift paper snapshots
+- **simple label** for trays, bags, boxes, or similar lightweight identification needs
+
+These artifacts are intentionally generic enough to work across bakery, café, small-restaurant, dark-kitchen, and similar preset directions.
+
+### Browser-print-first workflow
+
+The expected near-term flow is:
+
+1. worker opens the relevant operational surface in SKOSSina
+2. worker chooses a print action tied to the current workflow
+3. SKOSSina opens a focused print view with minimal chrome
+4. the browser print dialog is used as the actual print trigger
+5. paper output can then be handed into kitchen, packing, front-desk, or shift workflows
+
+This keeps the first version useful in both hosted-server and LAN/self-hosted environments without requiring a dedicated print service.
+
+### Explicit non-goals for the current stage
+
+The current foundation does **not** attempt to provide:
+
+- printer vendor integrations
+- LAN print routing layers
+- advanced queue management
+- printer fleet administration
+- background print daemons by default
+- overbuilt print settings or print-admin modules
+
+Those may become relevant later, but only after real operational usage shows which printer flows are worth standardizing.
+
 ## Near-term guidance
 
 Near-term printing work should prioritize:

@@ -4,7 +4,7 @@ import { getLineStatus, getOrderProgress, getProductionBoard } from '@/lib/serve
 import { updateOrderLineProgressAction } from '@/lib/server/actions';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { SubmitButton } from '@/components/submit-button';
-import { CheckIcon, HandoffIcon, ProductionIcon } from '@/components/ui-icons';
+import { CheckIcon, HandoffIcon, PrinterIcon, ProductionIcon } from '@/components/ui-icons';
 
 function getProviderLabel(entry: { deliveryProvider?: string; providerLabel?: string }, t: (key: string) => string) {
   if (!entry.providerLabel) {
@@ -44,7 +44,13 @@ export default async function ProductionPage() {
                 {board.boardOrders.length} {t('production.boardSummary')} · {board.readyCount} {t('production.readyWipEntries')} · {board.handoffCount} {t('production.handoffLogs')}
               </p>
             </div>
-            <span className="summary-pill">{board.changedOrders.length} {t('production.changedFlaggedOrders')}</span>
+            <div className="action-cluster compact-actions">
+              <span className="summary-pill">{board.changedOrders.length} {t('production.changedFlaggedOrders')}</span>
+              <Link href={{ pathname: '/production/print', query: { date: board.productionDate } }} className="button-secondary" target="_blank" rel="noreferrer">
+                <PrinterIcon className="button-icon" />
+                <span>{t('printing.actions.productionTicket')}</span>
+              </Link>
+            </div>
           </div>
 
           <div className="stats-grid compact-stats-grid">
