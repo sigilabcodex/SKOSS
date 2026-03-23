@@ -159,6 +159,7 @@ export default async function EditOrderPage({
       <OrderForm
         action={action}
         customers={view.customers}
+        customerContextById={view.customerContextById}
         destinations={view.destinations}
         order={order}
         productSuggestions={view.productSuggestions}

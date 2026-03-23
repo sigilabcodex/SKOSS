@@ -72,6 +72,18 @@ export interface CustomerFormValues {
   active: boolean;
 }
 
+export interface CustomerOrderContext {
+  linkedOrderCount: number;
+  lastOrderDate?: string;
+  recentOrders: Array<{
+    id: string;
+    productionDate: string;
+    fulfillmentType: Order['fulfillmentType'];
+    destinationLabel?: string;
+    promisedTime?: string;
+  }>;
+}
+
 export interface RawMaterialFormValues {
   name: string;
   category?: string;
@@ -431,9 +443,9 @@ export async function getCustomersWorkspace(selectedCustomerId?: string) {
       lastOrderDateByCustomer.set(order.customerId, order.productionDate);
     }
   }
-  const selectedCustomer = (selectedCustomerId
+  const selectedCustomer = selectedCustomerId
     ? customers.find((customer) => customer.id === selectedCustomerId) ?? null
-    : customers[0] ?? null);
+    : null;
   const customerOrderHistory = selectedCustomer
     ? [...data.orders]
       .filter((order) => order.customerId === selectedCustomer.id)
@@ -456,10 +468,30 @@ export async function getCustomersWorkspace(selectedCustomerId?: string) {
 export async function getOrderEditor(orderId?: string) {
   const data = await readStore();
   const order = orderId ? data.orders.find((entry) => entry.id === orderId) ?? null : null;
+  const customerContextById: Record<string, CustomerOrderContext> = {};
+
+  for (const customer of data.customers) {
+    const recentOrders = [...data.orders]
+      .filter((entry) => entry.customerId === customer.id)
+      .sort(sortOrders);
+
+    customerContextById[customer.id] = {
+      linkedOrderCount: recentOrders.length,
+      lastOrderDate: recentOrders[0]?.productionDate,
+      recentOrders: recentOrders.slice(0, 3).map((entry) => ({
+        id: entry.id,
+        productionDate: entry.productionDate,
+        fulfillmentType: entry.fulfillmentType,
+        destinationLabel: entry.destinationLabel,
+        promisedTime: entry.promisedTime,
+      })),
+    };
+  }
 
   return {
     order,
     customers: [...data.customers].sort((left, right) => left.displayName.localeCompare(right.displayName)),
+    customerContextById,
     destinations: data.destinations,
     productSuggestions: getProductSuggestions(data.products),
     focusDate: getFocusDate(data),

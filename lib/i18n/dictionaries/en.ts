@@ -442,6 +442,9 @@ const en = {
       },
       linkedCustomerHint: 'This order is linked to saved customer memory.',
       openCustomer: 'Open customer detail',
+      customerContext: {
+        summary: '{{count}} linked orders so far. Last linked order: {{date}}.',
+      },
       dispatchHint: {
         pickup: 'Use this section only when pickup timing or collection notes matter.',
         delivery: 'Keep delivery source, assignment, promise time, and packing notes visible without building dispatch software.',
