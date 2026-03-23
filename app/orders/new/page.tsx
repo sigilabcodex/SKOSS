@@ -38,6 +38,7 @@ export default async function NewOrderPage({
 
       <OrderForm
         action={createOrderAction}
+        customers={view.customers}
         destinations={view.destinations}
         productSuggestions={view.productSuggestions}
         focusDate={view.focusDate}

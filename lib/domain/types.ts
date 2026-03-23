@@ -3,7 +3,8 @@ import type { AppLocale, AppPreset } from '@/lib/i18n/config';
 export type UserRole = 'admin' | 'manager' | 'production' | 'frontdesk' | 'delivery';
 export type ThemeName = 'light' | 'dark' | 'system';
 export type OperatingMode = 'pickup' | 'delivery' | 'mixed';
-export type WorkspaceSurface = 'home' | 'orders' | 'production' | 'handoff' | 'preferences' | 'setup';
+export type WorkspaceSurface = 'home' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup';
+export type CustomerContactMethod = 'phone' | 'email' | 'whatsapp';
 
 export type OrderStatus = 'draft' | 'active' | 'changed' | 'cancelled' | 'completed';
 export type OrderLineStatus = 'pending' | 'in_progress' | 'done' | 'cancelled';
@@ -91,6 +92,20 @@ export interface Product {
   variants: ProductVariant[];
 }
 
+export interface Customer extends AuditFields {
+  id: string;
+  displayName: string;
+  phone?: string;
+  email?: string;
+  preferredContactMethod?: CustomerContactMethod;
+  address?: string;
+  deliveryNote?: string;
+  internalNote?: string;
+  active: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface OrderLine {
   id: string;
   lineType: 'product_variant' | 'draft_product' | 'note_item';
@@ -107,6 +122,7 @@ export interface Order extends AuditFields {
   source: OrderSource;
   status: OrderStatus;
   fulfillmentType: FulfillmentType;
+  customerId?: string;
   customerLabel: string;
   customerPhone?: string;
   destinationLabel?: string;
@@ -258,6 +274,7 @@ export interface AppData {
   preferences: WorkspacePreferences;
   session: SessionState;
   users: User[];
+  customers: Customer[];
   destinations: Destination[];
   products: Product[];
   suppliers: Supplier[];

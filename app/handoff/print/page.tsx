@@ -97,6 +97,7 @@ export default async function HandoffPrintPage() {
                 <span>
                   {formatStatusLabel(order.fulfillmentType, t)}
                   {order.destinationLabel ? ` · ${order.destinationLabel}` : ''}
+                  {order.customerPhone ? ` · ${t('orders.customerMemory.phone')}: ${order.customerPhone}` : ''}
                   {order.deliveryAssignee ? ` · ${order.deliveryAssignee}` : ''}
                   {order.promisedTime ? ` · ${order.promisedTime}` : ''}
                 </span>

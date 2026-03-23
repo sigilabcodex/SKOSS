@@ -134,8 +134,10 @@ export default async function ProductionPage() {
                       <span>
                         {order.destinationLabel ?? t('common.destinationStillOpen')}
                         {providerLabel ? ` · ${providerLabel}` : ''}
+                        {order.customerPhone ? ` · ${t('orders.customerMemory.phone')}: ${order.customerPhone}` : ''}
                         {order.promisedTime ? ` · ${order.promisedTime}` : ''}
                         {` · ${order.remainingQuantity} ${t('production.fulfillmentQueues.remaining').toLowerCase()}`}
+                        {order.deliveryNote ? ` · ${order.deliveryNote}` : ''}
                         {order.dispatchNotes ? ` · ${order.dispatchNotes}` : ''}
                       </span>
                     </li>
@@ -160,7 +162,9 @@ export default async function ProductionPage() {
                       <span>
                         {order.destinationLabel ?? t('common.destinationStillOpen')}
                         {providerLabel ? ` · ${providerLabel}` : ''}
+                        {order.customerPhone ? ` · ${t('orders.customerMemory.phone')}: ${order.customerPhone}` : ''}
                         {order.promisedTime ? ` · ${order.promisedTime}` : ''}
+                        {order.deliveryNote ? ` · ${order.deliveryNote}` : ''}
                         {order.dispatchNotes ? ` · ${order.dispatchNotes}` : ''}
                       </span>
                     </li>
@@ -184,6 +188,7 @@ export default async function ProductionPage() {
                     <strong>{order.customerLabel}</strong>
                     <span>
                       {order.destinationLabel ?? t('common.destinationStillOpen')}
+                      {order.customerPhone ? ` · ${t('orders.customerMemory.phone')}: ${order.customerPhone}` : ''}
                       {order.promisedTime ? ` · ${order.promisedTime}` : ''}
                       {order.dispatchNotes ? ` · ${order.dispatchNotes}` : ''}
                     </span>
@@ -279,7 +284,9 @@ export default async function ProductionPage() {
                     </div>
                     {order.deliveryAssignee || order.promisedTime || order.dispatchNotes ? (
                       <p className="helper-text no-margin">
+                        {order.customerId ? `${t('orders.customerMemory.linked')}. ` : ''}
                         {order.deliveryAssignee ? `${t('orders.assignee')}: ${order.deliveryAssignee}. ` : ''}
+                        {order.customerPhone ? `${t('orders.customerMemory.phone')}: ${order.customerPhone}. ` : ''}
                         {order.promisedTime ? `${t('orders.promise')}: ${order.promisedTime}. ` : ''}
                         {order.dispatchNotes ?? ''}
                       </p>

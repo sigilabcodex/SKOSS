@@ -4,6 +4,7 @@ import { demoSeed } from '@/data/demo-seed';
 import { inferFulfillmentType } from '@/lib/domain/order-helpers';
 import type {
   AppData,
+  Customer,
   Order,
   OrderLine,
   Recipe,
@@ -189,6 +190,33 @@ function normalizeUser(user: Partial<User> & { email?: string; role?: string }, 
   };
 }
 
+function normalizeCustomer(customer: Partial<Customer>): Customer {
+  const now = new Date().toISOString();
+  const createdAt = customer.createdAt ?? now;
+  const updatedAt = customer.updatedAt ?? createdAt;
+  const preferredContactMethod = customer.preferredContactMethod === 'phone'
+    || customer.preferredContactMethod === 'email'
+    || customer.preferredContactMethod === 'whatsapp'
+    ? customer.preferredContactMethod
+    : undefined;
+
+  return {
+    id: customer.id ?? `customer-${crypto.randomUUID()}`,
+    displayName: customer.displayName?.trim() || 'Draft customer',
+    phone: customer.phone?.trim() || undefined,
+    email: customer.email?.trim() || undefined,
+    preferredContactMethod,
+    address: customer.address?.trim() || undefined,
+    deliveryNote: customer.deliveryNote?.trim() || undefined,
+    internalNote: customer.internalNote?.trim() || undefined,
+    active: customer.active ?? true,
+    createdAt,
+    updatedAt,
+    createdByUserId: customer.createdByUserId,
+    updatedByUserId: customer.updatedByUserId,
+  };
+}
+
 function nextOccurrenceDate(template: RecurringTemplate, currentDate: string) {
   if (template.frequency === 'daily') {
     return addDays(currentDate, 1);
@@ -317,6 +345,7 @@ function hydrateStore(rawData: AppData): AppData {
       lastLoginAt: rawData.session?.lastLoginAt,
     },
     users,
+    customers: (rawData.customers ?? []).map((customer) => normalizeCustomer(customer)),
     recurringTemplates: (rawData.recurringTemplates ?? []).map((template) =>
       normalizeTemplate(template as Partial<RecurringTemplate>),
     ),
@@ -328,6 +357,7 @@ function hydrateStore(rawData: AppData): AppData {
       deliveryAssignee: order.deliveryAssignee,
       promisedTime: order.promisedTime,
       dispatchNotes: order.dispatchNotes,
+      customerId: order.customerId,
       changedInKitchen: order.changedInKitchen ?? false,
       visibleOnProductionBoard: order.visibleOnProductionBoard ?? true,
       templateId: order.templateId,

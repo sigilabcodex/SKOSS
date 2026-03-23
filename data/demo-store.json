@@ -188,10 +188,10 @@
       "notes": "Daily opening rhythm. Adjust sweet tray mix if the prior evening sold down.",
       "frequency": "daily",
       "weeklyDays": [],
-      "nextOccurrenceDate": "2026-04-02",
+      "nextOccurrenceDate": "2026-04-03",
       "active": true,
       "createdAt": "2026-03-20T18:05:00Z",
-      "updatedAt": "2026-03-22T03:45:10.595Z",
+      "updatedAt": "2026-03-23T00:47:22.437Z",
       "lines": [
         {
           "id": "template-line-counter-roll",
@@ -322,43 +322,8 @@
       "deliveryAssignee": null,
       "dispatchNotes": "Call on arrival",
       "promisedTime": "09:30",
-      "deliveryProviderLabel": null
-    },
-    {
-      "id": "order-valeria-app",
-      "source": "phone",
-      "status": "active",
-      "customerLabel": "Valeria office lunch",
-      "customerPhone": "+52 555 010 2991",
-      "destinationLabel": "Roma Norte office drop",
-      "dueDate": "2026-03-28",
-      "productionDate": "2026-03-28",
-      "notes": "App order packed separately from front counter pickup.",
-      "createdAt": "2026-03-21T05:15:00Z",
-      "updatedAt": "2026-03-21T05:15:00Z",
-      "changedInKitchen": false,
-      "visibleOnProductionBoard": true,
-      "generatedFromTemplate": false,
-      "templateEdited": false,
-      "lines": [
-        {
-          "id": "line-valeria-croissant",
-          "lineType": "product_variant",
-          "productLabel": "Croissant / Butter",
-          "quantity": 8,
-          "completedQuantity": 0,
-          "unit": "pieces",
-          "lineStatus": "pending",
-          "note": "Pack in two bags for courier handoff."
-        }
-      ],
-      "generatedOccurrenceDate": "2026-03-28",
-      "fulfillmentType": "app_delivery",
-      "deliveryProvider": "uber",
       "deliveryProviderLabel": null,
-      "deliveryAssignee": "App courier pending",
-      "promisedTime": "10:15",
-      "dispatchNotes": "Leave near dispatch shelf once packed."
+      "customerId": "customer-sofia-birthday"
     },
     {
       "id": "order-template-front-counter-daily-2026-03-28",
@@ -450,7 +415,45 @@
       "deliveryAssignee": null,
       "dispatchNotes": "Bag loaves in pairs. Assign a morning route runner before packing finishes.",
       "deliveryProviderLabel": null,
-      "promisedTime": "07:00"
+      "promisedTime": "07:00",
+      "customerId": "customer-cafe-luna"
+    },
+    {
+      "id": "order-valeria-app",
+      "source": "phone",
+      "status": "active",
+      "customerLabel": "Valeria office lunch",
+      "customerPhone": "+52 555 010 2991",
+      "destinationLabel": "Roma Norte office drop",
+      "dueDate": "2026-03-28",
+      "productionDate": "2026-03-28",
+      "notes": "App order packed separately from front counter pickup.",
+      "createdAt": "2026-03-21T05:15:00Z",
+      "updatedAt": "2026-03-21T05:15:00Z",
+      "changedInKitchen": false,
+      "visibleOnProductionBoard": true,
+      "generatedFromTemplate": false,
+      "templateEdited": false,
+      "lines": [
+        {
+          "id": "line-valeria-croissant",
+          "lineType": "product_variant",
+          "productLabel": "Croissant / Butter",
+          "quantity": 8,
+          "completedQuantity": 0,
+          "unit": "pieces",
+          "lineStatus": "pending",
+          "note": "Pack in two bags for courier handoff."
+        }
+      ],
+      "generatedOccurrenceDate": "2026-03-28",
+      "fulfillmentType": "app_delivery",
+      "deliveryProvider": "uber",
+      "deliveryProviderLabel": null,
+      "deliveryAssignee": "App courier pending",
+      "promisedTime": "10:15",
+      "dispatchNotes": "Leave near dispatch shelf once packed.",
+      "customerId": "customer-valeria-office"
     },
     {
       "id": "order-template-front-counter-daily-2026-03-29",
@@ -676,6 +679,47 @@
       ],
       "promisedTime": null,
       "deliveryProviderLabel": null
+    },
+    {
+      "id": "order-template-front-counter-daily-2026-04-02",
+      "source": "generated",
+      "status": "active",
+      "fulfillmentType": "pickup",
+      "customerLabel": "Front Counter opening trays",
+      "destinationLabel": "Front Counter",
+      "dispatchNotes": "Daily opening rhythm. Adjust sweet tray mix if the prior evening sold down.",
+      "dueDate": "2026-04-02",
+      "productionDate": "2026-04-02",
+      "notes": "Daily opening rhythm. Adjust sweet tray mix if the prior evening sold down.",
+      "createdAt": "2026-03-23T00:47:22.437Z",
+      "updatedAt": "2026-03-23T00:47:22.437Z",
+      "changedInKitchen": false,
+      "visibleOnProductionBoard": true,
+      "templateId": "template-front-counter-daily",
+      "templateTitle": "Front Counter opening trays recurring",
+      "generatedOccurrenceDate": "2026-04-02",
+      "generatedFromTemplate": true,
+      "templateEdited": false,
+      "lines": [
+        {
+          "id": "line-68bed29e-5dd7-4519-a57a-746ae5b4df4c",
+          "lineType": "product_variant",
+          "productLabel": "Roll / Sesame",
+          "quantity": 20,
+          "completedQuantity": 0,
+          "unit": "pieces",
+          "lineStatus": "pending"
+        },
+        {
+          "id": "line-c9b759fb-dcbe-49ee-b586-b276acec2dcf",
+          "lineType": "product_variant",
+          "productLabel": "Croissant / Butter",
+          "quantity": 10,
+          "completedQuantity": 0,
+          "unit": "pieces",
+          "lineStatus": "pending"
+        }
+      ]
     }
   ],
   "wipEntries": [
@@ -953,5 +997,53 @@
   "session": {
     "currentUserId": "user-lucia",
     "lastLoginAt": "2026-03-21T18:00:00Z"
-  }
+  },
+  "customers": [
+    {
+      "id": "customer-cafe-luna",
+      "displayName": "Cafe Luna",
+      "phone": "+52 555 010 3000",
+      "email": "pedidos@cafeluna.example",
+      "preferredContactMethod": "whatsapp",
+      "address": "Roma Norte, morning receiving door",
+      "deliveryNote": "Bag loaves in pairs and ring the side bell before 07:00.",
+      "internalNote": "Wholesale stop with steady Saturday demand.",
+      "active": true,
+      "createdAt": "2026-03-18T13:00:00Z",
+      "updatedAt": "2026-03-21T05:45:00Z"
+    },
+    {
+      "id": "customer-valeria-office",
+      "displayName": "Valeria office lunch",
+      "phone": "+52 555 010 2991",
+      "preferredContactMethod": "phone",
+      "address": "Roma Norte office drop",
+      "deliveryNote": "Leave near dispatch shelf once packed.",
+      "internalNote": "Usually asks for courier-ready packing.",
+      "active": true,
+      "createdAt": "2026-03-20T17:20:00Z",
+      "updatedAt": "2026-03-21T05:15:00Z"
+    },
+    {
+      "id": "customer-sofia-birthday",
+      "displayName": "Sofía birthday",
+      "phone": "+52 555 010 1442",
+      "preferredContactMethod": "phone",
+      "deliveryNote": "Call when decorated items are ready at pickup.",
+      "internalNote": "Draft-first customer that still changes details late.",
+      "active": true,
+      "createdAt": "2026-03-21T00:25:00Z",
+      "updatedAt": "2026-03-21T06:05:00Z"
+    },
+    {
+      "id": "customer-past-wholesale",
+      "displayName": "Old market account",
+      "email": "old-route@example.com",
+      "preferredContactMethod": "email",
+      "internalNote": "Inactive but kept for memory and old order lookup.",
+      "active": false,
+      "createdAt": "2026-03-10T08:00:00Z",
+      "updatedAt": "2026-03-19T12:00:00Z"
+    }
+  ]
 }

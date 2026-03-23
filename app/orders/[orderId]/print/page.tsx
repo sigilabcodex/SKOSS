@@ -18,15 +18,19 @@ export default async function OrderPrintPage({
     notFound();
   }
 
-  const providerLabel = resolveDeliveryProviderLabel(view.order);
-  const progress = getOrderProgress(view.order);
+  const order = view.order;
+  const providerLabel = resolveDeliveryProviderLabel(order);
+  const progress = getOrderProgress(order);
+  const linkedCustomer = order.customerId
+    ? view.customers.find((customer) => customer.id === order.customerId) ?? null
+    : null;
   const intent = createPrintIntent({
     artifact: 'order_ticket',
     purpose: 'kitchen_execution',
     sourceWorkspace: 'orders',
     title: t('printing.artifacts.order_ticket'),
     summary: t('printing.purposes.kitchen_execution'),
-    reference: view.order.customerLabel,
+    reference: order.customerLabel,
   });
 
   return (
@@ -34,7 +38,7 @@ export default async function OrderPrintPage({
       intent={intent}
       title={t('printing.documents.orderTicket.title')}
       description={t('printing.documents.orderTicket.description')}
-      backHref={`/orders/${view.order.id}`}
+      backHref={`/orders/${order.id}`}
       backLabel={t('printing.actions.backToOrder')}
       printNowLabel={t('printing.actions.printNow')}
       browserFirstBadge={t('printing.browserFirstBadge')}
@@ -48,15 +52,15 @@ export default async function OrderPrintPage({
       <section className="print-meta-grid">
         <div className="print-meta-card">
           <span className="field-label">{t('orders.production')}</span>
-          <strong>{formatDateLabel(view.order.productionDate, locale)}</strong>
+          <strong>{formatDateLabel(order.productionDate, locale)}</strong>
         </div>
         <div className="print-meta-card">
           <span className="field-label">{t('orders.fulfillment')}</span>
-          <strong>{formatStatusLabel(view.order.fulfillmentType, t)}</strong>
+          <strong>{formatStatusLabel(order.fulfillmentType, t)}</strong>
         </div>
         <div className="print-meta-card">
           <span className="field-label">{t('orders.promise')}</span>
-          <strong>{view.order.promisedTime ?? t('common.clear')}</strong>
+          <strong>{order.promisedTime ?? t('common.clear')}</strong>
         </div>
         <div className="print-meta-card">
           <span className="field-label">{t('orders.completion')}</span>
@@ -66,29 +70,37 @@ export default async function OrderPrintPage({
 
       <section className="print-section-grid">
         <div className="print-block">
-          <h2>{view.order.customerLabel}</h2>
+          <h2>{order.customerLabel}</h2>
           <div className="print-kv-grid">
             <div>
               <span className="field-label">{t('terms.destination.one')}</span>
-              <strong>{view.order.destinationLabel ?? t('common.destinationStillOpen')}</strong>
+              <strong>{order.destinationLabel ?? t('common.destinationStillOpen')}</strong>
             </div>
             <div>
               <span className="field-label">{t('orders.source')}</span>
-              <strong>{formatStatusLabel(view.order.source, t)}</strong>
+              <strong>{formatStatusLabel(order.source, t)}</strong>
             </div>
             <div>
               <span className="field-label">{t('orders.provider')}</span>
               <strong>
                 {providerLabel
-                  ? view.order.deliveryProvider && view.order.deliveryProvider !== 'other'
-                    ? t(`orders.providerOptions.${view.order.deliveryProvider}`)
+                  ? order.deliveryProvider && order.deliveryProvider !== 'other'
+                    ? t(`orders.providerOptions.${order.deliveryProvider}`)
                     : providerLabel
                   : t('common.clear')}
               </strong>
             </div>
             <div>
+              <span className="field-label">{t('orders.customerMemory.linked')}</span>
+              <strong>{linkedCustomer?.displayName ?? t('orders.editPage.noSavedCustomer')}</strong>
+            </div>
+            <div>
+              <span className="field-label">{t('orders.customerMemory.phone')}</span>
+              <strong>{order.customerPhone ?? linkedCustomer?.phone ?? t('common.clear')}</strong>
+            </div>
+            <div>
               <span className="field-label">{t('orders.assignee')}</span>
-              <strong>{view.order.deliveryAssignee ?? t('common.clear')}</strong>
+              <strong>{order.deliveryAssignee ?? t('common.clear')}</strong>
             </div>
           </div>
         </div>
@@ -96,7 +108,7 @@ export default async function OrderPrintPage({
         <div className="print-block">
           <h2>{t('printing.documents.shared.lines')}</h2>
           <ul className="print-list">
-            {view.order.lines.filter((line) => line.lineType !== 'note_item').map((line) => (
+            {order.lines.filter((line) => line.lineType !== 'note_item').map((line) => (
               <li key={line.id}>
                 <div>
                   <strong>{line.productLabel}</strong>
@@ -112,18 +124,35 @@ export default async function OrderPrintPage({
         </div>
       </section>
 
-      {view.order.dispatchNotes || view.order.notes ? (
+      {order.dispatchNotes || order.notes ? (
         <section className="print-block">
           <h2>{t('printing.documents.shared.notes')}</h2>
           <div className="page-stack compact-gap">
-            {view.order.dispatchNotes ? (
+            {order.dispatchNotes ? (
               <p className="no-margin">
-                <strong>{t('orders.dispatchNotes')}:</strong> {view.order.dispatchNotes}
+                <strong>{t('orders.dispatchNotes')}:</strong> {order.dispatchNotes}
               </p>
             ) : null}
-            {view.order.notes ? (
+            {order.notes ? (
               <p className="no-margin">
-                <strong>{t('orders.notes')}:</strong> {view.order.notes}
+                <strong>{t('orders.notes')}:</strong> {order.notes}
+              </p>
+            ) : null}
+          </div>
+        </section>
+      ) : null}
+      {linkedCustomer?.deliveryNote || linkedCustomer?.address ? (
+        <section className="print-block">
+          <h2>{t('orders.customerMemory.title')}</h2>
+          <div className="page-stack compact-gap">
+            {linkedCustomer.address ? (
+              <p className="no-margin">
+                <strong>{t('customers.fields.address')}:</strong> {linkedCustomer.address}
+              </p>
+            ) : null}
+            {linkedCustomer.deliveryNote ? (
+              <p className="no-margin">
+                <strong>{t('customers.fields.deliveryNote')}:</strong> {linkedCustomer.deliveryNote}
               </p>
             ) : null}
           </div>

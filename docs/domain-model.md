@@ -163,6 +163,8 @@ Responsibilities:
 
 A customer may be lightweight at first and later support richer CRM-style extensions.
 
+At the current stage, this should remain CRM-light: reusable identity, contact memory, address or delivery context, operational notes, and recent linked orders without introducing pipeline or marketing complexity.
+
 ### Supplier
 
 A supplier represents a business or person that provides ingredients or materials.

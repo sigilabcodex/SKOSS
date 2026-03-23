@@ -141,6 +141,7 @@ The initial product direction centers on the operational backbone of small kitch
 - destinations and route-oriented output
 - role-based workspaces
 - print-friendly operational outputs such as tickets, summaries, and labels
+- lightweight customer memory for repeat order-taking, fulfillment context, and handoff visibility
 - a browser-print-first foundation that keeps current printing practical without early printer-system bloat
 
 The near-term focus is the transformation engine that connects these concepts rather than trying to solve every business function at once.

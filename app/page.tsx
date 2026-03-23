@@ -5,7 +5,7 @@ import { getPresetExperience, type WorkspaceLinkKey } from '@/lib/business-prese
 import { getWorkspaceSummary } from '@/lib/server/demo-data';
 import { getCurrentUserContext } from '@/lib/server/auth';
 import { getRequestPreferences, getServerTranslator } from '@/lib/i18n/server';
-import { ArrowRightIcon, HandoffIcon, OrdersIcon, ProductionIcon, SetupIcon, SparklesIcon } from '@/components/ui-icons';
+import { ArrowRightIcon, CustomersIcon, HandoffIcon, OrdersIcon, ProductionIcon, SetupIcon, SparklesIcon } from '@/components/ui-icons';
 
 type QuickLink = {
   href: Parameters<typeof Link>[0]['href'];
@@ -30,6 +30,12 @@ export default async function HomePage() {
       title: t('home.quickLinks.orders.title'),
       description: t('home.quickLinks.orders.description'),
       icon: OrdersIcon,
+    },
+    customers: {
+      href: '/customers',
+      title: t('home.quickLinks.customers.title'),
+      description: t('home.quickLinks.customers.description'),
+      icon: CustomersIcon,
     },
     production: {
       href: '/production',

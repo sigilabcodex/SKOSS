@@ -131,8 +131,10 @@ export default async function HandoffPage({
                     {formatStatusLabel(order.fulfillmentType, t)}
                     {order.destinationLabel ? ` · ${order.destinationLabel}` : ''}
                     {providerLabel ? ` · ${providerLabel}` : ''}
+                    {order.customerPhone ? ` · ${t('orders.customerMemory.phone')}: ${order.customerPhone}` : ''}
                     {order.promisedTime ? ` · ${order.promisedTime}` : ''}
                     {` · ${order.remainingQuantity} ${t('handoff.fulfillmentWatch.remaining').toLowerCase()}`}
+                    {order.deliveryNote ? ` · ${order.deliveryNote}` : ''}
                     {order.dispatchNotes ? ` · ${order.dispatchNotes}` : ''}
                   </span>
                 </li>
@@ -152,12 +154,14 @@ export default async function HandoffPage({
           <ul className="stack-list muted-list">
             {view.assignmentWatch.map((order) => (
               <li key={order.id}>
-                <strong>{order.customerLabel}</strong>
-                <span>
-                  {order.destinationLabel ?? t('common.destinationStillOpen')}
-                  {order.promisedTime ? ` · ${order.promisedTime}` : ''}
-                  {order.dispatchNotes ? ` · ${order.dispatchNotes}` : ''}
-                </span>
+                  <strong>{order.customerLabel}</strong>
+                  <span>
+                    {order.destinationLabel ?? t('common.destinationStillOpen')}
+                    {order.customerPhone ? ` · ${t('orders.customerMemory.phone')}: ${order.customerPhone}` : ''}
+                    {order.promisedTime ? ` · ${order.promisedTime}` : ''}
+                    {order.deliveryNote ? ` · ${order.deliveryNote}` : ''}
+                    {order.dispatchNotes ? ` · ${order.dispatchNotes}` : ''}
+                  </span>
               </li>
             ))}
           </ul>
@@ -176,12 +180,13 @@ export default async function HandoffPage({
           <ul className="stack-list muted-list">
             {view.pickupWatch.map((order) => (
               <li key={order.id}>
-                <strong>{order.customerLabel}</strong>
-                <span>
-                  {order.destinationLabel ?? t('common.destinationStillOpen')}
-                  {order.promisedTime ? ` · ${order.promisedTime}` : ''}
-                  {order.dispatchNotes ? ` · ${order.dispatchNotes}` : ''}
-                </span>
+                  <strong>{order.customerLabel}</strong>
+                  <span>
+                    {order.destinationLabel ?? t('common.destinationStillOpen')}
+                    {order.customerPhone ? ` · ${t('orders.customerMemory.phone')}: ${order.customerPhone}` : ''}
+                    {order.promisedTime ? ` · ${order.promisedTime}` : ''}
+                    {order.dispatchNotes ? ` · ${order.dispatchNotes}` : ''}
+                  </span>
               </li>
             ))}
           </ul>
@@ -202,6 +207,7 @@ export default async function HandoffPage({
                 <span>
                   {formatStatusLabel(order.fulfillmentType, t)}
                   {order.destinationLabel ? ` · ${order.destinationLabel}` : ''}
+                  {order.customerPhone ? ` · ${t('orders.customerMemory.phone')}: ${order.customerPhone}` : ''}
                   {order.deliveryAssignee ? ` · ${order.deliveryAssignee}` : ''}
                   {order.promisedTime ? ` · ${order.promisedTime}` : ''}
                 </span>
