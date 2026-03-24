@@ -554,83 +554,87 @@ export default async function SetupPage({
             </div>
             <span className="summary-pill">{data.users.length} {t('common.users')}</span>
           </div>
-          {data.users.length > 0 ? (
-            <ul className="stack-list compact-list">
-              {data.users.map((user) => (
-                <li key={user.id} className="list-with-actions">
-                  <div>
-                    <strong>
-                      {user.displayName}
-                      {!user.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
-                    </strong>
-                    <span>{t(`roles.${user.role}.label`)} · {user.loginIdentifier}</span>
-                    <span className="inline-meta">{t('setup.labels.defaultWorkspace')}: {t(`nav.${user.preferences?.defaultWorkspace ?? user.defaultWorkspace}`)}</span>
-                    <span className="inline-meta">
-                      {t('setup.labels.visibleWorkspaces')}: {getVisibleWorkspacesForRole(user.role).map((workspace) => t(`nav.${workspace}`)).join(' · ')}
-                    </span>
-                  </div>
-                  <div className="inline-action-row">
-                    <Link href={buildSetupHref({ user: user.id, supplier: editingSupplier?.id, material: editingMaterial?.id, recipe: editingRecipe?.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, costingStatus: costingStatusFilter, costingItem: selectedCostingItem?.id })} className="inline-link">
-                      {t('setup.actions.edit')}
-                    </Link>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          ) : (
-            <p className="empty-state">{t('setup.usersEmpty')}</p>
-          )}
-          <form action={userFormAction} className="field-section page-stack">
-            <div className="field-section-header">
-              <div>
-                <h3>{editingUser ? t('setup.editUser') : t('setup.addUser')}</h3>
-                <p className="helper-text">{editingUser ? t('setup.editUserHelp') : t('setup.addUserHelp')}</p>
+          <div className="admin-split-layout">
+            <div className="page-stack">
+              {data.users.length > 0 ? (
+                <ul className="stack-list compact-list">
+                  {data.users.map((user) => (
+                    <li key={user.id} className="list-with-actions">
+                      <div>
+                        <strong>
+                          {user.displayName}
+                          {!user.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
+                        </strong>
+                        <span>{t(`roles.${user.role}.label`)} · {user.loginIdentifier}</span>
+                        <span className="inline-meta">{t('setup.labels.defaultWorkspace')}: {t(`nav.${user.preferences?.defaultWorkspace ?? user.defaultWorkspace}`)}</span>
+                        <span className="inline-meta">
+                          {t('setup.labels.visibleWorkspaces')}: {getVisibleWorkspacesForRole(user.role).map((workspace) => t(`nav.${workspace}`)).join(' · ')}
+                        </span>
+                      </div>
+                      <div className="inline-action-row">
+                        <Link href={buildSetupHref({ user: user.id, supplier: editingSupplier?.id, material: editingMaterial?.id, recipe: editingRecipe?.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, costingStatus: costingStatusFilter, costingItem: selectedCostingItem?.id })} className="inline-link">
+                          {t('setup.actions.edit')}
+                        </Link>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="empty-state">{t('setup.usersEmpty')}</p>
+              )}
+            </div>
+            <form action={userFormAction} className="field-section page-stack">
+              <div className="field-section-header">
+                <div>
+                  <h3>{editingUser ? t('setup.editUser') : t('setup.addUser')}</h3>
+                  <p className="helper-text">{editingUser ? t('setup.editUserHelp') : t('setup.addUserHelp')}</p>
+                </div>
+                {editingUser ? (
+                  <Link href={buildSetupHref({ supplier: editingSupplier?.id, material: editingMaterial?.id, recipe: editingRecipe?.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, costingStatus: costingStatusFilter, costingItem: selectedCostingItem?.id })} className="button-secondary compact-button">
+                    {t('setup.actions.cancelEdit')}
+                  </Link>
+                ) : null}
               </div>
-              {editingUser ? (
-                <Link href={buildSetupHref({ supplier: editingSupplier?.id, material: editingMaterial?.id, recipe: editingRecipe?.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, costingStatus: costingStatusFilter, costingItem: selectedCostingItem?.id })} className="button-secondary compact-button">
-                  {t('setup.actions.cancelEdit')}
-                </Link>
-              ) : null}
-            </div>
-            <div className="grid-two">
-              <label>
-                <span className="field-heading">{t('setup.fields.userDisplayName')} {renderRequiredMark()}</span>
-                <input name="displayName" placeholder={t('setup.placeholders.userDisplayName')} defaultValue={editingUser?.displayName ?? ''} required />
+              <div className="grid-two">
+                <label>
+                  <span className="field-heading">{t('setup.fields.userDisplayName')} {renderRequiredMark()}</span>
+                  <input name="displayName" placeholder={t('setup.placeholders.userDisplayName')} defaultValue={editingUser?.displayName ?? ''} required />
+                </label>
+                <label>
+                  <span className="field-heading">{t('setup.fields.loginIdentifier')} {renderRequiredMark()}</span>
+                  <input name="loginIdentifier" placeholder="lucia@example.com" defaultValue={editingUser?.loginIdentifier ?? ''} required />
+                </label>
+              </div>
+              <div className="grid-two">
+                <label>
+                  <span className="field-heading">{t('setup.fields.role')} {renderRequiredMark()}</span>
+                  <select name="role" defaultValue={editingUser?.role ?? 'frontdesk'}>
+                    {['admin', 'manager', 'production', 'frontdesk', 'delivery'].map((role) => (
+                      <option key={role} value={role}>{t(`roles.${role}.label`)}</option>
+                    ))}
+                  </select>
+                </label>
+                <label>
+                  <span className="field-heading">{t('setup.fields.defaultWorkspace')} {renderRequiredMark()}</span>
+                  <select name="defaultWorkspace" defaultValue={editingUser?.preferences?.defaultWorkspace ?? editingUser?.defaultWorkspace ?? 'orders'}>
+                    {['timeline', 'orders', 'customers', 'production', 'handoff', 'preferences', 'setup'].map((workspace) => (
+                      <option key={workspace} value={workspace}>{t(`nav.${workspace}`)}</option>
+                    ))}
+                  </select>
+                </label>
+              </div>
+              <label className="checkbox-row">
+                <input name="active" type="checkbox" defaultChecked={editingUser?.active ?? true} />
+                <span>
+                  <strong>{t('setup.fields.userActive')}</strong>
+                  <span className="helper-text">{t('setup.fields.userActiveHelp')}</span>
+                </span>
               </label>
-              <label>
-                <span className="field-heading">{t('setup.fields.loginIdentifier')} {renderRequiredMark()}</span>
-                <input name="loginIdentifier" placeholder="lucia@example.com" defaultValue={editingUser?.loginIdentifier ?? ''} required />
-              </label>
-            </div>
-            <div className="grid-two">
-              <label>
-                <span className="field-heading">{t('setup.fields.role')} {renderRequiredMark()}</span>
-                <select name="role" defaultValue={editingUser?.role ?? 'frontdesk'}>
-                  {['admin', 'manager', 'production', 'frontdesk', 'delivery'].map((role) => (
-                    <option key={role} value={role}>{t(`roles.${role}.label`)}</option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                <span className="field-heading">{t('setup.fields.defaultWorkspace')} {renderRequiredMark()}</span>
-                <select name="defaultWorkspace" defaultValue={editingUser?.preferences?.defaultWorkspace ?? editingUser?.defaultWorkspace ?? 'orders'}>
-                  {['timeline', 'orders', 'customers', 'production', 'handoff', 'preferences', 'setup'].map((workspace) => (
-                    <option key={workspace} value={workspace}>{t(`nav.${workspace}`)}</option>
-                  ))}
-                </select>
-              </label>
-            </div>
-            <label className="checkbox-row">
-              <input name="active" type="checkbox" defaultChecked={editingUser?.active ?? true} />
-              <span>
-                <strong>{t('setup.fields.userActive')}</strong>
-                <span className="helper-text">{t('setup.fields.userActiveHelp')}</span>
-              </span>
-            </label>
-            <button type="submit" className="button-primary">
-              {editingUser ? t('setup.actions.updateUser') : t('setup.actions.saveUser')}
-            </button>
-          </form>
+              <button type="submit" className="button-primary">
+                {editingUser ? t('setup.actions.updateUser') : t('setup.actions.saveUser')}
+              </button>
+            </form>
+          </div>
         </article>
       </section>
 
@@ -651,33 +655,34 @@ export default async function SetupPage({
               </div>
               <span className="summary-pill">{data.suppliers.length} {t('common.suppliers')}</span>
             </div>
-            {data.suppliers.length > 0 ? (
-              <ul className="stack-list compact-list">
-                {data.suppliers.map((supplier) => (
-                  <li key={supplier.id} className="list-with-actions">
-                    <div>
-                      <strong>
-                        {supplier.name}
-                        {!supplier.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
-                      </strong>
-                      <span>{supplier.contact ?? supplier.notes ?? t('setup.noExtraContactYet')}</span>
-                      <span className="inline-meta">{supplierPriceCounts.get(supplier.id) ?? 0} {t('setup.labels.priceEntries')}</span>
-                    </div>
-                    <div className="inline-action-row">
-                      <Link href={buildSetupHref({ supplier: supplier.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, material: editingMaterial?.id, recipe: editingRecipe?.id })} className="inline-link">
-                        {t('setup.actions.edit')}
-                      </Link>
-                      <Link href={supplierHistoryHref(supplier.id)} className="inline-link">
-                        {t('setup.actions.viewHistory')}
-                      </Link>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p className="empty-state">{t('setup.suppliersEmpty')}</p>
-            )}
-            <form action={supplierFormAction} className="field-section page-stack">
+            <div className="admin-split-layout">
+              {data.suppliers.length > 0 ? (
+                <ul className="stack-list compact-list">
+                  {data.suppliers.map((supplier) => (
+                    <li key={supplier.id} className="list-with-actions">
+                      <div>
+                        <strong>
+                          {supplier.name}
+                          {!supplier.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
+                        </strong>
+                        <span>{supplier.contact ?? supplier.notes ?? t('setup.noExtraContactYet')}</span>
+                        <span className="inline-meta">{supplierPriceCounts.get(supplier.id) ?? 0} {t('setup.labels.priceEntries')}</span>
+                      </div>
+                      <div className="inline-action-row">
+                        <Link href={buildSetupHref({ supplier: supplier.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, material: editingMaterial?.id, recipe: editingRecipe?.id })} className="inline-link">
+                          {t('setup.actions.edit')}
+                        </Link>
+                        <Link href={supplierHistoryHref(supplier.id)} className="inline-link">
+                          {t('setup.actions.viewHistory')}
+                        </Link>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="empty-state">{t('setup.suppliersEmpty')}</p>
+              )}
+              <form action={supplierFormAction} className="field-section page-stack">
               <div className="field-section-header">
                 <div>
                   <h3>{editingSupplier ? t('setup.editSupplier') : t('setup.addSupplier')}</h3>
@@ -713,7 +718,8 @@ export default async function SetupPage({
               <button type="submit" className="button-primary">
                 {editingSupplier ? t('setup.actions.updateSupplier') : t('setup.actions.saveSupplier')}
               </button>
-            </form>
+              </form>
+            </div>
           </article>
 
           <article className="subpanel page-stack" id="raw-materials">
@@ -724,8 +730,9 @@ export default async function SetupPage({
               </div>
               <span className="summary-pill">{data.rawMaterials.length} {t('common.materials')}</span>
             </div>
-            {data.rawMaterials.length > 0 ? (
-              <ul className="stack-list compact-list">
+            <div className="admin-split-layout">
+              {data.rawMaterials.length > 0 ? (
+                <ul className="stack-list compact-list">
                 {data.rawMaterials.map((material) => {
                   const latestPrice = data.latestPriceByMaterial.get(material.id);
 
@@ -758,11 +765,11 @@ export default async function SetupPage({
                     </li>
                   );
                 })}
-              </ul>
-            ) : (
-              <p className="empty-state">{t('setup.rawMaterialsEmpty')}</p>
-            )}
-            <form action={rawMaterialFormAction} className="field-section page-stack">
+                </ul>
+              ) : (
+                <p className="empty-state">{t('setup.rawMaterialsEmpty')}</p>
+              )}
+              <form action={rawMaterialFormAction} className="field-section page-stack">
               <div className="field-section-header">
                 <div>
                   <h3>{editingMaterial ? t('setup.editRawMaterial') : t('setup.addRawMaterial')}</h3>
@@ -807,7 +814,8 @@ export default async function SetupPage({
               <button type="submit" className="button-primary">
                 {editingMaterial ? t('setup.actions.updateRawMaterial') : t('setup.actions.saveRawMaterial')}
               </button>
-            </form>
+              </form>
+            </div>
           </article>
         </div>
       </section>
@@ -821,7 +829,7 @@ export default async function SetupPage({
           <span className="summary-pill">{linkedProductCount} {t('setup.recipeLabels.linkedProducts')}</span>
         </div>
 
-        <div className="grid-two recipe-grid">
+        <div className="grid-two recipe-grid admin-split-layout">
           <article className="subpanel page-stack">
             <div className="table-header-row">
               <div>

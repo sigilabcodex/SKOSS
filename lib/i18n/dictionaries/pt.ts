@@ -52,6 +52,10 @@ const pt = {
   shell: {
     homeAria: 'Início do SKOSS',
     brandTitle: 'Operações de cozinha',
+    sections: {
+      operational: 'Espaços operacionais',
+      admin: 'Administração e configuração',
+    },
     switchUser: 'Trocar usuário',
     logout: 'Sair',
     login: 'Entrar',

@@ -54,6 +54,10 @@ const en = {
   shell: {
     homeAria: 'SKOSS home',
     brandTitle: 'Kitchen operations',
+    sections: {
+      operational: 'Operational workspaces',
+      admin: 'Admin and setup',
+    },
     switchUser: 'Switch user',
     logout: 'Log out',
     login: 'Log in',
