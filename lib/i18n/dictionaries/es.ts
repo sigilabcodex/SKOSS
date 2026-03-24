@@ -61,11 +61,14 @@ const es = {
     login: 'Iniciar sesión',
     userMenuAria: 'Abrir menú de usuario y preferencias',
     sessionSection: 'Sesión',
-    sessionHelp: 'Mantén los datos de identidad cerca sin competir con la navegación principal.',
+    sessionHelp:
+      'Mantén los datos de identidad cerca sin competir con la navegación principal.',
     preferencesSection: 'Preferencias',
-    preferencesHelp: 'Los controles personales viven aquí para que el trabajo diario siga al frente.',
+    preferencesHelp:
+      'Los controles personales viven aquí para que el trabajo diario siga al frente.',
     languageHelp: 'Cambia el idioma de la interfaz para esta sesión.',
-    appearanceHelp: 'Elige claro, oscuro o seguir el dispositivo para esta sesión.',
+    appearanceHelp:
+      'Elige claro, oscuro o seguir el dispositivo para esta sesión.',
     openPreferences: 'Abrir preferencias completas',
   },
   roles: {
@@ -84,30 +87,35 @@ const es = {
     openMenu: 'Abrir menú de apariencia',
     optionsAria: 'Opciones de apariencia',
     appearance: 'Apariencia',
-    quickSwitch: 'Cambio rápido. Los controles completos siguen en preferencias.',
+    quickSwitch:
+      'Cambio rápido. Los controles completos siguen en preferencias.',
     quickSwitchHeader: 'Cambio rápido en el menú de usuario',
     groupAria: 'Preferencia de apariencia',
     light: {
       label: 'Claro',
       shortLabel: 'Claro',
-      description: 'Superficies claras para prep diurna, mostrador y lectura rápida.',
+      description:
+        'Superficies claras para prep diurna, mostrador y lectura rápida.',
     },
     dark: {
       label: 'Oscuro',
       shortLabel: 'Oscuro',
-      description: 'Contraste de menor brillo para madrugadas, prep nocturno y espacios con poca luz.',
+      description:
+        'Contraste de menor brillo para madrugadas, prep nocturno y espacios con poca luz.',
     },
     system: {
       label: 'Usar ajuste del dispositivo',
       shortLabel: 'Sistema',
-      description: 'Sigue automáticamente la apariencia del teléfono, tablet o navegador.',
+      description:
+        'Sigue automáticamente la apariencia del teléfono, tablet o navegador.',
     },
   },
 
   operatingModes: {
     pickup: {
       label: 'Retiro',
-      description: 'La mayoría de los pedidos se entregan directamente al cliente.',
+      description:
+        'La mayoría de los pedidos se entregan directamente al cliente.',
     },
     delivery: {
       label: 'Entrega',
@@ -115,7 +123,8 @@ const es = {
     },
     mixed: {
       label: 'Mixto',
-      description: 'Retiro y entrega importan al mismo tiempo en el flujo diario.',
+      description:
+        'Retiro y entrega importan al mismo tiempo en el flujo diario.',
     },
   },
   presets: {
@@ -125,27 +134,33 @@ const es = {
     },
     cafe: {
       label: 'Cafetería',
-      description: 'Da un poco más de peso a la captura de pedidos y al ritmo de mostrador.',
+      description:
+        'Da un poco más de peso a la captura de pedidos y al ritmo de mostrador.',
     },
     small_restaurant: {
       label: 'Restaurante pequeño',
-      description: 'Parte del flujo de servicio, visibilidad de prep y despacho práctico.',
+      description:
+        'Parte del flujo de servicio, visibilidad de prep y despacho práctico.',
     },
     dark_kitchen: {
       label: 'Dark kitchen',
-      description: 'Da más peso al flujo de pedidos, preparación para courier y relevo de despacho.',
+      description:
+        'Da más peso al flujo de pedidos, preparación para courier y relevo de despacho.',
     },
     food_stall: {
       label: 'Puesto de comida',
-      description: 'Captura rápida, servicio simple y configuración compacta para trabajo tipo feria o pop-up.',
+      description:
+        'Captura rápida, servicio simple y configuración compacta para trabajo tipo feria o pop-up.',
     },
     generic: {
       label: 'Genérico',
-      description: 'Punto de partida neutral cuando el negocio aún está definiendo su forma.',
+      description:
+        'Punto de partida neutral cuando el negocio aún está definiendo su forma.',
     },
     other: {
       label: 'Otro',
-      description: 'Usa una base flexible ahora y ajústala después sin quedar encerrado.',
+      description:
+        'Usa una base flexible ahora y ajústala después sin quedar encerrado.',
     },
   },
   presetSuggestions: {
@@ -265,27 +280,32 @@ const es = {
   },
   home: {
     eyebrow: 'Primer tramo operativo',
-    lede:
-      'SKOSS ahora cubre un ciclo práctico de cocina: captura de pedidos, generación recurrente, producción agrupada, avance parcial, relevo de WIP y una capa operativa ligera para entrega y memoria de compras.',
+    lede: 'SKOSS ahora cubre un ciclo práctico de cocina: captura de pedidos, generación recurrente, producción agrupada, avance parcial, relevo de WIP y una capa operativa ligera para entrega y memoria de compras.',
     focusDate: 'Fecha foco',
     focusDateHelp: 'es la vista operativa compartida actual.',
     recommendedFirst: 'Recomendado primero',
     presetFocusTitle: 'Enfoque inicial del preset',
-    presetFocusBody: '{{preset}} hoy solo cambia lenguaje, énfasis en inicio y guía inicial.',
+    presetFocusBody:
+      '{{preset}} hoy solo cambia lenguaje, énfasis en inicio y guía inicial.',
     exampleSetupTitle: 'Ejemplos de arranque',
-    exampleSetupBody: 'Estos ejemplos son solo sugerencias ligeras. Puedes cambiarlos después en Configuración.',
+    exampleSetupBody:
+      'Estos ejemplos son solo sugerencias ligeras. Puedes cambiarlos después en Configuración.',
     roleFocusTitle: 'Atención guiada por rol',
-    roleFocusBody: '{{role}} comienza más cerca de {{workspace}} para que el día arranque con lo más relevante y no con todo el sistema.',
-    roleFocusFallback: 'Los espacios ahora se ordenan por rol para mostrar primero lo más útil a cada equipo.',
+    roleFocusBody:
+      '{{role}} comienza más cerca de {{workspace}} para que el día arranque con lo más relevante y no con todo el sistema.',
+    roleFocusFallback:
+      'Los espacios ahora se ordenan por rol para mostrar primero lo más útil a cada equipo.',
     stats: {
       ordersToday: 'Pedidos de hoy',
       ordersOnDate: 'pedidos en',
       kitchenAttention: 'Atención de cocina',
-      kitchenAttentionHelp: 'pedidos marcados como cambiados o editados desde la base recurrente',
+      kitchenAttentionHelp:
+        'pedidos marcados como cambiados o editados desde la base recurrente',
       readyWip: 'WIP listo',
       readyWipHelp: 'registros WIP ya listos para el siguiente turno',
       recurringTemplates: 'Plantillas recurrentes',
-      recurringTemplatesHelp: 'plantillas recurrentes activas alimentando la próxima demanda',
+      recurringTemplatesHelp:
+        'plantillas recurrentes activas alimentando la próxima demanda',
       partialOrders: 'Pedidos parciales',
       partialOrdersHelp: 'pedidos ya completados parcialmente',
       supplierPrices: 'Precios de proveedor',
@@ -295,37 +315,45 @@ const es = {
     quickLinks: {
       timeline: {
         title: 'Línea operativa',
-        description: 'Mira lo vencido, lo que toca ahora, lo que viene pronto y lo de más tarde sin convertir el día en administración de calendario.',
+        description:
+          'Mira lo vencido, lo que toca ahora, lo que viene pronto y lo de más tarde sin convertir el día en administración de calendario.',
       },
       orders: {
         title: 'Captura + lista de pedidos',
-        description: 'Captura demanda con plantillas recurrentes, clientes borrador, ítems borrador y ediciones rápidas.',
+        description:
+          'Captura demanda con plantillas recurrentes, clientes borrador, ítems borrador y ediciones rápidas.',
       },
       customers: {
         title: 'Memoria de clientes',
-        description: 'Mantén fichas ligeras de clientes y contexto reciente de pedidos vinculados cerca del trabajo diario.',
+        description:
+          'Mantén fichas ligeras de clientes y contexto reciente de pedidos vinculados cerca del trabajo diario.',
       },
       production: {
         title: 'Tablero de producción',
-        description: 'Ve demanda requerida vs completada, avance por línea y cambios tardíos en un solo tablero.',
+        description:
+          'Ve demanda requerida vs completada, avance por línea y cambios tardíos en un solo tablero.',
       },
       handoff: {
         title: 'WIP + relevo',
-        description: 'Registra estado de prep, notas de turno y lo que debe saber el siguiente turno.',
+        description:
+          'Registra estado de prep, notas de turno y lo que debe saber el siguiente turno.',
       },
       setup: {
         title: 'Configuración ligera',
-        description: 'Revisa la estructura mínima que sostiene el tramo operativo.',
+        description:
+          'Revisa la estructura mínima que sostiene el tramo operativo.',
       },
     },
   },
   timeline: {
     workspace: 'Línea de tiempo operativa',
     title: 'Línea de tiempo',
-    description: 'Una superficie ligera basada en tiempo para trabajo operativo real: pedidos por vencer, promesas de recogida, tiempos de entrega y atención sensible al handoff.',
+    description:
+      'Una superficie ligera basada en tiempo para trabajo operativo real: pedidos por vencer, promesas de recogida, tiempos de entrega y atención sensible al handoff.',
     openOrders: 'Abrir lista de pedidos',
     focusDateTitle: '{{date}} es el día operativo activo.',
-    focusDateBody: 'Cuando hoy todavía no tiene trabajo activo, esta superficie se ancla al siguiente día de producción activo en vez de fingir ser un calendario genérico.',
+    focusDateBody:
+      'Cuando hoy todavía no tiene trabajo activo, esta superficie se ancla al siguiente día de producción activo en vez de fingir ser un calendario genérico.',
     unscheduled: 'Sin hora prometida',
     unscheduledShort: 'Sin hora',
     overdue: 'Vencido',
@@ -339,65 +367,82 @@ const es = {
     moreLinesHint: '+{{count}} líneas más',
     summary: {
       overdue: 'Vencido',
-      overdueHelp: 'sigue abierto desde un día operativo anterior o una promesa ya pasada',
+      overdueHelp:
+        'sigue abierto desde un día operativo anterior o una promesa ya pasada',
       dueNow: 'Toca ahora',
       dueNowHelp: 'el trabajo más temprano que debería atenderse primero',
       comingSoon: 'Viene pronto',
-      comingSoonHelp: 'las próximas recogidas, entregas o pedidos sensibles al handoff',
+      comingSoonHelp:
+        'las próximas recogidas, entregas o pedidos sensibles al handoff',
       laterToday: 'Más tarde hoy',
-      laterTodayHelp: 'el trabajo restante del día foco después de la siguiente ola',
+      laterTodayHelp:
+        'el trabajo restante del día foco después de la siguiente ola',
       pickupReady: 'Recogida lista',
-      pickupReadyHelp: 'pedidos de recogida del día foco ya terminados y esperando',
+      pickupReadyHelp:
+        'pedidos de recogida del día foco ya terminados y esperando',
       assignmentNeeded: 'Falta asignar',
       assignmentNeededHelp: 'entregas propias todavía sin responsable',
     },
     todayLaneTitle: 'Hoy / siguiente carril activo',
-    todayLaneHelp: 'Tarjetas compactas mantienen juntas la hora, el contexto del cliente, el modo de fulfillment y las pistas de atención.',
+    todayLaneHelp:
+      'Tarjetas compactas mantienen juntas la hora, el contexto del cliente, el modo de fulfillment y las pistas de atención.',
     noFocusItems: 'No hay elementos operativos con hora en el día foco actual.',
     overdueListTitle: 'Atención vencida',
-    overdueListHelp: 'Úsalo para detectar trabajo que se salió del día operativo compartido.',
+    overdueListHelp:
+      'Úsalo para detectar trabajo que se salió del día operativo compartido.',
     noneOverdue: 'No hay nada vencido ahora.',
     upcomingTitle: 'Próximos días',
-    upcomingHelp: 'Las fechas futuras siguen visibles como grupos ligeros en lugar de convertirse en un módulo completo de planeación.',
+    upcomingHelp:
+      'Las fechas futuras siguen visibles como grupos ligeros en lugar de convertirse en un módulo completo de planeación.',
     noUpcomingTitle: 'Todavía no hay siguiente ola',
-    noUpcomingBody: 'Por ahora el trabajo actual sigue concentrado en un solo día activo.',
-    noRoleAttention: 'Ahora mismo no hay nada especial esperando para este rol.',
+    noUpcomingBody:
+      'Por ahora el trabajo actual sigue concentrado en un solo día activo.',
+    noRoleAttention:
+      'Ahora mismo no hay nada especial esperando para este rol.',
     roleAttention: {
       production: {
         title: 'Vigilancia de producción',
-        description: 'Mantén cerca del ritmo de cocina el trabajo incompleto, cambiado o todavía en movimiento.',
+        description:
+          'Mantén cerca del ritmo de cocina el trabajo incompleto, cambiado o todavía en movimiento.',
       },
       delivery: {
         title: 'Vigilancia de despacho',
-        description: 'Mantén visibles el trabajo listo para repartidor, las promesas de entrega y los huecos de asignación.',
+        description:
+          'Mantén visibles el trabajo listo para repartidor, las promesas de entrega y los huecos de asignación.',
       },
       frontdesk: {
         title: 'Vigilancia de llegada de clientes',
-        description: 'Mantén fáciles de escanear las recogidas, el contacto del cliente y el contexto rápido de fulfillment.',
+        description:
+          'Mantén fáciles de escanear las recogidas, el contacto del cliente y el contexto rápido de fulfillment.',
       },
       manager: {
         title: 'Vigilancia entre espacios',
-        description: 'Mantén visible lo vencido, cambiado o sin asignar sin abrir primero todos los espacios.',
+        description:
+          'Mantén visible lo vencido, cambiado o sin asignar sin abrir primero todos los espacios.',
       },
     },
   },
   setupAssistant: {
     eyebrow: 'Primer ajuste rápido',
     firstRunTitle: 'Deja SKOSS listo en un minuto',
-    firstRunIntro: 'Pon nombre al espacio, elige idioma y estilo para tu equipo, y sigue trabajando.',
+    firstRunIntro:
+      'Pon nombre al espacio, elige idioma y estilo para tu equipo, y sigue trabajando.',
     settingsTitle: 'Revisar preferencias del espacio',
-    settingsIntro: 'Actualiza nombre del negocio, idioma, preset, modo operativo o tema cuando el equipo necesite otro ajuste.',
+    settingsIntro:
+      'Actualiza nombre del negocio, idioma, preset, modo operativo o tema cuando el equipo necesite otro ajuste.',
     progress: '3 pasos cortos',
     progressAria: 'Progreso de inicio',
     stepLabel: 'Paso {{step}}',
-    notLocked: 'Los presets solo son un punto de partida. Puedes cambiarlos después.',
+    notLocked:
+      'Los presets solo son un punto de partida. Puedes cambiarlos después.',
     sections: {
       business: 'Datos básicos',
       businessHelp: 'Mantén lo esencial corto y práctico.',
       preset: 'Preset inicial',
       presetHelp: 'Elige la forma más cercana. No bloqueará tu flujo.',
       appearance: 'Apariencia',
-      appearanceHelp: 'Elige un tema cómodo para los espacios donde la gente realmente trabaja.',
+      appearanceHelp:
+        'Elige un tema cómodo para los espacios donde la gente realmente trabaja.',
     },
     fields: {
       businessName: 'Nombre del negocio',
@@ -413,16 +458,21 @@ const es = {
     footer: 'Puedes volver a estas preferencias después desde Configuración.',
     quickStart: {
       title: 'Registros iniciales opcionales',
-      description: 'Agrega algunos datos base ahora, salta lo que no tengas y sigue operando.',
+      description:
+        'Agrega algunos datos base ahora, salta lo que no tengas y sigue operando.',
       optional: 'Todo opcional',
       users: 'Agregar usuarios iniciales',
-      usersHelp: 'Si el equipo está listo, agrega una o dos personas ahora. Déjalo en blanco para saltar.',
+      usersHelp:
+        'Si el equipo está listo, agrega una o dos personas ahora. Déjalo en blanco para saltar.',
       customers: 'Agregar clientes iniciales',
-      customersHelp: 'Agrega un cliente repetido ahora o salta y luego importa.',
+      customersHelp:
+        'Agrega un cliente repetido ahora o salta y luego importa.',
       suppliers: 'Agregar proveedores iniciales',
-      suppliersHelp: 'Captura contacto práctico de proveedor ahora y enriquece después.',
+      suppliersHelp:
+        'Captura contacto práctico de proveedor ahora y enriquece después.',
       materials: 'Agregar materias primas iniciales',
-      materialsHelp: 'Agrega algunos insumos clave ahora para conectar recetas y precios más adelante.',
+      materialsHelp:
+        'Agrega algunos insumos clave ahora para conectar recetas y precios más adelante.',
       skipHelp: 'Todo aquí se puede omitir.',
     },
   },
@@ -433,9 +483,11 @@ const es = {
       'Pedidos manuales, pedidos recurrentes generados, avance parcial y cambios visibles para cocina permanecen en una sola lista táctil.',
     newOrder: 'Nuevo pedido',
     newRecurringTemplate: 'Nueva plantilla recurrente',
-    recurringSaved: 'Plantilla recurrente guardada. Los próximos pedidos se generarán automáticamente.',
+    recurringSaved:
+      'Plantilla recurrente guardada. Los próximos pedidos se generarán automáticamente.',
     recurringDemand: 'Demanda recurrente',
-    recurringDemandHelp: 'Mantén visible el próximo trabajo repetido sin agregar un motor de programación.',
+    recurringDemandHelp:
+      'Mantén visible el próximo trabajo repetido sin agregar un motor de programación.',
     nextUp: 'próxima fecha',
     currentProductionFocus: 'Foco actual de producción.',
     savedOrdersByDay: 'Pedidos guardados agrupados por día de producción.',
@@ -478,41 +530,54 @@ const es = {
       },
       sections: {
         whoAndWhen: 'Quién y cuándo',
-        whoAndWhenHelp: 'Mantén visible la etiqueta práctica del cliente y las fechas clave.',
+        whoAndWhenHelp:
+          'Mantén visible la etiqueta práctica del cliente y las fechas clave.',
         requiredFields: 'Los campos obligatorios usan *',
         dispatch: 'Detalles de despacho',
-        dispatchHelp: 'Mantén el ruteo ligero, pero visible cuando el pedido sale de cocina.',
+        dispatchHelp:
+          'Mantén el ruteo ligero, pero visible cuando el pedido sale de cocina.',
         visibility: 'Visibilidad para cocina',
-        visibilityHelp: 'Usa estos controles solo cuando ayuden al siguiente turno a actuar más rápido.',
+        visibilityHelp:
+          'Usa estos controles solo cuando ayuden al siguiente turno a actuar más rápido.',
         lines: 'Líneas del pedido',
-        linesHelp: 'Usa ítems estructurados cuando sea posible, pero conserva etiquetas borrador cuando la configuración esté incompleta.',
+        linesHelp:
+          'Usa ítems estructurados cuando sea posible, pero conserva etiquetas borrador cuando la configuración esté incompleta.',
       },
       fields: {
         customerMemory: 'Cliente guardado',
-        customerMemoryHelp: 'Vincula un cliente guardado cuando el equipo necesite contexto reusable de contacto o entrega.',
+        customerMemoryHelp:
+          'Vincula un cliente guardado cuando el equipo necesite contexto reusable de contacto o entrega.',
         customerLabel: 'Cliente o etiqueta borrador',
-        customerLabelHelp: 'Usa el nombre que el equipo realmente reconocerá hoy.',
+        customerLabelHelp:
+          'Usa el nombre que el equipo realmente reconocerá hoy.',
         customerPhone: 'Teléfono o contacto',
         destination: 'Destino',
         fulfillment: 'Entrega',
-        fulfillmentHelp: 'Retiro sigue simple. Los campos de entrega solo necesitan detalle ligero de ruta.',
+        fulfillmentHelp:
+          'Retiro sigue simple. Los campos de entrega solo necesitan detalle ligero de ruta.',
         source: 'Origen',
         productionDay: 'Día de producción',
         dueDay: 'Día de entrega / cumplimiento',
         deliveryProvider: 'Proveedor / canal de entrega',
-        deliveryProviderHelp: 'Útil para canales de apps o para nombrar el origen de la ruta.',
+        deliveryProviderHelp:
+          'Útil para canales de apps o para nombrar el origen de la ruta.',
         deliveryAssignee: 'Responsable de entrega',
         promisedTime: 'Hora prometida',
-        promisedTimeHelp: 'Ventana opcional de retiro o entrega para que operaciones la vea rápido.',
+        promisedTimeHelp:
+          'Ventana opcional de retiro o entrega para que operaciones la vea rápido.',
         deliveryProviderCustom: 'Etiqueta personalizada del proveedor',
         dispatchNotes: 'Notas de despacho',
         orderStatus: 'Estado del pedido',
-        changedCalloutTitle: 'Usa “Cambiado” cuando cocina deba volver a revisar este pedido.',
-        changedCalloutBody: 'Esto mantiene visibles las ediciones de último minuto en tableros y tarjetas.',
+        changedCalloutTitle:
+          'Usa “Cambiado” cuando cocina deba volver a revisar este pedido.',
+        changedCalloutBody:
+          'Esto mantiene visibles las ediciones de último minuto en tableros y tarjetas.',
         kitchenAttentionNeeded: 'Requiere atención de cocina',
-        kitchenAttentionHelp: 'Marca cambios tardíos, sustituciones o cualquier cosa que el turno no deba perder.',
+        kitchenAttentionHelp:
+          'Marca cambios tardíos, sustituciones o cualquier cosa que el turno no deba perder.',
         showOnBoard: 'Mostrar en tablero de producción',
-        showOnBoardHelp: 'Desactívalo solo cuando el pedido deba seguir guardado pero no agrupado en la demanda activa.',
+        showOnBoardHelp:
+          'Desactívalo solo cuando el pedido deba seguir guardado pero no agrupado en la demanda activa.',
       },
       placeholders: {
         noSavedCustomer: 'Sin cliente guardado vinculado',
@@ -521,19 +586,25 @@ const es = {
         deliveryProvider: 'Rappi, Uber Eats, furgón propio',
         deliveryAssignee: 'Lucía, ruta mañana, repartidor pendiente',
         noneSelected: 'Sin definir',
-        deliveryProviderCustom: 'Courier barrial, rider de marketplace o apodo de ruta',
-        dispatchNotes: 'Llamar antes de llegar, punto de relevo, instrucciones para courier o recordatorio de empaque',
+        deliveryProviderCustom:
+          'Courier barrial, rider de marketplace o apodo de ruta',
+        dispatchNotes:
+          'Llamar antes de llegar, punto de relevo, instrucciones para courier o recordatorio de empaque',
       },
       noSavedCustomerHint: '¿Necesitas primero un cliente reusable?',
       createCustomer: 'Crear memoria de cliente',
-      linkedCustomerHint: 'Este pedido está vinculado a memoria guardada del cliente.',
+      linkedCustomerHint:
+        'Este pedido está vinculado a memoria guardada del cliente.',
       openCustomer: 'Abrir detalle del cliente',
       customerContext: {
-        summary: '{{count}} pedidos vinculados hasta ahora. Último pedido vinculado: {{date}}.',
+        summary:
+          '{{count}} pedidos vinculados hasta ahora. Último pedido vinculado: {{date}}.',
       },
       dispatchHint: {
-        pickup: 'Usa esta sección solo cuando importen la hora o notas del retiro.',
-        delivery: 'Mantén visible origen, asignación, hora prometida y notas sin construir un sistema de despacho.',
+        pickup:
+          'Usa esta sección solo cuando importen la hora o notas del retiro.',
+        delivery:
+          'Mantén visible origen, asignación, hora prometida y notas sin construir un sistema de despacho.',
       },
       actions: {
         saveOrder: 'Guardar pedido',
@@ -544,7 +615,8 @@ const es = {
     },
     lineEditor: {
       line: 'Línea',
-      rowHelp: 'Mantén el nombre del ítem práctico. Las filas vacías pueden quitarse.',
+      rowHelp:
+        'Mantén el nombre del ítem práctico. Las filas vacías pueden quitarse.',
       remove: 'Quitar',
       removeAria: 'Quitar línea',
       kind: 'Tipo',
@@ -580,37 +652,50 @@ const es = {
     },
     newPage: {
       title: 'Nuevo pedido',
-      description: 'Captura demanda rápido, incluso cuando el cliente o el ítem siguen siendo solo una etiqueta práctica.',
+      description:
+        'Captura demanda rápido, incluso cuando el cliente o el ítem siguen siendo solo una etiqueta práctica.',
       calloutTitle: 'Captura rápida de pedidos',
-      calloutBody: 'Los datos obligatorios siguen visibles primero. Notas, etiquetas borrador y banderas de cocina quedan cerca cuando importan.',
+      calloutBody:
+        'Los datos obligatorios siguen visibles primero. Notas, etiquetas borrador y banderas de cocina quedan cerca cuando importan.',
     },
     recurringPage: {
       title: 'Nueva plantilla recurrente',
-      description: 'Captura una rutina de pedido repetible una sola vez y deja que SKOSS genere luego los pedidos fechados.',
+      description:
+        'Captura una rutina de pedido repetible una sola vez y deja que SKOSS genere luego los pedidos fechados.',
       calloutTitle: 'La demanda recurrente debe seguir ligera.',
-      calloutBody: 'Esta plantilla crea trabajo repetido útil sin convertir el flujo en un sistema pesado de programación.',
+      calloutBody:
+        'Esta plantilla crea trabajo repetido útil sin convertir el flujo en un sistema pesado de programación.',
     },
     recurringForm: {
       eyebrow: 'Pedido recurrente',
       title: 'Captura la rutina de cocina una vez',
-      intro: 'Mantén explícita la recurrencia: una etiqueta de cliente, una rutina simple diaria o semanal y la próxima fecha a generar.',
+      intro:
+        'Mantén explícita la recurrencia: una etiqueta de cliente, una rutina simple diaria o semanal y la próxima fecha a generar.',
       basics: 'Base de la plantilla',
-      basicsHelp: 'Define primero la demanda repetible y deja los pedidos generados editables después.',
+      basicsHelp:
+        'Define primero la demanda repetible y deja los pedidos generados editables después.',
       customerOrRoute: 'Cliente o etiqueta de ruta',
       nextOccurrence: 'Próxima ocurrencia',
       recurrence: 'Recurrencia',
-      generatedCalloutTitle: 'Los pedidos generados siguen siendo editables después.',
-      generatedCalloutBody: 'Esta plantilla define la base, no un motor rígido de programación.',
+      generatedCalloutTitle:
+        'Los pedidos generados siguen siendo editables después.',
+      generatedCalloutBody:
+        'Esta plantilla define la base, no un motor rígido de programación.',
       weeklyRhythm: 'Rutina semanal',
-      weeklyRhythmHelp: 'Solo los días seleccionados deben alimentar la generación recurrente futura.',
+      weeklyRhythmHelp:
+        'Solo los días seleccionados deben alimentar la generación recurrente futura.',
       weeklyDays: 'Días semanales',
       notes: 'Notas de plantilla',
-      notesHelp: 'Úsalo para recordatorios fijos de empaque o excepciones de ruta.',
+      notesHelp:
+        'Úsalo para recordatorios fijos de empaque o excepciones de ruta.',
       recurringLinesEyebrow: 'Líneas recurrentes',
       recurringLinesTitle: 'Mantén visible la demanda repetida',
-      recurringLinesBody: 'Los operadores todavía pueden usar nombres borrador aquí. Los pedidos generados siguen siendo editables después.',
-      lineSectionLabel: 'Usa solo las filas necesarias para la rutina real. Agrega y quita líneas a medida que evoluciona la ruta.',
-      footerHint: 'Guardar esta plantilla mantiene visible la rutina recurrente sin forzar una configuración pesada de programación.',
+      recurringLinesBody:
+        'Los operadores todavía pueden usar nombres borrador aquí. Los pedidos generados siguen siendo editables después.',
+      lineSectionLabel:
+        'Usa solo las filas necesarias para la rutina real. Agrega y quita líneas a medida que evoluciona la ruta.',
+      footerHint:
+        'Guardar esta plantilla mantiene visible la rutina recurrente sin forzar una configuración pesada de programación.',
       save: 'Guardar plantilla recurrente',
       saving: 'Guardando plantilla recurrente…',
       placeholders: {
@@ -626,12 +711,15 @@ const es = {
       saved: 'Pedido guardado y marcado como visible para producción.',
       progressSaved: 'Avance de línea actualizado.',
       descriptionSeparator: '·',
-      editDescription: 'editar cantidades, detalles de despacho y actualizaciones rápidas de avance sin salir del espacio.',
+      editDescription:
+        'editar cantidades, detalles de despacho y actualizaciones rápidas de avance sin salir del espacio.',
       quickCompletion: 'Avance rápido',
-      quickCompletionHelp: 'Actualiza trabajo parcial por línea sin abrir una pantalla separada solo de cocina.',
+      quickCompletionHelp:
+        'Actualiza trabajo parcial por línea sin abrir una pantalla separada solo de cocina.',
       noExtraLineNote: 'Sin nota adicional de línea',
       customerMemory: 'Memoria de clientes',
-      customerMemoryHelp: 'Vincula un cliente guardado cuando importen el contacto repetido, la dirección o notas de entrega.',
+      customerMemoryHelp:
+        'Vincula un cliente guardado cuando importen el contacto repetido, la dirección o notas de entrega.',
       noSavedCustomer: 'Sin cliente guardado vinculado',
       openCustomer: 'Abrir detalle del cliente',
       noDeliveryAssignee: 'Sin responsable todavía',
@@ -648,28 +736,35 @@ const es = {
     summary: 'clientes',
     saved: 'Memoria de cliente guardada.',
     listTitle: 'Lista de clientes',
-    listHelp: 'Mantén reutilizables los nombres, contactos y contexto de entrega sin exigir una estructura CRM pesada.',
+    listHelp:
+      'Mantén reutilizables los nombres, contactos y contexto de entrega sin exigir una estructura CRM pesada.',
     newTitle: 'Nuevo cliente',
     editTitle: 'Editar cliente',
-    formHelp: 'Captura solo los detalles prácticos que el equipo necesita para trabajar más rápido la próxima vez.',
+    formHelp:
+      'Captura solo los detalles prácticos que el equipo necesita para trabajar más rápido la próxima vez.',
     newAction: 'Crear una ficha nueva',
     createAction: 'Guardar cliente',
     editAction: 'Editar',
     updateAction: 'Actualizar cliente',
     createOrderAction: 'Crear pedido vinculado',
     detailTitle: 'Contexto reciente del cliente',
-    detailHelp: 'Usa esta superficie para historial operativo liviano, no para seguimiento comercial.',
+    detailHelp:
+      'Usa esta superficie para historial operativo liviano, no para seguimiento comercial.',
     recentOrdersTitle: 'Pedidos vinculados recientes',
-    recentOrdersHelp: 'Muestra el historial operativo más reciente de este cliente.',
-    recentOrdersEmpty: 'Aún no hay pedidos vinculados. Crea uno directo desde esta ficha cuando haga falta.',
+    recentOrdersHelp:
+      'Muestra el historial operativo más reciente de este cliente.',
+    recentOrdersEmpty:
+      'Aún no hay pedidos vinculados. Crea uno directo desde esta ficha cuando haga falta.',
     noContactYet: 'Todavía sin dato de contacto',
     noPreferredContact: 'Todavía no hay método de contacto preferido guardado.',
     preferredContactSummary: 'Contacto preferido: {{method}}.',
     lastUpdated: 'Última actualización',
     lastOrderOn: 'último pedido el',
     emptyTitle: 'Elige o crea una ficha de cliente',
-    emptyBody: 'Guarda solo la memoria que el equipo realmente usa: quién es, cómo contactarlo y qué contexto operativo importa.',
-    listEmpty: 'Todavía no hay fichas de clientes. Guarda la primera desde el formulario de la derecha.',
+    emptyBody:
+      'Guarda solo la memoria que el equipo realmente usa: quién es, cómo contactarlo y qué contexto operativo importa.',
+    listEmpty:
+      'Todavía no hay fichas de clientes. Guarda la primera desde el formulario de la derecha.',
     stats: {
       active: 'Clientes activos',
       activeHelp: 'listos para vincular en pedidos nuevos',
@@ -692,7 +787,8 @@ const es = {
       deliveryNote: 'Nota de entrega',
       internalNote: 'Nota interna',
       active: 'Mantener cliente activo',
-      activeHelp: 'Desactívalo cuando el equipo deba conservar el historial pero dejar de vincularlo por defecto en pedidos nuevos.',
+      activeHelp:
+        'Desactívalo cuando el equipo deba conservar el historial pero dejar de vincularlo por defecto en pedidos nuevos.',
     },
     placeholders: {
       displayName: 'Café Luna o cumpleaños Sofía',
@@ -700,7 +796,8 @@ const es = {
       email: 'pedidos@example.com',
       contactMethod: 'Sin preferencia guardada',
       address: 'Calle, colonia, referencia o detalle de retiro',
-      deliveryNote: 'Código de puerta, mejor hora de llegada o recordatorio de empaque',
+      deliveryNote:
+        'Código de puerta, mejor hora de llegada o recordatorio de empaque',
       internalNote: 'Nota discreta para toma de pedidos, cumplimiento o relevo',
     },
   },
@@ -735,10 +832,12 @@ const es = {
     noDestinationYet: 'Sin destino todavía',
     orderLines: 'líneas de pedido',
     changedDemand: 'Demanda cambiada o sensible a borradores',
-    changedDemandHelp: 'Mantén visibles para cocina las ediciones tardías y el trabajo impulsado por borradores.',
+    changedDemandHelp:
+      'Mantén visibles para cocina las ediciones tardías y el trabajo impulsado por borradores.',
     fulfillmentQueues: {
       pack: 'Vigilancia de empaque para entrega',
-      packHelp: 'Muestra pedidos de entrega que todavía necesitan empaque o producción.',
+      packHelp:
+        'Muestra pedidos de entrega que todavía necesitan empaque o producción.',
       assign: 'Vigilancia de asignación interna',
       assignHelp: 'Mantén visibles las entregas propias hasta asignarlas.',
       pickup: 'Vigilancia de retiro',
@@ -746,47 +845,66 @@ const es = {
       remaining: 'pendiente',
     },
     currentWipSnapshot: 'Vista actual de WIP',
-    currentWipSnapshotHelp: 'Úsalo como lectura rápida antes de pasar a las actualizaciones de producción.',
+    currentWipSnapshotHelp:
+      'Úsalo como lectura rápida antes de pasar a las actualizaciones de producción.',
     fastLineCompletion: 'Cierre rápido por línea',
-    fastLineCompletionHelp: 'Toca el avance parcial sin salir de la vista de producción.',
+    fastLineCompletionHelp:
+      'Toca el avance parcial sin salir de la vista de producción.',
     liveUpdates: 'Actualizaciones en vivo por línea',
     complete: 'completo',
     completedField: 'Completado',
     save: 'Guardar',
     saving: 'Guardando…',
     recentHandoffNotes: 'Notas recientes de relevo',
-    recentHandoffNotesHelp: 'Muestra el contexto de turno más reciente junto a la demanda actual de producción.',
+    recentHandoffNotesHelp:
+      'Muestra el contexto de turno más reciente junto a la demanda actual de producción.',
     hiddenFromBoard: 'Ocultos del tablero',
-    hiddenFromBoardHelp: 'Los pedidos guardados aquí quedan fuera de la demanda agrupada pero siguen visibles para operadores.',
-    hiddenOrderHelp: 'Oculto de la demanda agrupada pero conservado en pedidos guardados.',
+    hiddenFromBoardHelp:
+      'Los pedidos guardados aquí quedan fuera de la demanda agrupada pero siguen visibles para operadores.',
+    hiddenOrderHelp:
+      'Oculto de la demanda agrupada pero conservado en pedidos guardados.',
     emptyTitle: 'Aún no hay tableros de producción.',
-    emptyBody: 'En cuanto existan pedidos guardados visibles, aquí aparecerán la demanda agrupada y el avance rápido.',
-    termHint: '{{items}} aparecerán aquí cuando la demanda visible quede agrupada.',
+    emptyBody:
+      'En cuanto existan pedidos guardados visibles, aquí aparecerán la demanda agrupada y el avance rápido.',
+    termHint:
+      '{{items}} aparecerán aquí cuando la demanda visible quede agrupada.',
+    sectionNav: {
+      demand: 'Demanda',
+      fulfillment: 'Cumplimiento',
+      handoff: 'WIP + relevo',
+      updates: 'Actualización por línea',
+    },
   },
   handoff: {
     eyebrow: 'WIP + relevo de turno',
     title: 'Revisión de la mañana',
-    description: 'Haz visible el trabajo preparado, formado, horneado y listo. Deja notas que el siguiente turno pueda entender en segundos.',
+    description:
+      'Haz visible el trabajo preparado, formado, horneado y listo. Deja notas que el siguiente turno pueda entender en segundos.',
     savedUpdate: 'Actualización de {{item}} guardada.',
     snapshotTitle: 'foto de relevo',
-    snapshotHelp: 'Resumen principal del turno y puntos abiertos para la fecha foco actual.',
+    snapshotHelp:
+      'Resumen principal del turno y puntos abiertos para la fecha foco actual.',
     nightShift: 'Turno noche',
     openItems: 'Puntos abiertos',
     handoffNote: 'Nota de relevo',
     noHandoffNote: 'Todavía no hay nota de relevo.',
     noSummaryTitle: 'Todavía no hay resumen de relevo para la fecha foco.',
-    noSummaryBody: 'Guarda la tarjeta principal de relevo abajo para crear el primer resumen visible.',
+    noSummaryBody:
+      'Guarda la tarjeta principal de relevo abajo para crear el primer resumen visible.',
     readyOrPendingWip: 'WIP listo o pendiente',
-    readyOrPendingWipHelp: 'El siguiente turno debería poder escanear esta lista rápido desde un teléfono o tablet.',
+    readyOrPendingWipHelp:
+      'El siguiente turno debería poder escanear esta lista rápido desde un teléfono o tablet.',
     fulfillmentWatch: {
       pack: 'Vigilancia de entrega',
-      packHelp: 'Pedidos de entrega que aún necesitan empaque o cierre antes de salir.',
+      packHelp:
+        'Pedidos de entrega que aún necesitan empaque o cierre antes de salir.',
       assign: 'Vigilancia de asignación',
       assignHelp: 'Entregas propias que todavía necesitan responsable.',
       pickup: 'Vigilancia de retiro',
       pickupHelp: 'Pedidos listos esperando que el cliente los retire.',
       all: 'Todas las notas de fulfillment',
-      allHelp: 'Vista rápida de handoff para el contexto de retiro y entrega de hoy.',
+      allHelp:
+        'Vista rápida de handoff para el contexto de retiro y entrega de hoy.',
       remaining: 'pendiente',
     },
     addWip: 'Agregar WIP',
@@ -812,7 +930,7 @@ const es = {
       unit: 'Unidad',
       stage: 'Etapa',
       notes: 'Notas',
-    promise: 'Hora prometida',
+      promise: 'Hora prometida',
       status: 'Estado',
       summary: 'Resumen',
       openItems: 'Puntos abiertos (uno por línea)',
@@ -836,7 +954,8 @@ const es = {
       packed_items: 'Empaquetados',
       other: 'Otro',
     },
-    termHint: '{{destinations}} y otras etiquetas ingresadas por usuarios se guardan exactamente como se escriben.',
+    termHint:
+      '{{destinations}} y otras etiquetas ingresadas por usuarios se guardan exactamente como se escriben.',
   },
   setup: {
     workspace: 'Espacio de configuración',
@@ -844,27 +963,41 @@ const es = {
     description:
       'La configuración sigue apoyando el trabajo en vez de bloquearlo. Pedidos, proveedores, materias primas, recetas y memoria de precios se mantienen visibles sin convertir SKOSS en una gran oficina administrativa.',
     saved: {
-      supplier: 'Proveedor guardado. Sigue agregando estructura solo donde ayude al trabajo diario.',
-      rawMaterial: 'Materia prima guardada. El costeo futuro de recetas ya puede apoyarse en una base real de ingredientes.',
-      price: 'Precio de proveedor guardado. Las comparaciones históricas ya están disponibles para costos y compras futuras.',
-      recipe: 'Receta guardada. Los vínculos entre productos y materias primas ya están listos para costeo liviano e impresiones de producción futuras.',
+      supplier:
+        'Proveedor guardado. Sigue agregando estructura solo donde ayude al trabajo diario.',
+      rawMaterial:
+        'Materia prima guardada. El costeo futuro de recetas ya puede apoyarse en una base real de ingredientes.',
+      price:
+        'Precio de proveedor guardado. Las comparaciones históricas ya están disponibles para costos y compras futuras.',
+      recipe:
+        'Receta guardada. Los vínculos entre productos y materias primas ya están listos para costeo liviano e impresiones de producción futuras.',
       preferences: 'Preferencias del espacio guardadas.',
       user: 'Usuario guardado. La navegación por rol y el espacio inicial ya quedaron listos.',
       import: 'Importación CSV completada.',
     },
     calloutTitle: 'Mantén la configuración práctica.',
-    calloutBody: 'Estas listas deben ayudar a los operadores a trabajar más rápido, no forzar mantenimiento pesado de datos antes del primer uso.',
+    calloutBody:
+      'Estas listas deben ayudar a los operadores a trabajar más rápido, no forzar mantenimiento pesado de datos antes del primer uso.',
     settingsSplitTitle: 'Preferencias vs configuración',
-    settingsSplitBody: 'El comportamiento personal ahora vive en una superficie de preferencias más liviana, mientras la estructura del negocio sigue aquí en configuración.',
+    settingsSplitBody:
+      'El comportamiento personal ahora vive en una superficie de preferencias más liviana, mientras la estructura del negocio sigue aquí en configuración.',
     settingsAreaTitle: 'La configuración sigue siendo compartida',
-    settingsAreaBody: 'Productos, proveedores, recetas, usuarios y costos siguen siendo estructura compartida del sistema.',
+    settingsAreaBody:
+      'Productos, proveedores, recetas, usuarios y costos siguen siendo estructura compartida del sistema.',
     preferencesAreaTitle: 'Las preferencias siguen siendo personales',
-    preferencesAreaBody: 'Idioma, apariencia y espacio inicial ahora pertenecen a quien inicia sesión, no a todo el negocio.',
+    preferencesAreaBody:
+      'Idioma, apariencia y espacio inicial ahora pertenecen a quien inicia sesión, no a todo el negocio.',
     openPreferences: 'Abrir preferencias',
-    roleShapingNote: 'Este rol se aleja de configuración por defecto, así que esta página debe quedar como algo secundario en el trabajo diario.',
+    roleShapingNote:
+      'Este rol se aleja de configuración por defecto, así que esta página debe quedar como algo secundario en el trabajo diario.',
     adminReadinessTitle: 'Administración lista para operar',
-    adminReadinessHelp: 'Usa estos accesos rápidos para moverte entre áreas de configuración sin perder contexto.',
+    adminReadinessHelp:
+      'Usa estos accesos rápidos para moverte entre áreas de configuración sin perder contexto.',
     sections: {
+      businessSetup: 'Base del negocio',
+      teamUsers: 'Equipo y usuarios',
+      catalogData: 'Catálogo y datos',
+      preferencesSystem: 'Preferencias y sistema',
       users: 'Usuarios',
       suppliers: 'Proveedores',
       rawMaterials: 'Materias primas',
@@ -875,15 +1008,41 @@ const es = {
       orders: 'Pedidos',
       imports: 'Importaciones',
     },
+    groups: {
+      business: {
+        title: 'Base del negocio',
+        description:
+          'Mantén memoria de clientes, puesta en marcha e importaciones cerca de la captura de pedidos.',
+      },
+      team: {
+        title: 'Equipo y usuarios',
+        description:
+          'Agrupa roles, enfoque de espacios y límites entre preferencias personales y ajustes compartidos.',
+      },
+      catalog: {
+        title: 'Catálogo y costo operativo',
+        description:
+          'Reúne proveedores, insumos, recetas, visibilidad de costo y evidencia de precios en un mismo flujo.',
+      },
+      system: {
+        title: 'Preferencias y comportamiento del sistema',
+        description:
+          'Separa defaults personales de la configuración compartida para mantener liviana la vista operativa.',
+      },
+    },
     import: {
       title: 'Importación CSV (ligera)',
-      description: 'Importa clientes, proveedores o materias primas con mapeo simple y vista previa corta.',
+      description:
+        'Importa clientes, proveedores o materias primas con mapeo simple y vista previa corta.',
       customers: 'Importar clientes',
-      customersHelp: 'Trae memoria de clientes repetidos rápido. Se permiten campos faltantes.',
+      customersHelp:
+        'Trae memoria de clientes repetidos rápido. Se permiten campos faltantes.',
       suppliers: 'Importar proveedores',
-      suppliersHelp: 'Trae listas de proveedores tal como están y ajusta contactos después.',
+      suppliersHelp:
+        'Trae listas de proveedores tal como están y ajusta contactos después.',
       materials: 'Importar materias primas',
-      materialsHelp: 'Trae listas de insumos rápido y mantén flexibles los campos opcionales.',
+      materialsHelp:
+        'Trae listas de insumos rápido y mantén flexibles los campos opcionales.',
       hint: 'Usa CSV UTF-8 con encabezados en la primera fila.',
       chooseFile: 'Archivo CSV',
       noFile: 'Ningún archivo seleccionado.',
@@ -891,7 +1050,8 @@ const es = {
       preview: 'Vista previa de primeras filas',
       emptyPreview: 'No se encontraron filas de datos en este archivo.',
       confirm: 'Confirmar importación',
-      result: 'Importación de {{entity}} completada: {{imported}} importadas, {{skipped}} omitidas.',
+      result:
+        'Importación de {{entity}} completada: {{imported}} importadas, {{skipped}} omitidas.',
       entityLabels: {
         customers: 'clientes',
         suppliers: 'proveedores',
@@ -904,112 +1064,168 @@ const es = {
       },
     },
     customerMemoryTitle: 'Memoria de clientes',
-    customerMemoryHelp: 'Usa fichas de clientes guardados sin perder la captura de pedidos en modo borrador cuando falten datos.',
-    customerMemoryEmpty: 'Todavía no hay clientes guardados. Crea uno para acelerar pedidos repetidos.',
+    customerMemoryHelp:
+      'Usa fichas de clientes guardados sin perder la captura de pedidos en modo borrador cuando falten datos.',
+    customerMemoryEmpty:
+      'Todavía no hay clientes guardados. Crea uno para acelerar pedidos repetidos.',
     operabilityChecklistTitle: 'Checklist de operabilidad admin',
-    operabilityChecklistHelp: 'Estos enlaces mantienen la configuración práctica desde el primer uso y no como demo.',
+    operabilityChecklistHelp:
+      'Estos enlaces mantienen la configuración práctica desde el primer uso y no como demo.',
     operabilityChecklist: {
       customerOrderLink: 'Cliente -> pedido',
-      customerOrderLinkHelp: 'Crea o edita clientes y abre captura de pedido ya vinculada al cliente seleccionado.',
+      customerOrderLinkHelp:
+        'Crea o edita clientes y abre captura de pedido ya vinculada al cliente seleccionado.',
       supplierMaterialLink: 'Proveedor + materia prima -> memoria de precios',
-      supplierMaterialLinkHelp: 'Guarda proveedores e insumos y mantén evidencia de precios append-only para costeo.',
+      supplierMaterialLinkHelp:
+        'Guarda proveedores e insumos y mantén evidencia de precios append-only para costeo.',
       recipeProductLink: 'Producto -> receta',
-      recipeProductLinkHelp: 'Crea recetas vinculadas al producto directo desde la lista de productos para mantener conectado costo y producción.',
+      recipeProductLinkHelp:
+        'Crea recetas vinculadas al producto directo desde la lista de productos para mantener conectado costo y producción.',
       userWorkspaceLink: 'Usuario -> rol -> espacio',
-      userWorkspaceLinkHelp: 'Ajusta rol y espacio inicial en un solo lugar y revisa de inmediato el impacto en espacios visibles.',
+      userWorkspaceLinkHelp:
+        'Ajusta rol y espacio inicial en un solo lugar y revisa de inmediato el impacto en espacios visibles.',
     },
     appearance: 'Apariencia',
-    appearanceHelp: 'La apariencia debe seguir siendo fácil de alcanzar desde el menú de usuario, mientras configuración conserva el contexto más amplio del sistema.',
+    appearanceHelp:
+      'La apariencia debe seguir siendo fácil de alcanzar desde el menú de usuario, mientras configuración conserva el contexto más amplio del sistema.',
     presetWorkspaceTitle: 'Énfasis del espacio según preset',
-    presetWorkspaceHelp: 'Hoy el preset seleccionado reordena y destaca los espacios más relevantes sin ocultar los demás.',
+    presetWorkspaceHelp:
+      'Hoy el preset seleccionado reordena y destaca los espacios más relevantes sin ocultar los demás.',
     starterSuggestionsTitle: 'Sugerencias iniciales',
-    starterSuggestionsHelp: 'Son empujes prácticos, no configuración bloqueada.',
+    starterSuggestionsHelp:
+      'Son empujes prácticos, no configuración bloqueada.',
     activeSuppliers: 'Proveedores activos',
-    activeSuppliersHelp: 'Contactos prácticos listos para conversaciones de reposición.',
+    activeSuppliersHelp:
+      'Contactos prácticos listos para conversaciones de reposición.',
     rawMaterials: 'Materias primas',
-    rawMaterialsHelp: 'Estructura de ingredientes a la que el costeo futuro de recetas puede apuntar.',
+    rawMaterialsHelp:
+      'Estructura de ingredientes a la que el costeo futuro de recetas puede apuntar.',
     recordedPrices: 'Precios registrados',
-    recordedPricesHelp: 'Precios históricos de proveedores listos para comparaciones y lógica de costo más adelante.',
+    recordedPricesHelp:
+      'Precios históricos de proveedores listos para comparaciones y lógica de costo más adelante.',
     recipes: 'Recetas',
-    recipesHelp: 'Fórmulas livianas que conectan productos con materias primas sin obligar a cada producto a entrar en un modelo completo de manufactura.',
+    recipesHelp:
+      'Fórmulas livianas que conectan productos con materias primas sin obligar a cada producto a entrar en un modelo completo de manufactura.',
     productsAndVariants: 'Productos y variantes',
-    productsAndVariantsHelp: 'Usa nombres prácticos que el equipo ya entienda en la operación.',
-    managedFromOrders: 'Los productos y variantes se mantienen desde la captura de pedidos y plantillas recurrentes.',
+    productsAndVariantsHelp:
+      'Usa nombres prácticos que el equipo ya entienda en la operación.',
+    managedFromOrders:
+      'Los productos y variantes se mantienen desde la captura de pedidos y plantillas recurrentes.',
     openOrderCapture: 'Abrir captura de pedido',
     destinations: 'Destinos',
     destinationsHelp: 'Deben seguir siendo reconocibles para ventas y cocina.',
-    destinationsManagedFromOrders: 'Los destinos se vuelven reutilizables desde captura de pedidos y recurrencias.',
+    destinationsManagedFromOrders:
+      'Los destinos se vuelven reutilizables desde captura de pedidos y recurrencias.',
     recurringRhythms: 'Ritmos recurrentes',
-    recurringRhythmsHelp: 'El trabajo repetido debe seguir explícito y fácil de revisar.',
-    managedFromRecurring: 'Los ritmos recurrentes se gestionan en el espacio de pedidos recurrentes.',
+    recurringRhythmsHelp:
+      'El trabajo repetido debe seguir explícito y fácil de revisar.',
+    managedFromRecurring:
+      'Los ritmos recurrentes se gestionan en el espacio de pedidos recurrentes.',
     openRecurringCapture: 'Abrir captura recurrente',
     users: 'Usuarios',
-    usersHelp: 'Los roles visibles apoyan relevo y responsabilidad sin sumar complejidad administrativa pesada.',
-    usersEmpty: 'Aún no hay usuarios. Agrega al primer integrante para empezar con espacios según rol.',
+    usersHelp:
+      'Los roles visibles apoyan relevo y responsabilidad sin sumar complejidad administrativa pesada.',
+    usersEmpty:
+      'Aún no hay usuarios. Agrega al primer integrante para empezar con espacios según rol.',
     addUser: 'Agregar usuario',
-    addUserHelp: 'Mantén el alta corta: quién es, cómo entra y dónde debería empezar su trabajo.',
+    addUserHelp:
+      'Mantén el alta corta: quién es, cómo entra y dónde debería empezar su trabajo.',
     editUser: 'Editar usuario',
-    editUserHelp: 'Ajusta rol, énfasis de navegación o estado activo sin crear una matriz grande de permisos.',
+    editUserHelp:
+      'Ajusta rol, énfasis de navegación o estado activo sin crear una matriz grande de permisos.',
     operationalDataLayer: 'Capa de datos operativa',
     operationalDataLayerHelp:
       'Estos registros agregan la estructura justa para comparar proveedores, limpiar ingredientes, vincular recetas y preparar costos futuros sin forzar una suite completa de compras.',
     draftFirstFriendly: 'Amigable con borrador primero',
     suppliers: 'Proveedores',
-    suppliersHelp: 'Mantén el contacto y la nota operativa que el equipo realmente usa.',
-    suppliersEmpty: 'Aún no hay proveedores. Agrega uno para empezar a registrar evidencia real de compra.',
+    suppliersHelp:
+      'Mantén el contacto y la nota operativa que el equipo realmente usa.',
+    suppliersEmpty:
+      'Aún no hay proveedores. Agrega uno para empezar a registrar evidencia real de compra.',
     noExtraContactYet: 'Todavía no hay otro dato de contacto.',
     addSupplier: 'Agregar proveedor',
-    addSupplierHelp: 'Lo bastante simple para capturarlo ahora y lo bastante útil para comparaciones de compra más adelante.',
+    addSupplierHelp:
+      'Lo bastante simple para capturarlo ahora y lo bastante útil para comparaciones de compra más adelante.',
     editSupplier: 'Editar proveedor',
-    editSupplierHelp: 'Actualiza la ficha sin borrar su memoria histórica de precios.',
+    editSupplierHelp:
+      'Actualiza la ficha sin borrar su memoria histórica de precios.',
     rawMaterialsSection: 'Materias primas',
-    rawMaterialsSectionHelp: 'Mantén el lenguaje de ingredientes práctico para que los costos futuros se apoyen en insumos reales de cocina.',
-    rawMaterialsEmpty: 'Aún no hay materias primas. Agrega una para vincular recetas y precios de proveedores.',
+    rawMaterialsSectionHelp:
+      'Mantén el lenguaje de ingredientes práctico para que los costos futuros se apoyen en insumos reales de cocina.',
+    rawMaterialsEmpty:
+      'Aún no hay materias primas. Agrega una para vincular recetas y precios de proveedores.',
     addRawMaterial: 'Agregar materia prima',
-    addRawMaterialHelp: 'Mantén los valores por defecto livianos. El detalle de receta y costo puede crecer después desde esta base.',
+    addRawMaterialHelp:
+      'Mantén los valores por defecto livianos. El detalle de receta y costo puede crecer después desde esta base.',
     editRawMaterial: 'Editar materia prima',
-    editRawMaterialHelp: 'Ajusta nombres o unidades sin convertir esto en un proyecto rígido de catálogo.',
+    editRawMaterialHelp:
+      'Ajusta nombres o unidades sin convertir esto en un proyecto rígido de catálogo.',
     recipeFoundationTitle: 'Base de receta / fórmula',
-    recipeFoundationHelp: 'Vincula productos o variantes con líneas prácticas de ingredientes para que el costo y las notas de producción imprimibles puedan crecer después sin sumar MRP ni descuento de inventario.',
+    recipeFoundationHelp:
+      'Vincula productos o variantes con líneas prácticas de ingredientes para que el costo y las notas de producción imprimibles puedan crecer después sin sumar MRP ni descuento de inventario.',
     recipeListTitle: 'Vínculos de recetas',
-    recipeListHelp: 'Mantén las fórmulas compactas. Un producto puede seguir sin receta hasta que el equipo la necesite.',
-    recipeEmpty: 'Todavía no se agregó ninguna receta. Los productos pueden seguir vendiéndose y produciéndose sin una.',
+    recipeListHelp:
+      'Mantén las fórmulas compactas. Un producto puede seguir sin receta hasta que el equipo la necesite.',
+    recipeEmpty:
+      'Todavía no se agregó ninguna receta. Los productos pueden seguir vendiéndose y produciéndose sin una.',
     addRecipe: 'Agregar receta',
-    addRecipeHelp: 'Empieza con el producto, unas pocas líneas de ingredientes y contexto de lote opcional. El detalle fino puede venir después.',
+    addRecipeHelp:
+      'Empieza con el producto, unas pocas líneas de ingredientes y contexto de lote opcional. El detalle fino puede venir después.',
     editRecipe: 'Editar receta',
-    editRecipeHelp: 'Ajusta líneas o notas sin convertir esto en una pantalla pesada de manufactura.',
+    editRecipeHelp:
+      'Ajusta líneas o notas sin convertir esto en una pantalla pesada de manufactura.',
     recipeLinesTitle: 'Líneas de ingredientes',
-    recipeLinesHelp: 'Deja las filas extra en blanco. SKOSS solo guarda las líneas que tienen materia prima, cantidad y unidad.',
-    recipeYieldHelp: 'El rendimiento de lote es opcional. Solo ayuda a explicar la escala y un costo aproximado por rendimiento cuando quieres usarlo.',
-    recipeRemoveLineHelp: 'Las líneas sin marcar siguen en la receta. Marca esto cuando quieras quitar una línea existente al guardar.',
+    recipeLinesHelp:
+      'Deja las filas extra en blanco. SKOSS solo guarda las líneas que tienen materia prima, cantidad y unidad.',
+    recipeYieldHelp:
+      'El rendimiento de lote es opcional. Solo ayuda a explicar la escala y un costo aproximado por rendimiento cuando quieres usarlo.',
+    recipeRemoveLineHelp:
+      'Las líneas sin marcar siguen en la receta. Marca esto cuando quieras quitar una línea existente al guardar.',
     recipeCostingTitle: 'Costo estimado de materiales',
-    recipeCostingHelp: 'Esta es una lectura liviana de los últimos precios de proveedor. Si faltan datos del empaque o las unidades no coinciden, la estimación sigue siendo honesta y no adivina.',
-    recipeCostStart: 'Guarda o abre una receta para revisar su estimación actual de materiales.',
-    recipeCostEmpty: 'Esta receta todavía no tiene líneas de ingredientes, así que no hay nada para estimar.',
-    recipeCostComplete: 'Cada línea pudo estimarse con el último precio registrado del proveedor.',
-    recipeCostIncomplete: 'El costo estimado está incompleto. Algunas líneas todavía necesitan un precio utilizable o una unidad más clara.',
-    recipeCostMissingPrice: 'Todavía no hay un precio utilizable registrado para este material.',
-    recipeCostMissingPackage: 'El último precio no tiene cantidad o unidad de empaque, así que SKOSS todavía no puede normalizarlo.',
-    recipeCostUnitMismatch: 'La unidad del empaque más reciente no coincide lo suficiente con esta línea para normalizarla automáticamente.',
+    recipeCostingHelp:
+      'Esta es una lectura liviana de los últimos precios de proveedor. Si faltan datos del empaque o las unidades no coinciden, la estimación sigue siendo honesta y no adivina.',
+    recipeCostStart:
+      'Guarda o abre una receta para revisar su estimación actual de materiales.',
+    recipeCostEmpty:
+      'Esta receta todavía no tiene líneas de ingredientes, así que no hay nada para estimar.',
+    recipeCostComplete:
+      'Cada línea pudo estimarse con el último precio registrado del proveedor.',
+    recipeCostIncomplete:
+      'El costo estimado está incompleto. Algunas líneas todavía necesitan un precio utilizable o una unidad más clara.',
+    recipeCostMissingPrice:
+      'Todavía no hay un precio utilizable registrado para este material.',
+    recipeCostMissingPackage:
+      'El último precio no tiene cantidad o unidad de empaque, así que SKOSS todavía no puede normalizarlo.',
+    recipeCostUnitMismatch:
+      'La unidad del empaque más reciente no coincide lo suficiente con esta línea para normalizarla automáticamente.',
     costingSnapshotTitle: 'Vista de costos',
-    costingSnapshotHelp: 'Revisa qué ya es utilizable, qué está incompleto y qué productos todavía necesitan receta o evidencia de precio. Sigue siendo una vista operativa y solo estimada.',
+    costingSnapshotHelp:
+      'Revisa qué ya es utilizable, qué está incompleto y qué productos todavía necesitan receta o evidencia de precio. Sigue siendo una vista operativa y solo estimada.',
     costingListTitle: 'Resumen por receta y producto',
-    costingListHelp: 'Usa filtros rápidos para enfocarte en lo totalmente costeado, lo parcial, lo que no tiene evidencia o lo que sigue sin receta.',
+    costingListHelp:
+      'Usa filtros rápidos para enfocarte en lo totalmente costeado, lo parcial, lo que no tiene evidencia o lo que sigue sin receta.',
     costingDetailTitle: 'Detalle de costo',
-    costingDetailHelp: 'El detalle por línea se mantiene compacto, pero igual muestra la evidencia de proveedor detrás de cada estimación cuando existe.',
+    costingDetailHelp:
+      'El detalle por línea se mantiene compacto, pero igual muestra la evidencia de proveedor detrás de cada estimación cuando existe.',
     costingNoRecipe: 'Todavía no hay una receta vinculada.',
-    costingNoRecipeHelp: 'Este artículo todavía necesita una receta vinculada antes de que SKOSS pueda estimar un costo de materiales.',
+    costingNoRecipeHelp:
+      'Este artículo todavía necesita una receta vinculada antes de que SKOSS pueda estimar un costo de materiales.',
     costingEmpty: 'Todavía no hay elementos de costo disponibles.',
-    costingEmptyForFilter: 'Todavía no hay elementos que coincidan con este filtro de costo.',
+    costingEmptyForFilter:
+      'Todavía no hay elementos que coincidan con este filtro de costo.',
     costingSummary: {
       fullyCosted: 'Totalmente costeado',
-      fullyCostedHelp: 'Cada línea de la receta pudo normalizarse desde evidencia utilizable de proveedor.',
+      fullyCostedHelp:
+        'Cada línea de la receta pudo normalizarse desde evidencia utilizable de proveedor.',
       partiallyCosted: 'Parcialmente costeado',
-      partiallyCostedHelp: 'Algunas líneas ya tienen costo, pero al menos una todavía necesita evidencia más clara.',
+      partiallyCostedHelp:
+        'Algunas líneas ya tienen costo, pero al menos una todavía necesita evidencia más clara.',
       missingEvidence: 'Falta evidencia de costo',
-      missingEvidenceHelp: 'La receta existe, pero la evidencia de proveedor aún no alcanza para costear ninguna línea.',
+      missingEvidenceHelp:
+        'La receta existe, pero la evidencia de proveedor aún no alcanza para costear ninguna línea.',
       noRecipe: 'Sin receta',
-      noRecipeHelp: 'Productos o variantes todavía necesitan una receta vinculada antes de mostrar un costo.',
+      noRecipeHelp:
+        'Productos o variantes todavía necesitan una receta vinculada antes de mostrar un costo.',
     },
     costingFilters: {
       all: 'Todo',
@@ -1025,10 +1241,14 @@ const es = {
       no_recipe: 'Sin receta',
     },
     costingStatusesHelp: {
-      fully_costed: 'La evidencia más reciente de proveedor cubre cada línea de la receta, así que esta estimación se puede leer de punta a punta.',
-      partially_costed: 'Al menos una línea es utilizable y al menos una todavía necesita precio o detalle de empaque más claro.',
-      missing_cost_evidence: 'Hay receta, pero todavía no puede normalizarse ninguna línea en una estimación utilizable.',
-      no_recipe: 'Este producto o variante todavía no tiene una receta vinculada, así que el costo todavía no está disponible.',
+      fully_costed:
+        'La evidencia más reciente de proveedor cubre cada línea de la receta, así que esta estimación se puede leer de punta a punta.',
+      partially_costed:
+        'Al menos una línea es utilizable y al menos una todavía necesita precio o detalle de empaque más claro.',
+      missing_cost_evidence:
+        'Hay receta, pero todavía no puede normalizarse ninguna línea en una estimación utilizable.',
+      no_recipe:
+        'Este producto o variante todavía no tiene una receta vinculada, así que el costo todavía no está disponible.',
     },
     costingLineStatuses: {
       costed: 'OK',
@@ -1037,9 +1257,12 @@ const es = {
       unit_mismatch: 'Unidad no coincide',
     },
     costingLineStatusesHelp: {
-      missing_price: 'Todavía no hay un precio registrado de proveedor que pueda usarse para este material.',
-      missing_package: 'Existe un precio de proveedor, pero todavía falta la cantidad o la unidad del empaque.',
-      unit_mismatch: 'La unidad del empaque del proveedor y la unidad de la receta no coinciden lo suficiente para normalizar honestamente.',
+      missing_price:
+        'Todavía no hay un precio registrado de proveedor que pueda usarse para este material.',
+      missing_package:
+        'Existe un precio de proveedor, pero todavía falta la cantidad o la unidad del empaque.',
+      unit_mismatch:
+        'La unidad del empaque del proveedor y la unidad de la receta no coinciden lo suficiente para normalizar honestamente.',
     },
     costingLabels: {
       latestRecipeEvidence: 'Última evidencia de receta',
@@ -1061,7 +1284,8 @@ const es = {
     supplierPriceMemoryHelp:
       'Registra lo que realmente se pagó con el tiempo para que SKOSS pueda comparar proveedores y alimentar el costeo de recetas sin adivinar desde un único precio actual.',
     addSupplierPrice: 'Agregar precio de proveedor',
-    addSupplierPriceHelp: 'Captura primero proveedor, fecha y precio. El detalle del empaque puede seguir liviano y SKOSS normalizará tasas más adelante.',
+    addSupplierPriceHelp:
+      'Captura primero proveedor, fecha y precio. El detalle del empaque puede seguir liviano y SKOSS normalizará tasas más adelante.',
     history: {
       title: 'Historial de precios',
       help: 'Las entradas son append-only. Usa los enlaces de proveedor y material para acotar la vista tipo cuaderno.',
@@ -1071,26 +1295,31 @@ const es = {
       empty: 'Todavía no hay entradas de precio para esta vista.',
     },
     nextStepsTitle: 'Lo que sigue siendo liviano a propósito',
-    nextStepsBody: 'Este espacio ahora cubre CRUD y vínculos operativos reales. La automatización de compras, descuento de inventario y contabilidad siguen fuera de alcance por diseño.',
+    nextStepsBody:
+      'Este espacio ahora cubre CRUD y vínculos operativos reales. La automatización de compras, descuento de inventario y contabilidad siguen fuera de alcance por diseño.',
     fields: {
       userDisplayName: 'Nombre del usuario',
       loginIdentifier: 'Identificador de acceso',
       role: 'Rol / función',
       defaultWorkspace: 'Espacio predeterminado',
       userActive: 'Usuario activo',
-      userActiveHelp: 'Los usuarios inactivos quedan en historial pero dejan de aparecer en el acceso rápido.',
+      userActiveHelp:
+        'Los usuarios inactivos quedan en historial pero dejan de aparecer en el acceso rápido.',
       supplierName: 'Nombre del proveedor',
       contact: 'Contacto',
       notes: 'Notas',
       activeSupplier: 'Proveedor activo',
-      activeSupplierHelp: 'Desactívalo cuando deba quedar en historial pero fuera de las opciones activas.',
+      activeSupplierHelp:
+        'Desactívalo cuando deba quedar en historial pero fuera de las opciones activas.',
       rawMaterialName: 'Nombre de la materia prima',
       category: 'Categoría',
       defaultUnit: 'Unidad por defecto',
-      unitQuickHelp: 'Sugerencias rápidas de unidad: g, kg, ml, l, unit, piece, dozen, eggs.',
+      unitQuickHelp:
+        'Sugerencias rápidas de unidad: g, kg, ml, l, unit, piece, dozen, eggs.',
       brand: 'Marca',
       activeRawMaterial: 'Materia prima activa',
-      activeRawMaterialHelp: 'Los materiales inactivos siguen disponibles en historial para precios pasados y trazas futuras de costo.',
+      activeRawMaterialHelp:
+        'Los materiales inactivos siguen disponibles en historial para precios pasados y trazas futuras de costo.',
       supplier: 'Proveedor',
       rawMaterial: 'Materia prima',
       product: 'Producto',
@@ -1104,26 +1333,31 @@ const es = {
       presentation: 'Presentación',
       packageQuantity: 'Cantidad del empaque',
       packageUnit: 'Unidad del empaque',
-      packageOptionalHelp: 'Cantidad y unidad del empaque son opcionales, pero completa ambas juntas si las incluyes.',
+      packageOptionalHelp:
+        'Cantidad y unidad del empaque son opcionales, pero completa ambas juntas si las incluyes.',
       price: 'Precio',
       date: 'Fecha',
       note: 'Nota',
       activeRecipe: 'Receta activa',
-      activeRecipeHelp: 'Desactívala cuando quieras mantener la fórmula en historial sin mostrarla como la actual.',
+      activeRecipeHelp:
+        'Desactívala cuando quieras mantener la fórmula en historial sin mostrarla como la actual.',
     },
     placeholders: {
       userDisplayName: 'Lucía',
       contact: 'María · WhatsApp · teléfono',
-      supplierNotes: 'Ritmo de entrega, pedido mínimo, recordatorio de pago o nota de ruta',
+      supplierNotes:
+        'Ritmo de entrega, pedido mínimo, recordatorio de pago o nota de ruta',
       rawMaterialName: 'Harina panadera',
       category: 'Harina, lácteos, empaque',
       defaultUnit: 'kg',
       brand: 'Marca por defecto o preferida',
-      rawMaterialNotes: 'Fuerza, nota de sustitución o recordatorio de preparación',
+      rawMaterialNotes:
+        'Fuerza, nota de sustitución o recordatorio de preparación',
       recipeTitle: 'Mezcla base pan de campo',
       batchYieldQuantity: '24',
       batchYieldUnit: 'pieces',
-      recipeInstructions: 'Método corto, nota de etapa o recordatorio de impresión',
+      recipeInstructions:
+        'Método corto, nota de etapa o recordatorio de impresión',
       recipeLineQuantity: '2.5',
       recipeLineUnit: 'kg',
       recipeLineNote: 'Tamizar primero, reservar 5 %, cobertura opcional',
@@ -1132,7 +1366,8 @@ const es = {
       packageQuantity: '25',
       packageUnit: 'kg, L, dozen, eggs',
       price: '30',
-      priceNote: 'Promo, compra de emergencia, cambio de ruta o nota de calidad',
+      priceNote:
+        'Promo, compra de emergencia, cambio de ruta o nota de calidad',
     },
     actions: {
       edit: 'Editar',
@@ -1158,6 +1393,9 @@ const es = {
       removeLine: 'Quitar línea',
     },
     labels: {
+      activeUsers: 'activos',
+      inactiveUsers: 'inactivos',
+      rolesInUse: 'roles en uso',
       defaultWorkspace: 'Espacio predeterminado',
       visibleWorkspaces: 'Espacios visibles',
       defaultUnitSuffix: 'por defecto',
@@ -1183,7 +1421,8 @@ const es = {
 
   printing: {
     browserFirstBadge: 'Impresión desde navegador primero',
-    browserFirstHelp: 'Abre esta vista en el dispositivo cercano al flujo en papel y luego usa el diálogo de impresión del navegador. El enrutamiento futuro de impresoras puede seguir modular.',
+    browserFirstHelp:
+      'Abre esta vista en el dispositivo cercano al flujo en papel y luego usa el diálogo de impresión del navegador. El enrutamiento futuro de impresoras puede seguir modular.',
     labels: {
       artifact: 'Artefacto',
       purpose: 'Propósito',
@@ -1224,19 +1463,23 @@ const es = {
       },
       orderTicket: {
         title: 'Ticket de pedido',
-        description: 'Detalle compacto del pedido para cocina, empaque o relevo de mostrador sin todo el cromo de la app.',
+        description:
+          'Detalle compacto del pedido para cocina, empaque o relevo de mostrador sin todo el cromo de la app.',
       },
       productionTicket: {
         title: 'Ticket de producción / preparación',
-        description: 'Un resumen imprimible de demanda para el día de producción activo, con WIP y contexto de relevo cerca.',
+        description:
+          'Un resumen imprimible de demanda para el día de producción activo, con WIP y contexto de relevo cerca.',
       },
       handoffSlip: {
         title: 'Slip de WIP / relevo',
-        description: 'Un resumen breve en papel para pasar entre turnos con trabajo abierto, WIP y seguimiento de cumplimiento.',
+        description:
+          'Un resumen breve en papel para pasar entre turnos con trabajo abierto, WIP y seguimiento de cumplimiento.',
       },
       simpleLabel: {
         title: 'Etiqueta simple',
-        description: 'Una etiqueta liviana pensada primero para impresión de navegador en bandejas, bolsas, cajas u otros puntos operativos de relevo.',
+        description:
+          'Una etiqueta liviana pensada primero para impresión de navegador en bandejas, bolsas, cajas u otros puntos operativos de relevo.',
         badge: 'Etiqueta',
       },
     },
@@ -1245,16 +1488,20 @@ const es = {
   preferences: {
     workspace: 'Preferencias personales',
     title: 'Preferencias',
-    description: 'Mantén livianos los valores personales: idioma, apariencia y qué espacio debe recibir primero a esta persona.',
+    description:
+      'Mantén livianos los valores personales: idioma, apariencia y qué espacio debe recibir primero a esta persona.',
     saved: 'Preferencias personales guardadas.',
     currentUserTitle: 'Usuario actual',
-    currentUserHelp: 'Esta sesión sigue siendo liviana. La identidad moldea la atención primero, no una política pesada de seguridad.',
+    currentUserHelp:
+      'Esta sesión sigue siendo liviana. La identidad moldea la atención primero, no una política pesada de seguridad.',
     defaultWorkspace: 'Espacio predeterminado',
     settingsBoundaryTitle: 'La configuración sigue compartida',
-    settingsBoundaryBody: 'La configuración del negocio sigue viviendo en Configuración. Preferencias solo moldea comportamiento personal y el primer enfoque.',
+    settingsBoundaryBody:
+      'La configuración del negocio sigue viviendo en Configuración. Preferencias solo moldea comportamiento personal y el primer enfoque.',
     switchUser: 'Cambiar usuario',
     formTitle: 'Valores personales',
-    formHelp: 'Estas elecciones siguen a la persona conectada para que los dispositivos compartidos sigan sintiéndose orientados por rol.',
+    formHelp:
+      'Estas elecciones siguen a la persona conectada para que los dispositivos compartidos sigan sintiéndose orientados por rol.',
     fields: {
       language: 'Idioma',
       theme: 'Apariencia',
@@ -1265,9 +1512,11 @@ const es = {
   login: {
     eyebrow: 'Base ligera de acceso',
     title: 'Elegir quién está trabajando',
-    description: 'Es un inicio de sesión práctico para equipos pequeños y dispositivos compartidos. Prepara a SKOSS para comportamientos con identidad sin sumar peso empresarial todavía.',
+    description:
+      'Es un inicio de sesión práctico para equipos pequeños y dispositivos compartidos. Prepara a SKOSS para comportamientos con identidad sin sumar peso empresarial todavía.',
     quickStartTitle: 'Inicio rápido',
-    quickStartHelp: 'Toca una persona para moldear la navegación y el foco del espacio en esta sesión.',
+    quickStartHelp:
+      'Toca una persona para moldear la navegación y el foco del espacio en esta sesión.',
     manualTitle: 'Acceso manual',
     manualHelp: 'Usa el identificador cuando la lista rápida no alcance.',
     manualBadge: 'Amigable para dispositivo compartido',

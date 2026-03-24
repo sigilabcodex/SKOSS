@@ -63,9 +63,11 @@ const en = {
     login: 'Log in',
     userMenuAria: 'Open user and preferences menu',
     sessionSection: 'Session',
-    sessionHelp: 'Keep identity details close without competing with primary navigation.',
+    sessionHelp:
+      'Keep identity details close without competing with primary navigation.',
     preferencesSection: 'Preferences',
-    preferencesHelp: 'Personal controls live here so daily work stays front-and-center.',
+    preferencesHelp:
+      'Personal controls live here so daily work stays front-and-center.',
     languageHelp: 'Change interface language for this session.',
     appearanceHelp: 'Pick light, dark, or follow the device for this session.',
     openPreferences: 'Open full preferences',
@@ -92,17 +94,20 @@ const en = {
     light: {
       label: 'Light',
       shortLabel: 'Light',
-      description: 'Bright default surfaces for daytime prep, counter work, and easy scanning.',
+      description:
+        'Bright default surfaces for daytime prep, counter work, and easy scanning.',
     },
     dark: {
       label: 'Dark',
       shortLabel: 'Dark',
-      description: 'Lower-glare contrast for early starts, overnight prep, and dim spaces.',
+      description:
+        'Lower-glare contrast for early starts, overnight prep, and dim spaces.',
     },
     system: {
       label: 'Use device setting',
       shortLabel: 'System',
-      description: 'Follow the phone, tablet, or browser appearance automatically.',
+      description:
+        'Follow the phone, tablet, or browser appearance automatically.',
     },
   },
   operatingModes: {
@@ -126,27 +131,33 @@ const en = {
     },
     cafe: {
       label: 'Café',
-      description: 'Keeps order capture and counter rhythm a little more front-and-center.',
+      description:
+        'Keeps order capture and counter rhythm a little more front-and-center.',
     },
     small_restaurant: {
       label: 'Small restaurant',
-      description: 'Starts from service flow, prep visibility, and practical dispatch.',
+      description:
+        'Starts from service flow, prep visibility, and practical dispatch.',
     },
     dark_kitchen: {
       label: 'Dark kitchen',
-      description: 'Gives more weight to order flow, courier readiness, and dispatch handoff.',
+      description:
+        'Gives more weight to order flow, courier readiness, and dispatch handoff.',
     },
     food_stall: {
       label: 'Food stall',
-      description: 'Fast capture, simple service flow, and compact setup for pop-up style work.',
+      description:
+        'Fast capture, simple service flow, and compact setup for pop-up style work.',
     },
     generic: {
       label: 'Generic',
-      description: 'A neutral starting point when the business still wants to discover its shape.',
+      description:
+        'A neutral starting point when the business still wants to discover its shape.',
     },
     other: {
       label: 'Other',
-      description: 'Use a flexible baseline now and tune it later without getting boxed in.',
+      description:
+        'Use a flexible baseline now and tune it later without getting boxed in.',
     },
   },
   presetSuggestions: {
@@ -266,27 +277,32 @@ const en = {
   },
   home: {
     eyebrow: 'First operational slice',
-    lede:
-      'SKOSS now covers a practical kitchen loop: order intake, recurring generation, grouped production, partial completion, WIP handoff, and a lightweight operational data layer for fulfillment and buying memory.',
+    lede: 'SKOSS now covers a practical kitchen loop: order intake, recurring generation, grouped production, partial completion, WIP handoff, and a lightweight operational data layer for fulfillment and buying memory.',
     focusDate: 'Focus date',
     focusDateHelp: 'is the current shared operational view.',
     recommendedFirst: 'Recommended first',
     presetFocusTitle: 'Preset starter focus',
-    presetFocusBody: '{{preset}} currently shifts language, home emphasis, and starter guidance only.',
+    presetFocusBody:
+      '{{preset}} currently shifts language, home emphasis, and starter guidance only.',
     exampleSetupTitle: 'Starter examples',
-    exampleSetupBody: 'These examples are only lightweight suggestions. You can change them later in Setup.',
+    exampleSetupBody:
+      'These examples are only lightweight suggestions. You can change them later in Setup.',
     roleFocusTitle: 'Role-shaped workspace attention',
-    roleFocusBody: '{{role}} starts closer to {{workspace}} so the day begins with the most relevant work instead of the full system.',
-    roleFocusFallback: 'Workspaces now stay role-shaped so teams can see the most relevant surfaces first.',
+    roleFocusBody:
+      '{{role}} starts closer to {{workspace}} so the day begins with the most relevant work instead of the full system.',
+    roleFocusFallback:
+      'Workspaces now stay role-shaped so teams can see the most relevant surfaces first.',
     stats: {
       ordersToday: 'Orders today',
       ordersOnDate: 'orders on',
       kitchenAttention: 'Kitchen attention',
-      kitchenAttentionHelp: 'orders marked changed or edited from the recurring baseline',
+      kitchenAttentionHelp:
+        'orders marked changed or edited from the recurring baseline',
       readyWip: 'Ready WIP',
       readyWipHelp: 'WIP entries already ready for the next shift',
       recurringTemplates: 'Recurring templates',
-      recurringTemplatesHelp: 'active recurring templates feeding the next demand',
+      recurringTemplatesHelp:
+        'active recurring templates feeding the next demand',
       partialOrders: 'Partial orders',
       partialOrdersHelp: 'orders already partially completed',
       supplierPrices: 'Supplier prices',
@@ -296,37 +312,45 @@ const en = {
     quickLinks: {
       timeline: {
         title: 'Operational timeline',
-        description: 'Scan what is overdue, due now, coming soon, and later without turning the day into calendar admin.',
+        description:
+          'Scan what is overdue, due now, coming soon, and later without turning the day into calendar admin.',
       },
       orders: {
         title: 'Order intake + list',
-        description: 'Capture demand with recurring templates, draft customers, draft items, and quick edits.',
+        description:
+          'Capture demand with recurring templates, draft customers, draft items, and quick edits.',
       },
       customers: {
         title: 'Customer memory',
-        description: 'Keep lightweight customer cards and recent linked order context close to daily work.',
+        description:
+          'Keep lightweight customer cards and recent linked order context close to daily work.',
       },
       production: {
         title: 'Production board',
-        description: 'See required vs completed demand, line progress, and late changes in one board.',
+        description:
+          'See required vs completed demand, line progress, and late changes in one board.',
       },
       handoff: {
         title: 'WIP + handoff',
-        description: 'Record prep state, shift notes, and what the next shift needs to know.',
+        description:
+          'Record prep state, shift notes, and what the next shift needs to know.',
       },
       setup: {
         title: 'Light setup',
-        description: 'Review the minimal structure that supports the operational slice.',
+        description:
+          'Review the minimal structure that supports the operational slice.',
       },
     },
   },
   timeline: {
     workspace: 'Operational timeline',
     title: 'Timeline',
-    description: 'A lightweight time-based surface for real operational work: due orders, pickup promises, delivery timing, and handoff-sensitive attention.',
+    description:
+      'A lightweight time-based surface for real operational work: due orders, pickup promises, delivery timing, and handoff-sensitive attention.',
     openOrders: 'Open orders list',
     focusDateTitle: '{{date}} is the active operational day.',
-    focusDateBody: 'When today has no live work yet, this surface anchors itself to the next active production day instead of pretending to be a generic calendar.',
+    focusDateBody:
+      'When today has no live work yet, this surface anchors itself to the next active production day instead of pretending to be a generic calendar.',
     unscheduled: 'No promised time',
     unscheduledShort: 'No time',
     overdue: 'Overdue',
@@ -340,11 +364,13 @@ const en = {
     moreLinesHint: '+{{count}} more lines',
     summary: {
       overdue: 'Overdue',
-      overdueHelp: 'still open from an earlier production day or passed promise window',
+      overdueHelp:
+        'still open from an earlier production day or passed promise window',
       dueNow: 'Due now',
       dueNowHelp: 'the earliest work that should be handled first',
       comingSoon: 'Coming soon',
-      comingSoonHelp: 'next promised pickups, deliveries, or handoff-sensitive orders',
+      comingSoonHelp:
+        'next promised pickups, deliveries, or handoff-sensitive orders',
       laterToday: 'Later today',
       laterTodayHelp: 'the remaining focus-day work after the next wave',
       pickupReady: 'Pickup ready',
@@ -353,41 +379,51 @@ const en = {
       assignmentNeededHelp: 'own-delivery work with no assignee yet',
     },
     todayLaneTitle: 'Today / next active lane',
-    todayLaneHelp: 'Compact cards keep the timing, customer context, fulfillment mode, and attention hints together.',
-    noFocusItems: 'No timed operational items are sitting on the current focus day.',
+    todayLaneHelp:
+      'Compact cards keep the timing, customer context, fulfillment mode, and attention hints together.',
+    noFocusItems:
+      'No timed operational items are sitting on the current focus day.',
     overdueListTitle: 'Overdue attention',
-    overdueListHelp: 'Use this to catch work that slipped past the shared operational day.',
+    overdueListHelp:
+      'Use this to catch work that slipped past the shared operational day.',
     noneOverdue: 'Nothing is overdue right now.',
     upcomingTitle: 'Upcoming next days',
-    upcomingHelp: 'Future dates stay visible as lightweight groups instead of becoming a full planning module.',
+    upcomingHelp:
+      'Future dates stay visible as lightweight groups instead of becoming a full planning module.',
     noUpcomingTitle: 'No upcoming wave yet',
     noUpcomingBody: 'The current work is staying on one active day for now.',
     noRoleAttention: 'Nothing special is waiting for this role right now.',
     roleAttention: {
       production: {
         title: 'Production watch',
-        description: 'Keep unfinished, changed, or still-moving work close to the kitchen rhythm.',
+        description:
+          'Keep unfinished, changed, or still-moving work close to the kitchen rhythm.',
       },
       delivery: {
         title: 'Dispatch watch',
-        description: 'Keep courier-ready work, delivery promises, and assignment gaps obvious.',
+        description:
+          'Keep courier-ready work, delivery promises, and assignment gaps obvious.',
       },
       frontdesk: {
         title: 'Customer arrival watch',
-        description: 'Keep pickups, customer contact, and quick fulfillment context easy to scan.',
+        description:
+          'Keep pickups, customer contact, and quick fulfillment context easy to scan.',
       },
       manager: {
         title: 'Cross-workspace watch',
-        description: 'Keep overdue, changed, and unassigned work visible without opening every workspace first.',
+        description:
+          'Keep overdue, changed, and unassigned work visible without opening every workspace first.',
       },
     },
   },
   setupAssistant: {
     eyebrow: 'Quick first setup',
     firstRunTitle: 'Get SKOSS ready in a minute',
-    firstRunIntro: 'Give the workspace a name, choose the language and style that fit your team, and keep moving.',
+    firstRunIntro:
+      'Give the workspace a name, choose the language and style that fit your team, and keep moving.',
     settingsTitle: 'Review workspace preferences',
-    settingsIntro: 'Update your business name, language, preset, operating mode, or theme whenever the team needs a different fit.',
+    settingsIntro:
+      'Update your business name, language, preset, operating mode, or theme whenever the team needs a different fit.',
     progress: '3 short steps',
     progressAria: 'Onboarding progress',
     stepLabel: 'Step {{step}}',
@@ -396,9 +432,11 @@ const en = {
       business: 'Business basics',
       businessHelp: 'Keep the essentials short and practical.',
       preset: 'Starting preset',
-      presetHelp: 'Choose the closest starting shape. It will not lock your workflow.',
+      presetHelp:
+        'Choose the closest starting shape. It will not lock your workflow.',
       appearance: 'Appearance',
-      appearanceHelp: 'Pick a comfortable theme for the spaces where people actually work.',
+      appearanceHelp:
+        'Pick a comfortable theme for the spaces where people actually work.',
     },
     fields: {
       businessName: 'Business name',
@@ -414,16 +452,20 @@ const en = {
     footer: 'You can revisit these preferences later from Setup.',
     quickStart: {
       title: 'Optional quick records',
-      description: 'Add a few starter records now, skip anything, and keep moving.',
+      description:
+        'Add a few starter records now, skip anything, and keep moving.',
       optional: 'All optional',
       users: 'Add initial users',
-      usersHelp: 'If the team is ready, add one or two people now. Leave blank to skip.',
+      usersHelp:
+        'If the team is ready, add one or two people now. Leave blank to skip.',
       customers: 'Add initial customers',
       customersHelp: 'Add a repeat customer now, or skip and import later.',
       suppliers: 'Add initial suppliers',
-      suppliersHelp: 'Capture practical supplier contact now, then enrich over time.',
+      suppliersHelp:
+        'Capture practical supplier contact now, then enrich over time.',
       materials: 'Add initial materials',
-      materialsHelp: 'Add a few core ingredients now so recipes and pricing can connect later.',
+      materialsHelp:
+        'Add a few core ingredients now so recipes and pricing can connect later.',
       skipHelp: 'Everything here is skippable.',
     },
   },
@@ -434,9 +476,11 @@ const en = {
       'Manual orders, generated recurring orders, partial completion, and kitchen-visible changes all stay in one touch-friendly list.',
     newOrder: 'New order',
     newRecurringTemplate: 'New recurring template',
-    recurringSaved: 'Recurring template saved. Upcoming orders will generate automatically.',
+    recurringSaved:
+      'Recurring template saved. Upcoming orders will generate automatically.',
     recurringDemand: 'Recurring demand',
-    recurringDemandHelp: 'Keep the next repeated work visible without adding a scheduling engine.',
+    recurringDemandHelp:
+      'Keep the next repeated work visible without adding a scheduling engine.',
     nextUp: 'next up',
     currentProductionFocus: 'Current production focus.',
     savedOrdersByDay: 'Saved orders grouped by production day.',
@@ -479,41 +523,54 @@ const en = {
       },
       sections: {
         whoAndWhen: 'Who and when',
-        whoAndWhenHelp: 'Keep the practical customer label and key dates easy to scan.',
+        whoAndWhenHelp:
+          'Keep the practical customer label and key dates easy to scan.',
         requiredFields: 'Required fields use *',
         dispatch: 'Dispatch details',
-        dispatchHelp: 'Keep routing lightweight, but visible when the order leaves the kitchen.',
+        dispatchHelp:
+          'Keep routing lightweight, but visible when the order leaves the kitchen.',
         visibility: 'Kitchen visibility',
-        visibilityHelp: 'Use these toggles only when they help the next shift act faster.',
+        visibilityHelp:
+          'Use these toggles only when they help the next shift act faster.',
         lines: 'Order lines',
-        linesHelp: 'Use structured items where possible, but keep draft labels available when setup is incomplete.',
+        linesHelp:
+          'Use structured items where possible, but keep draft labels available when setup is incomplete.',
       },
       fields: {
         customerMemory: 'Saved customer',
-        customerMemoryHelp: 'Link a saved customer when the team needs reusable contact or delivery context.',
+        customerMemoryHelp:
+          'Link a saved customer when the team needs reusable contact or delivery context.',
         customerLabel: 'Customer or draft label',
-        customerLabelHelp: 'Use the name the team will actually recognize today.',
+        customerLabelHelp:
+          'Use the name the team will actually recognize today.',
         customerPhone: 'Phone or contact',
         destination: 'Destination',
         fulfillment: 'Fulfillment',
-        fulfillmentHelp: 'Pickup stays simple. Delivery fields only need lightweight routing detail.',
+        fulfillmentHelp:
+          'Pickup stays simple. Delivery fields only need lightweight routing detail.',
         source: 'Source',
         productionDay: 'Production day',
         dueDay: 'Due / fulfillment day',
         deliveryProvider: 'Delivery provider / source',
-        deliveryProviderHelp: 'Useful for app delivery channels or naming the route source.',
+        deliveryProviderHelp:
+          'Useful for app delivery channels or naming the route source.',
         deliveryAssignee: 'Delivery assignee',
         promisedTime: 'Promised time',
-        promisedTimeHelp: 'Optional pickup or delivery promise window for operators to scan fast.',
+        promisedTimeHelp:
+          'Optional pickup or delivery promise window for operators to scan fast.',
         deliveryProviderCustom: 'Custom provider label',
         dispatchNotes: 'Dispatch notes',
         orderStatus: 'Order status',
-        changedCalloutTitle: 'Use “Changed” when kitchen work should double-check this order.',
-        changedCalloutBody: 'This keeps last-minute edits obvious on boards and cards.',
+        changedCalloutTitle:
+          'Use “Changed” when kitchen work should double-check this order.',
+        changedCalloutBody:
+          'This keeps last-minute edits obvious on boards and cards.',
         kitchenAttentionNeeded: 'Kitchen attention needed',
-        kitchenAttentionHelp: 'Flag late changes, substitutions, or anything the shift should not miss.',
+        kitchenAttentionHelp:
+          'Flag late changes, substitutions, or anything the shift should not miss.',
         showOnBoard: 'Show on production board',
-        showOnBoardHelp: 'Turn off only when the order should stay saved but not grouped into active demand.',
+        showOnBoardHelp:
+          'Turn off only when the order should stay saved but not grouped into active demand.',
       },
       placeholders: {
         noSavedCustomer: 'No saved customer linked',
@@ -522,8 +579,10 @@ const en = {
         deliveryProvider: 'Rappi, Uber Eats, in-house van',
         deliveryAssignee: 'Lucía, morning route, rider pending',
         noneSelected: 'Not set',
-        deliveryProviderCustom: 'Neighborhood courier, marketplace rider, or route nickname',
-        dispatchNotes: 'Call before arrival, handoff point, app courier instructions, or packing reminder',
+        deliveryProviderCustom:
+          'Neighborhood courier, marketplace rider, or route nickname',
+        dispatchNotes:
+          'Call before arrival, handoff point, app courier instructions, or packing reminder',
       },
       noSavedCustomerHint: 'Need a reusable customer first?',
       createCustomer: 'Create customer memory',
@@ -533,8 +592,10 @@ const en = {
         summary: '{{count}} linked orders so far. Last linked order: {{date}}.',
       },
       dispatchHint: {
-        pickup: 'Use this section only when pickup timing or collection notes matter.',
-        delivery: 'Keep delivery source, assignment, promise time, and packing notes visible without building dispatch software.',
+        pickup:
+          'Use this section only when pickup timing or collection notes matter.',
+        delivery:
+          'Keep delivery source, assignment, promise time, and packing notes visible without building dispatch software.',
       },
       actions: {
         saveOrder: 'Save order',
@@ -581,37 +642,49 @@ const en = {
     },
     newPage: {
       title: 'New order',
-      description: 'Capture demand quickly, even when the customer or item is still just a practical label.',
+      description:
+        'Capture demand quickly, even when the customer or item is still just a practical label.',
       calloutTitle: 'Fast order capture',
-      calloutBody: 'Required details stay obvious first. Notes, draft labels, and kitchen flags remain close by when they matter.',
+      calloutBody:
+        'Required details stay obvious first. Notes, draft labels, and kitchen flags remain close by when they matter.',
     },
     recurringPage: {
       title: 'New recurring template',
-      description: 'Capture a repeatable order rhythm once, then let SKOSS generate the dated orders ahead.',
+      description:
+        'Capture a repeatable order rhythm once, then let SKOSS generate the dated orders ahead.',
       calloutTitle: 'Recurring demand should stay lightweight.',
-      calloutBody: 'This template creates useful repeated work without turning the workflow into a heavy scheduling system.',
+      calloutBody:
+        'This template creates useful repeated work without turning the workflow into a heavy scheduling system.',
     },
     recurringForm: {
       eyebrow: 'Recurring order',
       title: 'Capture the kitchen rhythm once',
-      intro: 'Keep recurrence explicit: a customer label, a simple daily or weekly rhythm, and the next date to generate.',
+      intro:
+        'Keep recurrence explicit: a customer label, a simple daily or weekly rhythm, and the next date to generate.',
       basics: 'Template basics',
-      basicsHelp: 'Set the repeatable demand first, then keep generated orders editable later.',
+      basicsHelp:
+        'Set the repeatable demand first, then keep generated orders editable later.',
       customerOrRoute: 'Customer or route label',
       nextOccurrence: 'Next occurrence',
       recurrence: 'Recurrence',
       generatedCalloutTitle: 'Generated orders still stay editable later.',
-      generatedCalloutBody: 'This template defines the baseline, not a locked schedule engine.',
+      generatedCalloutBody:
+        'This template defines the baseline, not a locked schedule engine.',
       weeklyRhythm: 'Weekly rhythm',
-      weeklyRhythmHelp: 'Only the selected days should feed future recurring generation.',
+      weeklyRhythmHelp:
+        'Only the selected days should feed future recurring generation.',
       weeklyDays: 'Weekly days',
       notes: 'Template notes',
-      notesHelp: 'Use this for standing packing reminders or route-level exceptions.',
+      notesHelp:
+        'Use this for standing packing reminders or route-level exceptions.',
       recurringLinesEyebrow: 'Recurring lines',
       recurringLinesTitle: 'Keep the repeated demand visible',
-      recurringLinesBody: 'Operators can still use draft names here. Generated orders stay editable later.',
-      lineSectionLabel: 'Use only the rows needed for the actual rhythm. Add and remove lines as the route evolves.',
-      footerHint: 'Saving this template keeps the recurring rhythm visible without forcing a heavy scheduling setup.',
+      recurringLinesBody:
+        'Operators can still use draft names here. Generated orders stay editable later.',
+      lineSectionLabel:
+        'Use only the rows needed for the actual rhythm. Add and remove lines as the route evolves.',
+      footerHint:
+        'Saving this template keeps the recurring rhythm visible without forcing a heavy scheduling setup.',
       save: 'Save recurring template',
       saving: 'Saving recurring template…',
       placeholders: {
@@ -627,12 +700,15 @@ const en = {
       saved: 'Order saved and marked visible to production.',
       progressSaved: 'Line completion updated.',
       descriptionSeparator: '·',
-      editDescription: 'edit quantities, dispatch details, and quick completion updates without leaving the workspace.',
+      editDescription:
+        'edit quantities, dispatch details, and quick completion updates without leaving the workspace.',
       quickCompletion: 'Quick completion',
-      quickCompletionHelp: 'Update partial work per line without opening a separate kitchen-only screen.',
+      quickCompletionHelp:
+        'Update partial work per line without opening a separate kitchen-only screen.',
       noExtraLineNote: 'No extra line note',
       customerMemory: 'Customer memory',
-      customerMemoryHelp: 'Link a saved customer when repeat contact, address, or delivery notes matter.',
+      customerMemoryHelp:
+        'Link a saved customer when repeat contact, address, or delivery notes matter.',
       noSavedCustomer: 'No saved customer linked',
       openCustomer: 'Open customer detail',
       noDeliveryAssignee: 'No assignee yet',
@@ -649,28 +725,34 @@ const en = {
     summary: 'customers',
     saved: 'Customer memory saved.',
     listTitle: 'Customer list',
-    listHelp: 'Keep names, contact details, and delivery context reusable without requiring heavy CRM structure.',
+    listHelp:
+      'Keep names, contact details, and delivery context reusable without requiring heavy CRM structure.',
     newTitle: 'New customer',
     editTitle: 'Edit customer',
-    formHelp: 'Capture only the practical details the team needs to work faster next time.',
+    formHelp:
+      'Capture only the practical details the team needs to work faster next time.',
     newAction: 'Start a new card',
     createAction: 'Save customer',
     editAction: 'Edit',
     updateAction: 'Update customer',
     createOrderAction: 'Create linked order',
     detailTitle: 'Recent customer context',
-    detailHelp: 'Use this surface for lightweight operational history, not pipeline tracking.',
+    detailHelp:
+      'Use this surface for lightweight operational history, not pipeline tracking.',
     recentOrdersTitle: 'Recent linked orders',
     recentOrdersHelp: 'Show the latest operational history for this customer.',
-    recentOrdersEmpty: 'No linked orders yet. Create one directly from this customer card when ready.',
+    recentOrdersEmpty:
+      'No linked orders yet. Create one directly from this customer card when ready.',
     noContactYet: 'No contact detail yet',
     noPreferredContact: 'No preferred contact method saved yet.',
     preferredContactSummary: 'Preferred contact: {{method}}.',
     lastUpdated: 'Last updated',
     lastOrderOn: 'last order on',
     emptyTitle: 'Choose or create a customer card',
-    emptyBody: 'Save only the memory the team actually uses: who this is, how to reach them, and what operational context matters.',
-    listEmpty: 'No customer cards yet. Save the first one from the form on the right.',
+    emptyBody:
+      'Save only the memory the team actually uses: who this is, how to reach them, and what operational context matters.',
+    listEmpty:
+      'No customer cards yet. Save the first one from the form on the right.',
     stats: {
       active: 'Active customers',
       activeHelp: 'ready to link on new orders',
@@ -693,7 +775,8 @@ const en = {
       deliveryNote: 'Delivery note',
       internalNote: 'Internal note',
       active: 'Keep customer active',
-      activeHelp: 'Turn this off when the team should keep history but stop linking new orders by default.',
+      activeHelp:
+        'Turn this off when the team should keep history but stop linking new orders by default.',
     },
     placeholders: {
       displayName: 'Cafe Luna or Sofía birthday',
@@ -702,7 +785,8 @@ const en = {
       contactMethod: 'No preference saved',
       address: 'Street, neighborhood, reference point, or pickup detail',
       deliveryNote: 'Gate code, best arrival time, or packing reminder',
-      internalNote: 'Quiet operator note for order-taking, fulfillment, or handoff',
+      internalNote:
+        'Quiet operator note for order-taking, fulfillment, or handoff',
     },
   },
   production: {
@@ -736,58 +820,80 @@ const en = {
     noDestinationYet: 'No destination yet',
     orderLines: 'order lines',
     changedDemand: 'Changed or draft-sensitive demand',
-    changedDemandHelp: 'Keep late edits and draft-driven work visible to the kitchen.',
+    changedDemandHelp:
+      'Keep late edits and draft-driven work visible to the kitchen.',
     fulfillmentQueues: {
       pack: 'Delivery packing watch',
-      packHelp: 'Show delivery orders that still need packing or production completion.',
+      packHelp:
+        'Show delivery orders that still need packing or production completion.',
       assign: 'Internal delivery assignment watch',
-      assignHelp: 'Keep internal delivery orders visible until someone is assigned.',
+      assignHelp:
+        'Keep internal delivery orders visible until someone is assigned.',
       pickup: 'Pickup collection watch',
-      pickupHelp: 'Show completed pickup orders waiting for customer collection.',
+      pickupHelp:
+        'Show completed pickup orders waiting for customer collection.',
       remaining: 'remaining',
     },
     currentWipSnapshot: 'Current WIP snapshot',
-    currentWipSnapshotHelp: 'Use this as the fast read before moving into production updates.',
+    currentWipSnapshotHelp:
+      'Use this as the fast read before moving into production updates.',
     fastLineCompletion: 'Fast line completion',
-    fastLineCompletionHelp: 'Tap into partial completion without leaving the production view.',
+    fastLineCompletionHelp:
+      'Tap into partial completion without leaving the production view.',
     liveUpdates: 'Live updates per line',
     complete: 'complete',
     completedField: 'Completed',
     save: 'Save',
     saving: 'Saving…',
     recentHandoffNotes: 'Recent handoff notes',
-    recentHandoffNotesHelp: 'Surface the latest shift context next to current production demand.',
+    recentHandoffNotesHelp:
+      'Surface the latest shift context next to current production demand.',
     hiddenFromBoard: 'Hidden from board',
-    hiddenFromBoardHelp: 'Orders saved here stay out of grouped demand but remain visible to operators.',
+    hiddenFromBoardHelp:
+      'Orders saved here stay out of grouped demand but remain visible to operators.',
     hiddenOrderHelp: 'Hidden from grouped demand but kept in saved orders.',
     emptyTitle: 'No production boards yet.',
-    emptyBody: 'As soon as visible saved orders exist, grouped demand and fast completion will appear here.',
+    emptyBody:
+      'As soon as visible saved orders exist, grouped demand and fast completion will appear here.',
     termHint: '{{items}} will appear here once visible demand is grouped.',
+    sectionNav: {
+      demand: 'Demand',
+      fulfillment: 'Fulfillment',
+      handoff: 'WIP + handoff',
+      updates: 'Line updates',
+    },
   },
   handoff: {
     eyebrow: 'WIP + shift handoff',
     title: 'Morning review',
-    description: 'Make prepared, shaped, baked, and ready work visible. Leave notes that the next shift can understand in seconds.',
+    description:
+      'Make prepared, shaped, baked, and ready work visible. Leave notes that the next shift can understand in seconds.',
     savedUpdate: 'Saved {{item}} update.',
     snapshotTitle: 'handoff snapshot',
-    snapshotHelp: 'Main shift summary and open items for the current focus date.',
+    snapshotHelp:
+      'Main shift summary and open items for the current focus date.',
     nightShift: 'Night shift',
     openItems: 'Open items',
     handoffNote: 'Handoff note',
     noHandoffNote: 'No handoff note yet.',
     noSummaryTitle: 'No handoff summary yet for the focus date.',
-    noSummaryBody: 'Save the main handoff card below to create the first visible summary.',
+    noSummaryBody:
+      'Save the main handoff card below to create the first visible summary.',
     readyOrPendingWip: 'Ready or pending WIP',
-    readyOrPendingWipHelp: 'The next shift should be able to scan this list fast on a phone or tablet.',
+    readyOrPendingWipHelp:
+      'The next shift should be able to scan this list fast on a phone or tablet.',
     fulfillmentWatch: {
       pack: 'Delivery watch',
-      packHelp: 'Delivery orders still needing packing or completion before they leave.',
+      packHelp:
+        'Delivery orders still needing packing or completion before they leave.',
       assign: 'Assignment watch',
-      assignHelp: 'Own-delivery orders that still need a worker or courier assigned.',
+      assignHelp:
+        'Own-delivery orders that still need a worker or courier assigned.',
       pickup: 'Pickup watch',
-      pickupHelp: 'Pickup orders that are ready and waiting for customer collection.',
+      pickupHelp:
+        'Pickup orders that are ready and waiting for customer collection.',
       all: 'All fulfillment notes',
-      allHelp: 'Quick handoff view of today\'s pickup and delivery context.',
+      allHelp: "Quick handoff view of today's pickup and delivery context.",
       remaining: 'remaining',
     },
     addWip: 'Add WIP',
@@ -813,7 +919,7 @@ const en = {
       unit: 'Unit',
       stage: 'Stage',
       notes: 'Notes',
-    promise: 'Promised time',
+      promise: 'Promised time',
       status: 'Status',
       summary: 'Summary',
       openItems: 'Open items (one per line)',
@@ -837,7 +943,8 @@ const en = {
       packed_items: 'Packed items',
       other: 'Other',
     },
-    termHint: '{{destinations}} and other user-entered labels remain stored exactly as entered.',
+    termHint:
+      '{{destinations}} and other user-entered labels remain stored exactly as entered.',
   },
   setup: {
     workspace: 'Setup workspace',
@@ -845,27 +952,41 @@ const en = {
     description:
       'Setup still supports the work instead of blocking it. Orders, suppliers, raw materials, recipes, and price memory stay visible without turning SKOSS into a huge back office.',
     saved: {
-      supplier: 'Supplier saved. Keep growing structure only where it helps daily work.',
-      rawMaterial: 'Raw material saved. Future recipe costing can now point to a real ingredient foundation.',
-      price: 'Supplier price saved. Historical comparisons are now available for future costing and buying choices.',
-      recipe: 'Recipe saved. Product-to-material links are now available for lightweight costing and future production prints.',
+      supplier:
+        'Supplier saved. Keep growing structure only where it helps daily work.',
+      rawMaterial:
+        'Raw material saved. Future recipe costing can now point to a real ingredient foundation.',
+      price:
+        'Supplier price saved. Historical comparisons are now available for future costing and buying choices.',
+      recipe:
+        'Recipe saved. Product-to-material links are now available for lightweight costing and future production prints.',
       preferences: 'Workspace preferences saved.',
       user: 'User saved. Role-shaped navigation and default workspace choices are ready.',
       import: 'CSV import completed.',
     },
     calloutTitle: 'Keep setup practical.',
-    calloutBody: 'These lists should help operators work faster, not force heavy data maintenance before first use.',
+    calloutBody:
+      'These lists should help operators work faster, not force heavy data maintenance before first use.',
     settingsSplitTitle: 'Preferences vs settings',
-    settingsSplitBody: 'Personal behavior now has its own lighter preferences surface, while business structure stays here in settings.',
+    settingsSplitBody:
+      'Personal behavior now has its own lighter preferences surface, while business structure stays here in settings.',
     settingsAreaTitle: 'Settings stay business-facing',
-    settingsAreaBody: 'Products, suppliers, recipes, user setup, and costing remain shared system structure.',
+    settingsAreaBody:
+      'Products, suppliers, recipes, user setup, and costing remain shared system structure.',
     preferencesAreaTitle: 'Preferences stay personal',
-    preferencesAreaBody: 'Language, appearance, and default landing workspace now belong to the signed-in person, not the whole business.',
+    preferencesAreaBody:
+      'Language, appearance, and default landing workspace now belong to the signed-in person, not the whole business.',
     openPreferences: 'Open preferences',
-    roleShapingNote: 'This role is shaped away from settings by default, so this page should stay secondary for daily work.',
+    roleShapingNote:
+      'This role is shaped away from settings by default, so this page should stay secondary for daily work.',
     adminReadinessTitle: 'Admin setup, now as an operational surface',
-    adminReadinessHelp: 'Use these quick links to move between setup areas without losing context.',
+    adminReadinessHelp:
+      'Use these quick links to move between setup areas without losing context.',
     sections: {
+      businessSetup: 'Business setup',
+      teamUsers: 'Team and users',
+      catalogData: 'Catalog and data',
+      preferencesSystem: 'Preferences and system',
       users: 'Users',
       suppliers: 'Suppliers',
       rawMaterials: 'Raw materials',
@@ -876,15 +997,40 @@ const en = {
       orders: 'Orders',
       imports: 'Imports',
     },
+    groups: {
+      business: {
+        title: 'Business setup',
+        description:
+          'Keep customer memory, first-run setup, and imports close to order capture.',
+      },
+      team: {
+        title: 'Team and users',
+        description:
+          'Keep user roles, workspace emphasis, and personal/system boundaries together.',
+      },
+      catalog: {
+        title: 'Catalog and costing data',
+        description:
+          'Group suppliers, ingredients, recipes, costing visibility, and price evidence in one flow.',
+      },
+      system: {
+        title: 'Preferences and system behavior',
+        description:
+          'Keep personal defaults separate from shared setup so worker views stay light.',
+      },
+    },
     import: {
       title: 'CSV import (lightweight)',
-      description: 'Import customers, suppliers, or raw materials with simple mapping and a short preview.',
+      description:
+        'Import customers, suppliers, or raw materials with simple mapping and a short preview.',
       customers: 'Import customers',
-      customersHelp: 'Bring repeat customer memory quickly. Missing fields are allowed.',
+      customersHelp:
+        'Bring repeat customer memory quickly. Missing fields are allowed.',
       suppliers: 'Import suppliers',
       suppliersHelp: 'Bring supplier lists as-is and refine contacts later.',
       materials: 'Import raw materials',
-      materialsHelp: 'Bring ingredient lists quickly and keep optional fields flexible.',
+      materialsHelp:
+        'Bring ingredient lists quickly and keep optional fields flexible.',
       hint: 'Use UTF-8 CSV with headers in the first row.',
       chooseFile: 'CSV file',
       noFile: 'No file selected.',
@@ -892,7 +1038,8 @@ const en = {
       preview: 'Preview first rows',
       emptyPreview: 'No data rows found in this file.',
       confirm: 'Confirm import',
-      result: '{{entity}} import complete: {{imported}} imported, {{skipped}} skipped.',
+      result:
+        '{{entity}} import complete: {{imported}} imported, {{skipped}} skipped.',
       entityLabels: {
         customers: 'Customer',
         suppliers: 'Supplier',
@@ -905,112 +1052,168 @@ const en = {
       },
     },
     customerMemoryTitle: 'Customer memory',
-    customerMemoryHelp: 'Use saved customer cards while still allowing draft-first order capture when details are incomplete.',
-    customerMemoryEmpty: 'No saved customers yet. Create one to speed up repeat order capture.',
+    customerMemoryHelp:
+      'Use saved customer cards while still allowing draft-first order capture when details are incomplete.',
+    customerMemoryEmpty:
+      'No saved customers yet. Create one to speed up repeat order capture.',
     operabilityChecklistTitle: 'Admin operability checklist',
-    operabilityChecklistHelp: 'These links keep setup practical from first run instead of demo-like.',
+    operabilityChecklistHelp:
+      'These links keep setup practical from first run instead of demo-like.',
     operabilityChecklist: {
       customerOrderLink: 'Customer -> order',
-      customerOrderLinkHelp: 'Create or edit customers, then open order capture already linked to the selected customer.',
+      customerOrderLinkHelp:
+        'Create or edit customers, then open order capture already linked to the selected customer.',
       supplierMaterialLink: 'Supplier + raw material -> price memory',
-      supplierMaterialLinkHelp: 'Save suppliers and ingredients, then keep append-only price evidence visible for costing.',
+      supplierMaterialLinkHelp:
+        'Save suppliers and ingredients, then keep append-only price evidence visible for costing.',
       recipeProductLink: 'Product -> recipe',
-      recipeProductLinkHelp: 'Create product-linked recipes directly from the products list so costing and production context stay connected.',
+      recipeProductLinkHelp:
+        'Create product-linked recipes directly from the products list so costing and production context stay connected.',
       userWorkspaceLink: 'User -> role -> workspace',
-      userWorkspaceLinkHelp: 'Adjust role and landing workspace in one place, then review visible workspace impact immediately.',
+      userWorkspaceLinkHelp:
+        'Adjust role and landing workspace in one place, then review visible workspace impact immediately.',
     },
     appearance: 'Appearance',
-    appearanceHelp: 'Appearance stays easy to reach from the user menu, while setup still carries the broader system-facing context.',
+    appearanceHelp:
+      'Appearance stays easy to reach from the user menu, while setup still carries the broader system-facing context.',
     presetWorkspaceTitle: 'Preset workspace emphasis',
-    presetWorkspaceHelp: 'Today the selected preset reorders and highlights the most relevant workspaces without hiding the others.',
+    presetWorkspaceHelp:
+      'Today the selected preset reorders and highlights the most relevant workspaces without hiding the others.',
     starterSuggestionsTitle: 'Starter suggestions',
-    starterSuggestionsHelp: 'These are practical nudges, not locked configuration.',
+    starterSuggestionsHelp:
+      'These are practical nudges, not locked configuration.',
     activeSuppliers: 'Active suppliers',
-    activeSuppliersHelp: 'Practical vendor contacts ready for replenishment conversations.',
+    activeSuppliersHelp:
+      'Practical vendor contacts ready for replenishment conversations.',
     rawMaterials: 'Raw materials',
-    rawMaterialsHelp: 'Ingredient structure that future recipe costing can point to.',
+    rawMaterialsHelp:
+      'Ingredient structure that future recipe costing can point to.',
     recordedPrices: 'Recorded prices',
-    recordedPricesHelp: 'Historical supplier prices ready for later comparison and costing logic.',
+    recordedPricesHelp:
+      'Historical supplier prices ready for later comparison and costing logic.',
     recipes: 'Recipes',
-    recipesHelp: 'Light formulas that connect products to raw materials without forcing every product into a full manufacturing model.',
+    recipesHelp:
+      'Light formulas that connect products to raw materials without forcing every product into a full manufacturing model.',
     productsAndVariants: 'Products and variants',
-    productsAndVariantsHelp: 'Use practical names that operators already understand on the floor.',
-    managedFromOrders: 'Products and variants are currently maintained from order capture and recurring templates.',
+    productsAndVariantsHelp:
+      'Use practical names that operators already understand on the floor.',
+    managedFromOrders:
+      'Products and variants are currently maintained from order capture and recurring templates.',
     openOrderCapture: 'Open order capture',
     destinations: 'Destinations',
-    destinationsHelp: 'These should stay recognizable to both sales and kitchen teams.',
-    destinationsManagedFromOrders: 'Destinations become reusable from order and recurring capture.',
+    destinationsHelp:
+      'These should stay recognizable to both sales and kitchen teams.',
+    destinationsManagedFromOrders:
+      'Destinations become reusable from order and recurring capture.',
     recurringRhythms: 'Recurring rhythms',
-    recurringRhythmsHelp: 'Repeated work should stay explicit and easy to review.',
-    managedFromRecurring: 'Recurring rhythms are maintained in the recurring order workspace.',
+    recurringRhythmsHelp:
+      'Repeated work should stay explicit and easy to review.',
+    managedFromRecurring:
+      'Recurring rhythms are maintained in the recurring order workspace.',
     openRecurringCapture: 'Open recurring capture',
     users: 'Users',
-    usersHelp: 'Visible roles support handoff and accountability without adding admin-heavy complexity.',
-    usersEmpty: 'No users yet. Add the first team member so role-based workspace shaping can start.',
+    usersHelp:
+      'Visible roles support handoff and accountability without adding admin-heavy complexity.',
+    usersEmpty:
+      'No users yet. Add the first team member so role-based workspace shaping can start.',
     addUser: 'Add user',
-    addUserHelp: 'Keep user setup short: who they are, how they sign in, and where work should start for them.',
+    addUserHelp:
+      'Keep user setup short: who they are, how they sign in, and where work should start for them.',
     editUser: 'Edit user',
-    editUserHelp: 'Adjust role, access emphasis, or active state without creating a large permissions matrix.',
+    editUserHelp:
+      'Adjust role, access emphasis, or active state without creating a large permissions matrix.',
     operationalDataLayer: 'Operational data layer',
     operationalDataLayerHelp:
       'These records add just enough structure for supplier comparison, ingredient cleanup, recipe links, and future costing without forcing a full procurement suite.',
     draftFirstFriendly: 'Draft-first friendly',
     suppliers: 'Suppliers',
-    suppliersHelp: 'Keep the contact detail and operational note that the team actually uses.',
-    suppliersEmpty: 'No suppliers yet. Add one to start recording real purchase evidence.',
+    suppliersHelp:
+      'Keep the contact detail and operational note that the team actually uses.',
+    suppliersEmpty:
+      'No suppliers yet. Add one to start recording real purchase evidence.',
     noExtraContactYet: 'No extra contact detail yet.',
     addSupplier: 'Add supplier',
-    addSupplierHelp: 'Simple enough to capture now, detailed enough to support future buying comparisons.',
+    addSupplierHelp:
+      'Simple enough to capture now, detailed enough to support future buying comparisons.',
     editSupplier: 'Edit supplier',
-    editSupplierHelp: 'Update the supplier card without removing its historical price memory.',
+    editSupplierHelp:
+      'Update the supplier card without removing its historical price memory.',
     rawMaterialsSection: 'Raw materials',
-    rawMaterialsSectionHelp: 'Keep ingredient language practical so future costing can reference real kitchen inputs.',
-    rawMaterialsEmpty: 'No raw materials yet. Add one to link recipes and supplier prices.',
+    rawMaterialsSectionHelp:
+      'Keep ingredient language practical so future costing can reference real kitchen inputs.',
+    rawMaterialsEmpty:
+      'No raw materials yet. Add one to link recipes and supplier prices.',
     addRawMaterial: 'Add raw material',
-    addRawMaterialHelp: 'Keep defaults lightweight. Recipe and costing detail can grow later from this base.',
+    addRawMaterialHelp:
+      'Keep defaults lightweight. Recipe and costing detail can grow later from this base.',
     editRawMaterial: 'Edit raw material',
-    editRawMaterialHelp: 'Adjust naming or unit defaults without turning this into a rigid catalog project.',
+    editRawMaterialHelp:
+      'Adjust naming or unit defaults without turning this into a rigid catalog project.',
     recipeFoundationTitle: 'Recipe / formula foundation',
-    recipeFoundationHelp: 'Link products or variants to practical ingredient lines so costing and print-friendly production notes can grow later without adding MRP or inventory deduction.',
+    recipeFoundationHelp:
+      'Link products or variants to practical ingredient lines so costing and print-friendly production notes can grow later without adding MRP or inventory deduction.',
     recipeListTitle: 'Recipe links',
-    recipeListHelp: 'Keep formulas compact. A product can stay recipe-free until the team is ready.',
-    recipeEmpty: 'No recipe has been added yet. Products can still be sold and produced without one.',
+    recipeListHelp:
+      'Keep formulas compact. A product can stay recipe-free until the team is ready.',
+    recipeEmpty:
+      'No recipe has been added yet. Products can still be sold and produced without one.',
     addRecipe: 'Add recipe',
-    addRecipeHelp: 'Start with the product, a few ingredient lines, and optional batch context. Tight detail can come later.',
+    addRecipeHelp:
+      'Start with the product, a few ingredient lines, and optional batch context. Tight detail can come later.',
     editRecipe: 'Edit recipe',
-    editRecipeHelp: 'Adjust lines or notes without turning this into a heavy manufacturing screen.',
+    editRecipeHelp:
+      'Adjust lines or notes without turning this into a heavy manufacturing screen.',
     recipeLinesTitle: 'Ingredient lines',
-    recipeLinesHelp: 'Leave extra rows blank. SKOSS only keeps the lines that have a raw material, quantity, and unit.',
-    recipeYieldHelp: 'Batch yield is optional. It only helps explain scale and rough per-yield cost when you want it.',
-    recipeRemoveLineHelp: 'Unchecked lines stay in the recipe. Mark this when you want to remove an existing line on save.',
+    recipeLinesHelp:
+      'Leave extra rows blank. SKOSS only keeps the lines that have a raw material, quantity, and unit.',
+    recipeYieldHelp:
+      'Batch yield is optional. It only helps explain scale and rough per-yield cost when you want it.',
+    recipeRemoveLineHelp:
+      'Unchecked lines stay in the recipe. Mark this when you want to remove an existing line on save.',
     recipeCostingTitle: 'Estimated material cost',
-    recipeCostingHelp: 'This is a lightweight read from the latest supplier prices. Missing package detail or mismatched units will keep the estimate honest instead of guessing.',
-    recipeCostStart: 'Save or open a recipe to review its current material estimate.',
-    recipeCostEmpty: 'This recipe has no ingredient lines yet, so there is nothing to estimate.',
-    recipeCostComplete: 'Every line could be estimated from the latest recorded supplier price.',
-    recipeCostIncomplete: 'Estimated cost is incomplete. Some lines still need a usable price or a clearer unit match.',
-    recipeCostMissingPrice: 'No usable supplier price is recorded yet for this material.',
-    recipeCostMissingPackage: 'Latest supplier price is missing package quantity or unit, so SKOSS cannot normalize it yet.',
-    recipeCostUnitMismatch: 'Latest supplier package unit does not match this line closely enough to normalize automatically.',
+    recipeCostingHelp:
+      'This is a lightweight read from the latest supplier prices. Missing package detail or mismatched units will keep the estimate honest instead of guessing.',
+    recipeCostStart:
+      'Save or open a recipe to review its current material estimate.',
+    recipeCostEmpty:
+      'This recipe has no ingredient lines yet, so there is nothing to estimate.',
+    recipeCostComplete:
+      'Every line could be estimated from the latest recorded supplier price.',
+    recipeCostIncomplete:
+      'Estimated cost is incomplete. Some lines still need a usable price or a clearer unit match.',
+    recipeCostMissingPrice:
+      'No usable supplier price is recorded yet for this material.',
+    recipeCostMissingPackage:
+      'Latest supplier price is missing package quantity or unit, so SKOSS cannot normalize it yet.',
+    recipeCostUnitMismatch:
+      'Latest supplier package unit does not match this line closely enough to normalize automatically.',
     costingSnapshotTitle: 'Costing snapshot',
-    costingSnapshotHelp: 'Review what is usable, what is incomplete, and which product links still need recipe or price evidence. This stays operational and estimate-only.',
+    costingSnapshotHelp:
+      'Review what is usable, what is incomplete, and which product links still need recipe or price evidence. This stays operational and estimate-only.',
     costingListTitle: 'Recipe and product snapshot',
-    costingListHelp: 'Use quick filters to focus on what is fully costed, partially costed, missing evidence, or still recipe-free.',
+    costingListHelp:
+      'Use quick filters to focus on what is fully costed, partially costed, missing evidence, or still recipe-free.',
     costingDetailTitle: 'Costing detail',
-    costingDetailHelp: 'Line detail stays compact but still shows the supplier evidence behind each estimate when it exists.',
+    costingDetailHelp:
+      'Line detail stays compact but still shows the supplier evidence behind each estimate when it exists.',
     costingNoRecipe: 'No recipe linked yet.',
-    costingNoRecipeHelp: 'This item still needs a recipe link before SKOSS can estimate a material cost snapshot.',
+    costingNoRecipeHelp:
+      'This item still needs a recipe link before SKOSS can estimate a material cost snapshot.',
     costingEmpty: 'No costing items are available yet.',
     costingEmptyForFilter: 'No items match this costing filter yet.',
     costingSummary: {
       fullyCosted: 'Fully costed',
-      fullyCostedHelp: 'Every recipe line could be normalized from usable supplier evidence.',
+      fullyCostedHelp:
+        'Every recipe line could be normalized from usable supplier evidence.',
       partiallyCosted: 'Partially costed',
-      partiallyCostedHelp: 'Some lines are costed, but at least one line still needs clearer evidence.',
+      partiallyCostedHelp:
+        'Some lines are costed, but at least one line still needs clearer evidence.',
       missingEvidence: 'Missing cost evidence',
-      missingEvidenceHelp: 'Recipe exists, but usable supplier evidence is not enough to price any line yet.',
+      missingEvidenceHelp:
+        'Recipe exists, but usable supplier evidence is not enough to price any line yet.',
       noRecipe: 'No recipe',
-      noRecipeHelp: 'Products or variants still need a recipe link before any cost snapshot can appear.',
+      noRecipeHelp:
+        'Products or variants still need a recipe link before any cost snapshot can appear.',
     },
     costingFilters: {
       all: 'All',
@@ -1026,10 +1229,14 @@ const en = {
       no_recipe: 'No recipe',
     },
     costingStatusesHelp: {
-      fully_costed: 'Latest supplier evidence covers every recipe line, so this estimate is readable end to end.',
-      partially_costed: 'At least one line is usable and at least one line still needs clearer price or package evidence.',
-      missing_cost_evidence: 'There is a recipe, but no line can be normalized into a usable estimate yet.',
-      no_recipe: 'This product or variant still has no recipe link, so costing is not available yet.',
+      fully_costed:
+        'Latest supplier evidence covers every recipe line, so this estimate is readable end to end.',
+      partially_costed:
+        'At least one line is usable and at least one line still needs clearer price or package evidence.',
+      missing_cost_evidence:
+        'There is a recipe, but no line can be normalized into a usable estimate yet.',
+      no_recipe:
+        'This product or variant still has no recipe link, so costing is not available yet.',
     },
     costingLineStatuses: {
       costed: 'OK',
@@ -1038,9 +1245,12 @@ const en = {
       unit_mismatch: 'Unit mismatch',
     },
     costingLineStatusesHelp: {
-      missing_price: 'No recorded supplier price could be used for this material yet.',
-      missing_package: 'A supplier price exists, but package quantity or unit is still missing.',
-      unit_mismatch: 'Supplier package unit and recipe unit do not match closely enough to normalize honestly.',
+      missing_price:
+        'No recorded supplier price could be used for this material yet.',
+      missing_package:
+        'A supplier price exists, but package quantity or unit is still missing.',
+      unit_mismatch:
+        'Supplier package unit and recipe unit do not match closely enough to normalize honestly.',
     },
     costingLabels: {
       latestRecipeEvidence: 'Latest recipe evidence',
@@ -1062,7 +1272,8 @@ const en = {
     supplierPriceMemoryHelp:
       'Record what was actually paid over time so SKOSS can later compare vendors and feed recipe costing without guessing from one current price.',
     addSupplierPrice: 'Add supplier price',
-    addSupplierPriceHelp: 'Capture the supplier, date, and price first. Package detail can stay lightweight and SKOSS can normalize rates later.',
+    addSupplierPriceHelp:
+      'Capture the supplier, date, and price first. Package detail can stay lightweight and SKOSS can normalize rates later.',
     history: {
       title: 'Price history',
       help: 'Entries are append-only. Use supplier and material links to narrow the notebook view.',
@@ -1072,26 +1283,31 @@ const en = {
       empty: 'No price entries match this view yet.',
     },
     nextStepsTitle: 'What stays intentionally lightweight',
-    nextStepsBody: 'This setup workspace now supports real CRUD and linking flows. Procurement automation, inventory deduction, and accounting remain out of scope by design.',
+    nextStepsBody:
+      'This setup workspace now supports real CRUD and linking flows. Procurement automation, inventory deduction, and accounting remain out of scope by design.',
     fields: {
       userDisplayName: 'User name',
       loginIdentifier: 'Login identifier',
       role: 'Role / function',
       defaultWorkspace: 'Default workspace',
       userActive: 'Active user',
-      userActiveHelp: 'Inactive users stay in history but no longer show up in the quick login surface.',
+      userActiveHelp:
+        'Inactive users stay in history but no longer show up in the quick login surface.',
       supplierName: 'Supplier name',
       contact: 'Contact',
       notes: 'Notes',
       activeSupplier: 'Active supplier',
-      activeSupplierHelp: 'Turn this off when the contact should stay in history but out of active choices.',
+      activeSupplierHelp:
+        'Turn this off when the contact should stay in history but out of active choices.',
       rawMaterialName: 'Raw material name',
       category: 'Category',
       defaultUnit: 'Default unit',
-      unitQuickHelp: 'Quick unit suggestions: g, kg, ml, l, unit, piece, dozen, eggs.',
+      unitQuickHelp:
+        'Quick unit suggestions: g, kg, ml, l, unit, piece, dozen, eggs.',
       brand: 'Brand',
       activeRawMaterial: 'Active raw material',
-      activeRawMaterialHelp: 'Inactive materials remain available in history for past prices and future costing traces.',
+      activeRawMaterialHelp:
+        'Inactive materials remain available in history for past prices and future costing traces.',
       supplier: 'Supplier',
       rawMaterial: 'Raw material',
       product: 'Product',
@@ -1105,17 +1321,20 @@ const en = {
       presentation: 'Presentation',
       packageQuantity: 'Package quantity',
       packageUnit: 'Package unit',
-      packageOptionalHelp: 'Package quantity and unit are optional, but fill both together if you include them.',
+      packageOptionalHelp:
+        'Package quantity and unit are optional, but fill both together if you include them.',
       price: 'Price',
       date: 'Date',
       note: 'Note',
       activeRecipe: 'Active recipe',
-      activeRecipeHelp: 'Turn this off when you want to keep the formula in history without showing it as the current one.',
+      activeRecipeHelp:
+        'Turn this off when you want to keep the formula in history without showing it as the current one.',
     },
     placeholders: {
       userDisplayName: 'Lucía',
       contact: 'María · WhatsApp · phone',
-      supplierNotes: 'Delivery rhythm, minimum order, payment reminder, or route note',
+      supplierNotes:
+        'Delivery rhythm, minimum order, payment reminder, or route note',
       rawMaterialName: 'Bread flour',
       category: 'Flour, dairy, packaging',
       defaultUnit: 'kg',
@@ -1159,6 +1378,9 @@ const en = {
       removeLine: 'Remove line',
     },
     labels: {
+      activeUsers: 'active',
+      inactiveUsers: 'inactive',
+      rolesInUse: 'roles in use',
       defaultWorkspace: 'Default workspace',
       visibleWorkspaces: 'Visible workspaces',
       defaultUnitSuffix: 'default',
@@ -1184,7 +1406,8 @@ const en = {
 
   printing: {
     browserFirstBadge: 'Browser print first',
-    browserFirstHelp: 'Open this view on the device near the paper workflow, then use the browser print dialog. Future printer routing can stay modular.',
+    browserFirstHelp:
+      'Open this view on the device near the paper workflow, then use the browser print dialog. Future printer routing can stay modular.',
     labels: {
       artifact: 'Artifact',
       purpose: 'Purpose',
@@ -1225,19 +1448,23 @@ const en = {
       },
       orderTicket: {
         title: 'Order ticket',
-        description: 'Compact order detail for kitchen, packing, or counter handoff without full app chrome.',
+        description:
+          'Compact order detail for kitchen, packing, or counter handoff without full app chrome.',
       },
       productionTicket: {
         title: 'Production / prep ticket',
-        description: 'A print-friendly demand snapshot for the active production day, with WIP and handoff context kept close.',
+        description:
+          'A print-friendly demand snapshot for the active production day, with WIP and handoff context kept close.',
       },
       handoffSlip: {
         title: 'WIP / handoff slip',
-        description: 'A concise shift-to-shift paper snapshot for open work, WIP, and fulfillment watch items.',
+        description:
+          'A concise shift-to-shift paper snapshot for open work, WIP, and fulfillment watch items.',
       },
       simpleLabel: {
         title: 'Simple label',
-        description: 'A lightweight browser-print-first label for trays, bags, boxes, or other operational handoff points.',
+        description:
+          'A lightweight browser-print-first label for trays, bags, boxes, or other operational handoff points.',
         badge: 'Label',
       },
     },
@@ -1246,16 +1473,20 @@ const en = {
   preferences: {
     workspace: 'Personal preferences',
     title: 'Preferences',
-    description: 'Keep personal defaults light: language, appearance, and which workspace should greet this person first.',
+    description:
+      'Keep personal defaults light: language, appearance, and which workspace should greet this person first.',
     saved: 'Personal preferences saved.',
     currentUserTitle: 'Current user',
-    currentUserHelp: 'This session stays lightweight. Identity shapes attention first, not a heavy security policy.',
+    currentUserHelp:
+      'This session stays lightweight. Identity shapes attention first, not a heavy security policy.',
     defaultWorkspace: 'Default workspace',
     settingsBoundaryTitle: 'Settings remain shared',
-    settingsBoundaryBody: 'Business setup still lives in Settings. Preferences only shape personal behavior and first-view emphasis.',
+    settingsBoundaryBody:
+      'Business setup still lives in Settings. Preferences only shape personal behavior and first-view emphasis.',
     switchUser: 'Switch user',
     formTitle: 'Personal defaults',
-    formHelp: 'These choices follow the signed-in person so shared devices can still feel role-aware.',
+    formHelp:
+      'These choices follow the signed-in person so shared devices can still feel role-aware.',
     fields: {
       language: 'Language',
       theme: 'Appearance',
@@ -1266,9 +1497,11 @@ const en = {
   login: {
     eyebrow: 'Light login scaffold',
     title: 'Choose who is working',
-    description: 'This is a practical session starter for small teams and shared devices. It prepares SKOSS for identity-aware behavior without adding enterprise auth weight yet.',
+    description:
+      'This is a practical session starter for small teams and shared devices. It prepares SKOSS for identity-aware behavior without adding enterprise auth weight yet.',
     quickStartTitle: 'Quick start',
-    quickStartHelp: 'Tap a person to shape navigation and workspace focus for this session.',
+    quickStartHelp:
+      'Tap a person to shape navigation and workspace focus for this session.',
     manualTitle: 'Manual sign-in',
     manualHelp: 'Use the login identifier when the quick list is not enough.',
     manualBadge: 'Shared device friendly',

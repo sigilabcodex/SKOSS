@@ -1,6 +1,8 @@
 :root {
   color-scheme: light;
-  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-sans:
+    Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', sans-serif;
   --space-1: 0.25rem;
   --space-2: 0.5rem;
   --space-3: 0.75rem;
@@ -18,7 +20,13 @@
   --shadow-md: 0 14px 34px rgba(44, 32, 17, 0.08);
   --shadow-lg: 0 20px 44px rgba(44, 32, 17, 0.14);
   --bg: #f5f1e8;
-  --bg-accent: radial-gradient(circle at top left, rgba(186, 132, 69, 0.14), transparent 35%), linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 30%);
+  --bg-accent:
+    radial-gradient(
+      circle at top left,
+      rgba(186, 132, 69, 0.14),
+      transparent 35%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.55), transparent 30%);
   --surface: #fffdf8;
   --surface-soft: #faf4ea;
   --surface-strong: #f5ebdc;
@@ -53,7 +61,13 @@
 :root[data-theme='dark'] {
   color-scheme: dark;
   --bg: #141516;
-  --bg-accent: radial-gradient(circle at top left, rgba(102, 72, 31, 0.3), transparent 32%), linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 34%);
+  --bg-accent:
+    radial-gradient(
+      circle at top left,
+      rgba(102, 72, 31, 0.3),
+      transparent 32%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 34%);
   --surface: #1d1f21;
   --surface-soft: #24272a;
   --surface-strong: #2b2f33;
@@ -91,7 +105,13 @@
 :root[data-theme='garden'] {
   color-scheme: light;
   --bg: #eef0e7;
-  --bg-accent: radial-gradient(circle at top left, rgba(123, 149, 113, 0.24), transparent 34%), linear-gradient(180deg, rgba(255, 255, 255, 0.6), transparent 30%);
+  --bg-accent:
+    radial-gradient(
+      circle at top left,
+      rgba(123, 149, 113, 0.24),
+      transparent 34%
+    ),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.6), transparent 30%);
   --surface: #fbfcf8;
   --surface-soft: #f3f5ef;
   --surface-strong: #e7ebe1;
@@ -351,7 +371,11 @@ label,
   border-radius: var(--radius-pill);
   font-weight: 700;
   border: 1px solid transparent;
-  transition: background-color 140ms ease, border-color 140ms ease, color 140ms ease, transform 140ms ease,
+  transition:
+    background-color 140ms ease,
+    border-color 140ms ease,
+    color 140ms ease,
+    transform 140ms ease,
     box-shadow 140ms ease;
 }
 
@@ -685,7 +709,11 @@ label,
 }
 
 .hero-card {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 92%, transparent), var(--surface-soft));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface) 92%, transparent),
+    var(--surface-soft)
+  );
   box-shadow: var(--shadow-md);
 }
 
@@ -1125,7 +1153,10 @@ select {
   border-radius: var(--radius-md);
   background: var(--surface);
   color: var(--ink);
-  transition: border-color 140ms ease, background-color 140ms ease, box-shadow 140ms ease;
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    box-shadow 140ms ease;
 }
 
 input::placeholder,
@@ -1342,6 +1373,7 @@ select:disabled {
 
 .summary-pill-row,
 .filter-pill-row,
+.workspace-map-grid,
 .onboarding-progress,
 .onboarding-actions {
   display: flex;
@@ -1351,6 +1383,12 @@ select:disabled {
 
 .filter-pill-row {
   align-items: center;
+}
+
+.workspace-map-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: var(--space-3);
 }
 
 .compact-list {
@@ -1416,7 +1454,11 @@ select:disabled {
 }
 
 .onboarding-assistant {
-  background: linear-gradient(180deg, color-mix(in srgb, var(--surface) 92%, transparent), var(--surface-soft));
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--surface) 92%, transparent),
+    var(--surface-soft)
+  );
 }
 
 .onboarding-first-run {
@@ -1467,7 +1509,11 @@ select:disabled {
   border: 1px solid var(--border);
   background: var(--surface);
   box-shadow: var(--shadow-sm);
-  transition: border-color 140ms ease, box-shadow 140ms ease, transform 140ms ease, background-color 140ms ease;
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease,
+    transform 140ms ease,
+    background-color 140ms ease;
 }
 
 .option-card:hover .option-card-body,
@@ -1696,7 +1742,6 @@ select:disabled {
   border: 0;
 }
 
-
 .recipe-grid {
   align-items: start;
 }
@@ -1777,7 +1822,6 @@ select:disabled {
     grid-template-columns: minmax(0, 1fr);
   }
 }
-
 
 .compact-gap {
   gap: var(--space-2);
