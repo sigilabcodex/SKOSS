@@ -258,6 +258,22 @@ Avoid:
 
 ## 10. Guidance for future PRs
 
+## 11. Local sub-navigation for growing workspaces
+
+When a workspace accumulates multiple functional zones, add **light local sub-navigation** before adding new top-level routes.
+
+Current examples:
+
+- Settings groups sections by business setup, team/users, catalog/costing, and preferences/system boundaries.
+- Production boards expose quick jumps for demand, fulfillment queues, WIP/handoff context, and line updates.
+
+Rules:
+
+- keep sub-navigation compact (chips/pills are enough)
+- map directly to visible sections, not abstract admin taxonomies
+- preserve role-shaped access from primary navigation
+- avoid introducing deep menu trees unless a workflow truly needs separate routes
+
 Future UI work should follow these rules:
 
 - extend tokens first before adding hardcoded values

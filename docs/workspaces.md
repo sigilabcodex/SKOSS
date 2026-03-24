@@ -176,7 +176,6 @@ At the moment this preset layer stays intentionally light:
 
 It does **not** yet hide major parts of the product, fork business logic, or force a team into one workspace model permanently.
 
-
 ## Role-shaped attention foundation
 
 The project now starts applying workspace shaping through a lightweight user and role foundation.
@@ -221,3 +220,28 @@ Role-shaped visibility still applies in both layouts:
 - non-admin roles should continue to see only relevant workspaces first
 - setup-heavy navigation remains conditional on role/workspace visibility
 - desktop enhancements are additive and should not force admin complexity into operator flows
+
+## Current structure refresh (settings + production)
+
+As the first operational surfaces matured, two areas started to feel flat:
+
+- **Settings** had too many unrelated cards at one depth, so scanning and orientation slowed down.
+- **Production** had strong data but weak internal grouping, making it feel like one long board instead of a workflow.
+
+The current UI pass keeps the same capabilities but tightens information architecture:
+
+1. **Settings now uses grouped local navigation**
+   - business setup
+   - team and users
+   - catalog and costing data
+   - preferences/system boundaries
+2. **Production now adds board-level section navigation**
+   - demand
+   - fulfillment queues
+   - WIP / handoff context
+   - line updates
+3. **User control in settings is denser and clearer**
+   - active/inactive and role-coverage summary is visible up front
+   - role + default workspace + visible workspaces remain visible per user
+
+This keeps growth structured without turning SKOSS into a heavy admin tree.
