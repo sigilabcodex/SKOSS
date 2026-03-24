@@ -224,6 +224,14 @@ export default async function SetupPage({
       costingItem: selectedCostingItem?.id,
       ...overrides,
     });
+  const setupSections = [
+    { href: '#users', label: t('setup.sections.users') },
+    { href: '#suppliers', label: t('setup.sections.suppliers') },
+    { href: '#raw-materials', label: t('setup.sections.rawMaterials') },
+    { href: '#recipes', label: t('setup.sections.recipes') },
+    { href: '#costing', label: t('setup.sections.costing') },
+    { href: '#price-history', label: t('setup.sections.priceHistory') },
+  ];
 
   return (
     <div className="page-stack">
@@ -244,6 +252,24 @@ export default async function SetupPage({
       <SavedMessage saved={params?.saved} />
       {params?.error ? <p className="inline-warning">{params.error}</p> : null}
 
+      <section className="panel page-stack">
+        <div className="table-header-row">
+          <div>
+            <h2>{t('setup.adminReadinessTitle')}</h2>
+            <p>{t('setup.adminReadinessHelp')}</p>
+          </div>
+        </div>
+        <div className="filter-pill-row">
+          {setupSections.map((section) => (
+            <a key={section.href} href={section.href} className="summary-pill">
+              {section.label}
+            </a>
+          ))}
+          <Link href="/customers" className="summary-pill">{t('setup.sections.customers')}</Link>
+          <Link href="/orders" className="summary-pill">{t('setup.sections.orders')}</Link>
+        </div>
+      </section>
+
       <OnboardingAssistant
         businessName={data.workspace.name}
         preferences={data.preferences}
@@ -262,7 +288,7 @@ export default async function SetupPage({
         <p className="inline-warning">{t('setup.roleShapingNote')}</p>
       ) : null}
 
-      <section className="grid-two">
+      <section className="grid-two" id="users">
         <article className="panel page-stack">
           <div className="table-header-row">
             <div>
@@ -427,25 +453,29 @@ export default async function SetupPage({
             </div>
             <span className="summary-pill">{data.users.length} {t('common.users')}</span>
           </div>
-          <ul className="stack-list compact-list">
-            {data.users.map((user) => (
-              <li key={user.id} className="list-with-actions">
-                <div>
-                  <strong>
-                    {user.displayName}
-                    {!user.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
-                  </strong>
-                  <span>{t(`roles.${user.role}.label`)} · {user.loginIdentifier}</span>
-                  <span className="inline-meta">{t('setup.labels.defaultWorkspace')}: {t(`nav.${user.preferences?.defaultWorkspace ?? user.defaultWorkspace}`)}</span>
-                </div>
-                <div className="inline-action-row">
-                  <Link href={buildSetupHref({ user: user.id, supplier: editingSupplier?.id, material: editingMaterial?.id, recipe: editingRecipe?.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, costingStatus: costingStatusFilter, costingItem: selectedCostingItem?.id })} className="inline-link">
-                    {t('setup.actions.edit')}
-                  </Link>
-                </div>
-              </li>
-            ))}
-          </ul>
+          {data.users.length > 0 ? (
+            <ul className="stack-list compact-list">
+              {data.users.map((user) => (
+                <li key={user.id} className="list-with-actions">
+                  <div>
+                    <strong>
+                      {user.displayName}
+                      {!user.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
+                    </strong>
+                    <span>{t(`roles.${user.role}.label`)} · {user.loginIdentifier}</span>
+                    <span className="inline-meta">{t('setup.labels.defaultWorkspace')}: {t(`nav.${user.preferences?.defaultWorkspace ?? user.defaultWorkspace}`)}</span>
+                  </div>
+                  <div className="inline-action-row">
+                    <Link href={buildSetupHref({ user: user.id, supplier: editingSupplier?.id, material: editingMaterial?.id, recipe: editingRecipe?.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, costingStatus: costingStatusFilter, costingItem: selectedCostingItem?.id })} className="inline-link">
+                      {t('setup.actions.edit')}
+                    </Link>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="empty-state">{t('setup.usersEmpty')}</p>
+          )}
           <form action={userFormAction} className="field-section page-stack">
             <div className="field-section-header">
               <div>
@@ -509,7 +539,7 @@ export default async function SetupPage({
           <span className="summary-pill">{t('setup.draftFirstFriendly')}</span>
         </div>
         <div className="grid-two">
-          <article className="subpanel page-stack">
+          <article className="subpanel page-stack" id="suppliers">
             <div className="table-header-row">
               <div>
                 <h3>{t('setup.suppliers')}</h3>
@@ -517,28 +547,32 @@ export default async function SetupPage({
               </div>
               <span className="summary-pill">{data.suppliers.length} {t('common.suppliers')}</span>
             </div>
-            <ul className="stack-list compact-list">
-              {data.suppliers.map((supplier) => (
-                <li key={supplier.id} className="list-with-actions">
-                  <div>
-                    <strong>
-                      {supplier.name}
-                      {!supplier.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
-                    </strong>
-                    <span>{supplier.contact ?? supplier.notes ?? t('setup.noExtraContactYet')}</span>
-                    <span className="inline-meta">{supplierPriceCounts.get(supplier.id) ?? 0} {t('setup.labels.priceEntries')}</span>
-                  </div>
-                  <div className="inline-action-row">
-                    <Link href={buildSetupHref({ supplier: supplier.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, material: editingMaterial?.id, recipe: editingRecipe?.id })} className="inline-link">
-                      {t('setup.actions.edit')}
-                    </Link>
-                    <Link href={supplierHistoryHref(supplier.id)} className="inline-link">
-                      {t('setup.actions.viewHistory')}
-                    </Link>
-                  </div>
-                </li>
-              ))}
-            </ul>
+            {data.suppliers.length > 0 ? (
+              <ul className="stack-list compact-list">
+                {data.suppliers.map((supplier) => (
+                  <li key={supplier.id} className="list-with-actions">
+                    <div>
+                      <strong>
+                        {supplier.name}
+                        {!supplier.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
+                      </strong>
+                      <span>{supplier.contact ?? supplier.notes ?? t('setup.noExtraContactYet')}</span>
+                      <span className="inline-meta">{supplierPriceCounts.get(supplier.id) ?? 0} {t('setup.labels.priceEntries')}</span>
+                    </div>
+                    <div className="inline-action-row">
+                      <Link href={buildSetupHref({ supplier: supplier.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, material: editingMaterial?.id, recipe: editingRecipe?.id })} className="inline-link">
+                        {t('setup.actions.edit')}
+                      </Link>
+                      <Link href={supplierHistoryHref(supplier.id)} className="inline-link">
+                        {t('setup.actions.viewHistory')}
+                      </Link>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="empty-state">{t('setup.suppliersEmpty')}</p>
+            )}
             <form action={supplierFormAction} className="field-section page-stack">
               <div className="field-section-header">
                 <div>
@@ -578,7 +612,7 @@ export default async function SetupPage({
             </form>
           </article>
 
-          <article className="subpanel page-stack">
+          <article className="subpanel page-stack" id="raw-materials">
             <div className="table-header-row">
               <div>
                 <h3>{t('setup.rawMaterialsSection')}</h3>
@@ -586,40 +620,44 @@ export default async function SetupPage({
               </div>
               <span className="summary-pill">{data.rawMaterials.length} {t('common.materials')}</span>
             </div>
-            <ul className="stack-list compact-list">
-              {data.rawMaterials.map((material) => {
-                const latestPrice = data.latestPriceByMaterial.get(material.id);
+            {data.rawMaterials.length > 0 ? (
+              <ul className="stack-list compact-list">
+                {data.rawMaterials.map((material) => {
+                  const latestPrice = data.latestPriceByMaterial.get(material.id);
 
-                return (
-                  <li key={material.id} className="list-with-actions">
-                    <div>
-                      <strong>
-                        {material.name}
-                        {!material.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
-                      </strong>
-                      <span>
-                        {[
-                          material.category,
-                          material.defaultUnit ? `${material.defaultUnit} ${t('setup.labels.defaultUnitSuffix')}` : t('setup.labels.noDefaultUnit'),
-                          latestPrice ? `${t('setup.labels.latest')} ${formatUnitRate(latestPrice, locale)}` : null,
-                        ]
-                          .filter(Boolean)
-                          .join(' · ')}
-                      </span>
-                      <span className="inline-meta">{materialPriceCounts.get(material.id) ?? 0} {t('setup.labels.priceEntries')}</span>
-                    </div>
-                    <div className="inline-action-row">
-                      <Link href={buildSetupHref({ material: material.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, supplier: editingSupplier?.id, recipe: editingRecipe?.id })} className="inline-link">
-                        {t('setup.actions.edit')}
-                      </Link>
-                      <Link href={materialHistoryHref(material.id)} className="inline-link">
-                        {t('setup.actions.viewHistory')}
-                      </Link>
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+                  return (
+                    <li key={material.id} className="list-with-actions">
+                      <div>
+                        <strong>
+                          {material.name}
+                          {!material.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
+                        </strong>
+                        <span>
+                          {[
+                            material.category,
+                            material.defaultUnit ? `${material.defaultUnit} ${t('setup.labels.defaultUnitSuffix')}` : t('setup.labels.noDefaultUnit'),
+                            latestPrice ? `${t('setup.labels.latest')} ${formatUnitRate(latestPrice, locale)}` : null,
+                          ]
+                            .filter(Boolean)
+                            .join(' · ')}
+                        </span>
+                        <span className="inline-meta">{materialPriceCounts.get(material.id) ?? 0} {t('setup.labels.priceEntries')}</span>
+                      </div>
+                      <div className="inline-action-row">
+                        <Link href={buildSetupHref({ material: material.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, supplier: editingSupplier?.id, recipe: editingRecipe?.id })} className="inline-link">
+                          {t('setup.actions.edit')}
+                        </Link>
+                        <Link href={materialHistoryHref(material.id)} className="inline-link">
+                          {t('setup.actions.viewHistory')}
+                        </Link>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            ) : (
+              <p className="empty-state">{t('setup.rawMaterialsEmpty')}</p>
+            )}
             <form action={rawMaterialFormAction} className="field-section page-stack">
               <div className="field-section-header">
                 <div>
@@ -670,7 +708,7 @@ export default async function SetupPage({
         </div>
       </section>
 
-      <section className="panel page-stack">
+      <section className="panel page-stack" id="recipes">
         <div className="table-header-row">
           <div>
             <h2>{t('setup.recipeFoundationTitle')}</h2>
@@ -905,7 +943,7 @@ export default async function SetupPage({
         </div>
       </section>
 
-      <section className="panel page-stack">
+      <section className="panel page-stack" id="costing">
         <div className="table-header-row">
           <div>
             <h2>{t('setup.costingSnapshotTitle')}</h2>
@@ -1093,7 +1131,7 @@ export default async function SetupPage({
         </div>
       </section>
 
-      <section className="panel page-stack">
+      <section className="panel page-stack" id="price-history">
         <div className="table-header-row">
           <div>
             <h2>{t('setup.supplierPriceMemory')}</h2>
@@ -1220,8 +1258,8 @@ export default async function SetupPage({
       <section className="page-context-card">
         <SparklesIcon className="callout-icon" />
         <div>
-          <strong>{t('setup.futureTitle')}</strong>
-          <p className="helper-text no-margin">{t('setup.futureBody')}</p>
+          <strong>{t('setup.nextStepsTitle')}</strong>
+          <p className="helper-text no-margin">{t('setup.nextStepsBody')}</p>
         </div>
       </section>
     </div>

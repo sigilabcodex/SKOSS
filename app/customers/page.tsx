@@ -76,36 +76,40 @@ export default async function CustomersPage({
             </div>
             <span className="summary-pill">{view.customers.length} {t('customers.summary')}</span>
           </div>
-          <ul className="stack-list">
-            {view.customers.map((customer) => {
-              const linkedOrderCount = view.orderCountByCustomer.get(customer.id) ?? 0;
+          {view.customers.length > 0 ? (
+            <ul className="stack-list">
+              {view.customers.map((customer) => {
+                const linkedOrderCount = view.orderCountByCustomer.get(customer.id) ?? 0;
 
-              return (
-                <li key={customer.id}>
-                  <div>
-                    <strong>
-                      <Link href={`/customers?customer=${customer.id}`} className="inline-link">
-                        {customer.displayName}
-                      </Link>
-                    </strong>
-                    <span>
-                      {customer.phone ?? customer.email ?? t('customers.noContactYet')}
-                      {customer.deliveryNote ? ` · ${customer.deliveryNote}` : ''}
-                      {view.lastOrderDateByCustomer.get(customer.id)
-                        ? ` · ${t('customers.lastOrderOn')} ${formatDateLabel(view.lastOrderDateByCustomer.get(customer.id)!, locale)}`
-                        : ''}
-                    </span>
-                  </div>
-                  <div className="page-stack compact-badge-stack align-end">
-                    <span className={`badge badge-${customer.active ? 'ready' : 'neutral'}`}>
-                      {customer.active ? t('common.active') : t('common.inactive')}
-                    </span>
-                    <span className="badge badge-manual">{customerOrdersBadgeLabel(linkedOrderCount)} {t('common.orders')}</span>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+                return (
+                  <li key={customer.id}>
+                    <div>
+                      <strong>
+                        <Link href={`/customers?customer=${customer.id}`} className="inline-link">
+                          {customer.displayName}
+                        </Link>
+                      </strong>
+                      <span>
+                        {customer.phone ?? customer.email ?? t('customers.noContactYet')}
+                        {customer.deliveryNote ? ` · ${customer.deliveryNote}` : ''}
+                        {view.lastOrderDateByCustomer.get(customer.id)
+                          ? ` · ${t('customers.lastOrderOn')} ${formatDateLabel(view.lastOrderDateByCustomer.get(customer.id)!, locale)}`
+                          : ''}
+                      </span>
+                    </div>
+                    <div className="page-stack compact-badge-stack align-end">
+                      <span className={`badge badge-${customer.active ? 'ready' : 'neutral'}`}>
+                        {customer.active ? t('common.active') : t('common.inactive')}
+                      </span>
+                      <span className="badge badge-manual">{customerOrdersBadgeLabel(linkedOrderCount)} {t('common.orders')}</span>
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <p className="empty-state">{t('customers.listEmpty')}</p>
+          )}
         </article>
 
         <div className="page-stack">
@@ -165,6 +169,11 @@ export default async function CustomersPage({
             </label>
 
             <button type="submit" className="button-primary">{selectedCustomer ? t('customers.updateAction') : t('customers.createAction')}</button>
+            {selectedCustomer ? (
+              <Link href={`/orders/new?customerId=${selectedCustomer.id}`} className="button-secondary">
+                {t('customers.createOrderAction')}
+              </Link>
+            ) : null}
           </form>
 
           <article className="panel page-stack">
@@ -219,23 +228,27 @@ export default async function CustomersPage({
                   </div>
                   <span className="summary-pill">{view.customerOrderHistory.length} {t('common.orders')}</span>
                 </div>
-                <ul className="stack-list muted-list">
-                  {view.customerOrderHistory.map((order) => (
-                    <li key={order.id}>
-                      <strong>
-                        <Link href={`/orders/${order.id}`} className="inline-link">
-                          {formatDateLabel(order.productionDate, locale)}
-                        </Link>
-                      </strong>
-                      <span>
-                        {formatStatusLabel(order.fulfillmentType, t)}
-                        {order.destinationLabel ? ` · ${order.destinationLabel}` : ''}
-                        {order.promisedTime ? ` · ${order.promisedTime}` : ''}
-                        {order.dispatchNotes ? ` · ${order.dispatchNotes}` : ''}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+                {view.customerOrderHistory.length > 0 ? (
+                  <ul className="stack-list muted-list">
+                    {view.customerOrderHistory.map((order) => (
+                      <li key={order.id}>
+                        <strong>
+                          <Link href={`/orders/${order.id}`} className="inline-link">
+                            {formatDateLabel(order.productionDate, locale)}
+                          </Link>
+                        </strong>
+                        <span>
+                          {formatStatusLabel(order.fulfillmentType, t)}
+                          {order.destinationLabel ? ` · ${order.destinationLabel}` : ''}
+                          {order.promisedTime ? ` · ${order.promisedTime}` : ''}
+                          {order.dispatchNotes ? ` · ${order.dispatchNotes}` : ''}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="empty-state">{t('customers.recentOrdersEmpty')}</p>
+                )}
               </>
             ) : (
               <section className="page-context-card">

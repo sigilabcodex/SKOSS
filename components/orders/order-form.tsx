@@ -19,6 +19,7 @@ interface OrderFormProps {
   order?: Order | null;
   productSuggestions: string[];
   focusDate: string;
+  initialCustomerId?: string;
 }
 
 const sourceOptions = [
@@ -45,9 +46,10 @@ export function OrderForm({
   order,
   productSuggestions,
   focusDate,
+  initialCustomerId,
 }: OrderFormProps) {
   const { t, locale } = useI18n();
-  const [selectedCustomerId, setSelectedCustomerId] = useState(order?.customerId ?? '');
+  const [selectedCustomerId, setSelectedCustomerId] = useState(order?.customerId ?? initialCustomerId ?? '');
   const lineDrafts = getDefaultLineDrafts(order?.lines);
   const visibleCustomers = customers.filter((customer) => customer.active || customer.id === order?.customerId);
   const selectedCustomer = useMemo(
