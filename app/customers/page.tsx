@@ -85,9 +85,7 @@ export default async function CustomersPage({
                   <li key={customer.id}>
                     <div>
                       <strong>
-                        <Link href={`/customers?customer=${customer.id}`} className="inline-link">
-                          {customer.displayName}
-                        </Link>
+                        {customer.displayName}
                       </strong>
                       <span>
                         {customer.phone ?? customer.email ?? t('customers.noContactYet')}
@@ -102,6 +100,9 @@ export default async function CustomersPage({
                         {customer.active ? t('common.active') : t('common.inactive')}
                       </span>
                       <span className="badge badge-manual">{customerOrdersBadgeLabel(linkedOrderCount)} {t('common.orders')}</span>
+                      <Link href={`/customers?customer=${customer.id}`} className="inline-link">
+                        {t('customers.editAction')}
+                      </Link>
                     </div>
                   </li>
                 );
@@ -126,7 +127,7 @@ export default async function CustomersPage({
 
             <div className="grid-two">
               <label>
-                <span className="field-heading">{t('customers.fields.displayName')} <span className="required-dot">{t('common.required')}</span></span>
+                <span className="field-heading">{t('customers.fields.displayName')} <span className="setup-required-mark" aria-hidden="true">*</span></span>
                 <input name="displayName" defaultValue={selectedCustomer?.displayName ?? ''} placeholder={t('customers.placeholders.displayName')} required />
               </label>
               <label>

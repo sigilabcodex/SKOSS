@@ -165,8 +165,8 @@ export function OrderForm({
                 <span className="helper-text">{t('orders.orderForm.fields.customerMemoryHelp')}</span>
               </label>
               <label>
-                <span className="field-heading">{t('orders.orderForm.fields.customerLabel')} <span className="required-dot">{t('common.required')}</span></span>
-                <input name="customerLabel" defaultValue={order?.customerLabel ?? ''} placeholder={t('orders.orderForm.placeholders.customerLabel')} />
+                <span className="field-heading">{t('orders.orderForm.fields.customerLabel')} <span className="setup-required-mark" aria-hidden="true">*</span></span>
+                <input name="customerLabel" defaultValue={order?.customerLabel ?? ''} placeholder={t('orders.orderForm.placeholders.customerLabel')} required />
                 <span className="helper-text">{t('orders.orderForm.fields.customerLabelHelp')}</span>
               </label>
               <label>
@@ -201,14 +201,20 @@ export function OrderForm({
                 </select>
               </label>
               <label>
-                <span className="field-heading">{t('orders.orderForm.fields.productionDay')} <span className="required-dot">{t('common.required')}</span></span>
+                <span className="field-heading">{t('orders.orderForm.fields.productionDay')} <span className="setup-required-mark" aria-hidden="true">*</span></span>
                 <input name="productionDate" type="date" defaultValue={order?.productionDate ?? focusDate} required />
               </label>
               <label>
-                <span className="field-heading">{t('orders.orderForm.fields.dueDay')} <span className="required-dot">{t('common.required')}</span></span>
+                <span className="field-heading">{t('orders.orderForm.fields.dueDay')} <span className="setup-required-mark" aria-hidden="true">*</span></span>
                 <input name="dueDate" type="date" defaultValue={order?.dueDate ?? focusDate} required />
               </label>
             </div>
+            {!selectedCustomer ? (
+              <p className="helper-text no-margin">
+                {t('orders.orderForm.noSavedCustomerHint')}{' '}
+                <Link href="/customers" className="inline-link">{t('orders.orderForm.createCustomer')}</Link>
+              </p>
+            ) : null}
             {selectedCustomer ? (
               <section className="page-context-card">
                 <CustomersIcon className="callout-icon" />
