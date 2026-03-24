@@ -141,6 +141,9 @@ What is now more usable in practice:
 - setup now highlights role-to-workspace visibility more clearly so user role changes have immediate operational meaning
 - setup navigation better indicates where related data is maintained (orders and recurring capture links) to reduce dead-end admin screens
 - required-field signaling was simplified to quieter marker patterns to reduce visual noise in high-frequency forms
+- setup now includes a customer-memory panel with direct actions to open customer records and start a customer-linked order
+- product rows now expose recipe linking actions so teams can attach or adjust formulas from the same setup pass
+- setup includes an explicit operability checklist to keep admin work grounded in real task flows instead of static data review
 
 What remains intentionally lightweight:
 
@@ -154,6 +157,7 @@ Known limitations still open:
 - supplier price entries are append-focused (history-first) and not yet a full correction workflow
 - setup still favors single-page operational editing over advanced filtering, bulk editing, or approval workflows
 - recipe costing remains an estimate surface driven by latest available price evidence, not a full margin engine
+- products and destinations still do not have dedicated admin modules; they continue to be maintained from order and recurring capture surfaces
 
 ## Medium-term (structured operations data)
 
