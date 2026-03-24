@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { OnboardingAssistant } from '@/components/setup/onboarding-assistant';
+import { ImportHub } from '@/components/setup/import-hub';
 import { formatDateLabel } from '@/lib/domain/formatters';
 import { getPresetExperience, type WorkspaceLinkKey } from '@/lib/business-presets';
 import { getWorkspaceSummary } from '@/lib/server/demo-data';
@@ -95,6 +96,7 @@ export default async function HomePage() {
           preferences={summary.preferences}
           variant="first-run"
         />
+        <ImportHub redirectTo="/" compact />
       </div>
     );
   }

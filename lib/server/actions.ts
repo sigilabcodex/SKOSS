@@ -38,6 +38,14 @@ import {
 } from '@/lib/server/demo-data';
 import { getCurrentUserContext, loggedOutSessionValue, sessionUserCookieName } from '@/lib/server/auth';
 import { readStore, writeStore } from '@/lib/server/store';
+import {
+  buildCustomerImportPayload,
+  buildRawMaterialImportPayload,
+  buildSupplierImportPayload,
+  parseCsvContent,
+  parseCsvMapping,
+  type CsvEntity,
+} from '@/lib/domain/csv-import';
 import { isSupportedLocale, isSupportedPreset, localeCookieName, supportedLocales, presetCookieName, supportedPresets } from '@/lib/i18n/config';
 import { themeCookieName } from '@/lib/theme';
 import { getDefaultWorkspaceForRole, isPrimaryWorkspaceSurface } from '@/lib/workspaces';
@@ -71,6 +79,15 @@ function revalidateAllWorkspaces() {
   revalidatePath('/preferences');
   revalidatePath('/setup');
   revalidatePath('/login');
+}
+
+function resolveRedirectTo(formData: FormData, fallback: string) {
+  const redirectTo = String(formData.get('redirectTo') ?? '').trim();
+  return redirectTo.startsWith('/') ? redirectTo : fallback;
+}
+
+function shouldAllowEmpty(formData: FormData) {
+  return String(formData.get('allowEmpty') ?? '') === '1';
 }
 
 export async function saveOnboardingPreferencesAction(formData: FormData) {
@@ -234,18 +251,23 @@ export async function logoutAction() {
 
 export async function createUserAction(formData: FormData) {
   const data = await readStore();
+  const redirectTo = resolveRedirectTo(formData, '/setup');
+  const allowEmpty = shouldAllowEmpty(formData);
   const values = normalizeUserForm(formData);
+  if (allowEmpty && !values.displayName.trim() && !values.loginIdentifier.trim()) {
+    redirect(redirectTo);
+  }
   const error = validateUserForm(values, data);
 
   if (error) {
-    redirect(`/setup?error=${encodeURIComponent(error)}`);
+    redirect(`${redirectTo}?error=${encodeURIComponent(error)}`);
   }
 
   const user = buildUserRecord(values, data);
   data.users = [...data.users, user].sort(sortUsers);
   await writeStore(data);
   revalidateAllWorkspaces();
-  redirect('/setup?saved=user');
+  redirect(`${redirectTo}?saved=user`);
 }
 
 export async function updateUserAction(userId: string, formData: FormData) {
@@ -277,11 +299,16 @@ export async function updateUserAction(userId: string, formData: FormData) {
 
 export async function createCustomerAction(formData: FormData) {
   const data = await readStore();
+  const redirectTo = resolveRedirectTo(formData, '/customers');
+  const allowEmpty = shouldAllowEmpty(formData);
   const values = normalizeCustomerForm(formData);
+  if (allowEmpty && !values.displayName.trim()) {
+    redirect(redirectTo);
+  }
   const error = validateCustomerForm(values);
 
   if (error) {
-    redirect(`/customers?error=${encodeURIComponent(error)}`);
+    redirect(`${redirectTo}?error=${encodeURIComponent(error)}`);
   }
 
   const actorUserId = await getActorUserId(data);
@@ -289,7 +316,11 @@ export async function createCustomerAction(formData: FormData) {
   data.customers = [...data.customers, customer].sort((left, right) => left.displayName.localeCompare(right.displayName));
   await writeStore(data);
   revalidateAllWorkspaces();
-  redirect(`/customers?customer=${customer.id}&saved=customer`);
+  if (redirectTo.startsWith('/customers')) {
+    redirect(`/customers?customer=${customer.id}&saved=customer`);
+  }
+
+  redirect(`${redirectTo}?saved=customer`);
 }
 
 export async function updateCustomerAction(customerId: string, formData: FormData) {
@@ -454,11 +485,16 @@ export async function addWipEntryAction(formData: FormData) {
 
 export async function createSupplierAction(formData: FormData) {
   const data = await readStore();
+  const redirectTo = resolveRedirectTo(formData, '/setup');
+  const allowEmpty = shouldAllowEmpty(formData);
   const values = normalizeSupplierForm(formData);
+  if (allowEmpty && !values.name.trim()) {
+    redirect(redirectTo);
+  }
   const error = validateSupplierForm(values);
 
   if (error) {
-    redirect(`/setup?error=${encodeURIComponent(error)}`);
+    redirect(`${redirectTo}?error=${encodeURIComponent(error)}`);
   }
 
   const actorUserId = await getActorUserId(data);
@@ -467,7 +503,7 @@ export async function createSupplierAction(formData: FormData) {
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/setup');
-  redirect('/setup?saved=supplier');
+  redirect(`${redirectTo}?saved=supplier`);
 }
 
 export async function updateSupplierAction(supplierId: string, formData: FormData) {
@@ -498,11 +534,16 @@ export async function updateSupplierAction(supplierId: string, formData: FormDat
 
 export async function createRawMaterialAction(formData: FormData) {
   const data = await readStore();
+  const redirectTo = resolveRedirectTo(formData, '/setup');
+  const allowEmpty = shouldAllowEmpty(formData);
   const values = normalizeRawMaterialForm(formData);
+  if (allowEmpty && !values.name.trim()) {
+    redirect(redirectTo);
+  }
   const error = validateRawMaterialForm(values);
 
   if (error) {
-    redirect(`/setup?error=${encodeURIComponent(error)}`);
+    redirect(`${redirectTo}?error=${encodeURIComponent(error)}`);
   }
 
   const actorUserId = await getActorUserId(data);
@@ -511,7 +552,78 @@ export async function createRawMaterialAction(formData: FormData) {
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/setup');
-  redirect('/setup?saved=raw-material');
+  redirect(`${redirectTo}?saved=raw-material`);
+}
+
+export async function importCsvEntitiesAction(formData: FormData) {
+  const data = await readStore();
+  const redirectTo = resolveRedirectTo(formData, '/setup');
+  const entity = String(formData.get('entity') ?? '') as CsvEntity;
+  const csvContent = String(formData.get('csvContent') ?? '');
+  const rawMapping = String(formData.get('mapping') ?? '');
+
+  if (!csvContent.trim()) {
+    redirect(`${redirectTo}?error=${encodeURIComponent('Upload a CSV file before importing.')}`);
+  }
+
+  if (!['customers', 'suppliers', 'rawMaterials'].includes(entity)) {
+    redirect(`${redirectTo}?error=${encodeURIComponent('Choose a supported import type.')}`);
+  }
+
+  const parsed = parseCsvContent(csvContent);
+  const mapping = parseCsvMapping(rawMapping);
+  const actorUserId = await getActorUserId(data);
+  let imported = 0;
+  let skipped = 0;
+
+  if (entity === 'customers') {
+    const payload = buildCustomerImportPayload(parsed.headers, parsed.rows, mapping);
+    const importedRecords = payload.flatMap((entry) => {
+      if (!entry.displayName.trim()) {
+        skipped += 1;
+        return [];
+      }
+
+      imported += 1;
+      return [buildCustomerRecord(entry, actorUserId)];
+    });
+
+    data.customers = [...data.customers, ...importedRecords].sort((left, right) => left.displayName.localeCompare(right.displayName));
+  }
+
+  if (entity === 'suppliers') {
+    const payload = buildSupplierImportPayload(parsed.headers, parsed.rows, mapping);
+    const importedRecords = payload.flatMap((entry) => {
+      if (!entry.name.trim()) {
+        skipped += 1;
+        return [];
+      }
+
+      imported += 1;
+      return [buildSupplierRecord(entry, actorUserId)];
+    });
+
+    data.suppliers = [...data.suppliers, ...importedRecords].sort((left, right) => left.name.localeCompare(right.name));
+  }
+
+  if (entity === 'rawMaterials') {
+    const payload = buildRawMaterialImportPayload(parsed.headers, parsed.rows, mapping);
+    const importedRecords = payload.flatMap((entry) => {
+      if (!entry.name.trim()) {
+        skipped += 1;
+        return [];
+      }
+
+      imported += 1;
+      return [buildRawMaterialRecord(entry, actorUserId)];
+    });
+
+    data.rawMaterials = [...data.rawMaterials, ...importedRecords].sort((left, right) => left.name.localeCompare(right.name));
+  }
+
+  await writeStore(data);
+  revalidateAllWorkspaces();
+  redirect(`${redirectTo}?saved=import&importedEntity=${entity}&importedCount=${imported}&skippedCount=${skipped}`);
 }
 
 export async function updateRawMaterialAction(rawMaterialId: string, formData: FormData) {

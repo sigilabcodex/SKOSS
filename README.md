@@ -258,6 +258,7 @@ Before heavy implementation begins, the goal is to clarify:
 - `docs/printing.md` — operational printing requirements and future hardware direction
 - `docs/operational-time-surface.md` — why the timeline exists and how it stays intentionally lighter than a generic calendar
 - `docs/domain-glossary.md` — practical domain definitions
+- `docs/onboarding-and-csv-import.md` — first-run setup and lightweight CSV bootstrap workflow
 - `docs/domain-model.md` — conceptual domain model
 - `docs/i18n.md` — internationalization principles, dictionary strategy, and language-layer boundaries
 - `docs/workspaces.md` — initial role-based workspace definitions

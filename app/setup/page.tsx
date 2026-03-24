@@ -19,6 +19,7 @@ import { getPresetExperience } from '@/lib/business-presets';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { getVisibleWorkspacesForRole } from '@/lib/workspaces';
 import { OnboardingAssistant } from '@/components/setup/onboarding-assistant';
+import { ImportHub } from '@/components/setup/import-hub';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { SetupIcon, SparklesIcon } from '@/components/ui-icons';
 
@@ -36,6 +37,9 @@ type SetupSearchParams = {
   user?: string;
   costingStatus?: 'all' | 'fully_costed' | 'partially_costed' | 'missing_cost_evidence' | 'no_recipe';
   costingItem?: string;
+  importedEntity?: 'customers' | 'suppliers' | 'rawMaterials';
+  importedCount?: string;
+  skippedCount?: string;
 };
 
 function buildSetupHref(params: Record<string, string | undefined>) {
@@ -114,6 +118,10 @@ async function SavedMessage({ saved }: { saved?: string }) {
 
   if (saved === 'user') {
     return <p className="inline-success">{t('setup.saved.user')}</p>;
+  }
+
+  if (saved === 'import') {
+    return <p className="inline-success">{t('setup.saved.import')}</p>;
   }
 
   return null;
@@ -244,7 +252,11 @@ export default async function SetupPage({
     { href: '#costing', label: t('setup.sections.costing') },
     { href: '#price-history', label: t('setup.sections.priceHistory') },
     { href: '#customers-summary', label: t('setup.sections.customers') },
+    { href: '#imports', label: t('setup.sections.imports') },
   ];
+  const importedCount = Number(params?.importedCount ?? 0);
+  const skippedCount = Number(params?.skippedCount ?? 0);
+  const hasImportFeedback = params?.saved === 'import' && params?.importedEntity;
 
   return (
     <div className="page-stack">
@@ -264,6 +276,15 @@ export default async function SetupPage({
 
       <SavedMessage saved={params?.saved} />
       {params?.error ? <p className="inline-warning">{params.error}</p> : null}
+      {hasImportFeedback ? (
+        <p className="inline-success">
+          {t('setup.import.result', {
+            entity: t(`setup.import.entityLabels.${params.importedEntity}`),
+            imported: Number.isFinite(importedCount) ? importedCount : 0,
+            skipped: Number.isFinite(skippedCount) ? skippedCount : 0,
+          })}
+        </p>
+      ) : null}
 
       <section className="panel page-stack">
         <div className="table-header-row">
@@ -349,6 +370,8 @@ export default async function SetupPage({
         preferences={data.preferences}
         variant="settings"
       />
+
+      <ImportHub redirectTo="/setup" />
 
       <section className="page-context-card">
         <SetupIcon className="callout-icon" />
