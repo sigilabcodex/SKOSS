@@ -19,11 +19,18 @@ export async function AppShell({ children }: { children?: ReactNode }) {
           <span className="brand-subtitle">{t('shell.brandTitle')}</span>
         </Link>
         <div className="shell-controls">
-          <PrimaryNav visibleWorkspaces={visibleWorkspaces} />
+          <div className="shell-mobile-nav">
+            <PrimaryNav visibleWorkspaces={visibleWorkspaces} />
+          </div>
           <UserMenu currentUser={currentUser} t={t} />
         </div>
       </header>
-      <main className="shell-main">{children}</main>
+      <div className="shell-body">
+        <aside className="shell-sidebar">
+          <PrimaryNav visibleWorkspaces={visibleWorkspaces} mode="desktop" />
+        </aside>
+        <main className="shell-main">{children}</main>
+      </div>
     </div>
   );
 }

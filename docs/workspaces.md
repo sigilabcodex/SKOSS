@@ -206,3 +206,18 @@ The early role model exists mainly to answer questions like:
 That is different from a full permission engine.
 
 SKOSS should resist pretending it needs enterprise RBAC before it has proven the smaller operator-first workflow layer.
+
+## Mobile vs desktop interaction model
+
+The workspace model is now intentionally dual-form:
+
+- **Mobile:** focused and linear; top-shell navigation remains primary and each screen emphasizes one main task flow.
+- **Desktop:** spatial and multi-panel; left-sidebar navigation and side-by-side list/detail structures are used where higher context improves admin work.
+
+This is not a separate product mode and should not fork feature behavior.
+
+Role-shaped visibility still applies in both layouts:
+
+- non-admin roles should continue to see only relevant workspaces first
+- setup-heavy navigation remains conditional on role/workspace visibility
+- desktop enhancements are additive and should not force admin complexity into operator flows

@@ -219,6 +219,27 @@ Guidance:
 
 A good shell helps operators orient quickly, then gets out of the way.
 
+## 8.1 Desktop layout mode
+
+SKOSS now keeps two shell behaviors that share the same components:
+
+- **mobile/tablet compact mode**: primary navigation stays in the top shell so workflows remain linear and touch-first
+- **desktop mode (wide screens)**: primary navigation moves into a left sidebar and the top bar stays minimal (brand/workspace + user/preferences)
+
+Rationale:
+
+- on wide screens, horizontal top navigation felt stretched and reduced scan speed
+- admin users need faster movement between setup entities without fighting long vertical scrolls
+- preserving mobile behavior avoids disrupting the operator-first compact flow
+
+Desktop sidebar guidance:
+
+- first group: operational workspaces (home, timeline, orders, production, handoff, etc.)
+- second group (role-aware): admin/setup links (customers, users, suppliers, materials, recipes)
+- keep grouping compact and avoid turning the sidebar into a full settings tree
+
+The desktop mode should increase context and navigation clarity without changing the design language or introducing heavy layout systems.
+
 ## 9. Icon usage
 
 Use icons sparingly and functionally.

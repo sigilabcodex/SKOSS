@@ -52,6 +52,10 @@ const es = {
   shell: {
     homeAria: 'Inicio de SKOSS',
     brandTitle: 'Operaciones de cocina',
+    sections: {
+      operational: 'Espacios operativos',
+      admin: 'Administración y configuración',
+    },
     switchUser: 'Cambiar usuario',
     logout: 'Cerrar sesión',
     login: 'Iniciar sesión',
