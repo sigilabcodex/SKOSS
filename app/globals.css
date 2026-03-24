@@ -733,8 +733,7 @@ label,
 
 .summary-pill,
 .inline-meta,
-.optional-pill,
-.required-dot {
+.optional-pill {
   display: inline-flex;
   align-items: center;
   gap: var(--space-1);
@@ -744,24 +743,6 @@ label,
   font-weight: 700;
   background: var(--surface-strong);
   border: 1px solid var(--border);
-}
-
-.required-dot {
-  position: relative;
-  min-width: auto;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  font-size: 0;
-  line-height: 1;
-  color: var(--danger);
-}
-
-.required-dot::before {
-  content: '*';
-  font-size: 1rem;
-  font-weight: 800;
-  line-height: 1;
 }
 
 .optional-pill,

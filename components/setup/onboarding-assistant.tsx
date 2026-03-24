@@ -60,7 +60,7 @@ export async function OnboardingAssistant({
           </div>
           <label>
             <span className="field-heading">
-              {t('setupAssistant.fields.businessName')} <span className="required-dot">{t('common.required')}</span>
+              {t('setupAssistant.fields.businessName')} <span className="setup-required-mark" aria-hidden="true">*</span>
             </span>
             <input
               name="businessName"
@@ -72,7 +72,7 @@ export async function OnboardingAssistant({
           <div className="grid-two">
             <label>
               <span className="field-heading">
-                {t('setupAssistant.fields.language')} <span className="required-dot">{t('common.required')}</span>
+                {t('setupAssistant.fields.language')} <span className="setup-required-mark" aria-hidden="true">*</span>
               </span>
               <select name="locale" defaultValue={preferences.locale}>
                 {localeOptions.map((option) => (
@@ -84,7 +84,7 @@ export async function OnboardingAssistant({
             </label>
             <label>
               <span className="field-heading">
-                {t('setupAssistant.fields.operatingMode')} <span className="required-dot">{t('common.required')}</span>
+                {t('setupAssistant.fields.operatingMode')} <span className="setup-required-mark" aria-hidden="true">*</span>
               </span>
               <select name="operatingMode" defaultValue={preferences.operatingMode}>
                 {operatingModeOptions.map((mode) => (

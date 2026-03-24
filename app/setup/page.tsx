@@ -17,6 +17,7 @@ import { getSetupWorkspace } from '@/lib/server/demo-data';
 import { getCurrentUserContext } from '@/lib/server/auth';
 import { getPresetExperience } from '@/lib/business-presets';
 import { getServerTranslator } from '@/lib/i18n/server';
+import { getVisibleWorkspacesForRole } from '@/lib/workspaces';
 import { OnboardingAssistant } from '@/components/setup/onboarding-assistant';
 import { ThemeSwitcher } from '@/components/theme-switcher';
 import { SetupIcon, SparklesIcon } from '@/components/ui-icons';
@@ -395,6 +396,10 @@ export default async function SetupPage({
             </div>
             <span className="summary-pill">{data.products.length} {t('common.products')}</span>
           </div>
+          <p className="helper-text no-margin">
+            {t('setup.managedFromOrders')}{' '}
+            <Link href="/orders/new" className="inline-link">{t('setup.openOrderCapture')}</Link>
+          </p>
           <ul className="stack-list">
             {data.products.map((product) => (
               <li key={product.id}>
@@ -413,6 +418,10 @@ export default async function SetupPage({
             </div>
             <span className="summary-pill">{data.destinations.length} {term('destination', 'many')}</span>
           </div>
+          <p className="helper-text no-margin">
+            {t('setup.destinationsManagedFromOrders')}{' '}
+            <Link href="/orders/new" className="inline-link">{t('setup.openOrderCapture')}</Link>
+          </p>
           <ul className="stack-list">
             {data.destinations.map((destination) => (
               <li key={destination.id}>
@@ -433,6 +442,10 @@ export default async function SetupPage({
             </div>
             <span className="summary-pill">{data.recurringTemplates.length} {t('common.templates')}</span>
           </div>
+          <p className="helper-text no-margin">
+            {t('setup.managedFromRecurring')}{' '}
+            <Link href="/orders/templates/new" className="inline-link">{t('setup.openRecurringCapture')}</Link>
+          </p>
           <ul className="stack-list">
             {data.recurringTemplates.map((template) => (
               <li key={template.id}>
@@ -464,6 +477,9 @@ export default async function SetupPage({
                     </strong>
                     <span>{t(`roles.${user.role}.label`)} · {user.loginIdentifier}</span>
                     <span className="inline-meta">{t('setup.labels.defaultWorkspace')}: {t(`nav.${user.preferences?.defaultWorkspace ?? user.defaultWorkspace}`)}</span>
+                    <span className="inline-meta">
+                      {t('setup.labels.visibleWorkspaces')}: {getVisibleWorkspacesForRole(user.role).map((workspace) => t(`nav.${workspace}`)).join(' · ')}
+                    </span>
                   </div>
                   <div className="inline-action-row">
                     <Link href={buildSetupHref({ user: user.id, supplier: editingSupplier?.id, material: editingMaterial?.id, recipe: editingRecipe?.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, costingStatus: costingStatusFilter, costingItem: selectedCostingItem?.id })} className="inline-link">

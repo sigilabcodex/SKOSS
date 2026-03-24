@@ -130,6 +130,31 @@ This stays intentionally lightweight:
 
 The quality bar is operational usability first: teams should be able to maintain core setup records and connect them to daily work with low friction.
 
+### Admin operability pass (implemented in current UI slice)
+
+The latest productization pass focused on making existing foundations actually usable from the interface rather than adding new major systems.
+
+What is now more usable in practice:
+
+- customer, supplier, raw material, recipe, and user create/edit flows are directly available from workspace surfaces
+- order capture can move between draft customer labels and saved customer memory with clearer handoff to customer management
+- setup now highlights role-to-workspace visibility more clearly so user role changes have immediate operational meaning
+- setup navigation better indicates where related data is maintained (orders and recurring capture links) to reduce dead-end admin screens
+- required-field signaling was simplified to quieter marker patterns to reduce visual noise in high-frequency forms
+
+What remains intentionally lightweight:
+
+- no deep procurement workflow or purchasing automation
+- no inventory deduction or stock ledger behavior
+- no accounting, payroll, or ERP-style master-data expansion
+- products and destinations still evolve from operational flows first (order and recurring capture), not from a heavy catalog module
+
+Known limitations still open:
+
+- supplier price entries are append-focused (history-first) and not yet a full correction workflow
+- setup still favors single-page operational editing over advanced filtering, bulk editing, or approval workflows
+- recipe costing remains an estimate surface driven by latest available price evidence, not a full margin engine
+
 ## Medium-term (structured operations data)
 
 Once the v0 loop is stable, SKOSS should add a lightweight structured operations layer that supports repeatable setup without blocking daily work.

@@ -50,7 +50,7 @@ export function RecurringTemplateForm({
             </div>
             <div className="grid-two">
               <label>
-                <span className="field-heading">{t('orders.recurringForm.customerOrRoute')} <span className="required-dot">{t('common.required')}</span></span>
+                <span className="field-heading">{t('orders.recurringForm.customerOrRoute')} <span className="setup-required-mark" aria-hidden="true">*</span></span>
                 <input name="customerLabel" placeholder={t('orders.recurringForm.placeholders.customerOrRoute')} required />
               </label>
               <label>
@@ -67,7 +67,7 @@ export function RecurringTemplateForm({
                 </datalist>
               </label>
               <label>
-                <span className="field-heading">{t('orders.recurringForm.nextOccurrence')} <span className="required-dot">{t('common.required')}</span></span>
+                <span className="field-heading">{t('orders.recurringForm.nextOccurrence')} <span className="setup-required-mark" aria-hidden="true">*</span></span>
                 <input name="nextOccurrenceDate" type="date" defaultValue={focusDate} required />
               </label>
               <label>
