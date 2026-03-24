@@ -40,6 +40,15 @@ const basicUnits = [
 ] as const;
 
 type SetupSearchParams = {
+  section?:
+    | 'business-setup'
+    | 'users'
+    | 'preferences-system'
+    | 'suppliers'
+    | 'raw-materials'
+    | 'recipes'
+    | 'costing'
+    | 'price-history';
   error?: string;
   saved?: string;
   supplier?: string;
@@ -359,6 +368,33 @@ export default async function SetupPage({
   const skippedCount = Number(params?.skippedCount ?? 0);
   const hasImportFeedback =
     params?.saved === 'import' && params?.importedEntity;
+  const setupSection = params?.section;
+  const sectionNavItems: Array<{
+    key:
+      | 'business-setup'
+      | 'users'
+      | 'preferences-system'
+      | 'suppliers'
+      | 'raw-materials'
+      | 'recipes'
+      | 'costing'
+      | 'price-history';
+    label: string;
+  }> = [
+    { key: 'business-setup', label: t('setup.sections.businessSetup') },
+    { key: 'users', label: t('setup.sections.users') },
+    { key: 'preferences-system', label: t('setup.sections.preferencesSystem') },
+    { key: 'suppliers', label: t('setup.sections.suppliers') },
+    { key: 'raw-materials', label: t('setup.sections.rawMaterials') },
+    { key: 'recipes', label: t('setup.sections.recipes') },
+    { key: 'costing', label: t('setup.sections.costing') },
+    { key: 'price-history', label: t('setup.sections.priceHistory') },
+  ];
+  const buildSectionLink = (section: (typeof sectionNavItems)[number]['key']) => ({
+    pathname: '/setup',
+    query: { section },
+    hash: section,
+  });
 
   return (
     <div className="page-stack">
@@ -387,6 +423,26 @@ export default async function SetupPage({
           })}
         </p>
       ) : null}
+
+      <section className="panel page-stack setup-section-nav-panel">
+        <div className="table-header-row">
+          <div>
+            <h2>{t('setup.adminReadinessTitle')}</h2>
+            <p>{t('setup.description')}</p>
+          </div>
+        </div>
+        <div className="summary-pill-row">
+          {sectionNavItems.map((item) => (
+            <Link
+              key={item.key}
+              href={buildSectionLink(item.key)}
+              className={`summary-pill ${setupSection === item.key ? 'is-selected' : ''}`}
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+      </section>
 
       <section className="panel page-stack">
         <div className="table-header-row">

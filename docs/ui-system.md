@@ -219,6 +219,20 @@ Guidance:
 
 A good shell helps operators orient quickly, then gets out of the way.
 
+## 9. Desktop density and spatial admin behavior
+
+Mobile and desktop should share the same product model, but not the same spatial assumptions.
+
+Current refinement direction:
+
+- keep mobile linear and touch-safe as the baseline interaction
+- on desktop, use horizontal room for list/detail or list/editor/context combinations in admin-heavy screens
+- prefer compact, section-level navigation aids on desktop when admin surfaces are long
+- keep increased density moderate: reduce avoidable whitespace, but preserve scanning clarity and calm grouping
+- sticky desktop side/context panels are acceptable when they reduce repeated scrolling in setup and customer-management flows
+
+This is a usability optimization, not a visual redesign.
+
 ## 8.1 Desktop layout mode
 
 SKOSS now keeps two shell behaviors that share the same components:
