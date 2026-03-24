@@ -29,6 +29,7 @@ type SetupSearchParams = {
   saved?: string;
   supplier?: string;
   material?: string;
+  product?: string;
   historySupplier?: string;
   historyMaterial?: string;
   recipe?: string;
@@ -133,6 +134,9 @@ export default async function SetupPage({
   const editingMaterial = params?.material
     ? data.rawMaterials.find((material) => material.id === params.material) ?? null
     : null;
+  const selectedProduct = params?.product
+    ? data.products.find((product) => product.id === params.product) ?? null
+    : null;
   const editingRecipe = params?.recipe
     ? data.recipes.find((recipe) => recipe.id === params.recipe) ?? null
     : null;
@@ -195,9 +199,15 @@ export default async function SetupPage({
   });
 
   const recipeLineRows = buildRecipeLineRows(editingRecipe);
+  const recipeProductId = editingRecipe?.productId ?? selectedProduct?.id ?? '';
   const editingRecipeCost = editingRecipe ? data.recipeCostById.get(editingRecipe.id) ?? null : null;
   const activeRecipes = data.recipes.filter((recipe) => recipe.active).length;
   const linkedProductCount = new Set(data.recipes.map((recipe) => recipe.productVariantId ?? recipe.productId)).size;
+  const recipesByProduct = new Map<string, Recipe[]>();
+  for (const recipe of data.recipes) {
+    const existingRecipes = recipesByProduct.get(recipe.productId) ?? [];
+    recipesByProduct.set(recipe.productId, [...existingRecipes, recipe]);
+  }
   const costingItems = buildCostingSnapshotItems(data.products, data.recipes, data.recipeCostById);
   const costingStatusFilter = params?.costingStatus ?? 'all';
   const filteredCostingItems = costingItems.filter((item) => costingStatusFilter === 'all' || item.status === costingStatusFilter);
@@ -221,6 +231,7 @@ export default async function SetupPage({
       historySupplier: historySupplier?.id,
       historyMaterial: historyMaterial?.id,
       recipe: editingRecipe?.id,
+      product: selectedProduct?.id,
       costingStatus: costingStatusFilter,
       costingItem: selectedCostingItem?.id,
       ...overrides,
@@ -232,6 +243,7 @@ export default async function SetupPage({
     { href: '#recipes', label: t('setup.sections.recipes') },
     { href: '#costing', label: t('setup.sections.costing') },
     { href: '#price-history', label: t('setup.sections.priceHistory') },
+    { href: '#customers-summary', label: t('setup.sections.customers') },
   ];
 
   return (
@@ -266,9 +278,70 @@ export default async function SetupPage({
               {section.label}
             </a>
           ))}
-          <Link href="/customers" className="summary-pill">{t('setup.sections.customers')}</Link>
           <Link href="/orders" className="summary-pill">{t('setup.sections.orders')}</Link>
         </div>
+      </section>
+
+      <section className="grid-two">
+        <article className="panel page-stack" id="customers-summary">
+          <div className="table-header-row">
+            <div>
+              <h2>{t('setup.customerMemoryTitle')}</h2>
+              <p>{t('setup.customerMemoryHelp')}</p>
+            </div>
+            <span className="summary-pill">{data.customers.length} {t('common.customers')}</span>
+          </div>
+          {data.customers.length > 0 ? (
+            <ul className="stack-list compact-list">
+              {data.customers.slice(0, 6).map((customer) => (
+                <li key={customer.id} className="list-with-actions">
+                  <div>
+                    <strong>{customer.displayName}</strong>
+                    <span>{customer.phone ?? customer.email ?? t('customers.noContactYet')}</span>
+                  </div>
+                  <div className="inline-action-row">
+                    <Link href={`/customers?customer=${customer.id}`} className="inline-link">{t('setup.actions.openCustomer')}</Link>
+                    <Link href={`/orders/new?customerId=${customer.id}`} className="inline-link">{t('setup.actions.newOrder')}</Link>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="empty-state">{t('setup.customerMemoryEmpty')}</p>
+          )}
+          <div className="inline-action-row">
+            <Link href="/customers" className="button-secondary compact-button">{t('setup.actions.manageCustomers')}</Link>
+            <Link href="/customers#new-customer" className="button-secondary compact-button">{t('setup.actions.addCustomer')}</Link>
+          </div>
+        </article>
+
+        <article className="panel page-stack">
+          <div className="table-header-row">
+            <div>
+              <h2>{t('setup.operabilityChecklistTitle')}</h2>
+              <p>{t('setup.operabilityChecklistHelp')}</p>
+            </div>
+            <span className="summary-pill">{t('setup.draftFirstFriendly')}</span>
+          </div>
+          <ul className="stack-list compact-list">
+            <li>
+              <strong>{t('setup.operabilityChecklist.customerOrderLink')}</strong>
+              <span>{t('setup.operabilityChecklist.customerOrderLinkHelp')}</span>
+            </li>
+            <li>
+              <strong>{t('setup.operabilityChecklist.supplierMaterialLink')}</strong>
+              <span>{t('setup.operabilityChecklist.supplierMaterialLinkHelp')}</span>
+            </li>
+            <li>
+              <strong>{t('setup.operabilityChecklist.recipeProductLink')}</strong>
+              <span>{t('setup.operabilityChecklist.recipeProductLinkHelp')}</span>
+            </li>
+            <li>
+              <strong>{t('setup.operabilityChecklist.userWorkspaceLink')}</strong>
+              <span>{t('setup.operabilityChecklist.userWorkspaceLinkHelp')}</span>
+            </li>
+          </ul>
+        </article>
       </section>
 
       <OnboardingAssistant
@@ -402,9 +475,24 @@ export default async function SetupPage({
           </p>
           <ul className="stack-list">
             {data.products.map((product) => (
-              <li key={product.id}>
-                <strong>{product.name}</strong>
-                <span>{product.variants.map((variant) => variant.name).join(', ')}</span>
+              <li key={product.id} className="list-with-actions">
+                <div>
+                  <strong>{product.name}</strong>
+                  <span>{product.variants.map((variant) => variant.name).join(', ')}</span>
+                  <span className="inline-meta">
+                    {(recipesByProduct.get(product.id) ?? []).length} {t('common.recipes')}
+                  </span>
+                </div>
+                <div className="inline-action-row">
+                  <Link href={buildSetupHref({ product: product.id, supplier: editingSupplier?.id, material: editingMaterial?.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id, recipe: undefined })} className="inline-link">
+                    {t('setup.actions.addRecipe')}
+                  </Link>
+                  {(recipesByProduct.get(product.id) ?? [])[0] ? (
+                    <Link href={buildSetupHref({ recipe: (recipesByProduct.get(product.id) ?? [])[0]?.id, product: product.id, supplier: editingSupplier?.id, material: editingMaterial?.id, historySupplier: historySupplier?.id, historyMaterial: historyMaterial?.id })} className="inline-link">
+                      {t('setup.actions.editRecipe')}
+                    </Link>
+                  ) : null}
+                </div>
               </li>
             ))}
           </ul>
@@ -796,7 +884,7 @@ export default async function SetupPage({
               <div className="grid-two">
                 <label>
                   <span className="field-heading">{t('setup.fields.product')} {renderRequiredMark()}</span>
-                  <select name="productId" defaultValue={editingRecipe?.productId ?? ''} required>
+                  <select name="productId" defaultValue={recipeProductId} required>
                     <option value="" disabled>{t('common.selectProduct')}</option>
                     {data.products.map((product) => (
                       <option key={product.id} value={product.id}>{product.name}</option>

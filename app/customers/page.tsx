@@ -114,7 +114,7 @@ export default async function CustomersPage({
         </article>
 
         <div className="page-stack">
-          <form action={formAction} className="panel page-stack">
+          <form action={formAction} className="panel page-stack" id="new-customer">
             <div className="table-header-row">
               <div>
                 <h2>{selectedCustomer ? t('customers.editTitle') : t('customers.newTitle')}</h2>
