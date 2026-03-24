@@ -110,6 +110,26 @@ The first UI system should continue improving around real kitchen and front-of-h
 - stronger visibility for notes, exceptions, and partial completion
 - more focused role-oriented views where daily use shows friction
 
+### Admin operability pass (current focus)
+
+The immediate priority is to make existing setup/admin foundations genuinely operable before adding more subsystems.
+
+Current emphasis:
+
+- complete practical CRUD behavior for customers, suppliers, raw materials, recipes, and users
+- strengthen linking flows (for example customer-to-order and recipe-to-cost evidence workflows)
+- reduce placeholder/demo behavior in setup surfaces
+- improve cross-surface navigation so setup feels like a working area, not a static showcase
+
+This stays intentionally lightweight:
+
+- no deep procurement workflow
+- no inventory deduction engine
+- no accounting extension
+- no large architectural rewrite
+
+The quality bar is operational usability first: teams should be able to maintain core setup records and connect them to daily work with low friction.
+
 ## Medium-term (structured operations data)
 
 Once the v0 loop is stable, SKOSS should add a lightweight structured operations layer that supports repeatable setup without blocking daily work.

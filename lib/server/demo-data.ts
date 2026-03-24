@@ -467,7 +467,7 @@ export async function getCustomersWorkspace(selectedCustomerId?: string) {
   };
 }
 
-export async function getOrderEditor(orderId?: string) {
+export async function getOrderEditor(orderId?: string, initialCustomerId?: string) {
   const data = await readStore();
   const order = orderId ? data.orders.find((entry) => entry.id === orderId) ?? null : null;
   const customerContextById: Record<string, CustomerOrderContext> = {};
@@ -497,6 +497,7 @@ export async function getOrderEditor(orderId?: string) {
     destinations: data.destinations,
     productSuggestions: getProductSuggestions(data.products),
     focusDate: getFocusDate(data),
+    initialCustomerId,
   };
 }
 

@@ -8,9 +8,13 @@ import { ArrowRightIcon, OrdersIcon } from '@/components/ui-icons';
 export default async function NewOrderPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ error?: string }>;
+  searchParams?: Promise<{ error?: string; customerId?: string }>;
 }) {
-  const [view, params, { t }] = await Promise.all([getOrderEditor(), searchParams, getServerTranslator()]);
+  const params = await searchParams;
+  const [view, { t }] = await Promise.all([
+    getOrderEditor(undefined, params?.customerId),
+    getServerTranslator(),
+  ]);
 
   return (
     <div className="page-stack">
@@ -43,6 +47,7 @@ export default async function NewOrderPage({
         destinations={view.destinations}
         productSuggestions={view.productSuggestions}
         focusDate={view.focusDate}
+        initialCustomerId={view.initialCustomerId}
       />
     </div>
   );
