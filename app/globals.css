@@ -1573,9 +1573,9 @@ select:disabled {
 
   .shell-body {
     display: grid;
-    grid-template-columns: minmax(220px, 250px) minmax(0, 1fr);
+    grid-template-columns: minmax(220px, 240px) minmax(0, 1fr);
     gap: var(--space-4);
-    width: min(1500px, calc(100% - 2rem));
+    width: min(1680px, calc(100% - 2rem));
     margin: 0 auto;
     padding: 0 var(--space-2) var(--space-4);
   }
@@ -1613,7 +1613,7 @@ select:disabled {
 
   .shell-main {
     width: 100%;
-    max-width: 1220px;
+    max-width: 1400px;
     margin: 0;
     padding: var(--space-2) var(--space-2) var(--space-6);
   }
@@ -1657,6 +1657,41 @@ select:disabled {
   .admin-split-layout > .subpanel:first-child,
   .admin-split-layout > .panel:first-child {
     position: static;
+  }
+
+  .setup-section-nav-panel {
+    position: sticky;
+    top: calc(72px + var(--space-2));
+    z-index: 6;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .summary-pill-row .summary-pill {
+    padding: 0.4rem 0.75rem;
+  }
+
+  .customers-layout {
+    grid-template-columns: minmax(260px, 0.95fr) minmax(0, 1.55fr);
+    align-items: start;
+  }
+
+  .customers-list-panel {
+    position: sticky;
+    top: calc(72px + var(--space-4));
+    max-height: calc(100vh - 104px);
+    overflow: auto;
+  }
+
+  .customers-editor-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 0.85fr);
+    align-items: start;
+    gap: var(--space-4);
+  }
+
+  .customers-detail-panel {
+    position: sticky;
+    top: calc(72px + var(--space-4));
   }
 }
 
@@ -1784,6 +1819,10 @@ select:disabled {
 .list-with-actions.is-selected-row {
   border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
   background: color-mix(in srgb, var(--accent-soft) 85%, var(--surface));
+}
+
+.setup-section-nav-panel {
+  background: color-mix(in srgb, var(--surface) 95%, var(--surface-soft));
 }
 
 .costing-summary-grid {

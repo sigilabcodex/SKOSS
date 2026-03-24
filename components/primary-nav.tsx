@@ -15,7 +15,14 @@ import {
 } from '@/components/ui-icons';
 import type { WorkspaceSurface } from '@/lib/domain/types';
 
-type NavHref = '/' | '/timeline' | '/orders' | '/customers' | '/production' | '/handoff' | '/setup';
+type NavHref =
+  | '/'
+  | '/timeline'
+  | '/orders'
+  | '/customers'
+  | '/production'
+  | '/handoff'
+  | '/setup';
 
 type NavItem = {
   key: WorkspaceSurface;
@@ -26,9 +33,16 @@ type NavItem = {
 };
 
 type DesktopAdminItem = {
-  href: NavHref;
+  href:
+    | NavHref
+    | {
+        pathname: '/setup';
+        query: { section: string };
+        hash: string;
+      };
+  section?: string;
   labelKey: string;
-  active: (pathname: string) => boolean;
+  active: (pathname: string, section?: string | null) => boolean;
 };
 
 function NavLink({
@@ -38,7 +52,13 @@ function NavLink({
   children,
   compact = false,
 }: {
-  href: NavHref;
+  href:
+    | NavHref
+    | {
+        pathname: '/setup';
+        query: { section: string };
+        hash: string;
+      };
   label: string;
   active: boolean;
   children?: ReactNode;
@@ -115,24 +135,56 @@ const desktopAdminItems: DesktopAdminItem[] = [
     active: (pathname) => pathname.startsWith('/customers'),
   },
   {
-    href: '/setup',
+    href: { pathname: '/setup', query: { section: 'users' }, hash: 'users' },
+    section: 'users',
     labelKey: 'setup.sections.users',
-    active: (pathname) => pathname.startsWith('/setup'),
+    active: (pathname, section) => pathname.startsWith('/setup') && section === 'users',
   },
   {
-    href: '/setup',
+    href: {
+      pathname: '/setup',
+      query: { section: 'suppliers' },
+      hash: 'suppliers',
+    },
+    section: 'suppliers',
     labelKey: 'setup.sections.suppliers',
-    active: (pathname) => pathname.startsWith('/setup'),
+    active: (pathname, section) => pathname.startsWith('/setup') && section === 'suppliers',
   },
   {
-    href: '/setup',
+    href: {
+      pathname: '/setup',
+      query: { section: 'raw-materials' },
+      hash: 'raw-materials',
+    },
+    section: 'raw-materials',
     labelKey: 'setup.sections.rawMaterials',
-    active: (pathname) => pathname.startsWith('/setup'),
+    active: (pathname, section) => pathname.startsWith('/setup') && section === 'raw-materials',
+  },
+  {
+    href: {
+      pathname: '/setup',
+      query: { section: 'recipes' },
+      hash: 'recipes',
+    },
+    section: 'recipes',
+    labelKey: 'setup.sections.recipes',
+    active: (pathname, section) => pathname.startsWith('/setup') && section === 'recipes',
+  },
+  {
+    href: {
+      pathname: '/setup',
+      query: { section: 'preferences-system' },
+      hash: 'preferences-system',
+    },
+    section: 'preferences-system',
+    labelKey: 'setup.sections.preferencesSystem',
+    active: (pathname, section) =>
+      pathname.startsWith('/setup') && section === 'preferences-system',
   },
   {
     href: '/setup',
-    labelKey: 'setup.sections.recipes',
-    active: (pathname) => pathname.startsWith('/setup'),
+    labelKey: 'nav.setup',
+    active: (pathname, section) => pathname.startsWith('/setup') && !section,
   },
 ];
 
@@ -144,6 +196,10 @@ export function PrimaryNav({
   mode?: 'mobile' | 'desktop';
 }) {
   const pathname = usePathname();
+  const setupSection =
+    typeof window === 'undefined'
+      ? null
+      : new URLSearchParams(window.location.search).get('section');
   const { t } = useI18n();
   const items = navItems.filter((item) => visibleWorkspaces.includes(item.key));
   const showAdminSection = visibleWorkspaces.includes('setup');
@@ -182,7 +238,13 @@ export function PrimaryNav({
         <nav className="shell-nav shell-nav-desktop shell-nav-admin" aria-label={t('shell.sections.admin')}>
           <p className="shell-nav-section-label">{t('shell.sections.admin')}</p>
           {desktopAdminItems.map((item) => (
-            <NavLink key={`${item.href}-${item.labelKey}`} href={item.href} label={t(item.labelKey)} active={item.active(pathname)} compact />
+            <NavLink
+              key={`${item.href}-${item.labelKey}`}
+              href={item.href}
+              label={t(item.labelKey)}
+              active={item.active(pathname, setupSection)}
+              compact
+            />
           ))}
         </nav>
       ) : null}

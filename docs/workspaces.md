@@ -218,6 +218,17 @@ This is not a separate product mode and should not fork feature behavior.
 Role-shaped visibility still applies in both layouts:
 
 - non-admin roles should continue to see only relevant workspaces first
+
+## Desktop/admin refinement notes (current increment)
+
+Recent layout refinement keeps mobile behavior intact while making desktop admin work more spatial:
+
+- desktop shell navigation now supports direct setup subsection entry points (users, suppliers, raw materials, recipes, and settings-related sections) so admin movement is less linear
+- setup now exposes a compact subsection navigator intended for faster orientation on wider screens
+- admin-heavy areas keep list/editor patterns, but desktop now gives more stable list + form + context placement (especially customer and setup flows)
+- wider desktop widths use denser horizontal structure so operators see more operational context without opening additional pages
+
+This is intentionally additive and not a desktop-only fork. Mobile remains focused and single-flow first.
 - setup-heavy navigation remains conditional on role/workspace visibility
 - desktop enhancements are additive and should not force admin complexity into operator flows
 

@@ -67,8 +67,8 @@ export default async function CustomersPage({
         </article>
       </section>
 
-      <section className="grid-two">
-        <article className="panel page-stack">
+      <section className="grid-two customers-layout">
+        <article className="panel page-stack customers-list-panel">
           <div className="table-header-row">
             <div>
               <h2>{t('customers.listTitle')}</h2>
@@ -77,12 +77,13 @@ export default async function CustomersPage({
             <span className="summary-pill">{view.customers.length} {t('customers.summary')}</span>
           </div>
           {view.customers.length > 0 ? (
-            <ul className="stack-list">
+            <ul className="stack-list compact-list">
               {view.customers.map((customer) => {
                 const linkedOrderCount = view.orderCountByCustomer.get(customer.id) ?? 0;
+                const isSelected = selectedCustomer?.id === customer.id;
 
                 return (
-                  <li key={customer.id}>
+                  <li key={customer.id} className={`list-with-actions ${isSelected ? 'is-selected-row' : ''}`}>
                     <div>
                       <strong>
                         {customer.displayName}
@@ -113,7 +114,7 @@ export default async function CustomersPage({
           )}
         </article>
 
-        <div className="page-stack">
+        <div className="page-stack customers-editor-panel">
           <form action={formAction} className="panel page-stack" id="new-customer">
             <div className="table-header-row">
               <div>
@@ -177,7 +178,7 @@ export default async function CustomersPage({
             ) : null}
           </form>
 
-          <article className="panel page-stack">
+          <article className="panel page-stack customers-detail-panel">
             <div className="table-header-row">
               <div>
                 <h2>{t('customers.detailTitle')}</h2>
