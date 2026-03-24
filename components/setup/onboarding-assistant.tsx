@@ -5,6 +5,7 @@ import { getServerTranslator } from '@/lib/i18n/server';
 import { saveOnboardingPreferencesAction } from '@/lib/server/actions';
 import { themeOptions } from '@/lib/theme';
 import { SetupIcon, SparklesIcon } from '@/components/ui-icons';
+import { OnboardingQuickStart } from '@/components/setup/onboarding-quick-start';
 
 type OnboardingAssistantProps = {
   businessName: string;
@@ -12,6 +13,7 @@ type OnboardingAssistantProps = {
   saved?: boolean;
   error?: string;
   variant?: 'first-run' | 'settings';
+  includeQuickStart?: boolean;
 };
 
 export async function OnboardingAssistant({
@@ -20,6 +22,7 @@ export async function OnboardingAssistant({
   saved = false,
   error,
   variant = 'settings',
+  includeQuickStart = true,
 }: OnboardingAssistantProps) {
   const { t } = await getServerTranslator();
   const titleKey = variant === 'first-run' ? 'setupAssistant.firstRunTitle' : 'setupAssistant.settingsTitle';
@@ -161,6 +164,8 @@ export async function OnboardingAssistant({
           <p className="helper-text no-margin">{t('setupAssistant.footer')}</p>
         </div>
       </form>
+
+      {includeQuickStart ? <OnboardingQuickStart redirectTo={variant === 'first-run' ? '/' : '/setup'} compact /> : null}
     </section>
   );
 }

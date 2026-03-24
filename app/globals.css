@@ -2050,3 +2050,42 @@ select:disabled {
     align-items: center;
   }
 }
+
+.inline-code {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.3rem 0.55rem;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--border);
+  background: var(--surface-inset);
+  font-size: 0.82rem;
+}
+
+.csv-import-card {
+  min-width: 0;
+}
+
+.table-scroll-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table-compact {
+  width: 100%;
+  min-width: 32rem;
+  border-collapse: collapse;
+}
+
+.table-compact th,
+.table-compact td {
+  padding: 0.45rem 0.55rem;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+  font-size: 0.86rem;
+  vertical-align: top;
+}
+
+.table-compact thead th {
+  color: var(--ink-soft);
+  background: color-mix(in srgb, var(--surface-soft) 70%, transparent);
+}
