@@ -256,3 +256,31 @@ The current UI pass keeps the same capabilities but tightens information archite
    - role + default workspace + visible workspaces remain visible per user
 
 This keeps growth structured without turning SKOSS into a heavy admin tree.
+
+## Settings simplification pass (action-first)
+
+To reduce cognitive load in day-to-day setup work, Settings now follows a stricter **act-first** structure:
+
+- one primary local navigation surface (section pills)
+- one main page header (`Settings`)
+- direct list + create/edit surfaces inside each section
+- guidance moved away from large concept cards into lightweight helper text and empty states
+
+What was intentionally removed from the Settings UI layer:
+
+- duplicated orientation layers where the same concepts appeared as both group cards and section navigation
+- large conceptual blocks (preset workspace narratives, starter suggestion panels, checklist-heavy messaging)
+- repeated “admin readiness/setup” framing that slowed simple edits
+
+Current Settings sections are treated as working surfaces:
+
+- Business
+- Users
+- Preferences
+- Suppliers
+- Raw materials
+- Recipes
+- Costing
+- Price history
+
+The goal is to keep setup practical on mobile and desktop: open section, scan list, create/edit, move on.
