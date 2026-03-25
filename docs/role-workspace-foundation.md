@@ -62,9 +62,10 @@ This PR introduces a lightweight foundation for:
 3. **default workspace shaping**
    - each user can have a default workspace
    - navigation shows the surfaces most relevant to that role first
-4. **minimal session scaffold**
-   - a practical shared-device login chooser
-   - lightweight current-user session selection
+4. **lightweight authentication and session baseline**
+   - password sign-in with per-user credential storage
+   - cookie-backed session selection with explicit logout
+   - practical shared-device behavior without enterprise IAM stack
 5. **modest audit groundwork**
    - records can now carry `createdByUserId` and `updatedByUserId`
    - shift notes can carry `authorUserId`
@@ -148,6 +149,13 @@ It does **not** introduce:
 - fine-grained permission matrices
 - a full audit log system
 - a split into separate SKOSS and SKOSSina apps
+
+It also does **not** yet provide:
+
+- PIN quick re-entry
+- MFA / step-up checks
+- lockout policy tuning
+- full audit timeline of every identity action
 
 ## Non-goals
 

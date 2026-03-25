@@ -38,6 +38,7 @@ import {
 } from '@/lib/server/demo-data';
 import { getCurrentUserContext, loggedOutSessionValue, sessionUserCookieName } from '@/lib/server/auth';
 import { readStore, writeStore } from '@/lib/server/store';
+import { hashPassword, verifyPassword } from '@/lib/server/passwords';
 import {
   buildCustomerImportPayload,
   buildRawMaterialImportPayload,
@@ -59,6 +60,7 @@ function sortOrders(left: { productionDate: string; updatedAt: string }, right: 
 const supportedThemes = ['light', 'dark', 'system'] as const;
 const supportedOperatingModes = ['pickup', 'delivery', 'mixed'] as const;
 const supportedPreferenceWorkspaces = ['timeline', 'orders', 'customers', 'production', 'handoff', 'setup'] as const;
+const sessionMaxAgeSeconds = 60 * 60 * 24 * 14;
 
 function sortUsers(left: { displayName: string }, right: { displayName: string }) {
   return left.displayName.localeCompare(right.displayName);
@@ -213,11 +215,16 @@ export async function saveUserPreferencesAction(formData: FormData) {
 export async function loginAction(formData: FormData) {
   const data = await readStore();
   const requestedIdentifier = String(formData.get('loginIdentifier') ?? '').trim().toLowerCase();
+  const password = String(formData.get('password') ?? '');
   const redirectTo = String(formData.get('redirectTo') ?? '/');
   const user = data.users.find((entry) => entry.active && entry.loginIdentifier.trim().toLowerCase() === requestedIdentifier);
 
   if (!user) {
-    redirect(`/login?error=${encodeURIComponent('Choose an active user to continue.')}`);
+    redirect(`/login?error=${encodeURIComponent('Sign-in details are not valid.')}`);
+  }
+
+  if (!verifyPassword(password, user.passwordHash)) {
+    redirect(`/login?error=${encodeURIComponent('Sign-in details are not valid.')}`);
   }
 
   const now = new Date().toISOString();
@@ -226,7 +233,7 @@ export async function loginAction(formData: FormData) {
   await writeStore(data);
 
   const cookieStore = await cookies();
-  cookieStore.set(sessionUserCookieName, user.id, { path: '/', maxAge: 31536000, sameSite: 'lax' });
+  cookieStore.set(sessionUserCookieName, user.id, { path: '/', maxAge: sessionMaxAgeSeconds, sameSite: 'lax' });
   if (user.preferences?.locale) {
     cookieStore.set(localeCookieName, user.preferences.locale, { path: '/', maxAge: 31536000, sameSite: 'lax' });
   }
@@ -244,7 +251,7 @@ export async function logoutAction() {
   await writeStore(data);
 
   const cookieStore = await cookies();
-  cookieStore.set(sessionUserCookieName, loggedOutSessionValue, { path: '/', maxAge: 31536000, sameSite: 'lax' });
+  cookieStore.set(sessionUserCookieName, loggedOutSessionValue, { path: '/', maxAge: sessionMaxAgeSeconds, sameSite: 'lax' });
   revalidateAllWorkspaces();
   redirect('/login');
 }
@@ -264,6 +271,9 @@ export async function createUserAction(formData: FormData) {
   }
 
   const user = buildUserRecord(values, data);
+  user.passwordHash = hashPassword(values.password?.trim() || 'skoss-demo');
+  user.passwordUpdatedAt = new Date().toISOString();
+  user.mustChangePassword = !values.password?.trim();
   data.users = [...data.users, user].sort(sortUsers);
   await writeStore(data);
   revalidateAllWorkspaces();
@@ -286,6 +296,11 @@ export async function updateUserAction(userId: string, formData: FormData) {
   }
 
   const user = buildUserRecord(values, data, existing);
+  if (values.resetPassword || values.password?.trim()) {
+    user.passwordHash = hashPassword(values.password?.trim() || 'skoss-demo');
+    user.passwordUpdatedAt = new Date().toISOString();
+    user.mustChangePassword = !values.password?.trim();
+  }
   data.users = data.users.map((entry) => (entry.id === userId ? user : entry)).sort(sortUsers);
 
   if (!user.active && data.session.currentUserId === userId) {

@@ -1307,6 +1307,11 @@ const es = {
     fields: {
       userDisplayName: 'Nombre del usuario',
       loginIdentifier: 'Identificador de acceso',
+      password: 'Contraseña',
+      passwordCreateHelp: 'Puedes usar una contraseña temporal y cambiarla después.',
+      passwordEditHelp: 'Déjala en blanco para mantener la contraseña actual.',
+      resetPassword: 'Forzar reinicio de contraseña',
+      resetPasswordHelp: 'Reinicia este usuario con la contraseña temporal por defecto.',
       role: 'Rol / función',
       defaultWorkspace: 'Espacio predeterminado',
       userActive: 'Usuario activo',
@@ -1351,6 +1356,7 @@ const es = {
     },
     placeholders: {
       userDisplayName: 'Lucía',
+      password: 'Mínimo 8 caracteres',
       contact: 'María · WhatsApp · teléfono',
       supplierNotes:
         'Ritmo de entrega, pedido mínimo, recordatorio de pago o nota de ruta',
@@ -1405,6 +1411,9 @@ const es = {
       activeUsers: 'activos',
       inactiveUsers: 'inactivos',
       rolesInUse: 'roles en uso',
+      password: 'Estado de contraseña',
+      passwordReady: 'lista',
+      passwordNeedsReset: 'requiere reinicio',
       defaultWorkspace: 'Espacio predeterminado',
       visibleWorkspaces: 'Espacios visibles',
       defaultUnitSuffix: 'por defecto',
@@ -1519,20 +1528,17 @@ const es = {
     saveAction: 'Guardar preferencias',
   },
   login: {
-    eyebrow: 'Base ligera de acceso',
-    title: 'Elegir quién está trabajando',
+    eyebrow: 'Ingreso de equipo',
+    title: 'Ingresar a SKOSS',
     description:
-      'Es un inicio de sesión práctico para equipos pequeños y dispositivos compartidos. Prepara a SKOSS para comportamientos con identidad sin sumar peso empresarial todavía.',
-    quickStartTitle: 'Inicio rápido',
-    quickStartHelp:
-      'Toca una persona para moldear la navegación y el foco del espacio en esta sesión.',
-    manualTitle: 'Acceso manual',
-    manualHelp: 'Usa el identificador cuando la lista rápida no alcance.',
-    manualBadge: 'Amigable para dispositivo compartido',
-    continueAs: 'Continuar como',
+      'SKOSS ahora usa acceso con contraseña y sesión ligera para equipos pequeños en dispositivos compartidos, sin complejidad IAM empresarial.',
+    manualTitle: 'Acceder',
+    manualHelp: 'Usa tu identificador y contraseña.',
+    demoPasswordHint: 'Los usuarios demo comparten la contraseña temporal: skoss-demo',
     submit: 'Iniciar sesión',
     fields: {
       loginIdentifier: 'Identificador de acceso',
+      password: 'Contraseña',
     },
   },
   units: {

@@ -8,6 +8,16 @@ This document keeps that baseline grounded rather than enterprise-heavy.
 
 SKOSS should aim for sensible default protections without assuming a large IT department.
 
+### Current implemented baseline (v0 foundation)
+
+- password-based sign-in for active users
+- one active session user at a time with explicit logout
+- per-user role and default workspace shaping
+- user lifecycle controls (create, edit, deactivate/reactivate)
+- access visibility shaping driven by primary role/workspace
+
+This keeps real teams usable today while leaving room for stronger controls later.
+
 ### Secure authentication
 
 Future implementation should provide:

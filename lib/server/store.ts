@@ -17,6 +17,7 @@ import type {
 import { defaultLocale, defaultPreset } from '@/lib/i18n/config';
 import { resolveThemePreference } from '@/lib/theme';
 import { getDefaultWorkspaceForRole } from '@/lib/workspaces';
+import { fallbackDemoPassword, hashPassword } from '@/lib/server/passwords';
 
 const storePath = path.join(process.cwd(), 'data', 'demo-store.json');
 const generationHorizonDays = 10;
@@ -175,6 +176,9 @@ function normalizeUser(user: Partial<User> & { email?: string; role?: string }, 
     id: user.id ?? `user-${crypto.randomUUID()}`,
     displayName: user.displayName?.trim() || 'Team member',
     loginIdentifier: user.loginIdentifier?.trim() || user.email?.trim() || `user-${crypto.randomUUID()}@local`,
+    passwordHash: user.passwordHash || hashPassword(fallbackDemoPassword),
+    passwordUpdatedAt: user.passwordUpdatedAt ?? createdAt,
+    mustChangePassword: user.mustChangePassword ?? false,
     role,
     workspaceId: user.workspaceId ?? workspaceId,
     defaultWorkspace: user.defaultWorkspace ?? user.preferences?.defaultWorkspace ?? getDefaultWorkspaceForRole(role),
