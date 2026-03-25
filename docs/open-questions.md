@@ -109,3 +109,16 @@ These are important unresolved questions that should guide future product discov
 - What should remain in the shared SKOSS core?
 - What should later become BAGET-specific or bakery-preset behavior?
 - How can preset support emerge without fragmenting the domain model too early?
+
+## Capacity and promise-date questions
+
+- What default warning thresholds are understandable and safe for small bakery teams (for example, near capacity at 80% vs 90%)?
+- How should confidence scoring be computed when some capacity inputs are missing or stale?
+- How much stage-level detail is the minimum for trustworthy WIP-aware feasibility (for example, mixed vs shaped vs baked)?
+- Should promise guidance default to a single suggested slot or show two alternatives (earliest and safer)?
+- When should a warning become a hard stop, if ever, and who can override it by role?
+- How should split fulfillment (partial now, partial later) appear in order intake without adding heavy workflow complexity?
+- Which capacity hints should be global defaults vs product-family specific vs product specific?
+- How should shift logs feed back into future capacity hints (manual review only or gradual auto-suggestion)?
+- What is the lightest way to include rough material risk in feasibility without creating full inventory logic?
+- Which minimal metrics should validate stage-1 usefulness (for example, reduced late deliveries, fewer promise-date edits)?

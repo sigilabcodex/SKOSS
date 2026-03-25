@@ -284,3 +284,40 @@ Current Settings sections are treated as working surfaces:
 - Price history
 
 The goal is to keep setup practical on mobile and desktop: open section, scan list, create/edit, move on.
+
+## Capacity guidance in sales and setup workspaces (proposed)
+
+### Sales workspace: promise guidance during intake
+
+Order capture should surface quick feasibility guidance without forcing a context switch.
+
+Suggested additions in order create/edit flows:
+
+- warning/status chip (`enough stock`, `requires production`, `near capacity`, etc.)
+- suggested promise date/time when requested slot is overloaded
+- short reason line for the warning
+- explicit override path with note (non-blocking by default)
+
+This keeps intake operator-first while reducing unrealistic commitments.
+
+### Setup workspace: capacity section (compact)
+
+Setup should expose capacity in a small section-based IA, not a deep admin tree.
+
+Suggested setup sections:
+
+1. capacity overview
+2. shift effort
+3. resources (ovens, mixers, prep tables, fermentation/cold space, packing)
+4. product/family capacity hints
+5. warning threshold settings
+
+### Production workspace tie-in
+
+Production views should show bottleneck pressure and spillover signals so shift leads can adjust before handoff issues accumulate.
+
+### UX constraints
+
+- mobile-first card/section patterns
+- progressive detail (basic setup first, deeper setup optional)
+- no hard requirement for complete configuration before order capture

@@ -451,3 +451,28 @@ SKOSS should evolve from a stable v0 operational slice into a modular operationa
 4. grow advanced capabilities through modules instead of bloating the core
 
 Complexity stays controlled by keeping the operator workflow small, making deeper structure progressive, preserving a clear SKOSS core plus SKOSSina client split, and moving advanced business functions into optional modules rather than forcing every kitchen into ERP-style depth.
+
+## Near-term addition: capacity and promise-date guidance
+
+SKOSS should add a documentation-first and then implementation-light layer for production feasibility during order intake.
+
+Near-term focus (aligned to v0 constraints):
+
+- add heuristic/day-level capacity envelopes per product or product family
+- estimate fulfillment using stock + WIP + remaining day/shift envelope
+- surface non-blocking warning levels during order capture
+- suggest a safer promise date/time when requested slot is overloaded
+- keep setup burden low and optional fields truly optional
+
+This should be delivered without introducing full scheduling optimization or heavy manufacturing abstractions.
+
+## Mid-term addition: resource-aware capacity
+
+After heuristic guidance proves useful, SKOSS should add light resource awareness:
+
+- shift effort by role
+- major shared bottlenecks (ovens, mixers, prep tables, fermentation space, packing)
+- simple availability windows
+- clearer reason codes for near/beyond capacity warnings
+
+This remains a practical planning aid, not a full optimizer.

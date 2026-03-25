@@ -436,3 +436,95 @@ This document does not lock in:
 - specific implementation strategy for draft-to-structured conversion
 
 Those decisions should follow only after the domain model and workflow layers are proven in practice.
+
+## Capacity and feasibility extensions (proposed)
+
+This section proposes lightweight domain additions for promise-date and feasibility guidance. These are direction-level concepts, not implemented entities yet.
+
+### Productive resource
+
+Represents a practical bottleneck or capacity contributor used in feasibility estimation.
+
+Suggested shape:
+
+- `id`
+- `workspaceId`
+- `name`
+- `resourceType` (`human`, `equipment`, `station`, `space`, `dispatch`)
+- `capacityUnit` (lightweight, human-readable)
+- `defaultAvailability`
+- `active`
+- `notes`
+
+### Equipment resource (specialization)
+
+Represents major shared physical constraints.
+
+Examples:
+
+- oven
+- mixer
+- prep table
+- fermentation/cold space
+- packing station
+
+Suggested additional fields:
+
+- `equipmentKind`
+- `throughputHint` optional
+- `batchLimitHint` optional
+
+### Capacity profile
+
+Defines coarse throughput envelopes used before detailed scheduling exists.
+
+Suggested shape:
+
+- `profileScope` (`product`, `product_family`, `role`, `resource`)
+- `scopeRef`
+- `maxPerDay` optional
+- `maxPerShift` optional
+- `safetyBufferPercent` optional
+- `effectiveFrom` optional
+
+### Operation/process profile (lightweight)
+
+Defines practical stage hints for level-B resource-aware feasibility.
+
+Suggested shape:
+
+- `stepKey` (`prep`, `mix`, `ferment`, `shape`, `bake`, `pack`, `dispatch`)
+- `defaultDurationRange`
+- `primaryResourceRef` optional
+- `secondaryResourceRef` optional
+
+This is intentionally a hint layer, not a full workflow engine.
+
+### Product capability / yield / batch profile
+
+Allows capacity estimation even if recipe setup is partial.
+
+Suggested shape:
+
+- `productId` or `productFamilyKey`
+- `typicalBatchSize` optional
+- `yieldPerBatch` optional
+- `capacityWeight` optional
+- `fallbackDailyMax` optional
+
+### Modeling boundaries
+
+Core near-term concepts:
+
+- productive resource
+- equipment resource
+- capacity profile
+- product capability hints
+
+Later/optional concepts:
+
+- detailed queue sequencing
+- minute-level machine schedules
+- full optimization constraints
+
+This keeps the domain practical, reversible, and aligned with operator-first setup.
