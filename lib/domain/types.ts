@@ -47,6 +47,9 @@ export interface User {
   id: string;
   displayName: string;
   loginIdentifier: string;
+  passwordHash: string;
+  passwordUpdatedAt?: string;
+  mustChangePassword?: boolean;
   role: UserRole;
   workspaceId: string;
   defaultWorkspace: WorkspaceSurface;

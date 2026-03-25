@@ -1,5 +1,8 @@
 import type { AppData } from '@/lib/domain/types';
 import { defaultLocale, defaultPreset } from '@/lib/i18n/config';
+import { hashPassword } from '@/lib/server/passwords';
+
+const demoPasswordHash = hashPassword('skoss-demo');
 
 export const demoSeed: AppData = {
   workspace: {
@@ -25,6 +28,8 @@ export const demoSeed: AppData = {
       id: 'user-lucia',
       displayName: 'Lucía',
       loginIdentifier: 'lucia@example.com',
+      passwordHash: demoPasswordHash,
+      passwordUpdatedAt: '2026-03-21T18:00:00Z',
       role: 'admin',
       workspaceId: 'ws-kalali',
       defaultWorkspace: 'setup',
@@ -40,6 +45,8 @@ export const demoSeed: AppData = {
       id: 'user-mateo',
       displayName: 'Mateo',
       loginIdentifier: 'mateo@example.com',
+      passwordHash: demoPasswordHash,
+      passwordUpdatedAt: '2026-03-20T12:30:00Z',
       role: 'frontdesk',
       workspaceId: 'ws-kalali',
       defaultWorkspace: 'orders',
@@ -54,6 +61,8 @@ export const demoSeed: AppData = {
       id: 'user-noche',
       displayName: 'Noche',
       loginIdentifier: 'noche@example.com',
+      passwordHash: demoPasswordHash,
+      passwordUpdatedAt: '2026-03-20T23:00:00Z',
       role: 'manager',
       workspaceId: 'ws-kalali',
       defaultWorkspace: 'handoff',
@@ -68,6 +77,8 @@ export const demoSeed: AppData = {
       id: 'user-amanecer',
       displayName: 'Amanecer',
       loginIdentifier: 'amanecer@example.com',
+      passwordHash: demoPasswordHash,
+      passwordUpdatedAt: '2026-03-20T23:10:00Z',
       role: 'production',
       workspaceId: 'ws-kalali',
       defaultWorkspace: 'production',
@@ -82,6 +93,8 @@ export const demoSeed: AppData = {
       id: 'user-ruta',
       displayName: 'Ruta',
       loginIdentifier: 'ruta@example.com',
+      passwordHash: demoPasswordHash,
+      passwordUpdatedAt: '2026-03-20T07:00:00Z',
       role: 'delivery',
       workspaceId: 'ws-kalali',
       defaultWorkspace: 'handoff',

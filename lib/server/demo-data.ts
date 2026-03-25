@@ -143,6 +143,8 @@ export interface RecurringTemplateFormValues {
 export interface UserFormValues {
   displayName: string;
   loginIdentifier: string;
+  password?: string;
+  resetPassword: boolean;
   role: UserRole;
   defaultWorkspace: WorkspaceSurface;
   active: boolean;
@@ -326,6 +328,8 @@ export function normalizeUserForm(formData: FormData): UserFormValues {
   return {
     displayName: String(formData.get('displayName') ?? ''),
     loginIdentifier: String(formData.get('loginIdentifier') ?? ''),
+    password: String(formData.get('password') ?? ''),
+    resetPassword: formData.get('resetPassword') !== null,
     role,
     defaultWorkspace: supportedWorkspaceDefaults.includes(requestedWorkspace)
       ? requestedWorkspace
@@ -349,6 +353,10 @@ export function validateUserForm(values: UserFormValues, data: Pick<AppData, 'us
     return 'Login identifier must stay unique.';
   }
 
+  if (!existingUserId && !values.password?.trim()) {
+    return 'Password is required for a new user.';
+  }
+
   return null;
 }
 
@@ -364,6 +372,9 @@ export function buildUserRecord(
     id: existingUser?.id ?? `user-${crypto.randomUUID()}` ,
     displayName: values.displayName.trim(),
     loginIdentifier: values.loginIdentifier.trim().toLowerCase(),
+    passwordHash: existingUser?.passwordHash ?? '',
+    passwordUpdatedAt: existingUser?.passwordUpdatedAt,
+    mustChangePassword: existingUser?.mustChangePassword ?? false,
     role: values.role,
     workspaceId: existingUser?.workspaceId ?? data.workspace.id,
     defaultWorkspace,

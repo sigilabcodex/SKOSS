@@ -1295,6 +1295,11 @@ const en = {
     fields: {
       userDisplayName: 'User name',
       loginIdentifier: 'Login identifier',
+      password: 'Password',
+      passwordCreateHelp: 'Use a temporary password if needed. Team members can rotate it later.',
+      passwordEditHelp: 'Leave blank to keep the current password.',
+      resetPassword: 'Force password reset',
+      resetPasswordHelp: 'Reset this user to the default temporary password.',
       role: 'Role / function',
       defaultWorkspace: 'Default workspace',
       userActive: 'Active user',
@@ -1339,6 +1344,7 @@ const en = {
     },
     placeholders: {
       userDisplayName: 'Lucía',
+      password: 'Minimum 8 characters',
       contact: 'María · WhatsApp · phone',
       supplierNotes:
         'Delivery rhythm, minimum order, payment reminder, or route note',
@@ -1390,6 +1396,9 @@ const en = {
       activeUsers: 'active',
       inactiveUsers: 'inactive',
       rolesInUse: 'roles in use',
+      password: 'Password status',
+      passwordReady: 'set',
+      passwordNeedsReset: 'needs reset',
       defaultWorkspace: 'Default workspace',
       visibleWorkspaces: 'Visible workspaces',
       defaultUnitSuffix: 'default',
@@ -1504,20 +1513,17 @@ const en = {
     saveAction: 'Save preferences',
   },
   login: {
-    eyebrow: 'Light login scaffold',
-    title: 'Choose who is working',
+    eyebrow: 'Team sign-in',
+    title: 'Sign in to SKOSS',
     description:
-      'This is a practical session starter for small teams and shared devices. It prepares SKOSS for identity-aware behavior without adding enterprise auth weight yet.',
-    quickStartTitle: 'Quick start',
-    quickStartHelp:
-      'Tap a person to shape navigation and workspace focus for this session.',
-    manualTitle: 'Manual sign-in',
-    manualHelp: 'Use the login identifier when the quick list is not enough.',
-    manualBadge: 'Shared device friendly',
-    continueAs: 'Continue as',
+      'SKOSS now uses password sign-in with lightweight session handling so small teams can work on shared devices without enterprise IAM complexity.',
+    manualTitle: 'Sign-in',
+    manualHelp: 'Use your login identifier and password.',
+    demoPasswordHint: 'Demo users currently share temporary password: skoss-demo',
     submit: 'Start session',
     fields: {
       loginIdentifier: 'Login identifier',
+      password: 'Password',
     },
   },
   units: {

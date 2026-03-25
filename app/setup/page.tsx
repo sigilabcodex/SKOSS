@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import {
   formatCurrency,
   formatDateLabel,
@@ -177,6 +178,14 @@ export default async function SetupPage({
     data.preferences.operatingMode,
   );
   const today = new Date().toISOString().slice(0, 10);
+
+  if (!userContext.currentUser) {
+    redirect('/login?redirectTo=/setup');
+  }
+
+  if (!userContext.canManageSettings) {
+    redirect('/');
+  }
 
   const editingSupplier = params?.supplier
     ? (data.suppliers.find((supplier) => supplier.id === params.supplier) ??
@@ -886,6 +895,12 @@ export default async function SetupPage({
                             .map((workspace) => t(`nav.${workspace}`))
                             .join(' · ')}
                         </span>
+                        <span className="inline-meta">
+                          {t('setup.labels.password')}:{' '}
+                          {user.mustChangePassword
+                            ? t('setup.labels.passwordNeedsReset')
+                            : t('setup.labels.passwordReady')}
+                        </span>
                       </div>
                       <div className="inline-action-row">
                         <Link
@@ -1013,6 +1028,36 @@ export default async function SetupPage({
                     ))}
                   </select>
                 </label>
+              </div>
+              <div className="grid-two">
+                <label>
+                  <span className="field-heading">
+                    {t('setup.fields.password')}
+                    {!editingUser ? <> {renderRequiredMark()}</> : null}
+                  </span>
+                  <input
+                    name="password"
+                    type="password"
+                    placeholder={t('setup.placeholders.password')}
+                    required={!editingUser}
+                  />
+                  <span className="helper-text">
+                    {editingUser
+                      ? t('setup.fields.passwordEditHelp')
+                      : t('setup.fields.passwordCreateHelp')}
+                  </span>
+                </label>
+                {editingUser ? (
+                  <label className="checkbox-row">
+                    <input name="resetPassword" type="checkbox" />
+                    <span>
+                      <strong>{t('setup.fields.resetPassword')}</strong>
+                      <span className="helper-text">
+                        {t('setup.fields.resetPasswordHelp')}
+                      </span>
+                    </span>
+                  </label>
+                ) : <div />}
               </div>
               <label className="checkbox-row">
                 <input
