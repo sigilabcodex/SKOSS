@@ -774,4 +774,5 @@ export const demoSeed: AppData = {
       ],
     },
   ],
+  activities: [],
 };

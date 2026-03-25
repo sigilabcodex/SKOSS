@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { OnboardingAssistant } from '@/components/setup/onboarding-assistant';
 import { ImportHub } from '@/components/setup/import-hub';
+import { ActivityFeed } from '@/components/activity-feed';
 import { formatDateLabel } from '@/lib/domain/formatters';
 import { getPresetExperience, type WorkspaceLinkKey } from '@/lib/business-presets';
 import { getWorkspaceSummary } from '@/lib/server/demo-data';
@@ -195,6 +196,13 @@ export default async function HomePage() {
           </ul>
         </article>
       </section>
+
+      <ActivityFeed
+        title={t('activity.homeTitle')}
+        description={t('activity.homeHelp')}
+        emptyLabel={t('activity.empty')}
+        items={summary.recentActivities}
+      />
 
       <section className="page-context-card">
         <SparklesIcon className="callout-icon" />

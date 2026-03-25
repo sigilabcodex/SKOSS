@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { formatDateLabel, formatStatusLabel } from '@/lib/domain/formatters';
 import { getTimelineWorkspace } from '@/lib/server/demo-data';
+import { ActivityFeed } from '@/components/activity-feed';
 import { getCurrentUserContext } from '@/lib/server/auth';
 import { getServerTranslator } from '@/lib/i18n/server';
 import type { AppLocale } from '@/lib/i18n/config';
@@ -257,6 +258,14 @@ export default async function TimelinePage() {
               )) : <li><span>{t('timeline.noRoleAttention')}</span></li>}
             </ul>
           </article>
+
+          <ActivityFeed
+            title={t('activity.timelineTitle')}
+            description={t('activity.timelineHelp')}
+            emptyLabel={t('activity.empty')}
+            items={view.recentActivities}
+            compact
+          />
 
           <article className="panel page-stack">
             <div className="table-header-row">
