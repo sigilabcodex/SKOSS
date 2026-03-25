@@ -30,6 +30,13 @@ All quick forms are optional. Submitting empty forms does nothing, so teams can 
 
 CSV import is available from first-run onboarding and Setup.
 
+Entry points now exist in practical admin surfaces so teams do not need to hunt for imports:
+
+- first-run home onboarding
+- Setup -> Imports section
+- Customers workspace quick action (links to Setup imports)
+- Setup supplier and raw-material sections (direct "Import CSV" buttons)
+
 Supported entities in this phase:
 
 - customers
@@ -60,6 +67,8 @@ Mapping is intentionally simple:
 - no scripted transforms
 - no merge rules
 
+To reduce first-run friction, SKOSS tries lightweight header auto-matching before manual mapping (for example `name` -> customer display name).
+
 ## 4. Tolerant handling
 
 The importer is designed for imperfect data:
@@ -85,6 +94,8 @@ Example headers:
 - raw materials: `name,category,defaultUnit,brand`
 
 Header names do not need to be exact because users can map columns manually.
+
+Practical tip: if headers are close to field names (`name`, `phone`, `email`, `defaultUnit`), auto-mapping usually pre-fills most fields.
 
 ## 6. Why this helps adoption
 
