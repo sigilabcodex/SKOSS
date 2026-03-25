@@ -180,3 +180,44 @@ The early production logic is not trying to be:
 It only needs to do one hard, valuable thing well:
 
 **help a small kitchen turn incoming demand and current reality into clear next actions.**
+
+## Capacity and promise-feasibility position in the flow (proposed)
+
+To extend the existing transformation logic, add a feasibility checkpoint between grouped demand interpretation and commitment confidence.
+
+Updated conceptual flow:
+
+1. orders and recurring demand are captured
+2. demand is grouped by production context
+3. existing WIP and ready output reduce what still must be produced
+4. remaining production requirement is compared to available capacity envelope
+5. warning level and suggested promise window are produced
+6. actionable production work and handoff priorities are updated
+
+### Capacity-aware checkpoint inputs
+
+- grouped demand totals by production date/time window
+- WIP entries by stage and expected readiness
+- existing production commitments already in queue
+- shift effort context from shift logs or shift profiles
+- key bottleneck resource limits when configured
+
+### Capacity-aware checkpoint outputs
+
+- `enough_stock`
+- `requires_production`
+- `requires_extra_shift_effort`
+- `near_capacity`
+- `beyond_safe_capacity`
+
+And optionally:
+
+- suggested alternative promise date/time
+- confidence level (`low`, `medium`, `high`)
+- short reason label (example: `oven_bottleneck`, `missing_shift_profile`)
+
+### Practical behavior constraints
+
+- early versions should remain approximate and transparent
+- missing setup should lower confidence, not fully block estimation
+- warnings should guide order intake and production negotiation, not act as rigid hard blocks
