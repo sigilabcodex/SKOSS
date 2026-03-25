@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 import {
   formatCurrency,
   formatDateLabel,
-  formatTemplateScheduleLabel,
   formatUnitRate,
 } from '@/lib/domain/formatters';
 import type { Product, Recipe } from '@/lib/domain/types';
@@ -21,13 +20,9 @@ import {
 } from '@/lib/server/actions';
 import { getSetupWorkspace } from '@/lib/server/demo-data';
 import { getCurrentUserContext } from '@/lib/server/auth';
-import { getPresetExperience } from '@/lib/business-presets';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { getVisibleWorkspacesForRole } from '@/lib/workspaces';
-import { OnboardingAssistant } from '@/components/setup/onboarding-assistant';
-import { ImportHub } from '@/components/setup/import-hub';
 import { ThemeSwitcher } from '@/components/theme-switcher';
-import { SetupIcon, SparklesIcon } from '@/components/ui-icons';
 
 const basicUnits = [
   'g',
@@ -173,10 +168,6 @@ export default async function SetupPage({
     getServerTranslator(),
     getCurrentUserContext(),
   ]);
-  const presetExperience = getPresetExperience(
-    data.preferences.preset,
-    data.preferences.operatingMode,
-  );
   const today = new Date().toISOString().slice(0, 10);
 
   if (!userContext.currentUser) {
@@ -327,52 +318,6 @@ export default async function SetupPage({
       costingItem: selectedCostingItem?.id,
       ...overrides,
     });
-  const setupGroups = [
-    {
-      title: t('setup.groups.business.title'),
-      description: t('setup.groups.business.description'),
-      links: [
-        { href: '#business-setup', label: t('setup.sections.businessSetup') },
-        { href: '#customers-summary', label: t('setup.sections.customers') },
-        { href: '#imports', label: t('setup.sections.imports') },
-      ],
-    },
-    {
-      title: t('setup.groups.team.title'),
-      description: t('setup.groups.team.description'),
-      links: [
-        { href: '#team-users', label: t('setup.sections.teamUsers') },
-        { href: '#users', label: t('setup.sections.users') },
-        {
-          href: '#preferences-system',
-          label: t('setup.sections.preferencesSystem'),
-        },
-      ],
-    },
-    {
-      title: t('setup.groups.catalog.title'),
-      description: t('setup.groups.catalog.description'),
-      links: [
-        { href: '#catalog-data', label: t('setup.sections.catalogData') },
-        { href: '#suppliers', label: t('setup.sections.suppliers') },
-        { href: '#raw-materials', label: t('setup.sections.rawMaterials') },
-        { href: '#recipes', label: t('setup.sections.recipes') },
-        { href: '#costing', label: t('setup.sections.costing') },
-        { href: '#price-history', label: t('setup.sections.priceHistory') },
-      ],
-    },
-    {
-      title: t('setup.groups.system.title'),
-      description: t('setup.groups.system.description'),
-      links: [
-        {
-          href: '#preferences-system',
-          label: t('setup.sections.preferencesSystem'),
-        },
-        { href: '/orders', label: t('setup.sections.orders') },
-      ],
-    },
-  ];
   const importedCount = Number(params?.importedCount ?? 0);
   const skippedCount = Number(params?.skippedCount ?? 0);
   const hasImportFeedback =
@@ -436,8 +381,8 @@ export default async function SetupPage({
       <section className="panel page-stack setup-section-nav-panel">
         <div className="table-header-row">
           <div>
-            <h2>{t('setup.adminReadinessTitle')}</h2>
-            <p>{t('setup.description')}</p>
+            <h2>{t('setup.title')}</h2>
+            <p className="helper-text">{t('setup.adminReadinessHelp')}</p>
           </div>
         </div>
         <div className="summary-pill-row">
@@ -449,36 +394,6 @@ export default async function SetupPage({
             >
               {item.label}
             </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="panel page-stack">
-        <div className="table-header-row">
-          <div>
-            <h2>{t('setup.adminReadinessTitle')}</h2>
-            <p>{t('setup.adminReadinessHelp')}</p>
-          </div>
-        </div>
-        <div className="workspace-map-grid">
-          {setupGroups.map((group) => (
-            <article key={group.title} className="subpanel page-stack">
-              <div>
-                <strong>{group.title}</strong>
-                <p className="helper-text no-margin">{group.description}</p>
-              </div>
-              <div className="filter-pill-row">
-                {group.links.map((link) => (
-                  <a
-                    key={link.href + link.label}
-                    href={link.href}
-                    className="summary-pill"
-                  >
-                    {link.label}
-                  </a>
-                ))}
-              </div>
-            </article>
           ))}
         </div>
       </section>
@@ -542,134 +457,33 @@ export default async function SetupPage({
         <article className="panel page-stack">
           <div className="table-header-row">
             <div>
-              <h2>{t('setup.operabilityChecklistTitle')}</h2>
-              <p>{t('setup.operabilityChecklistHelp')}</p>
+              <h2>{t('setup.sections.imports')}</h2>
+              <p className="helper-text">{t('setup.adminReadinessHelp')}</p>
             </div>
-            <span className="summary-pill">
-              {t('setup.draftFirstFriendly')}
-            </span>
           </div>
-          <ul className="stack-list compact-list">
-            <li>
-              <strong>
-                {t('setup.operabilityChecklist.customerOrderLink')}
-              </strong>
-              <span>
-                {t('setup.operabilityChecklist.customerOrderLinkHelp')}
-              </span>
-            </li>
-            <li>
-              <strong>
-                {t('setup.operabilityChecklist.supplierMaterialLink')}
-              </strong>
-              <span>
-                {t('setup.operabilityChecklist.supplierMaterialLinkHelp')}
-              </span>
-            </li>
-            <li>
-              <strong>
-                {t('setup.operabilityChecklist.recipeProductLink')}
-              </strong>
-              <span>
-                {t('setup.operabilityChecklist.recipeProductLinkHelp')}
-              </span>
-            </li>
-            <li>
-              <strong>
-                {t('setup.operabilityChecklist.userWorkspaceLink')}
-              </strong>
-              <span>
-                {t('setup.operabilityChecklist.userWorkspaceLinkHelp')}
-              </span>
-            </li>
-          </ul>
+          <div className="inline-action-row">
+            <a href="#suppliers" className="button-secondary compact-button">
+              {t('setup.actions.importSuppliersCsv')}
+            </a>
+            <a href="#raw-materials" className="button-secondary compact-button">
+              {t('setup.actions.importRawMaterialsCsv')}
+            </a>
+          </div>
         </article>
-      </section>
-
-      <OnboardingAssistant
-        businessName={data.workspace.name}
-        preferences={data.preferences}
-        variant="settings"
-      />
-
-      <ImportHub redirectTo="/setup" />
-
-      <section className="page-context-card">
-        <SetupIcon className="callout-icon" />
-        <div>
-          <strong>{t('setup.calloutTitle')}</strong>
-          <p className="helper-text no-margin">{t('setup.calloutBody')}</p>
-        </div>
       </section>
 
       {!userContext.canManageSettings ? (
         <p className="inline-warning">{t('setup.roleShapingNote')}</p>
       ) : null}
 
-      <section className="grid-two" id="users">
-        <article className="panel page-stack">
-          <div className="table-header-row">
-            <div>
-              <h2>{t('setup.presetWorkspaceTitle')}</h2>
-              <p>{t('setup.presetWorkspaceHelp')}</p>
-            </div>
-            <span className="summary-pill">
-              {t(`presets.${data.preferences.preset}.label`)}
-            </span>
-          </div>
-          <ul className="stack-list">
-            {presetExperience.featuredWorkspaces.map((workspaceKey, index) => (
-              <li key={workspaceKey}>
-                <strong>
-                  {t(`nav.${workspaceKey}`)}
-                  {index === 0 ? ` · ${t('home.recommendedFirst')}` : ''}
-                </strong>
-                <span>{t(`home.quickLinks.${workspaceKey}.description`)}</span>
-              </li>
-            ))}
-          </ul>
-        </article>
-
-        <article className="panel page-stack">
-          <div className="table-header-row">
-            <div>
-              <h2>{t('setup.starterSuggestionsTitle')}</h2>
-              <p>{t('setup.starterSuggestionsHelp')}</p>
-            </div>
-            <span className="summary-pill">
-              {t(`operatingModes.${data.preferences.operatingMode}.label`)}
-            </span>
-          </div>
-          <ul className="stack-list">
-            {presetExperience.starterSuggestionKeys.map((key) => (
-              <li key={key}>
-                <strong>{t(`presetSuggestions.${key}.title`)}</strong>
-                <span>{t(`presetSuggestions.${key}.body`)}</span>
-              </li>
-            ))}
-          </ul>
-        </article>
-      </section>
-
       <section className="grid-two" id="preferences-system">
         <article className="panel page-stack">
           <div className="table-header-row">
             <div>
-              <h2>{t('setup.settingsSplitTitle')}</h2>
-              <p>{t('setup.settingsSplitBody')}</p>
+              <h2>{t('setup.sections.preferencesSystem')}</h2>
+              <p className="helper-text">{t('setup.preferencesAreaBody')}</p>
             </div>
-            <span className="summary-pill">{t('setup.title')}</span>
           </div>
-          <ul className="stack-list compact-list">
-            <li>
-              <strong>{t('setup.settingsAreaTitle')}</strong>
-              <span>{t('setup.settingsAreaBody')}</span>
-            </li>
-            <li>
-              <strong>{t('setup.preferencesAreaTitle')}</strong>
-              <span>{t('setup.preferencesAreaBody')}</span>
-            </li>
-          </ul>
           <Link href="/preferences" className="button-secondary compact-button">
             {t('setup.openPreferences')}
           </Link>
@@ -808,37 +622,7 @@ export default async function SetupPage({
         </article>
       </section>
 
-      <section className="grid-two" id="team-users">
-        <article className="panel page-stack">
-          <div className="table-header-row">
-            <div>
-              <h2>{t('setup.recurringRhythms')}</h2>
-              <p>{t('setup.recurringRhythmsHelp')}</p>
-            </div>
-            <span className="summary-pill">
-              {data.recurringTemplates.length} {t('common.templates')}
-            </span>
-          </div>
-          <p className="helper-text no-margin">
-            {t('setup.managedFromRecurring')}{' '}
-            <Link href="/orders/templates/new" className="inline-link">
-              {t('setup.openRecurringCapture')}
-            </Link>
-          </p>
-          <ul className="stack-list">
-            {data.recurringTemplates.map((template) => (
-              <li key={template.id}>
-                <strong>{template.customerLabel}</strong>
-                <span>
-                  {formatTemplateScheduleLabel(template, t)} ·{' '}
-                  {t('orders.nextUp')}{' '}
-                  {formatDateLabel(template.nextOccurrenceDate, locale)}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </article>
-
+      <section id="users">
         <article className="panel page-stack">
           <div className="table-header-row">
             <div>
@@ -1085,10 +869,9 @@ export default async function SetupPage({
       <section className="panel page-stack">
         <div className="table-header-row">
           <div>
-            <h2>{t('setup.operationalDataLayer')}</h2>
-            <p>{t('setup.operationalDataLayerHelp')}</p>
+            <h2>{t('setup.sections.catalogData')}</h2>
+            <p className="helper-text">{t('setup.rawMaterialsHelp')}</p>
           </div>
-          <span className="summary-pill">{t('setup.draftFirstFriendly')}</span>
         </div>
         <div className="grid-two">
           <article className="subpanel page-stack" id="suppliers">
@@ -1101,7 +884,10 @@ export default async function SetupPage({
                 <span className="summary-pill">
                   {data.suppliers.length} {t('common.suppliers')}
                 </span>
-                <a href="#imports" className="button-secondary compact-button">
+                <a
+                  href="#raw-materials"
+                  className="button-secondary compact-button"
+                >
                   {t('setup.actions.importSuppliersCsv')}
                 </a>
               </div>
@@ -1256,7 +1042,7 @@ export default async function SetupPage({
                 <span className="summary-pill">
                   {data.rawMaterials.length} {t('common.materials')}
                 </span>
-                <a href="#imports" className="button-secondary compact-button">
+                <a href="#suppliers" className="button-secondary compact-button">
                   {t('setup.actions.importRawMaterialsCsv')}
                 </a>
               </div>
@@ -2385,13 +2171,6 @@ export default async function SetupPage({
         </div>
       </section>
 
-      <section className="page-context-card">
-        <SparklesIcon className="callout-icon" />
-        <div>
-          <strong>{t('setup.nextStepsTitle')}</strong>
-          <p className="helper-text no-margin">{t('setup.nextStepsBody')}</p>
-        </div>
-      </section>
     </div>
   );
 }
