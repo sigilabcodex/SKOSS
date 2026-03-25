@@ -1541,6 +1541,15 @@ const es = {
       password: 'Contraseña',
     },
   },
+  activity: {
+    homeTitle: 'Actividad reciente',
+    homeHelp: 'Una vista ligera de lo que cambió en los flujos clave.',
+    timelineTitle: 'Actividad en la línea de tiempo',
+    timelineHelp: 'Actualizaciones recientes que cambian la atención del turno.',
+    customerTitle: 'Actividad del cliente',
+    customerHelp: 'Actualizaciones recientes vinculadas a este cliente.',
+    empty: 'Todavía no hay actividad registrada.',
+  },
   units: {
     g: 'gramos',
     kg: 'kilogramos',

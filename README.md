@@ -263,6 +263,7 @@ Before heavy implementation begins, the goal is to clarify:
 - `docs/i18n.md` — internationalization principles, dictionary strategy, and language-layer boundaries
 - `docs/workspaces.md` — initial role-based workspace definitions
 - `docs/operational-data-layer.md` — lightweight suppliers, raw materials, fulfillment context, and price-history direction
+- `docs/activity-layer.md` — lightweight activity and audit visibility scope
 - `docs/recurring-logic.md` — recurrence model and editing rules
 - `docs/production-logic.md` — order-to-production transformation logic
 - `docs/mvp-v0.md` — narrow first MVP definition

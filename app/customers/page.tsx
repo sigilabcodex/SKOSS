@@ -4,6 +4,7 @@ import { createCustomerAction, updateCustomerAction } from '@/lib/server/actions
 import { getCustomersWorkspace } from '@/lib/server/demo-data';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { ArrowRightIcon, CheckIcon, CustomersIcon } from '@/components/ui-icons';
+import { ActivityFeed } from '@/components/activity-feed';
 
 type CustomerSearchParams = {
   customer?: string;
@@ -256,6 +257,14 @@ export default async function CustomersPage({
                 ) : (
                   <p className="empty-state">{t('customers.recentOrdersEmpty')}</p>
                 )}
+
+                <ActivityFeed
+                  title={t('activity.customerTitle')}
+                  description={t('activity.customerHelp')}
+                  emptyLabel={t('activity.empty')}
+                  items={view.selectedCustomerActivity}
+                  compact
+                />
               </>
             ) : (
               <section className="page-context-card">

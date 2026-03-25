@@ -1,4 +1,5 @@
 import type {
+  ActivityEntry,
   AppData,
   Customer,
   CustomerContactMethod,
@@ -168,6 +169,10 @@ function sortOrders(left: Order, right: Order) {
 
 function sortShiftLogs(left: ShiftLog, right: ShiftLog) {
   return right.updatedAt.localeCompare(left.updatedAt);
+}
+
+function sortActivities(left: ActivityEntry, right: ActivityEntry) {
+  return right.timestamp.localeCompare(left.timestamp);
 }
 
 function getProductLabel(product: Pick<Product, 'name'>, variant?: { name: string } | null) {
@@ -408,6 +413,15 @@ export async function getWorkspaceSummary() {
     suppliers: data.suppliers.filter((supplier) => supplier.active).length,
     rawMaterials: data.rawMaterials.filter((material) => material.active).length,
     procurementPrices: activePriceEntries.length,
+    recentActivities: [...data.activities]
+      .sort(sortActivities)
+      .slice(0, 6)
+      .map((activity) => ({
+        ...activity,
+        userLabel: activity.userId
+          ? data.users.find((user) => user.id === activity.userId)?.displayName
+          : undefined,
+      })),
   };
 }
 
@@ -475,6 +489,18 @@ export async function getCustomersWorkspace(selectedCustomerId?: string) {
     activeCustomers: customers.filter((customer) => customer.active).length,
     inactiveCustomers: customers.filter((customer) => !customer.active).length,
     linkedOrders: data.orders.filter((order) => order.customerId).length,
+    selectedCustomerActivity: selectedCustomer
+      ? [...data.activities]
+        .filter((activity) => activity.entityType === 'customer' && activity.entityId === selectedCustomer.id)
+        .sort(sortActivities)
+        .slice(0, 6)
+        .map((activity) => ({
+          ...activity,
+          userLabel: activity.userId
+            ? data.users.find((user) => user.id === activity.userId)?.displayName
+            : undefined,
+        }))
+      : [],
   };
 }
 
@@ -689,6 +715,15 @@ export async function getTimelineWorkspace() {
       readyForPickup: focusEntries.filter((entry) => entry.readyForPickup).length,
       readyForDispatch: focusEntries.filter((entry) => entry.readyForDispatch).length,
     },
+    recentActivities: [...data.activities]
+      .sort(sortActivities)
+      .slice(0, 8)
+      .map((activity) => ({
+        ...activity,
+        userLabel: activity.userId
+          ? data.users.find((user) => user.id === activity.userId)?.displayName
+          : undefined,
+      })),
   };
 }
 

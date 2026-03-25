@@ -3,6 +3,7 @@ import path from 'node:path';
 import { demoSeed } from '@/data/demo-seed';
 import { inferFulfillmentType } from '@/lib/domain/order-helpers';
 import type {
+  ActivityEntry,
   AppData,
   Customer,
   Order,
@@ -221,6 +222,35 @@ function normalizeCustomer(customer: Partial<Customer>): Customer {
   };
 }
 
+function normalizeActivity(activity: Partial<ActivityEntry>): ActivityEntry | null {
+  const entityType = activity.entityType;
+  const action = activity.action;
+  const timestamp = activity.timestamp;
+  const summary = activity.summary?.trim();
+
+  if (!activity.id || !activity.entityId || !summary || !timestamp) {
+    return null;
+  }
+
+  if (!entityType || !['order', 'customer', 'supplier', 'raw_material', 'recipe', 'user'].includes(entityType)) {
+    return null;
+  }
+
+  if (!action || !['created', 'updated', 'deleted', 'status_changed'].includes(action)) {
+    return null;
+  }
+
+  return {
+    id: activity.id,
+    entityType,
+    entityId: activity.entityId,
+    action,
+    summary,
+    timestamp,
+    userId: activity.userId,
+  };
+}
+
 function nextOccurrenceDate(template: RecurringTemplate, currentDate: string) {
   if (template.frequency === 'daily') {
     return addDays(currentDate, 1);
@@ -380,6 +410,7 @@ function hydrateStore(rawData: AppData): AppData {
       ...log,
       shiftNotes: (log.shiftNotes ?? []).map((note) => ({ ...note })),
     })),
+    activities: (rawData.activities ?? []).map((activity) => normalizeActivity(activity)).filter((activity): activity is ActivityEntry => Boolean(activity)),
   };
 
   return data;

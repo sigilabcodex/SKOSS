@@ -1526,6 +1526,15 @@ const en = {
       password: 'Password',
     },
   },
+  activity: {
+    homeTitle: 'Recent activity',
+    homeHelp: 'A lightweight view of what changed across core workflows.',
+    timelineTitle: 'Timeline activity',
+    timelineHelp: 'Recent updates that shape shift attention.',
+    customerTitle: 'Customer activity',
+    customerHelp: 'Recent updates connected to this customer.',
+    empty: 'No tracked activity yet.',
+  },
   units: {
     g: 'grams',
     kg: 'kilograms',

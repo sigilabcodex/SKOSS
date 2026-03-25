@@ -69,6 +69,19 @@ export interface AuditFields {
   updatedByUserId?: string;
 }
 
+export type ActivityEntityType = 'order' | 'customer' | 'supplier' | 'raw_material' | 'recipe' | 'user';
+export type ActivityActionType = 'created' | 'updated' | 'deleted' | 'status_changed';
+
+export interface ActivityEntry {
+  id: string;
+  entityType: ActivityEntityType;
+  entityId: string;
+  action: ActivityActionType;
+  summary: string;
+  timestamp: string;
+  userId?: string;
+}
+
 export interface Destination {
   id: string;
   name: string;
@@ -288,4 +301,5 @@ export interface AppData {
   orders: Order[];
   wipEntries: WipEntry[];
   shiftLogs: ShiftLog[];
+  activities: ActivityEntry[];
 }

@@ -1539,6 +1539,15 @@ const pt = {
       password: 'Senha',
     },
   },
+  activity: {
+    homeTitle: 'Atividade recente',
+    homeHelp: 'Uma visão leve do que mudou nos fluxos principais.',
+    timelineTitle: 'Atividade na linha do tempo',
+    timelineHelp: 'Atualizações recentes que mudam a atenção do turno.',
+    customerTitle: 'Atividade do cliente',
+    customerHelp: 'Atualizações recentes ligadas a este cliente.',
+    empty: 'Ainda não há atividade registrada.',
+  },
   units: {
     g: 'gramas',
     kg: 'quilogramas',

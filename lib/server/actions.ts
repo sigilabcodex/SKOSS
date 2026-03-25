@@ -38,6 +38,7 @@ import {
 } from '@/lib/server/demo-data';
 import { getCurrentUserContext, loggedOutSessionValue, sessionUserCookieName } from '@/lib/server/auth';
 import { readStore, writeStore } from '@/lib/server/store';
+import { appendActivity } from '@/lib/server/activity';
 import { hashPassword, verifyPassword } from '@/lib/server/passwords';
 import {
   buildCustomerImportPayload,
@@ -90,6 +91,10 @@ function resolveRedirectTo(formData: FormData, fallback: string) {
 
 function shouldAllowEmpty(formData: FormData) {
   return String(formData.get('allowEmpty') ?? '') === '1';
+}
+
+function quoteLabel(label: string) {
+  return `"${label}"`;
 }
 
 export async function saveOnboardingPreferencesAction(formData: FormData) {
@@ -258,6 +263,7 @@ export async function logoutAction() {
 
 export async function createUserAction(formData: FormData) {
   const data = await readStore();
+  const actorUserId = await getActorUserId(data);
   const redirectTo = resolveRedirectTo(formData, '/setup');
   const allowEmpty = shouldAllowEmpty(formData);
   const values = normalizeUserForm(formData);
@@ -275,6 +281,13 @@ export async function createUserAction(formData: FormData) {
   user.passwordUpdatedAt = new Date().toISOString();
   user.mustChangePassword = !values.password?.trim();
   data.users = [...data.users, user].sort(sortUsers);
+  appendActivity(data, {
+    entityType: 'user',
+    entityId: user.id,
+    action: 'created',
+    userId: actorUserId,
+    summary: `User ${quoteLabel(user.displayName)} created.`,
+  });
   await writeStore(data);
   revalidateAllWorkspaces();
   redirect(`${redirectTo}?saved=user`);
@@ -302,6 +315,15 @@ export async function updateUserAction(userId: string, formData: FormData) {
     user.mustChangePassword = !values.password?.trim();
   }
   data.users = data.users.map((entry) => (entry.id === userId ? user : entry)).sort(sortUsers);
+  appendActivity(data, {
+    entityType: 'user',
+    entityId: user.id,
+    action: existing.active !== user.active ? 'status_changed' : 'updated',
+    userId: data.session.currentUserId,
+    summary: existing.active !== user.active
+      ? `User ${quoteLabel(user.displayName)} marked as ${user.active ? 'active' : 'inactive'}.`
+      : `User ${quoteLabel(user.displayName)} updated.`,
+  });
 
   if (!user.active && data.session.currentUserId === userId) {
     data.session.currentUserId = data.users.find((entry) => entry.active && entry.id !== userId)?.id;
@@ -329,6 +351,13 @@ export async function createCustomerAction(formData: FormData) {
   const actorUserId = await getActorUserId(data);
   const customer = buildCustomerRecord(values, actorUserId);
   data.customers = [...data.customers, customer].sort((left, right) => left.displayName.localeCompare(right.displayName));
+  appendActivity(data, {
+    entityType: 'customer',
+    entityId: customer.id,
+    action: 'created',
+    userId: actorUserId,
+    summary: `Customer ${quoteLabel(customer.displayName)} created.`,
+  });
   await writeStore(data);
   revalidateAllWorkspaces();
   if (redirectTo.startsWith('/customers')) {
@@ -357,6 +386,15 @@ export async function updateCustomerAction(customerId: string, formData: FormDat
   const customer = buildCustomerRecord(values, actorUserId, existing);
   data.customers = data.customers.map((entry) => (entry.id === customerId ? customer : entry))
     .sort((left, right) => left.displayName.localeCompare(right.displayName));
+  appendActivity(data, {
+    entityType: 'customer',
+    entityId: customer.id,
+    action: existing.active !== customer.active ? 'status_changed' : 'updated',
+    userId: actorUserId,
+    summary: existing.active !== customer.active
+      ? `Customer ${quoteLabel(customer.displayName)} marked as ${customer.active ? 'active' : 'inactive'}.`
+      : `Customer ${quoteLabel(customer.displayName)} updated.`,
+  });
   await writeStore(data);
   revalidateAllWorkspaces();
   redirect(`/customers?customer=${customer.id}&saved=customer`);
@@ -374,6 +412,13 @@ export async function createOrderAction(formData: FormData) {
   const actorUserId = await getActorUserId(data);
   const order = buildOrderRecord(data, values, actorUserId);
   data.orders = [...data.orders, order].sort(sortOrders);
+  appendActivity(data, {
+    entityType: 'order',
+    entityId: order.id,
+    action: 'created',
+    userId: actorUserId,
+    summary: `Order ${quoteLabel(order.customerLabel)} created for ${order.productionDate}.`,
+  });
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/timeline');
@@ -401,6 +446,15 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
   const actorUserId = await getActorUserId(data);
   const updated = buildOrderRecord(data, values, actorUserId, existing);
   data.orders = data.orders.map((entry) => (entry.id === orderId ? updated : entry)).sort(sortOrders);
+  appendActivity(data, {
+    entityType: 'order',
+    entityId: updated.id,
+    action: existing.status !== updated.status ? 'status_changed' : 'updated',
+    userId: actorUserId,
+    summary: existing.status !== updated.status
+      ? `Order ${quoteLabel(updated.customerLabel)} changed from ${existing.status} to ${updated.status}.`
+      : `Order ${quoteLabel(updated.customerLabel)} updated.`,
+  });
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/orders');
@@ -468,6 +522,15 @@ export async function updateOrderLineProgressAction(orderId: string, lineId: str
   } else if (order.status === 'completed') {
     order.status = anyStarted ? 'changed' : 'active';
   }
+  appendActivity(data, {
+    entityType: 'order',
+    entityId: order.id,
+    action: line.lineStatus === 'done' && order.status === 'completed' ? 'status_changed' : 'updated',
+    userId: actorUserId,
+    summary: line.lineStatus === 'done' && order.status === 'completed'
+      ? `Order ${quoteLabel(order.customerLabel)} marked as completed.`
+      : `Order ${quoteLabel(order.customerLabel)} progress updated.`,
+  });
 
   data.orders = [...data.orders].sort(sortOrders);
   await writeStore(data);
@@ -515,6 +578,13 @@ export async function createSupplierAction(formData: FormData) {
   const actorUserId = await getActorUserId(data);
   const supplier = buildSupplierRecord(values, actorUserId);
   data.suppliers = [...data.suppliers, supplier].sort((left, right) => left.name.localeCompare(right.name));
+  appendActivity(data, {
+    entityType: 'supplier',
+    entityId: supplier.id,
+    action: 'created',
+    userId: actorUserId,
+    summary: `Supplier ${quoteLabel(supplier.name)} created.`,
+  });
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/setup');
@@ -541,6 +611,15 @@ export async function updateSupplierAction(supplierId: string, formData: FormDat
   data.suppliers = data.suppliers
     .map((entry) => (entry.id === supplierId ? supplier : entry))
     .sort((left, right) => left.name.localeCompare(right.name));
+  appendActivity(data, {
+    entityType: 'supplier',
+    entityId: supplier.id,
+    action: existing.active !== supplier.active ? 'status_changed' : 'updated',
+    userId: actorUserId,
+    summary: existing.active !== supplier.active
+      ? `Supplier ${quoteLabel(supplier.name)} marked as ${supplier.active ? 'active' : 'inactive'}.`
+      : `Supplier ${quoteLabel(supplier.name)} updated.`,
+  });
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/setup');
@@ -564,6 +643,13 @@ export async function createRawMaterialAction(formData: FormData) {
   const actorUserId = await getActorUserId(data);
   const rawMaterial = buildRawMaterialRecord(values, actorUserId);
   data.rawMaterials = [...data.rawMaterials, rawMaterial].sort((left, right) => left.name.localeCompare(right.name));
+  appendActivity(data, {
+    entityType: 'raw_material',
+    entityId: rawMaterial.id,
+    action: 'created',
+    userId: actorUserId,
+    summary: `Raw material ${quoteLabel(rawMaterial.name)} created.`,
+  });
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/setup');
@@ -661,6 +747,15 @@ export async function updateRawMaterialAction(rawMaterialId: string, formData: F
   data.rawMaterials = data.rawMaterials
     .map((entry) => (entry.id === rawMaterialId ? rawMaterial : entry))
     .sort((left, right) => left.name.localeCompare(right.name));
+  appendActivity(data, {
+    entityType: 'raw_material',
+    entityId: rawMaterial.id,
+    action: existing.active !== rawMaterial.active ? 'status_changed' : 'updated',
+    userId: actorUserId,
+    summary: existing.active !== rawMaterial.active
+      ? `Raw material ${quoteLabel(rawMaterial.name)} marked as ${rawMaterial.active ? 'active' : 'inactive'}.`
+      : `Raw material ${quoteLabel(rawMaterial.name)} updated.`,
+  });
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/setup');
@@ -679,6 +774,13 @@ export async function createRecipeAction(formData: FormData) {
   const actorUserId = await getActorUserId(data);
   const recipe = buildRecipeRecord(values, data, actorUserId);
   data.recipes = [...data.recipes, recipe].sort((left, right) => left.title.localeCompare(right.title));
+  appendActivity(data, {
+    entityType: 'recipe',
+    entityId: recipe.id,
+    action: 'created',
+    userId: actorUserId,
+    summary: `Recipe ${quoteLabel(recipe.title)} created.`,
+  });
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/setup');
@@ -705,6 +807,15 @@ export async function updateRecipeAction(recipeId: string, formData: FormData) {
   data.recipes = data.recipes
     .map((entry) => (entry.id === recipeId ? recipe : entry))
     .sort((left, right) => left.title.localeCompare(right.title));
+  appendActivity(data, {
+    entityType: 'recipe',
+    entityId: recipe.id,
+    action: existing.active !== recipe.active ? 'status_changed' : 'updated',
+    userId: actorUserId,
+    summary: existing.active !== recipe.active
+      ? `Recipe ${quoteLabel(recipe.title)} marked as ${recipe.active ? 'active' : 'inactive'}.`
+      : `Recipe ${quoteLabel(recipe.title)} updated.`,
+  });
   await writeStore(data);
   revalidatePath('/');
   revalidatePath('/setup');
