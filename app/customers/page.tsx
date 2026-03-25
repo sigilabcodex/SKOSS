@@ -40,10 +40,15 @@ export default async function CustomersPage({
           <h1>{t('customers.title')}</h1>
           <p>{t('customers.description')}</p>
         </div>
-        <Link href="/orders" className="button-secondary">
-          <ArrowRightIcon className="button-icon button-icon-reverse" />
-          <span>{t('common.backToOrders')}</span>
-        </Link>
+        <div className="inline-action-row">
+          <Link href="/setup#imports" className="button-secondary">
+            <span>{t('customers.actions.importCsv')}</span>
+          </Link>
+          <Link href="/orders" className="button-secondary">
+            <ArrowRightIcon className="button-icon button-icon-reverse" />
+            <span>{t('common.backToOrders')}</span>
+          </Link>
+        </div>
       </section>
 
       {params?.saved === 'customer' ? <p className="inline-success"><CheckIcon className="button-icon" />{t('customers.saved')}</p> : null}

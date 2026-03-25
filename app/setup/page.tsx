@@ -1052,9 +1052,14 @@ export default async function SetupPage({
                 <h3>{t('setup.suppliers')}</h3>
                 <p>{t('setup.suppliersHelp')}</p>
               </div>
-              <span className="summary-pill">
-                {data.suppliers.length} {t('common.suppliers')}
-              </span>
+              <div className="inline-action-row">
+                <span className="summary-pill">
+                  {data.suppliers.length} {t('common.suppliers')}
+                </span>
+                <a href="#imports" className="button-secondary compact-button">
+                  {t('setup.actions.importSuppliersCsv')}
+                </a>
+              </div>
             </div>
             <div className="admin-split-layout">
               {data.suppliers.length > 0 ? (
@@ -1202,9 +1207,14 @@ export default async function SetupPage({
                 <h3>{t('setup.rawMaterialsSection')}</h3>
                 <p>{t('setup.rawMaterialsSectionHelp')}</p>
               </div>
-              <span className="summary-pill">
-                {data.rawMaterials.length} {t('common.materials')}
-              </span>
+              <div className="inline-action-row">
+                <span className="summary-pill">
+                  {data.rawMaterials.length} {t('common.materials')}
+                </span>
+                <a href="#imports" className="button-secondary compact-button">
+                  {t('setup.actions.importRawMaterialsCsv')}
+                </a>
+              </div>
             </div>
             <div className="admin-split-layout">
               {data.rawMaterials.length > 0 ? (

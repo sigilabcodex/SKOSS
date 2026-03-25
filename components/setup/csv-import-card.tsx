@@ -23,10 +23,40 @@ type CsvImportCardProps = {
   previewTitle: string;
   emptyPreview: string;
   noFileLabel: string;
+  parseErrorNoColumns: string;
+  parseErrorReadFile: string;
   fields: CsvFieldDescriptor[];
   action: (formData: FormData) => void;
   redirectTo: string;
 };
+
+const fieldAliases: Record<string, string[]> = {
+  displayName: ['displayName', 'name', 'customer', 'customerName'],
+  name: ['name', 'supplier', 'supplierName', 'material', 'rawMaterial'],
+  phone: ['phone', 'mobile', 'whatsapp', 'contactPhone'],
+  email: ['email', 'mail'],
+  address: ['address', 'location'],
+  deliveryNote: ['deliveryNote', 'deliveryNotes', 'delivery'],
+  internalNote: ['internalNote', 'note', 'notes'],
+  contact: ['contact', 'contactName', 'contactPerson'],
+  notes: ['notes', 'note', 'comment'],
+  category: ['category', 'group'],
+  defaultUnit: ['defaultUnit', 'unit', 'uom'],
+  brand: ['brand', 'maker'],
+};
+
+function normalizeHeader(value: string) {
+  return value.trim().toLowerCase().replace(/[\s_-]+/g, '');
+}
+
+function findBestHeader(headers: string[], fieldKey: string) {
+  const candidates = [fieldKey, ...(fieldAliases[fieldKey] ?? [])].map((entry) =>
+    normalizeHeader(entry),
+  );
+  return headers.find((header) =>
+    candidates.includes(normalizeHeader(header)),
+  );
+}
 
 export function CsvImportCard({
   entity,
@@ -40,6 +70,8 @@ export function CsvImportCard({
   previewTitle,
   emptyPreview,
   noFileLabel,
+  parseErrorNoColumns,
+  parseErrorReadFile,
   fields,
   action,
   redirectTo,
@@ -73,7 +105,7 @@ export function CsvImportCard({
       const parsed = parseCsvContent(text);
 
       if (parsed.headers.length === 0) {
-        setParseError('No columns were found in this CSV file.');
+        setParseError(parseErrorNoColumns);
         setHeaders([]);
         setRows([]);
         setCsvContent('');
@@ -83,7 +115,7 @@ export function CsvImportCard({
 
       const nextMapping: Record<string, string> = {};
       fields.forEach((field) => {
-        const directHeader = parsed.headers.find((header) => header.toLowerCase() === field.key.toLowerCase());
+        const directHeader = findBestHeader(parsed.headers, field.key);
         if (directHeader) {
           nextMapping[field.key] = directHeader;
         }
@@ -95,7 +127,7 @@ export function CsvImportCard({
       setCsvContent(text);
       setMapping(nextMapping);
     } catch {
-      setParseError('The CSV file could not be read. Please try again.');
+      setParseError(parseErrorReadFile);
       setHeaders([]);
       setRows([]);
       setCsvContent('');

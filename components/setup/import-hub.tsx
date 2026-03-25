@@ -33,6 +33,8 @@ export async function ImportHub({ redirectTo, compact = false }: ImportHubProps)
           previewTitle={t('setup.import.preview')}
           emptyPreview={t('setup.import.emptyPreview')}
           noFileLabel={t('setup.import.noFile')}
+          parseErrorNoColumns={t('setup.import.errors.noColumns')}
+          parseErrorReadFile={t('setup.import.errors.readFailed')}
           fields={[
             { key: 'displayName', label: t('customers.fields.displayName'), required: true },
             { key: 'phone', label: t('customers.fields.phone') },
@@ -57,6 +59,8 @@ export async function ImportHub({ redirectTo, compact = false }: ImportHubProps)
           previewTitle={t('setup.import.preview')}
           emptyPreview={t('setup.import.emptyPreview')}
           noFileLabel={t('setup.import.noFile')}
+          parseErrorNoColumns={t('setup.import.errors.noColumns')}
+          parseErrorReadFile={t('setup.import.errors.readFailed')}
           fields={[
             { key: 'name', label: t('setup.fields.supplierName'), required: true },
             { key: 'contact', label: t('setup.fields.contact') },
@@ -78,6 +82,8 @@ export async function ImportHub({ redirectTo, compact = false }: ImportHubProps)
           previewTitle={t('setup.import.preview')}
           emptyPreview={t('setup.import.emptyPreview')}
           noFileLabel={t('setup.import.noFile')}
+          parseErrorNoColumns={t('setup.import.errors.noColumns')}
+          parseErrorReadFile={t('setup.import.errors.readFailed')}
           fields={[
             { key: 'name', label: t('setup.fields.rawMaterialName'), required: true },
             { key: 'category', label: t('setup.fields.category') },
