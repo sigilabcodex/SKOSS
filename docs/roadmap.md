@@ -466,6 +466,20 @@ Near-term focus (aligned to v0 constraints):
 
 This should be delivered without introducing full scheduling optimization or heavy manufacturing abstractions.
 
+## Near-term addition: instance entry gateway and onboarding separation
+
+SKOSS now needs a stable first-contact layer before deeper onboarding polish.
+
+Near-term focus:
+
+- add an explicit instance entry gateway with intent-first options (new kitchen, demo, restore, open existing, learn)
+- keep detection logic lightweight (instance initialized, admin presence, onboarding status, demo state, backup hint)
+- route predictably for first login and returning users
+- separate admin onboarding from operator-first onboarding
+- preserve 1–2 click demo launch for local development and pilot rehearsal
+
+This should remain small, reversible, and aligned with operator-first progressive setup.
+
 ## Mid-term addition: resource-aware capacity
 
 After heuristic guidance proves useful, SKOSS should add light resource awareness:

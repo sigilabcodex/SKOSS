@@ -53,6 +53,8 @@ import { themeCookieName } from '@/lib/theme';
 import { getDefaultWorkspaceForRole, isPrimaryWorkspaceSurface } from '@/lib/workspaces';
 import { isNonProductionMode } from '@/lib/server/runtime-mode';
 import { demoSeed } from '@/data/demo-seed';
+import type { AppData } from '@/lib/domain/types';
+import { detectInstanceGatewayState, shouldRouteToEntryGateway } from '@/lib/server/instance-entry';
 
 function sortOrders(left: { productionDate: string; updatedAt: string }, right: { productionDate: string; updatedAt: string }) {
   return left.productionDate === right.productionDate
@@ -110,6 +112,64 @@ export async function resetDemoWorkspaceAction() {
   redirect('/setup?saved=demo-reset');
 }
 
+function isRestorableBackupShape(value: unknown): value is AppData {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  const candidate = value as Partial<AppData>;
+  return Boolean(
+    candidate.workspace
+    && candidate.preferences
+    && Array.isArray(candidate.users)
+    && Array.isArray(candidate.orders),
+  );
+}
+
+export async function launchDemoModeAction() {
+  if (!isNonProductionMode()) {
+    redirect('/entry?error=' + encodeURIComponent('Demo launch is disabled in production mode.'));
+  }
+
+  const data = structuredClone(demoSeed);
+  data.instance.demoModeActive = true;
+  data.instance.initialized = true;
+  data.instance.environmentType = 'demo';
+  await writeStore(data);
+  revalidateAllWorkspaces();
+  redirect('/login?redirectTo=/');
+}
+
+export async function restoreInstanceFromBackupAction(formData: FormData) {
+  const uploaded = formData.get('backupFile');
+  if (!(uploaded instanceof File) || uploaded.size <= 0) {
+    redirect('/entry?error=' + encodeURIComponent('Select a backup file first.'));
+  }
+
+  const rawText = await uploaded.text();
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(rawText);
+  } catch {
+    redirect('/entry?error=' + encodeURIComponent('Backup file must be valid JSON.'));
+  }
+
+  if (!isRestorableBackupShape(parsed)) {
+    redirect('/entry?error=' + encodeURIComponent('Backup structure is not valid for this SKOSS version.'));
+  }
+
+  const restoredData = parsed;
+  restoredData.instance = {
+    ...(restoredData.instance ?? demoSeed.instance),
+    initialized: true,
+    backupHintAvailable: true,
+    lastRestoreAt: new Date().toISOString(),
+  };
+  await writeStore(restoredData);
+  revalidateAllWorkspaces();
+  redirect('/entry?saved=restored');
+}
+
 export async function saveOnboardingPreferencesAction(formData: FormData) {
   const data = await readStore();
   const businessName = String(formData.get('businessName') ?? '').trim();
@@ -149,6 +209,16 @@ export async function saveOnboardingPreferencesAction(formData: FormData) {
     onboardingCompleted: true,
     completedAt: data.preferences.completedAt ?? now,
     updatedAt: now,
+  };
+  data.instance = {
+    ...data.instance,
+    initialized: true,
+    onboardingStatus: 'completed',
+    onboardingProgress: {
+      ...data.instance.onboardingProgress,
+      workspaceBasics: true,
+      timezone: true,
+    },
   };
 
   await writeStore(data);
@@ -259,6 +329,17 @@ export async function loginAction(formData: FormData) {
     cookieStore.set(themeCookieName, user.preferences.theme, { path: '/', maxAge: 31536000, sameSite: 'lax' });
   }
 
+  const gatewayState = await detectInstanceGatewayState(data);
+  if (shouldRouteToEntryGateway(gatewayState, true)) {
+    revalidateAllWorkspaces();
+    redirect('/entry');
+  }
+
+  if (gatewayState.onboardingIncomplete && (user.role === 'admin' || user.role === 'manager')) {
+    revalidateAllWorkspaces();
+    redirect('/setup?section=business-setup');
+  }
+
   revalidateAllWorkspaces();
   redirect(redirectTo.startsWith('/') ? redirectTo : '/');
 }
@@ -294,6 +375,18 @@ export async function createUserAction(formData: FormData) {
   user.passwordUpdatedAt = new Date().toISOString();
   user.mustChangePassword = !values.password?.trim();
   data.users = [...data.users, user].sort(sortUsers);
+  if (user.role === 'admin') {
+    data.instance = {
+      ...data.instance,
+      initialized: true,
+      onboardingProgress: {
+        ...data.instance.onboardingProgress,
+        adminAccount: true,
+        roles: true,
+        users: true,
+      },
+    };
+  }
   appendActivity(data, {
     entityType: 'user',
     entityId: user.id,

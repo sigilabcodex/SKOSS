@@ -6,8 +6,10 @@ import type {
   ActivityEntry,
   AppData,
   Customer,
+  InstanceState,
   Order,
   OrderLine,
+  OnboardingProgress,
   Recipe,
   RecurringTemplate,
   User,
@@ -19,6 +21,7 @@ import { defaultLocale, defaultPreset } from '@/lib/i18n/config';
 import { resolveThemePreference } from '@/lib/theme';
 import { getDefaultWorkspaceForRole } from '@/lib/workspaces';
 import { fallbackDemoPassword, hashPassword } from '@/lib/server/passwords';
+import { getRuntimeMode } from '@/lib/server/runtime-mode';
 
 const storePath = path.join(process.cwd(), 'data', 'demo-store.json');
 const generationHorizonDays = 10;
@@ -356,6 +359,21 @@ function ensureGeneratedOrders(data: AppData) {
 }
 
 function hydrateStore(rawData: AppData): AppData {
+  const runtimeMode = getRuntimeMode();
+  const environmentType = runtimeMode === 'production'
+    ? 'production'
+    : runtimeMode === 'pilot'
+      ? 'pilot'
+      : 'demo';
+  const defaultOnboardingProgress: OnboardingProgress = {
+    adminAccount: false,
+    workspaceBasics: false,
+    timezone: false,
+    users: false,
+    roles: false,
+    shifts: false,
+    optionalImports: false,
+  };
   const preferences: WorkspacePreferences = {
     locale: rawData.preferences?.locale ?? defaultLocale,
     preset: rawData.preferences?.preset ?? defaultPreset,
@@ -367,6 +385,27 @@ function hydrateStore(rawData: AppData): AppData {
   };
 
   const users = (rawData.users ?? []).map((user) => normalizeUser(user as Partial<User> & { email?: string; role?: string }, rawData.workspace.id));
+  const hasAdminUser = users.some((user) => user.active && user.role === 'admin');
+  const onboardingCompleted = rawData.preferences?.onboardingCompleted ?? false;
+  const instance: InstanceState = {
+    initialized: rawData.instance?.initialized ?? users.length > 0,
+    onboardingStatus: rawData.instance?.onboardingStatus
+      ?? (onboardingCompleted ? 'completed' : users.length > 0 ? 'in_progress' : 'not_started'),
+    demoModeActive: rawData.instance?.demoModeActive ?? runtimeMode === 'demo',
+    environmentType: rawData.instance?.environmentType ?? environmentType,
+    backupHintAvailable: rawData.instance?.backupHintAvailable ?? false,
+    lastRestoreAt: rawData.instance?.lastRestoreAt,
+    onboardingProgress: {
+      ...defaultOnboardingProgress,
+      ...(rawData.instance?.onboardingProgress ?? {}),
+      adminAccount: rawData.instance?.onboardingProgress?.adminAccount ?? hasAdminUser,
+      workspaceBasics: rawData.instance?.onboardingProgress?.workspaceBasics ?? onboardingCompleted,
+      timezone: rawData.instance?.onboardingProgress?.timezone ?? onboardingCompleted,
+      users: rawData.instance?.onboardingProgress?.users ?? users.length > 0,
+      roles: rawData.instance?.onboardingProgress?.roles ?? hasAdminUser,
+    },
+    operatorOnboardingByUserId: rawData.instance?.operatorOnboardingByUserId ?? {},
+  };
   const currentUserId = rawData.session?.currentUserId && users.find((user) => user.id === rawData.session.currentUserId && user.active)
     ? rawData.session.currentUserId
     : users.find((user) => user.active)?.id;
@@ -374,6 +413,7 @@ function hydrateStore(rawData: AppData): AppData {
   const data: AppData = {
     ...rawData,
     preferences,
+    instance,
     session: {
       currentUserId,
       lastLoginAt: rawData.session?.lastLoginAt,

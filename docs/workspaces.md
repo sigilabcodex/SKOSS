@@ -2,6 +2,18 @@
 
 SKOSS should present work through role-based workspaces rather than one universal interface.
 
+## First-contact layer before workspaces
+
+Before users enter role workspaces, SKOSS now introduces an **instance entry gateway** so first-run intent is explicit:
+
+- start new kitchen (admin setup)
+- explore demo environment
+- restore from backup
+- open existing instance
+- learn/help links
+
+This layer is intentionally outside normal workspace navigation and should stay lightweight.
+
 The purpose of a workspace is to reduce noise and show each role the information needed to act quickly.
 
 ## 1. Sales / Order Intake

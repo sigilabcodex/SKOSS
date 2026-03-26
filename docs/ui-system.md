@@ -299,3 +299,15 @@ Future UI work should follow these rules:
 - keep the interface operational and fast even when adding personality
 
 If a proposed UI change improves aesthetics but adds typing, clicks, or ambiguity for operators, it should be reconsidered.
+
+## 12. Instance entry gateway UX notes
+
+The entry gateway (first-contact layer) should follow the same calm and section-based language:
+
+- one clear framing question (“what do you want to do right now?”)
+- 4–5 intent cards with short outcome-oriented copy
+- no deep nesting before first choice
+- mobile-safe touch targets and low text density
+- state hints that are informative, not alarming (instance/admin/onboarding/demo/backup)
+
+The gateway should reduce first-run anxiety and avoid forcing login/setup before user intent is known.

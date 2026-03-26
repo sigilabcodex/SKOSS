@@ -77,6 +77,14 @@ These are important unresolved questions that should guide future product discov
 - Which configuration tasks can be deferred until after daily usage begins?
 - How do we prevent admin setup from overwhelming first-time adoption?
 
+## Instance entry gateway and onboarding boundaries
+
+- Which gateway options should be visible or emphasized by detected state versus always shown?
+- Should “open existing instance” support quick account selection without exposing full user lists publicly?
+- What is the minimal operator onboarding per role that improves confidence without adding admin noise?
+- Which onboarding steps should be mandatory for pilot safety versus skippable for fast activation?
+- How should backup version compatibility be communicated before restore is confirmed?
+
 ## Deployment and hosting direction
 
 - What minimum stack best supports low-spec hosting without making development or maintenance fragile?

@@ -5,6 +5,8 @@ export type ThemeName = 'light' | 'dark' | 'system';
 export type OperatingMode = 'pickup' | 'delivery' | 'mixed';
 export type WorkspaceSurface = 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup';
 export type CustomerContactMethod = 'phone' | 'email' | 'whatsapp';
+export type EnvironmentType = 'dev' | 'demo' | 'pilot' | 'production';
+export type OnboardingStatus = 'not_started' | 'in_progress' | 'completed';
 
 export type OrderStatus = 'draft' | 'active' | 'changed' | 'cancelled' | 'completed';
 export type OrderLineStatus = 'pending' | 'in_progress' | 'done' | 'cancelled';
@@ -62,6 +64,27 @@ export interface User {
 export interface SessionState {
   currentUserId?: string;
   lastLoginAt?: string;
+}
+
+export interface OnboardingProgress {
+  adminAccount: boolean;
+  workspaceBasics: boolean;
+  timezone: boolean;
+  users: boolean;
+  roles: boolean;
+  shifts: boolean;
+  optionalImports: boolean;
+}
+
+export interface InstanceState {
+  initialized: boolean;
+  onboardingStatus: OnboardingStatus;
+  demoModeActive: boolean;
+  environmentType: EnvironmentType;
+  backupHintAvailable: boolean;
+  lastRestoreAt?: string;
+  onboardingProgress: OnboardingProgress;
+  operatorOnboardingByUserId?: Record<string, boolean>;
 }
 
 export interface AuditFields {
@@ -288,6 +311,7 @@ export interface ShiftLog extends AuditFields {
 export interface AppData {
   workspace: Workspace;
   preferences: WorkspacePreferences;
+  instance: InstanceState;
   session: SessionState;
   users: User[];
   customers: Customer[];
