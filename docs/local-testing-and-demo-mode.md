@@ -29,6 +29,12 @@ In SKOSS context, demo/developer mode means:
 - easy reset/reseed path for local workflows
 - strict expectation that this data is not business-of-record
 
+Runtime separation now follows a simple seed/runtime model:
+
+- tracked seed file: `data/seeds/demo-store.seed.json`
+- mutable runtime file: `data/runtime/demo-store.json` (git-ignored)
+- on startup, runtime data is copied from seed only when runtime is missing
+
 Current runtime modes:
 
 - `demo` (default in local/dev)
@@ -67,6 +73,12 @@ For local or internal pilot rehearsal:
 1. Open **Setup** as manager/admin.
 2. Use **Reset demo workspace to seed data**.
 3. Re-run the role checklist.
+
+CLI alternative:
+
+1. Stop local server.
+2. Run `npm run reset:demo-runtime`.
+3. Restart and re-run role checks.
 
 Reset is blocked when runtime mode is `production`.
 

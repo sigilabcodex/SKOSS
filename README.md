@@ -280,6 +280,7 @@ Before heavy implementation begins, the goal is to clarify:
 - `docs/future-ideas.md` — intentionally deferred ideas
 - `docs/ux-principles.md` — practical UX rules
 - `docs/open-questions.md` — unresolved product and domain questions
+- `docs/runtime-data-and-seeds.md` — tracked seed data and mutable runtime data model
 
 ## Contributing mindset
 
@@ -347,6 +348,7 @@ npm run dev
 npm run lint
 npm run typecheck
 npm run build
+npm run reset:demo-runtime
 ```
 
 ## Scaffold overview
@@ -356,7 +358,7 @@ The first implementation scaffold includes:
 - `app/` — Next.js App Router pages for the first workspaces
 - `app/api/` — lightweight JSON endpoints for orders, production, and handoff reads
 - `components/` — shared shell/navigation components and forms
-- `data/` — seed fixtures plus the simple file-backed demo store used by the first write loop
+- `data/` — seed fixtures (`data/seeds`) plus instance-specific runtime data (`data/runtime`, git-ignored)
 - `lib/domain/` — shared v0 domain types and formatting helpers
 - `lib/server/` — workflow-shaped read/write helpers and server actions
 

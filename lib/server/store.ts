@@ -1,6 +1,5 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import path from 'node:path';
-import { demoSeed } from '@/data/demo-seed';
 import { inferFulfillmentType } from '@/lib/domain/order-helpers';
 import type {
   ActivityEntry,
@@ -23,7 +22,8 @@ import { getDefaultWorkspaceForRole } from '@/lib/workspaces';
 import { fallbackDemoPassword, hashPassword } from '@/lib/server/passwords';
 import { getRuntimeMode } from '@/lib/server/runtime-mode';
 
-const storePath = path.join(process.cwd(), 'data', 'demo-store.json');
+const seedStorePath = path.join(process.cwd(), 'data', 'seeds', 'demo-store.seed.json');
+const runtimeStorePath = path.join(process.cwd(), 'data', 'runtime', 'demo-store.json');
 const generationHorizonDays = 10;
 
 function getLineStatus(line: Pick<OrderLine, 'quantity' | 'completedQuantity' | 'lineStatus'>): OrderLine['lineStatus'] {
@@ -458,16 +458,27 @@ function hydrateStore(rawData: AppData): AppData {
 
 async function ensureStore() {
   try {
-    await readFile(storePath, 'utf8');
+    await readFile(runtimeStorePath, 'utf8');
   } catch {
-    await mkdir(path.dirname(storePath), { recursive: true });
-    await writeFile(storePath, JSON.stringify(demoSeed, null, 2), 'utf8');
+    await mkdir(path.dirname(runtimeStorePath), { recursive: true });
+    await copyFile(seedStorePath, runtimeStorePath);
   }
+}
+
+export async function readSeedStore(): Promise<AppData> {
+  const raw = await readFile(seedStorePath, 'utf8');
+  return JSON.parse(raw) as AppData;
+}
+
+export async function reseedRuntimeStore() {
+  await mkdir(path.dirname(runtimeStorePath), { recursive: true });
+  await rm(runtimeStorePath, { force: true });
+  await copyFile(seedStorePath, runtimeStorePath);
 }
 
 export async function readStore(): Promise<AppData> {
   await ensureStore();
-  const raw = await readFile(storePath, 'utf8');
+  const raw = await readFile(runtimeStorePath, 'utf8');
   const data = hydrateStore(JSON.parse(raw) as AppData);
   const generatedChanged = ensureGeneratedOrders(data);
 
@@ -479,6 +490,6 @@ export async function readStore(): Promise<AppData> {
 }
 
 export async function writeStore(data: AppData) {
-  await mkdir(path.dirname(storePath), { recursive: true });
-  await writeFile(storePath, JSON.stringify(data, null, 2), 'utf8');
+  await mkdir(path.dirname(runtimeStorePath), { recursive: true });
+  await writeFile(runtimeStorePath, JSON.stringify(data, null, 2), 'utf8');
 }

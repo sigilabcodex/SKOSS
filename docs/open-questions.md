@@ -112,6 +112,12 @@ These are important unresolved questions that should guide future product discov
 - What should a simple, reliable backup and restore path look like from day one?
 - How can the project protect user data without locking operators into opaque infrastructure?
 
+## Runtime data and environment separation
+
+- How should runtime file locations evolve when one host runs multiple SKOSS instances?
+- Should pilot and production runtime stores support optional path overrides, or stay on fixed defaults longer?
+- What minimum backup metadata is needed so restore safety checks can validate runtime/seed compatibility?
+
 ## Future skin/preset strategy
 
 - What should remain in the shared SKOSS core?
@@ -138,4 +144,3 @@ These are important unresolved questions that should guide future product discov
 - How far should product/recipe CSV bootstrap go before variant and base-dough modeling stabilizes?
 - Should bootstrap support “draft users” (invited but inactive) as a first-class concept?
 - What minimal audit trail is required for bootstrap launch in pilot and production modes?
-

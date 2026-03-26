@@ -104,6 +104,19 @@ Why:
 - keeps pilot traffic and data clearly separated from future public rollout plans
 - allows faster operational fixes during first real usage cycles
 
+## Runtime data handling requirement for pilot
+
+Pilot deployments must keep runtime data outside version-controlled files.
+
+- tracked seed baseline: `data/seeds/demo-store.seed.json`
+- mutable instance runtime: `data/runtime/demo-store.json`
+- runtime file is initialized from seed only when missing
+
+Operational note:
+
+- include `data/runtime/` in backup/restore routines for pilot continuity
+- keep seed updates explicit in pull requests, never via runtime writes
+
 ## Proposed rollout sequence
 
 1. Local desktop validation with seeded demo users/data.
