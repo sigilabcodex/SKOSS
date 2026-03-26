@@ -2,173 +2,137 @@
 
 ## Status
 
-Draft proposal for domain direction. Not implemented.
+Draft domain proposal. Not implemented.
 
 ## Purpose
 
-Define a lightweight, kitchen-readable resource model for capacity estimation that fits SKOSS progressive adoption.
+Define a lightweight resource model for production feasibility that fits SKOSS progressive adoption and kitchen language.
 
-## Core idea
+## Resource model overview
 
-Capacity should be modeled through **productive resources** that can become bottlenecks during real work.
+Capacity should be represented by **productive resources** that affect output.
 
-Use practical categories:
+Two groups are required:
 
-- people (human effort)
-- equipment and workstations
-- constrained spaces (fermentation/cold hold)
-- dispatch/packing bottlenecks when operationally relevant
+1. **Human resources** (workers, roles, shifts)
+2. **Non-human resources** (ovens, mixers, prep tables, fermentation space, packaging stations, dispatch bottlenecks)
 
-Do not require full setup before value appears.
+## Core domain objects
 
-## Proposed lightweight domain objects
+## 1) productiveResource (core)
 
-## 1) Productive resource (core)
-
-A generic operational resource used for feasibility checks.
+A generic bottleneck/capacity contributor.
 
 Suggested fields:
 
 - `id`
 - `workspaceId`
-- `name` (example: "Deck Oven 1", "Morning bake crew")
+- `name`
 - `resourceType` (`human`, `equipment`, `station`, `space`, `dispatch`)
-- `capacityUnit` (example: `hours_per_shift`, `trays_per_hour`, `batches_per_shift`)
-- `defaultAvailability` (simple windows)
+- `capacityUnit` (human-readable, example: `trays_per_shift`)
+- `defaultAvailability`
 - `active`
 - `notes`
 
-This keeps one common shape while allowing practical variety.
+## 2) capacityProfile (core)
 
-## 2) Human capacity profile (core)
-
-A lightweight profile for role-based shift effort.
+A coarse envelope used in Level A and Level B checks.
 
 Suggested fields:
 
-- `roleKey` (example: `prep`, `bake`, `pack`, `dispatch`)
-- `expectedPeoplePerShift`
-- `effectiveCapacityPerShift` (simple numeric envelope)
-- `overrideByDay` optional
+- `id`
+- `profileScope` (`product`, `product_family`, `resource`, `role`)
+- `scopeRef`
+- `maxPerDay` optional
+- `maxPerShift` optional
+- `safetyBufferPercent` optional
+- `effectiveFrom` optional
 
-This does **not** require full staff rostering to be useful.
+## 3) operationHint / processHint (optional-core bridge)
 
-## 3) Equipment resource (core)
-
-For major shared tools that can saturate output.
-
-Suggested fields:
-
-- `equipmentKind` (`oven`, `mixer`, `proofer`, `prep_table`, `packing_station`, `fridge_space`)
-- `throughputHint` (simple, optional)
-- `batchLimitHint` optional
-- `availabilityWindow` optional
-
-Start with only the bottlenecks that matter.
-
-## 4) Process step profile (core-light)
-
-A minimal operational stage hint used for level B estimation.
+Light hint about which stage consumes which resources.
 
 Suggested fields:
 
 - `stepKey` (`prep`, `mix`, `ferment`, `shape`, `bake`, `pack`, `dispatch`)
-- `defaultDurationRange`
-- `primaryResourceType` (human/equipment/station/space)
+- `primaryResourceRef` optional
+- `secondaryResourceRef` optional
+- `durationHint` optional
 
-This is not a full route sheet; it is a planning hint.
+This improves estimates but remains optional.
 
-## 5) Product capability / batch profile (core-light)
+## Human resource modeling
 
-A product or product-family hint for capacity math when recipes are partial.
+Keep it lightweight:
 
-Suggested fields:
+- role-level shift effort is enough at first (not full HR roster)
+- examples: `morning_bake_crew`, `night_prep_crew`, `packing_shift`
+- allow simple shift overrides by day when needed
 
-- `productId` or `productFamilyKey`
-- `typicalBatchSize` optional
-- `yieldPerBatch` optional
-- `capacityWeight` optional (relative load)
-- `fallbackDailyMax` optional
+## Non-human resource modeling
 
-This allows estimation without forcing full formulas.
+Start with real bottlenecks only:
 
-## Human + non-human interaction
+- ovens
+- mixers
+- prep tables
+- fermentation/proofing/cold space
+- packaging stations
+- dispatch handoff points when they constrain throughput
 
-Use a bottleneck-first rule:
+Avoid modeling every tool in the kitchen.
 
-- for a requested output, estimate load per stage
-- stage feasibility is constrained by the minimum of:
-  - available human effort for that stage
-  - available key equipment/station/space for that stage
+## Shared bottlenecks
+
+Shared bottlenecks are first-class.
 
 Example:
 
-- enough bakers available, but single oven slot is full -> oven is bottleneck
-- oven has space, but only one packer available -> packing is bottleneck
+- one deck oven is consumed by buns, conchas, and loaves
+- all those flows reference the same oven resource
+- oven load becomes a single limiting signal
 
-## Shared bottlenecks (explicit)
+This is the practical model for "one oven" constraints.
 
-SKOSS should represent shared bottlenecks as single resources consumed by multiple products/processes.
+## Core vs optional scope
 
-Examples:
+### Core (near-term)
 
-- one deck oven shared by burger buns + baguette finishing
-- one large prep table shared by shaping and packing overflow
-- one fermentation fridge with limited tray slots
+- `productiveResource` basic record
+- `capacityProfile` at product/product-family and role/resource scope
+- shift-level human effort envelopes
+- key equipment bottlenecks
 
-The resource model should allow one resource to be referenced by multiple process-step profiles.
+### Optional later
 
-## What belongs in core vs optional
-
-## Core (near-term)
-
-- productive resource basic record
-- human shift capacity envelopes by role
-- key equipment bottlenecks (oven/mixer/critical station)
-- simple availability windows
-- product-family capacity hints
-
-## Optional (later)
-
-- detailed individual roster rules
 - minute-level changeovers
 - maintenance calendars
-- advanced constraint dependencies
-- route/dispatch optimization
+- individual worker assignment logic
+- complex dependency networks
+- route optimization
 
-## Incomplete setup behavior
+## Lightweight setup strategy
 
-If resource setup is partial:
+To keep setup practical:
 
-- capacity estimate should still run using available signals
-- missing resources should reduce confidence, not block result
-- UI should suggest which missing setup would improve estimate quality
+1. start with 1-3 critical bottlenecks
+2. set rough day/shift limits
+3. optionally add stage hints only where warnings are noisy
+4. improve progressively from shift logs and observed misses
 
-## Bakery-grounded examples
+No perfect configuration is required before value.
 
-### Example A: Burger buns and oven limit
+## Incomplete data behavior
 
-- buns share one oven with other morning items
-- resource model flags oven as saturated for Thursday early morning
-- suggestion shifts promise to Friday 11:00 window
+If some resources are missing:
 
-### Example B: Brioche dough and mixer limit
+- estimate with known envelopes
+- reduce confidence
+- return clear reason labels (example: `missing_oven_profile`)
+- never force a setup-complete gate for order capture
 
-- multiple brioche variants consume same mixing resource
-- partial WIP exists from prior shift
-- model reduces required mixing load, but checks remaining bake and pack resources
+## Kitchen examples
 
-### Example C: Dispatch bottleneck
-
-- product ready, but only one dispatch handoff window for app deliveries
-- system warns “requires extra shift effort” for same-slot additions
-
-## Naming and UX guidance
-
-Use practical names in UI and docs:
-
-- "bake station" instead of "work center"
-- "shift effort" instead of "labor allocation matrix"
-- "capacity warning" instead of "finite-capacity exception"
-
-Keep bilingual-friendly wording where possible.
+- **Bakery oven bottleneck:** enough dough, not enough bake slots.
+- **Mixer bottleneck:** multiple brioche variants compete for one mixer.
+- **Packaging bottleneck:** baking completes on time but one packing station delays delivery readiness.

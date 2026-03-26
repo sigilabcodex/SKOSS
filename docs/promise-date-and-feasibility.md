@@ -2,149 +2,111 @@
 
 ## Status
 
-Draft proposal. No implementation is claimed.
+Draft estimation design. Not implemented.
 
 ## Goal
 
-Define a practical estimation flow for order intake that answers:
+Define a practical, non-optimized flow from order intake to:
 
-- what is **available to promise** (ATP)?
-- what is **capable to promise** (CTP)?
-- what delivery/ready date-time should SKOSS suggest?
+- suggested delivery/ready date-time
+- feasibility classification
+- clear warning context
 
-This should stay approximate, transparent, and operator-usable.
+## End-to-end estimation flow
 
-## Terms
+1. **Order intake**
+   - capture requested quantity and requested date/time.
+2. **Stock check**
+   - compute ready quantity available to promise.
+3. **WIP adjustment**
+   - include only WIP that can become ready before requested time.
+4. **Production requirement**
+   - `required_new_output = requested - stock - usable_wip`.
+5. **Capacity estimation**
+   - Level A: compare to day/shift heuristic envelopes.
+   - Level B: compare stage load to human + equipment bottlenecks.
+6. **Promise suggestion**
+   - if unsafe, propose nearest safer date/time window.
+7. **Feasibility output**
+   - status, confidence, short reason labels, optional override note path.
 
-- **ATP (available to promise):** quantity that can be fulfilled from ready stock and near-term usable WIP.
-- **CTP (capable to promise):** quantity that can be produced in time given remaining capacity and bottlenecks.
-- **Suggested promise:** recommended ready/delivery window based on ATP + CTP + safety thresholds.
+## Feasibility states (required)
 
-## Inputs from existing SKOSS concepts
+- `fulfillable_from_stock`
+- `requires_production`
+- `near_capacity`
+- `high_strain`
+- `not_safely_fulfillable`
 
-Primary inputs should reuse current domain foundations:
+Interpretation:
 
-- orders and grouped demand for target production dates
-- production-day context and existing commitments
-- WIP entries and stage notes
-- shift logs and handoff notes
-- product/variant and optional formula/process hints
+- **fulfillable_from_stock:** no meaningful production impact.
+- **requires_production:** additional production needed but within normal range.
+- **near_capacity:** risk rising; suggest safer slot.
+- **high_strain:** feasible only with stretch/reprioritization.
+- **not_safely_fulfillable:** strong warning; keep manual override path.
 
-Secondary (optional) inputs:
+## WIP handling rules
 
-- productive resource setup
-- material risk flags (rough, non-blocking)
+WIP subtraction must be stage-aware.
 
-## Estimation flow (Level A to Level B)
+Examples:
 
-1. **Normalize request**
-   - map order line to product/variant/product family.
-2. **Check ATP**
-   - estimate usable ready stock.
-   - estimate usable WIP that can convert before requested time.
-3. **Compute gap**
-   - `gap = requested - ATP`.
-4. **Check CTP for gap**
-   - level A: compare gap to day/shift heuristic envelope.
-   - level B: compare stage load against human + equipment bottlenecks.
-5. **Determine warning level**
-   - enough stock / requires production / requires extra shift effort / near capacity / beyond safe capacity.
-6. **Suggest promise window**
-   - if current request window unsafe, propose next feasible window/date.
-7. **Report confidence**
-   - high/medium/low based on data completeness.
+- mixed dough can reduce mixing load
+- shaped trays can reduce prep+shape load
+- nothing should skip remaining required stages (example: bake+pack)
 
-## WIP treatment (required)
+## Existing commitments and shift interaction
 
-WIP should reduce required new production only when stage and timing make it realistically usable.
+Capacity estimation must account for:
 
-Example:
+- already committed production in the same window
+- available shift effort (per role/shift)
+- equipment/station envelope in that shift window
 
-- mixed dough WIP can reduce mixing load
-- but still requires fermentation/bake capacity before ready time
+Effective feasible output is constrained by the tightest stage bottleneck.
 
-So WIP subtraction must be stage-aware, not just quantity-aware.
+## Incomplete-data strategy
 
-## Warnings for sales/order intake
+Fallback path:
 
-Recommended semantics:
+1. product/product-family daily hint
+2. shift hint
+3. global workspace fallback hint
+4. low-confidence warning + manual commitment
 
-- **Enough stock**: can fulfill from current ready/near-ready amounts.
-- **Requires production**: needs additional production but within normal envelope.
-- **Requires extra shift effort**: feasible if team stretches or reprioritizes.
-- **Near capacity**: high risk of delay; suggest alternative window.
-- **Beyond safe capacity**: strong warning; still allow override with note.
+Principle: degraded guidance is better than silence, but confidence must be explicit.
 
-Design principle:
+## Warning without blocking
 
-- warn early
-- avoid hard blocking in normal cases
-- keep manual override path explicit and auditable
+Default behavior is advisory:
 
-## Suggested promise date/time behavior
+- show status chip + short reason
+- suggest safer slot when needed
+- allow commit with override note
 
-When requested slot is risky, SKOSS should propose the nearest safer window.
+Hard blocking should be exceptional and explicitly configured.
 
-Example:
+## Practical bakery walkthrough
 
-- request: Thursday 06:00
-- forecast: oven and pack bottlenecks overloaded
-- suggested: Friday 11:00 with status “requires production / safer window”
+Request: 300 burger buns for Thursday 06:00.
 
-The UI should show “why” in one short reason line (example: "oven load already near limit Thursday morning").
-
-## Incomplete data strategy
-
-The estimation must remain useful with partial setup.
-
-Fallback sequence:
-
-1. product-family day envelope
-2. shift-envelope heuristics
-3. last-known practical throughput hints
-4. manual confirmation with low-confidence warning
-
-The system should never pretend precision it does not have.
-
-## Material availability handling (rough, near-term)
-
-Early feasibility can include coarse material risk signals without deep inventory:
-
-- `material_ok` (no known issue)
-- `material_risk` (known thin supply soon)
-- `material_unknown` (insufficient evidence)
-
-This is advisory, not an automatic procurement planner.
-
-## Bakery scenario walkthrough
-
-Order intake at Wednesday 15:00:
-
-- New order: 300 burger buns for Thursday 06:00
-- Existing grouped demand already heavy for Thursday morning
-- WIP: 120 equivalent units mixed overnight-ready
-- Oven: one major bake bottleneck
-- Packing: near full in same window
+- stock ready: 40
+- usable WIP: 120
+- required new output: 140
+- oven load in Thursday early window already near maximum
 
 Result:
 
-- ATP covers part of request
-- CTP indicates Thursday 06:00 is beyond safe window
-- SKOSS suggests Friday 11:00 or split fulfillment
-- Warning: `near capacity` or `beyond safe capacity` depending on threshold
+- classification: `high_strain` or `not_safely_fulfillable`
+- suggested promise: Thursday late morning or Friday early slot
+- reason: `oven_bottleneck`
+- confidence based on completeness of shift/resource hints
 
-## What this document does not propose
+## Scope boundaries
 
-- no exact optimizer
-- no rigid schedule lock
-- no mandatory complete recipe/process setup
-- no heavy planning engine
+This proposal is intentionally not:
 
-## API and UI implications (future docs)
-
-Likely future additions (not implemented yet):
-
-- feasibility-check endpoint/action for order draft context
-- warning payload with confidence and reason codes
-- suggested promise window in order capture flow
-- optional override reason capture for risky commitments
+- a finite-capacity scheduler
+- an MRP system
+- a strict auto-planner that replaces operator judgment

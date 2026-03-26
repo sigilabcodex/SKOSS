@@ -293,7 +293,7 @@ Order capture should surface quick feasibility guidance without forcing a contex
 
 Suggested additions in order create/edit flows:
 
-- warning/status chip (`enough stock`, `requires production`, `near capacity`, etc.)
+- warning/status chip (`fulfillable_from_stock`, `requires_production`, `near_capacity`, etc.)
 - suggested promise date/time when requested slot is overloaded
 - short reason line for the warning
 - explicit override path with note (non-blocking by default)

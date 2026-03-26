@@ -2,192 +2,150 @@
 
 ## Status
 
-Draft proposal for the next documentation layer. This document defines direction, not implemented behavior.
+Draft proposal for architecture/domain/product direction. This document describes intended behavior, not implemented behavior.
 
-## Why this document exists
+## Problem in SKOSS context
 
-SKOSS already models the operational transformation loop well:
+SKOSS already covers the operational flow:
 
-`orders -> grouped demand -> production interpretation -> WIP -> shift handoff -> final output`
+`order intake -> grouped demand -> production requirements -> WIP adjustment -> actionable work -> shift handoff`
 
-What is still missing is a practical way to answer one critical intake question:
+What is missing is a formal way to answer, during order intake:
 
-**Can we promise this order at this date/time without overloading the operation?**
+- can this order be fulfilled without destabilizing the kitchen?
+- if yes, what promise date/time is safer?
 
-Today, the repo has strong foundations for demand, production visibility, and WIP, but not yet a formal capacity/plausibility model tied to promise-date guidance.
+This proposal adds a lightweight feasibility layer that stays aligned with SKOSS philosophy (operator-first, mobile-first, progressive adoption, non-ERP).
 
-## What already exists vs what is missing
+## What capacity means in SKOSS
 
-### Already present in SKOSS docs/direction
+Capacity is not the same as stock.
 
-- order capture and recurring demand
-- production-day grouping and production board
-- WIP as a first-class concept
-- shift logs and handoff context
-- lightweight recipes/formulas and material-cost context
-- role-based workspaces and setup surfaces
+### Stock availability
 
-### Missing today
+Ready output that can be committed now (for example, already baked and packed units).
 
-- explicit distinction between **available stock**, **available WIP**, and **available productive capacity**
-- a documented, staged model for feasibility estimation
-- a lightweight capability to suggest a realistic promise date/time during order intake
-- clear warning semantics for near/beyond capacity states
+### WIP availability
 
-## Capacity in kitchen terms
+Partially completed output that can likely become ready before the requested promise time (for example, shaped trays that still need baking).
 
-Capacity is not one number.
+### Production capacity
 
-For SKOSS, early capacity should combine three practical checks:
+Remaining ability to create missing output using available shifts and key bottlenecks (people + ovens + mixers + prep/fermentation/packing constraints).
 
-1. **Stock availability**: how much ready product is already available.
-2. **WIP availability**: how much in-progress work can realistically become ready by the promise time.
-3. **Productive capacity**: how much additional work the team can still execute (people + key equipment + stage bottlenecks) without unsafe overload.
+## Feasibility reasoning model
 
-If stock and WIP are enough, capacity pressure may be low.
-If stock/WIP are not enough, the missing quantity must fit remaining productive capacity.
+At intake time, SKOSS should reason in this order:
 
-## Smallest useful model (MVP direction)
+1. subtract usable stock
+2. subtract usable WIP
+3. compute missing quantity (`required_new_output`)
+4. compare missing quantity against remaining capacity envelope
+5. return a warning state + suggested promise date/time + confidence
 
-The smallest useful version SKOSS can support soon is:
+Core formula:
 
-- day-level (or shift-level) **heuristic capacity envelopes**
-- per product family or process family (for example: brioche family)
-- reduced required production after subtracting usable stock + usable WIP
-- non-blocking warning levels for order intake
-- suggested date/time based on the next feasible window
+`required_new_output = requested_quantity - usable_stock - usable_wip`
 
-This is intentionally approximate. It is enough to reduce unrealistic promises without building a full scheduler.
+If `required_new_output <= 0`, the order is fulfillable from current readiness.
 
-## Layered maturity model
+## Model maturity levels (required)
 
-## Level A — Heuristic / day-level capacity (near-term target)
+## LEVEL A — Heuristic (near-term, smallest useful version)
 
-**Goal:** practical feasibility guidance with minimal setup burden.
+- per-product or per-product-family daily/shift capacity hints
+- minimal setup (teams can begin with rough numbers)
+- immediate usefulness in sales/order intake
+- no detailed scheduling
 
-Inputs can be incomplete and still usable:
+This is the smallest useful version because it already reduces over-promising with very low setup burden.
 
-- grouped demand by production date
-- current WIP summary by stage
-- simple shift presence assumptions
-- optional per-product-family max units/day or max units/shift
+## LEVEL B — Resource-aware (mid-term)
 
-Behavior:
+- adds workers/roles/shifts + equipment/station bottlenecks
+- checks stage pressure (prep/mix/ferment/shape/bake/pack/dispatch)
+- exposes bottleneck reason labels (example: `oven_bottleneck`)
 
-- compute `required_new_output = requested - usable_stock - usable_wip`
-- compare required output against remaining envelope
-- produce a recommendation:
-  - likely feasible
-  - feasible with pressure
-  - likely needs next day/next window
+Still heuristic and transparent; not an optimizer.
 
-No optimizer, no minute-by-minute assignment.
+## LEVEL C — Scheduling (optional future)
 
-## Level B — Resource-aware capacity (mid-term)
+- optional timeline/sequencing refinement
+- optional queue balancing and finer slot logic
+- not required for core SKOSS value
 
-**Goal:** expose shared bottlenecks and improve promise-date realism.
+## Real kitchen examples
 
-Adds lightweight resource awareness:
+### Example 1: fulfillable from stock
 
-- worker-role presence windows
-- key equipment/workstation availability (ovens, mixers, prep tables, fermentation space, packing station)
-- simple process-stage load estimates (prep, ferment/rest, bake, pack, dispatch)
+A bakery has 90 packed burger buns ready. New order asks for 60 by today 17:00.
 
-Behavior:
+- stock covers all demand
+- status: `fulfillable_from_stock`
+- no extra production load
 
-- estimate whether the missing work can pass through key bottleneck stages in time
-- show which stage/resource is limiting
-- keep recommendations approximate and transparent
+### Example 2: WIP reduces required production
 
-Still not a full scheduling engine.
+Order asks for 200 conchas for tomorrow morning.
 
-## Level C — Queue/schedule refinement (future, optional)
+- ready stock: 20
+- WIP: dough equivalent for 120 (already mixed and resting)
+- missing new output: 60
 
-**Goal:** optional deeper planning for teams that need it.
+SKOSS should only capacity-check the missing 60, not the full 200.
 
-Potential additions:
+### Example 3: one-oven bottleneck
 
-- intra-day sequencing proposals
-- queue balancing between shifts
-- tighter stage timing assumptions
+Night shift can mix enough dough, but morning has one oven and the existing bake queue is already high.
 
-Must remain optional and should never become mandatory for core order capture.
+- prep looks feasible
+- bake stage is constrained
+- status: `near_capacity` or `high_strain`
+- suggested promise moves to a safer slot
 
-## Practical examples
+## Explicit answers to required questions
 
-### Example 1: Brioche family shared dough
+1. **Smallest useful version:** LEVEL A with per-day/per-shift heuristic envelopes and WIP-aware subtraction.
+2. **Incomplete data:** fallback to coarser heuristics and lower confidence (`low/medium/high`), never hard-fail by default.
+3. **Recipes without mandatory setup:** recipes/process hints improve estimates when present; product-family fallback works when absent.
+4. **Shifts vs equipment:** feasible load is bounded by both shift effort and equipment throughput; minimum effective stage capacity wins.
+5. **Bottlenecks (one oven):** model shared bottlenecks as single resources consumed by many products/processes.
+6. **How WIP reduces production:** only stage-usable WIP subtracts from required output before capacity comparison.
+7. **Warn without blocking:** show warning states + suggestion + override path with note; no default hard block.
+8. **Core vs later:** core = heuristic envelopes + key bottlenecks; later = detailed sequencing, changeovers, advanced optimization.
+9. **UI without friction:** inline intake chip + short reason + suggested promise, with compact setup sections.
+10. **Low-spec compatibility:** use simple aggregations/heuristics and avoid heavy optimization engines or always-on cloud dependencies.
 
-- Thursday demand includes brioche buns and brioche rolls.
-- WIP already has one mixed brioche base batch from night shift.
-- Intake order asks for 120 extra burger buns by Friday 11:00.
+## Non-goals
 
-SKOSS should:
+- no full MRP or manufacturing optimizer
+- no requirement for complete recipes/operations data
+- no mandatory scheduler before first value
+- no heavy infrastructure increase
 
-- treat shared dough WIP as reducing required new prep
-- still check bake/packing windows and oven pressure
-- suggest Friday 11:00 only if remaining bottlenecks are acceptable
+## Final summary (mandatory)
 
-### Example 2: Night prep vs morning bake
+### What already existed in the repo
 
-- Night shift can mix/shape enough units.
-- Morning shift has one oven and heavy existing queue.
+- strong demand-to-production flow
+- WIP and shift handoff as first-class concepts
+- role-based workspace direction
 
-Even if prep capacity is sufficient, promise guidance should flag bake bottleneck risk and propose later ready time.
+### What was missing
 
-### Example 3: Technically possible but operationally unsafe
+- formal capacity model for feasibility and promise-date guidance
+- explicit maturity path from simple heuristic to resource-aware planning
 
-- A large order can fit mathematically if every shift runs at maximum with zero disruptions.
+### What this proposal adds
 
-SKOSS should mark this as **near/beyond safe capacity** rather than “green”, and keep order capture possible with explicit warning.
+- clear distinction between stock, WIP, and capacity
+- staged model (LEVEL A/B/C)
+- explicit warning posture and graceful incomplete-data behavior
 
-## Incomplete-data behavior (required for progressive adoption)
+### Next implementation PR (recommended)
 
-Feasibility must degrade gracefully when setup is partial.
+Implement LEVEL A only:
 
-If data is missing, SKOSS should:
-
-- fall back from resource-aware logic to heuristic/day-level envelopes
-- mark confidence as `low`, `medium`, or `high`
-- indicate why confidence is reduced (for example: no oven profile, no shift window, no process profile)
-- avoid hard blocking order capture
-
-This preserves “work now, structure later”.
-
-## Warning model for order intake
-
-Recommended non-blocking statuses:
-
-- **Enough stock**
-- **Requires production**
-- **Requires extra shift effort**
-- **Near capacity**
-- **Beyond safe capacity**
-
-Behavior principle:
-
-- warnings should inform promise decisions, not punish fast intake
-- hard block should be rare and explicit (for example, impossible due date in closed hours if business chooses strict rule)
-
-## Relationship to existing docs
-
-This proposal extends, not replaces:
-
-- production logic and grouped demand interpretation
-- WIP-centric operational flow
-- shift handoff and role-based workspace design
-- lightweight setup philosophy and low-spec technical direction
-
-## Non-goals for this stage
-
-- no full MRP engine
-- no industrial optimizer
-- no mandatory recipe completeness
-- no microservice split
-- no heavy infrastructure assumptions
-
-## Suggested next documentation links
-
-- [Capacity resources model](./capacity-resources.md)
-- [Promise date and feasibility flow](./promise-date-and-feasibility.md)
-- [Capacity setup UX proposal](./setup-capacity-and-resources-ux.md)
-- [ADR 0002 production capacity direction](./adr/0002-production-capacity-direction.md)
+- add capacity hint records (product/product-family day/shift envelope)
+- add intake-time feasibility calculation using stock+WIP subtraction
+- return status + confidence + suggested promise window as non-blocking guidance
