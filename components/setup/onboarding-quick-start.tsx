@@ -50,7 +50,7 @@ export async function OnboardingQuickStart({ redirectTo, compact = false }: Onbo
           <div className="grid-two">
             <label>
               <span className="field-heading">{t('setup.fields.role')}</span>
-              <select name="role" defaultValue="frontdesk">
+              <select name="roles" defaultValue="frontdesk">
                 {['admin', 'manager', 'production', 'frontdesk', 'delivery'].map((role) => (
                   <option key={role} value={role}>{t(`roles.${role}.label`)}</option>
                 ))}

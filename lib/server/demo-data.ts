@@ -144,9 +144,11 @@ export interface RecurringTemplateFormValues {
 export interface UserFormValues {
   displayName: string;
   loginIdentifier: string;
+  email?: string;
+  phone?: string;
   password?: string;
   resetPassword: boolean;
-  role: UserRole;
+  roles: UserRole[];
   defaultWorkspace: WorkspaceSurface;
   active: boolean;
 }
@@ -327,18 +329,25 @@ const supportedWorkspaceDefaults: WorkspaceSurface[] = ['home', 'timeline', 'ord
 
 export function normalizeUserForm(formData: FormData): UserFormValues {
   const requestedRole = String(formData.get('role') ?? 'frontdesk') as UserRole;
+  const roleValues = formData.getAll('roles').map((value) => String(value) as UserRole);
+  const normalizedRoles = roleValues.filter((role): role is UserRole => supportedUserRoles.includes(role));
+  const roles: UserRole[] = normalizedRoles.length > 0
+    ? normalizedRoles.filter((role, index, list) => list.indexOf(role) === index)
+    : (supportedUserRoles.includes(requestedRole) ? [requestedRole] : ['frontdesk']);
+  const primaryRole = roles[0] ?? 'frontdesk';
   const requestedWorkspace = String(formData.get('defaultWorkspace') ?? '') as WorkspaceSurface;
-  const role = supportedUserRoles.includes(requestedRole) ? requestedRole : 'frontdesk';
 
   return {
     displayName: String(formData.get('displayName') ?? ''),
     loginIdentifier: String(formData.get('loginIdentifier') ?? ''),
+    email: String(formData.get('email') ?? '').trim() || undefined,
+    phone: String(formData.get('phone') ?? '').trim() || undefined,
     password: String(formData.get('password') ?? ''),
     resetPassword: formData.get('resetPassword') !== null,
-    role,
+    roles,
     defaultWorkspace: supportedWorkspaceDefaults.includes(requestedWorkspace)
       ? requestedWorkspace
-      : getDefaultWorkspaceForRole(role),
+      : getDefaultWorkspaceForRole(primaryRole),
     active: formData.get('active') !== null,
   };
 }
@@ -371,7 +380,8 @@ export function buildUserRecord(
   existingUser?: User,
 ): User {
   const now = new Date().toISOString();
-  const defaultWorkspace = values.defaultWorkspace || getDefaultWorkspaceForRole(values.role);
+  const primaryRole = values.roles[0] ?? 'frontdesk';
+  const defaultWorkspace = values.defaultWorkspace || getDefaultWorkspaceForRole(primaryRole);
 
   return {
     id: existingUser?.id ?? `user-${crypto.randomUUID()}` ,
@@ -380,9 +390,13 @@ export function buildUserRecord(
     passwordHash: existingUser?.passwordHash ?? '',
     passwordUpdatedAt: existingUser?.passwordUpdatedAt,
     mustChangePassword: existingUser?.mustChangePassword ?? false,
-    role: values.role,
+    role: primaryRole,
+    roles: values.roles,
     workspaceId: existingUser?.workspaceId ?? data.workspace.id,
     defaultWorkspace,
+    username: values.loginIdentifier.trim().toLowerCase(),
+    email: values.email,
+    phone: values.phone,
     active: values.active,
     preferences: {
       ...existingUser?.preferences,

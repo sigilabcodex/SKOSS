@@ -173,6 +173,11 @@ function normalizeRole(role: string | undefined): UserRole {
 function normalizeUser(user: Partial<User> & { email?: string; role?: string }, workspaceId: string): User {
   const now = new Date().toISOString();
   const role = normalizeRole(user.role);
+  const normalizedRoles = (user.roles ?? [])
+    .map((entry) => normalizeRole(entry))
+    .filter((entry, index, list) => list.indexOf(entry) === index);
+  const roles = normalizedRoles.length > 0 ? normalizedRoles : [role];
+  const primaryRole = roles[0] ?? role;
   const createdAt = user.createdAt ?? now;
   const updatedAt = user.updatedAt ?? createdAt;
 
@@ -183,9 +188,13 @@ function normalizeUser(user: Partial<User> & { email?: string; role?: string }, 
     passwordHash: user.passwordHash || hashPassword(fallbackDemoPassword),
     passwordUpdatedAt: user.passwordUpdatedAt ?? createdAt,
     mustChangePassword: user.mustChangePassword ?? false,
-    role,
+    role: primaryRole,
+    roles,
     workspaceId: user.workspaceId ?? workspaceId,
-    defaultWorkspace: user.defaultWorkspace ?? user.preferences?.defaultWorkspace ?? getDefaultWorkspaceForRole(role),
+    defaultWorkspace: user.defaultWorkspace ?? user.preferences?.defaultWorkspace ?? getDefaultWorkspaceForRole(primaryRole),
+    username: user.username?.trim() || user.loginIdentifier?.trim() || user.email?.trim() || undefined,
+    email: user.email?.trim() || undefined,
+    phone: user.phone?.trim() || undefined,
     active: user.active ?? true,
     preferences: user.preferences
       ? {
@@ -385,7 +394,7 @@ function hydrateStore(rawData: AppData): AppData {
   };
 
   const users = (rawData.users ?? []).map((user) => normalizeUser(user as Partial<User> & { email?: string; role?: string }, rawData.workspace.id));
-  const hasAdminUser = users.some((user) => user.active && user.role === 'admin');
+  const hasAdminUser = users.some((user) => user.active && (user.roles?.includes('admin') || user.role === 'admin'));
   const onboardingCompleted = rawData.preferences?.onboardingCompleted ?? false;
   const instance: InstanceState = {
     initialized: rawData.instance?.initialized ?? users.length > 0,

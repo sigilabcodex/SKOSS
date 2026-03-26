@@ -671,7 +671,7 @@ export default async function SetupPage({
               {t('setup.labels.inactiveUsers')}
             </span>
             <span className="summary-pill">
-              {new Set(data.users.map((user) => user.role)).size}{' '}
+              {new Set(data.users.flatMap((user) => user.roles ?? [user.role])).size}{' '}
               {t('setup.labels.rolesInUse')}
             </span>
             <Link href="/preferences" className="inline-link">
@@ -692,7 +692,7 @@ export default async function SetupPage({
                             : ''}
                         </strong>
                         <span>
-                          {t(`roles.${user.role}.label`)} ·{' '}
+                          {(user.roles?.length ? user.roles : [user.role]).map((role) => t(`roles.${role}.label`)).join(' · ')} ·{' '}
                           {user.loginIdentifier}
                         </span>
                         <span className="inline-meta">
@@ -703,7 +703,7 @@ export default async function SetupPage({
                         </span>
                         <span className="inline-meta">
                           {t('setup.labels.visibleWorkspaces')}:{' '}
-                          {getVisibleWorkspacesForRole(user.role)
+                          {getVisibleWorkspacesForRole((user.roles?.[0] ?? user.role))
                             .map((workspace) => t(`nav.${workspace}`))
                             .join(' · ')}
                         </span>
@@ -796,22 +796,22 @@ export default async function SetupPage({
                   <span className="field-heading">
                     {t('setup.fields.role')} {renderRequiredMark()}
                   </span>
-                  <select
-                    name="role"
-                    defaultValue={editingUser?.role ?? 'frontdesk'}
-                  >
-                    {[
-                      'admin',
-                      'manager',
-                      'production',
-                      'frontdesk',
-                      'delivery',
-                    ].map((role) => (
-                      <option key={role} value={role}>
-                        {t(`roles.${role}.label`)}
-                      </option>
-                    ))}
-                  </select>
+                  <div className="subpanel page-stack">
+                    {['admin', 'manager', 'production', 'frontdesk', 'delivery'].map((role) => {
+                      const selectedRoles = editingUser?.roles?.length ? editingUser.roles : [editingUser?.role ?? 'frontdesk'];
+                      return (
+                        <label key={role} className="checkbox-row">
+                          <input
+                            type="checkbox"
+                            name="roles"
+                            value={role}
+                            defaultChecked={selectedRoles.includes(role as typeof selectedRoles[number])}
+                          />
+                          <span><strong>{t(`roles.${role}.label`)}</strong></span>
+                        </label>
+                      );
+                    })}
+                  </div>
                 </label>
                 <label>
                   <span className="field-heading">
@@ -839,6 +839,25 @@ export default async function SetupPage({
                       </option>
                     ))}
                   </select>
+                </label>
+              </div>
+              <div className="grid-two">
+                <label>
+                  <span className="field-heading">Email</span>
+                  <input
+                    name="email"
+                    type="email"
+                    defaultValue={editingUser?.email ?? ''}
+                    placeholder="owner@kitchen.local"
+                  />
+                </label>
+                <label>
+                  <span className="field-heading">Phone</span>
+                  <input
+                    name="phone"
+                    defaultValue={editingUser?.phone ?? ''}
+                    placeholder="+1 555 0100"
+                  />
                 </label>
               </div>
               <div className="grid-two">

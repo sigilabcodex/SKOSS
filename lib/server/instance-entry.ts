@@ -26,7 +26,7 @@ export async function detectBackupAvailability() {
 
 export async function detectInstanceGatewayState(data: AppData): Promise<InstanceGatewayState> {
   const activeUsers = data.users.filter((user) => user.active);
-  const hasAdminUser = activeUsers.some((user) => user.role === 'admin');
+  const hasAdminUser = activeUsers.some((user) => user.role === 'admin' || user.roles?.includes('admin'));
   const backupAvailable = data.instance.backupHintAvailable || await detectBackupAvailability();
 
   return {
