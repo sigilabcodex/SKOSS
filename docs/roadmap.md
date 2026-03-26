@@ -490,3 +490,18 @@ After heuristic guidance proves useful, SKOSS should add light resource awarenes
 - clearer reason codes for near/beyond capacity warnings
 
 This remains a practical planning aid, not a full optimizer.
+
+## Near-term corrective pass: first-run bootstrap hardening
+
+A corrective UX pass is now prioritized to replace pseudo-wizard behavior with a true first-run bootstrap flow.
+
+Scope of this corrective pass:
+
+- dedicated bootstrap shell without normal app chrome
+- discrete multi-step onboarding screens with progress persistence
+- stronger first-admin and team/role setup
+- inline import actions inside relevant setup steps
+- clearer boundaries between bootstrap, demo exploration, regular login, and later admin maintenance
+
+Non-goals remain unchanged: no enterprise installer, no heavy permissions framework, no broad app redesign.
+

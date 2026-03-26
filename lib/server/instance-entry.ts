@@ -10,6 +10,7 @@ export type InstanceGatewayState = {
   demoModeActive: boolean;
   backupAvailable: boolean;
   canOpenExistingInstance: boolean;
+  canRunBootstrap: boolean;
 };
 
 export async function detectBackupAvailability() {
@@ -36,6 +37,10 @@ export async function detectInstanceGatewayState(data: AppData): Promise<Instanc
     demoModeActive: data.instance.demoModeActive,
     backupAvailable,
     canOpenExistingInstance: data.instance.initialized && activeUsers.length > 0,
+    canRunBootstrap: !data.instance.initialized
+      || data.instance.onboardingStatus !== 'completed'
+      || !hasAdminUser
+      || !data.preferences.onboardingCompleted,
   };
 }
 

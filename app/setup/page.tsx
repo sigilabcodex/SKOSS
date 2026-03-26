@@ -785,7 +785,7 @@ export default async function SetupPage({
                   </span>
                   <input
                     name="loginIdentifier"
-                    placeholder="lucia@example.com"
+                    placeholder="owner"
                     defaultValue={editingUser?.loginIdentifier ?? ''}
                     required
                   />

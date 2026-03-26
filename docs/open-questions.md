@@ -130,3 +130,12 @@ These are important unresolved questions that should guide future product discov
 - How should shift logs feed back into future capacity hints (manual review only or gradual auto-suggestion)?
 - What is the lightest way to include rough material risk in feasibility without creating full inventory logic?
 - Which minimal metrics should validate stage-1 usefulness (for example, reduced late deliveries, fewer promise-date edits)?
+
+## Bootstrap roles and import depth (new questions)
+
+- Should bootstrap team setup include explicit per-workspace visibility (beyond default workspace) in v0, or stay lightweight?
+- Should bootstrap require first-password rotation for all non-admin team users created during onboarding?
+- How far should product/recipe CSV bootstrap go before variant and base-dough modeling stabilizes?
+- Should bootstrap support “draft users” (invited but inactive) as a first-class concept?
+- What minimal audit trail is required for bootstrap launch in pilot and production modes?
+

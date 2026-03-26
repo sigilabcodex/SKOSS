@@ -21,7 +21,7 @@ export default async function EntryGatewayPage({
 
   const state = await detectInstanceGatewayState(data);
 
-  if (currentUser && state.hasAdminUser && state.hasInstance) {
+  if (currentUser && state.hasAdminUser && state.hasInstance && !state.onboardingIncomplete) {
     redirect('/');
   }
 
@@ -42,14 +42,22 @@ export default async function EntryGatewayPage({
 
       {params?.error ? <p className="inline-warning">{params.error}</p> : null}
       {params?.saved === 'restored' ? <p className="inline-success">Backup restored. Continue with sign-in.</p> : null}
+      {params?.saved === 'bootstrap-complete' ? <p className="inline-success">Bootstrap complete. Sign in with your admin username.</p> : null}
 
       <section className="grid-two">
         <article className="panel page-stack">
           <h2>Start a new kitchen</h2>
-          <p>Open admin onboarding and configure workspace basics, timezone, users, roles, shifts, and optional imports.</p>
-          <Link className="button-primary" href="/setup?section=business-setup">
-            Open admin setup
-          </Link>
+          <p>Run first-use bootstrap with dedicated onboarding screens for admin, workspace basics, team, shifts, imports, and launch.</p>
+          {state.canRunBootstrap ? (
+            <Link className="button-primary" href="/bootstrap?step=1">
+              Run first-use wizard
+            </Link>
+          ) : (
+            <button className="button-primary" disabled type="button">
+              First-use wizard unavailable
+            </button>
+          )}
+          {!state.canRunBootstrap ? <p className="helper-text">Bootstrap is locked after instance initialization is completed.</p> : null}
         </article>
 
         <article className="panel page-stack">

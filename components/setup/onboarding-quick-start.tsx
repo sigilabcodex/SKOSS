@@ -45,7 +45,7 @@ export async function OnboardingQuickStart({ redirectTo, compact = false }: Onbo
           </label>
           <label>
             <span className="field-heading">{t('setup.fields.loginIdentifier')}</span>
-            <input name="loginIdentifier" placeholder="owner@kitchen.local" />
+            <input name="loginIdentifier" placeholder="owner" />
           </label>
           <div className="grid-two">
             <label>

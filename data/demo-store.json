@@ -10,7 +10,7 @@
     {
       "id": "user-lucia",
       "displayName": "Lucía",
-      "loginIdentifier": "lucia@example.com",
+      "loginIdentifier": "lucia",
       "passwordHash": "scrypt$46a6f933294c5bc7989f8620a0732131$7b42c82bc7e92cf6a3e280434cf91bfda7ab3c0fcad8b5c0d37d9c13183cd6230affc3782f69eb5ea185dc8bb7a21bae4fb9d0963311f3cb04d113776f7aa1f4",
       "passwordUpdatedAt": "2026-03-10T09:00:00Z",
       "mustChangePassword": false,
@@ -28,7 +28,7 @@
     {
       "id": "user-mateo",
       "displayName": "Mateo",
-      "loginIdentifier": "mateo@example.com",
+      "loginIdentifier": "mateo",
       "passwordHash": "scrypt$b63fccd9eed5325e74aced7bb85a47db$d3b32ca735596f05799415f252bdee388e17cf6569f9cd72cc54943ceca8ca311d7a18611f214f410f993475f493e8f6dabdce78467f1cdf1bf4d040f0300fea",
       "passwordUpdatedAt": "2026-03-10T09:10:00Z",
       "mustChangePassword": false,
@@ -45,7 +45,7 @@
     {
       "id": "user-noche",
       "displayName": "Noche",
-      "loginIdentifier": "noche@example.com",
+      "loginIdentifier": "noche",
       "passwordHash": "scrypt$3c3ae5d8af0a52fb38e1d0a243305e78$ca792d080f3aed5f36ba330a89280e4e7e7cc7199423f8206d2c2aed70483fc79e1421bfa7c080ae05417423db06b4a6e81a2dcefe8339e86c5c7fbf698c80fa",
       "passwordUpdatedAt": "2026-03-10T09:20:00Z",
       "mustChangePassword": false,
@@ -62,7 +62,7 @@
     {
       "id": "user-amanecer",
       "displayName": "Amanecer",
-      "loginIdentifier": "amanecer@example.com",
+      "loginIdentifier": "amanecer",
       "passwordHash": "scrypt$96fc545c27fc979e45f250af7f161ce7$fba4ad224beaba0fe04259aa84206cd0806394b88a60f17839836a51749f5f04c7cfc2243d0fdb9e78065a660d6b0dd7c9397fc99dfe12cf09aa130c22eabe0b",
       "passwordUpdatedAt": "2026-03-10T09:30:00Z",
       "mustChangePassword": false,
@@ -79,7 +79,7 @@
     {
       "id": "user-ruta",
       "displayName": "Ruta",
-      "loginIdentifier": "ruta@example.com",
+      "loginIdentifier": "ruta",
       "passwordHash": "scrypt$fe50abe1374f6768bc2103f6facbe55c$afddc4d8243635d98d195de6b17c56dc0be66151897d9f2983788d2e64230b229c3b862bb9ff1d6bda9f1cb4d5808a1fef858b4bee437727a7c7b79e45bf8a2e",
       "passwordUpdatedAt": "2026-03-12T14:00:00Z",
       "mustChangePassword": false,
@@ -203,10 +203,10 @@
       "notes": "Daily opening rhythm. Adjust sweet tray mix if the prior evening sold down.",
       "frequency": "daily",
       "weeklyDays": [],
-      "nextOccurrenceDate": "2026-04-05",
+      "nextOccurrenceDate": "2026-04-06",
       "active": true,
       "createdAt": "2026-03-20T18:05:00Z",
-      "updatedAt": "2026-03-25T04:12:12.391Z",
+      "updatedAt": "2026-03-26T06:20:58.412Z",
       "lines": [
         {
           "id": "template-line-counter-roll",
@@ -235,10 +235,10 @@
       "weeklyDays": [
         "sun"
       ],
-      "nextOccurrenceDate": "2026-04-05",
+      "nextOccurrenceDate": "2026-04-12",
       "active": true,
       "createdAt": "2026-03-20T18:10:00Z",
-      "updatedAt": "2026-03-21T21:01:10.210Z",
+      "updatedAt": "2026-03-26T06:20:58.412Z",
       "lines": [
         {
           "id": "template-line-market-loaf",
@@ -860,6 +860,90 @@
           "lineStatus": "pending"
         }
       ]
+    },
+    {
+      "id": "order-template-market-sunday-2026-04-05",
+      "source": "generated",
+      "status": "active",
+      "fulfillmentType": "own_delivery",
+      "customerLabel": "Sunday Market Stall",
+      "customerPhone": "+52 555 010 1880",
+      "destinationLabel": "Sunday Market Stall",
+      "dispatchNotes": "Weekly market stock. Keep sweet tray count flexible if Saturday sells out.",
+      "dueDate": "2026-04-05",
+      "productionDate": "2026-04-05",
+      "notes": "Weekly market stock. Keep sweet tray count flexible if Saturday sells out.",
+      "createdAt": "2026-03-26T06:20:58.412Z",
+      "updatedAt": "2026-03-26T06:20:58.412Z",
+      "changedInKitchen": false,
+      "visibleOnProductionBoard": true,
+      "templateId": "template-market-sunday",
+      "templateTitle": "Sunday Market Stall recurring",
+      "generatedOccurrenceDate": "2026-04-05",
+      "generatedFromTemplate": true,
+      "templateEdited": false,
+      "lines": [
+        {
+          "id": "line-1c73e071-0964-41e9-a2a0-e7a237ba09e1",
+          "lineType": "product_variant",
+          "productLabel": "Country Loaf / 800g",
+          "quantity": 6,
+          "completedQuantity": 0,
+          "unit": "pieces",
+          "lineStatus": "pending"
+        },
+        {
+          "id": "line-2c120fcd-f54b-49fa-897d-a1ced2f0152a",
+          "lineType": "draft_product",
+          "productLabel": "Savory market tray",
+          "quantity": 1,
+          "completedQuantity": 0,
+          "unit": "tray",
+          "lineStatus": "pending",
+          "note": "Draft item until the market mix is standardized."
+        }
+      ]
+    },
+    {
+      "id": "order-template-front-counter-daily-2026-04-05",
+      "source": "generated",
+      "status": "active",
+      "fulfillmentType": "pickup",
+      "customerLabel": "Front Counter opening trays",
+      "destinationLabel": "Front Counter",
+      "dispatchNotes": "Daily opening rhythm. Adjust sweet tray mix if the prior evening sold down.",
+      "dueDate": "2026-04-05",
+      "productionDate": "2026-04-05",
+      "notes": "Daily opening rhythm. Adjust sweet tray mix if the prior evening sold down.",
+      "createdAt": "2026-03-26T06:20:58.411Z",
+      "updatedAt": "2026-03-26T06:20:58.411Z",
+      "changedInKitchen": false,
+      "visibleOnProductionBoard": true,
+      "templateId": "template-front-counter-daily",
+      "templateTitle": "Front Counter opening trays recurring",
+      "generatedOccurrenceDate": "2026-04-05",
+      "generatedFromTemplate": true,
+      "templateEdited": false,
+      "lines": [
+        {
+          "id": "line-88518484-5044-4514-9ad0-6404897f35c1",
+          "lineType": "product_variant",
+          "productLabel": "Roll / Sesame",
+          "quantity": 20,
+          "completedQuantity": 0,
+          "unit": "pieces",
+          "lineStatus": "pending"
+        },
+        {
+          "id": "line-33df87fe-0e50-4d22-9923-56a3aea7c0a1",
+          "lineType": "product_variant",
+          "productLabel": "Croissant / Butter",
+          "quantity": 10,
+          "completedQuantity": 0,
+          "unit": "pieces",
+          "lineStatus": "pending"
+        }
+      ]
     }
   ],
   "wipEntries": [
@@ -1185,5 +1269,23 @@
       "createdAt": "2026-03-10T08:00:00Z",
       "updatedAt": "2026-03-19T12:00:00Z"
     }
-  ]
+  ],
+  "instance": {
+    "initialized": true,
+    "onboardingStatus": "in_progress",
+    "demoModeActive": false,
+    "environmentType": "pilot",
+    "backupHintAvailable": false,
+    "onboardingProgress": {
+      "adminAccount": true,
+      "workspaceBasics": false,
+      "timezone": false,
+      "users": true,
+      "roles": true,
+      "shifts": false,
+      "optionalImports": false
+    },
+    "operatorOnboardingByUserId": {}
+  },
+  "activities": []
 }

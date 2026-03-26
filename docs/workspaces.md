@@ -333,3 +333,17 @@ Production views should show bottleneck pressure and spillover signals so shift 
 - mobile-first card/section patterns
 - progressive detail (basic setup first, deeper setup optional)
 - no hard requirement for complete configuration before order capture
+
+## Bootstrap-to-workspace transition clarification
+
+First-run bootstrap is not a workspace.
+
+Transition behavior:
+
+- users begin in the entry gateway
+- first-use bootstrap runs in a dedicated onboarding shell
+- after step 8 (launch), bootstrap ends and users return to normal sign-in + role-shaped workspace entry
+- ongoing maintenance remains in regular Setup workspace sections, not in bootstrap screens
+
+This separation keeps installation/setup intent distinct from daily operator workflows.
+
