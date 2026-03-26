@@ -311,3 +311,15 @@ The entry gateway (first-contact layer) should follow the same calm and section-
 - state hints that are informative, not alarming (instance/admin/onboarding/demo/backup)
 
 The gateway should reduce first-run anxiety and avoid forcing login/setup before user intent is known.
+
+## 13. Dedicated bootstrap shell behavior
+
+First-run bootstrap now uses a dedicated onboarding shell behavior:
+
+- hide normal workspace side navigation
+- hide regular workspace links and setup trees
+- keep focus on one onboarding step per screen
+- show compact progress context and step actions (back/next/skip/launch)
+
+This is intentionally separate from normal app chrome so first-use configuration feels like a deliberate instance bootstrap action, not a routine in-app settings page.
+

@@ -1,6 +1,8 @@
 import { loginAction } from '@/lib/server/actions';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { readStore } from '@/lib/server/store';
+import { detectInstanceGatewayState } from '@/lib/server/instance-entry';
+import Link from 'next/link';
 
 export default async function LoginPage({
   searchParams,
@@ -8,6 +10,7 @@ export default async function LoginPage({
   searchParams?: Promise<{ error?: string; redirectTo?: string }>;
 }) {
   const [{ t }, data, params] = await Promise.all([getServerTranslator(), readStore(), searchParams]);
+  const gatewayState = await detectInstanceGatewayState(data);
   const activeUsers = data.users.filter((user) => user.active);
   const redirectTo = params?.redirectTo ?? '/';
 
@@ -37,7 +40,7 @@ export default async function LoginPage({
         <input type="hidden" name="redirectTo" value={redirectTo} />
         <label>
           <span className="field-heading">{t('login.fields.loginIdentifier')} <span className="setup-required-mark" aria-hidden="true">*</span></span>
-          <input name="loginIdentifier" list="login-user-options" placeholder="lucia@example.com" required />
+          <input name="loginIdentifier" list="login-user-options" placeholder="owner" required />
         </label>
         <label>
           <span className="field-heading">{t('login.fields.password')} <span className="setup-required-mark" aria-hidden="true">*</span></span>
@@ -49,6 +52,11 @@ export default async function LoginPage({
           ))}
         </datalist>
         <button type="submit" className="button-primary">{t('login.submit')}</button>
+        {gatewayState.canRunBootstrap ? (
+          <p className="helper-text no-margin">
+            Need to initialize this instance first? <Link href="/bootstrap?step=1" className="inline-link">Run first-use wizard</Link>
+          </p>
+        ) : null}
       </form>
     </div>
   );

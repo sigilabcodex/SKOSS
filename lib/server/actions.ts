@@ -101,6 +101,26 @@ function quoteLabel(label: string) {
   return `"${label}"`;
 }
 
+function slugifyUsername(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9._-]/g, '')
+    .slice(0, 40);
+}
+
+function nextBootstrapStep(current: number, direction: 'next' | 'back' | 'stay') {
+  if (direction === 'back') {
+    return Math.max(1, current - 1);
+  }
+
+  if (direction === 'stay') {
+    return current;
+  }
+
+  return Math.min(8, current + 1);
+}
+
 
 export async function resetDemoWorkspaceAction() {
   if (!isNonProductionMode()) {
@@ -242,6 +262,180 @@ export async function saveOnboardingPreferencesAction(formData: FormData) {
   redirect('/?welcome=1');
 }
 
+export async function saveBootstrapStepAction(formData: FormData) {
+  const data = await readStore();
+  const step = Number(formData.get('step') ?? 1);
+  const intent = String(formData.get('intent') ?? 'next') as 'next' | 'back' | 'stay' | 'launch' | 'skip';
+
+  data.instance.initialized = true;
+  data.instance.onboardingStatus = 'in_progress';
+
+  if (step === 1) {
+    data.instance.onboardingProgress.workspaceBasics = true;
+  }
+
+  if (step === 2) {
+    const displayName = String(formData.get('adminDisplayName') ?? '').trim();
+    const username = slugifyUsername(String(formData.get('adminUsername') ?? ''));
+    const password = String(formData.get('adminPassword') ?? '').trim();
+
+    if (!displayName || !username || !password) {
+      redirect('/bootstrap?step=2&error=' + encodeURIComponent('Add admin name, username, and password.'));
+    }
+
+    const now = new Date().toISOString();
+    const existingAdmin = data.users.find((user) => user.role === 'admin');
+    const duplicate = data.users.find(
+      (user) => user.id !== existingAdmin?.id && user.loginIdentifier.toLowerCase() === username,
+    );
+    if (duplicate) {
+      redirect('/bootstrap?step=2&error=' + encodeURIComponent('Username is already in use.'));
+    }
+
+    if (existingAdmin) {
+      existingAdmin.displayName = displayName;
+      existingAdmin.loginIdentifier = username;
+      existingAdmin.passwordHash = hashPassword(password);
+      existingAdmin.passwordUpdatedAt = now;
+      existingAdmin.active = true;
+      existingAdmin.updatedAt = now;
+    } else {
+      data.users.push({
+        id: `user-${crypto.randomUUID()}`,
+        displayName,
+        loginIdentifier: username,
+        passwordHash: hashPassword(password),
+        passwordUpdatedAt: now,
+        mustChangePassword: false,
+        role: 'admin',
+        workspaceId: data.workspace.id,
+        defaultWorkspace: 'setup',
+        active: true,
+        preferences: {
+          defaultWorkspace: 'setup',
+        },
+        createdAt: now,
+        updatedAt: now,
+      });
+    }
+
+    data.instance.onboardingProgress.adminAccount = true;
+    data.instance.onboardingProgress.users = true;
+    data.instance.onboardingProgress.roles = true;
+  }
+
+  if (step === 3) {
+    const businessName = String(formData.get('businessName') ?? '').trim();
+    const timezone = String(formData.get('timezone') ?? '').trim();
+    const locale = String(formData.get('locale') ?? '').trim();
+    const preset = String(formData.get('preset') ?? '').trim();
+    const operatingMode = String(formData.get('operatingMode') ?? '').trim();
+    const theme = String(formData.get('theme') ?? '').trim();
+
+    if (!businessName) {
+      redirect('/bootstrap?step=3&error=' + encodeURIComponent('Business name is required.'));
+    }
+
+    data.workspace.name = businessName;
+    data.workspace.timezone = timezone || data.workspace.timezone;
+    data.preferences.locale = isSupportedLocale(locale) ? locale : data.preferences.locale;
+    data.preferences.preset = isSupportedPreset(preset) ? preset : data.preferences.preset;
+    if (supportedOperatingModes.includes(operatingMode as (typeof supportedOperatingModes)[number])) {
+      data.preferences.operatingMode = operatingMode as (typeof supportedOperatingModes)[number];
+    }
+    if (supportedThemes.includes(theme as (typeof supportedThemes)[number])) {
+      data.preferences.theme = theme as (typeof supportedThemes)[number];
+    }
+    data.instance.onboardingProgress.workspaceBasics = true;
+    data.instance.onboardingProgress.timezone = Boolean(data.workspace.timezone);
+  }
+
+  if (step === 4) {
+    const now = new Date().toISOString();
+    for (const row of [1, 2, 3]) {
+      const displayName = String(formData.get(`teamDisplayName${row}`) ?? '').trim();
+      const username = slugifyUsername(String(formData.get(`teamUsername${row}`) ?? ''));
+      const role = String(formData.get(`teamRole${row}`) ?? 'frontdesk');
+      const defaultWorkspace = String(formData.get(`teamWorkspace${row}`) ?? 'orders');
+      const enabled = formData.get(`teamEnabled${row}`) !== null;
+
+      if (!displayName || !username) {
+        continue;
+      }
+
+      const existing = data.users.find((user) => user.loginIdentifier.toLowerCase() === username);
+      if (existing) {
+        existing.displayName = displayName;
+        existing.role = ['admin', 'manager', 'production', 'frontdesk', 'delivery'].includes(role) ? (role as typeof existing.role) : existing.role;
+        existing.defaultWorkspace = isPrimaryWorkspaceSurface(defaultWorkspace as typeof existing.defaultWorkspace)
+          ? (defaultWorkspace as typeof existing.defaultWorkspace)
+          : existing.defaultWorkspace;
+        existing.active = enabled;
+        existing.updatedAt = now;
+      } else {
+        data.users.push({
+          id: `user-${crypto.randomUUID()}`,
+          displayName,
+          loginIdentifier: username,
+          passwordHash: hashPassword('skoss-demo'),
+          passwordUpdatedAt: now,
+          mustChangePassword: true,
+          role: ['admin', 'manager', 'production', 'frontdesk', 'delivery'].includes(role)
+            ? (role as 'admin' | 'manager' | 'production' | 'frontdesk' | 'delivery')
+            : 'frontdesk',
+          workspaceId: data.workspace.id,
+          defaultWorkspace: isPrimaryWorkspaceSurface(defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
+            ? (defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
+            : 'orders',
+          active: enabled,
+          preferences: {
+            defaultWorkspace: isPrimaryWorkspaceSurface(defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
+              ? (defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
+              : 'orders',
+          },
+          createdAt: now,
+          updatedAt: now,
+        });
+      }
+    }
+    data.instance.onboardingProgress.users = true;
+    data.instance.onboardingProgress.roles = true;
+  }
+
+  if (step === 5) {
+    data.instance.onboardingProgress.shifts = true;
+  }
+
+  if (step === 6 || step === 7) {
+    data.instance.onboardingProgress.optionalImports = true;
+  }
+
+  if (intent === 'launch') {
+    if (!data.instance.onboardingProgress.adminAccount) {
+      redirect('/bootstrap?step=2&error=' + encodeURIComponent('Create an admin before launch.'));
+    }
+
+    data.preferences.onboardingCompleted = true;
+    data.preferences.completedAt = data.preferences.completedAt ?? new Date().toISOString();
+    data.preferences.updatedAt = new Date().toISOString();
+    data.instance.onboardingStatus = 'completed';
+    data.instance.demoModeActive = false;
+    data.session.currentUserId = undefined;
+    await writeStore(data);
+    revalidateAllWorkspaces();
+    redirect('/entry?saved=bootstrap-complete');
+  }
+
+  await writeStore(data);
+  revalidateAllWorkspaces();
+  if (intent === 'skip') {
+    redirect(`/bootstrap?step=${Math.min(8, step + 1)}&saved=progress`);
+  }
+
+  const nextStep = nextBootstrapStep(step, intent === 'back' ? 'back' : intent === 'stay' ? 'stay' : 'next');
+  redirect(`/bootstrap?step=${nextStep}&saved=progress`);
+}
+
 
 export async function saveUserPreferencesAction(formData: FormData) {
   const data = await readStore();
@@ -337,7 +531,7 @@ export async function loginAction(formData: FormData) {
 
   if (gatewayState.onboardingIncomplete && (user.role === 'admin' || user.role === 'manager')) {
     revalidateAllWorkspaces();
-    redirect('/setup?section=business-setup');
+    redirect('/bootstrap?step=1');
   }
 
   revalidateAllWorkspaces();

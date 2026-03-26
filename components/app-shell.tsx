@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { headers } from 'next/headers';
 import { PrimaryNav } from '@/components/primary-nav';
 import { UserMenu } from '@/components/user-menu';
 import { getServerTranslator } from '@/lib/i18n/server';
@@ -12,6 +13,26 @@ export async function AppShell({ children }: { children?: ReactNode }) {
   const { currentUser, visibleWorkspaces } = await getCurrentUserContext(data);
   const showNonProductionBanner = isNonProductionMode();
   const runtimeModeLabel = getRuntimeModeLabel();
+  const headerStore = await headers();
+  const requestPath =
+    headerStore.get('next-url')
+    ?? headerStore.get('x-invoke-path')
+    ?? headerStore.get('x-matched-path')
+    ?? '';
+  const isBootstrapRoute = requestPath.startsWith('/bootstrap');
+
+  if (isBootstrapRoute) {
+    return (
+      <div className="shell onboarding-shell">
+        {showNonProductionBanner ? (
+          <div className="runtime-banner" role="status">
+            {runtimeModeLabel} · non-production data only
+          </div>
+        ) : null}
+        <main className="shell-main onboarding-shell-main">{children}</main>
+      </div>
+    );
+  }
 
   return (
     <div className="shell">

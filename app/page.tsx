@@ -1,14 +1,12 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { OnboardingAssistant } from '@/components/setup/onboarding-assistant';
-import { ImportHub } from '@/components/setup/import-hub';
 import { ActivityFeed } from '@/components/activity-feed';
 import { formatDateLabel } from '@/lib/domain/formatters';
 import { getPresetExperience, type WorkspaceLinkKey } from '@/lib/business-presets';
 import { getWorkspaceSummary } from '@/lib/server/demo-data';
 import { getCurrentUserContext } from '@/lib/server/auth';
 import { detectInstanceGatewayState, shouldRouteToEntryGateway } from '@/lib/server/instance-entry';
-import { getRequestPreferences, getServerTranslator } from '@/lib/i18n/server';
+import { getServerTranslator } from '@/lib/i18n/server';
 import { readStore } from '@/lib/server/store';
 import { ArrowRightIcon, CustomersIcon, HandoffIcon, OrdersIcon, ProductionIcon, SetupIcon, SparklesIcon, TimelineIcon } from '@/components/ui-icons';
 
@@ -20,10 +18,9 @@ type QuickLink = {
 };
 
 export default async function HomePage() {
-  const [summary, { t, locale, preset }, requestPreferences, data, userContext] = await Promise.all([
+  const [summary, { t, locale, preset }, data, userContext] = await Promise.all([
     getWorkspaceSummary(),
     getServerTranslator(),
-    getRequestPreferences(),
     readStore(),
     getCurrentUserContext(),
   ]);
@@ -87,33 +84,7 @@ export default async function HomePage() {
   const orderedQuickLinks = orderedQuickLinkKeys.map((key) => quickLinkMap[key]);
 
   if (!summary.preferences.onboardingCompleted) {
-    return (
-      <div className="page-stack">
-        <section className="hero-card">
-          <div className="hero-header">
-            <div>
-              <p className="eyebrow">{t('setupAssistant.eyebrow')}</p>
-              <h1>{t('setupAssistant.firstRunTitle')}</h1>
-              <p className="lede">{t('setupAssistant.firstRunIntro')}</p>
-            </div>
-            <div className="hero-note">
-              <SparklesIcon className="callout-icon" />
-              <div>
-                <strong>{t(`presets.${requestPreferences.preset}.label`)}</strong>
-                <p className="helper-text no-margin">{t('setupAssistant.notLocked')}</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <OnboardingAssistant
-          businessName={summary.workspace.name}
-          preferences={summary.preferences}
-          variant="first-run"
-        />
-        <ImportHub redirectTo="/" compact />
-      </div>
-    );
+    redirect('/bootstrap?step=1');
   }
 
   return (

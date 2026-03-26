@@ -153,3 +153,27 @@ For pilot teams, this clarifies first contact:
 2. explicit operator onboarding cards per role/workspace
 3. backup manifest/version metadata checks
 4. optional “open existing instance” auto-highlight when state is stable
+
+## Corrective pass: true first-run bootstrap flow
+
+The previous onboarding behaved like a long setup dashboard. It mixed onboarding, setup maintenance, and imports in one scrolling page, while still showing normal app chrome.
+
+A corrective bootstrap pass now defines onboarding as a dedicated route (`/bootstrap`) with a focused multi-step flow:
+
+1. Welcome / intent confirmation
+2. Create first admin (username-first login identifier)
+3. Workspace basics
+4. Team and roles (multiple users, explicit role/default-workspace assignment)
+5. Shifts
+6. Products/recipes-oriented setup + inline import support
+7. Customers/suppliers/materials + inline import support
+8. Review and launch
+
+Behavior rules now clarified:
+
+- bootstrap is instance-level and separated from normal settings and workspace navigation
+- progress is saved step-by-step and supports back/next + skip where safe
+- launch completes onboarding and returns the instance to normal login/entry behavior
+- bootstrap entry should be shown only while instance state indicates first-use or incomplete onboarding
+- demo exploration remains a separate entry path and should not leak seeded identity into bootstrap
+
