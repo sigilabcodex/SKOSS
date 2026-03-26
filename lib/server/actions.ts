@@ -37,7 +37,7 @@ import {
   validateWipEntry,
 } from '@/lib/server/demo-data';
 import { getCurrentUserContext, loggedOutSessionValue, sessionUserCookieName } from '@/lib/server/auth';
-import { readStore, writeStore } from '@/lib/server/store';
+import { readSeedStore, readStore, reseedRuntimeStore, writeStore } from '@/lib/server/store';
 import { appendActivity } from '@/lib/server/activity';
 import { hashPassword, verifyPassword } from '@/lib/server/passwords';
 import {
@@ -52,7 +52,6 @@ import { isSupportedLocale, isSupportedPreset, localeCookieName, supportedLocale
 import { themeCookieName } from '@/lib/theme';
 import { getDefaultWorkspaceForRole, isPrimaryWorkspaceSurface } from '@/lib/workspaces';
 import { isNonProductionMode } from '@/lib/server/runtime-mode';
-import { demoSeed } from '@/data/demo-seed';
 import type { AppData } from '@/lib/domain/types';
 import { detectInstanceGatewayState, shouldRouteToEntryGateway } from '@/lib/server/instance-entry';
 
@@ -127,7 +126,7 @@ export async function resetDemoWorkspaceAction() {
     redirect('/setup?error=' + encodeURIComponent('Demo reset is disabled in production mode.'));
   }
 
-  await writeStore(demoSeed);
+  await reseedRuntimeStore();
   revalidateAllWorkspaces();
   redirect('/setup?saved=demo-reset');
 }
@@ -151,7 +150,7 @@ export async function launchDemoModeAction() {
     redirect('/entry?error=' + encodeURIComponent('Demo launch is disabled in production mode.'));
   }
 
-  const data = structuredClone(demoSeed);
+  const data = await readSeedStore();
   data.instance.demoModeActive = true;
   data.instance.initialized = true;
   data.instance.environmentType = 'demo';
@@ -180,7 +179,7 @@ export async function restoreInstanceFromBackupAction(formData: FormData) {
 
   const restoredData = parsed;
   restoredData.instance = {
-    ...(restoredData.instance ?? demoSeed.instance),
+    ...(restoredData.instance ?? (await readSeedStore()).instance),
     initialized: true,
     backupHintAvailable: true,
     lastRestoreAt: new Date().toISOString(),
