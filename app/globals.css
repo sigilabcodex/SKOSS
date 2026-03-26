@@ -236,6 +236,20 @@ textarea {
   display: block;
 }
 
+.runtime-banner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45rem 1rem;
+  background: color-mix(in srgb, var(--warning-soft) 72%, var(--surface));
+  border-bottom: 1px solid color-mix(in srgb, var(--warning-border) 55%, var(--border));
+  color: var(--warning-ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
 .shell-header {
   position: sticky;
   top: 0;

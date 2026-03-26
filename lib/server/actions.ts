@@ -51,6 +51,8 @@ import {
 import { isSupportedLocale, isSupportedPreset, localeCookieName, supportedLocales, presetCookieName, supportedPresets } from '@/lib/i18n/config';
 import { themeCookieName } from '@/lib/theme';
 import { getDefaultWorkspaceForRole, isPrimaryWorkspaceSurface } from '@/lib/workspaces';
+import { isNonProductionMode } from '@/lib/server/runtime-mode';
+import { demoSeed } from '@/data/demo-seed';
 
 function sortOrders(left: { productionDate: string; updatedAt: string }, right: { productionDate: string; updatedAt: string }) {
   return left.productionDate === right.productionDate
@@ -95,6 +97,17 @@ function shouldAllowEmpty(formData: FormData) {
 
 function quoteLabel(label: string) {
   return `"${label}"`;
+}
+
+
+export async function resetDemoWorkspaceAction() {
+  if (!isNonProductionMode()) {
+    redirect('/setup?error=' + encodeURIComponent('Demo reset is disabled in production mode.'));
+  }
+
+  await writeStore(demoSeed);
+  revalidateAllWorkspaces();
+  redirect('/setup?saved=demo-reset');
 }
 
 export async function saveOnboardingPreferencesAction(formData: FormData) {

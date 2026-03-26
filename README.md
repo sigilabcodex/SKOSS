@@ -337,6 +337,9 @@ npm run dev
 
 Then open `http://localhost:3000`.
 
+For safe local exploration, keep `SKOSS_RUNTIME_MODE=demo` in `.env.local`.
+In non-production runtime modes, the shell shows a visible banner and Setup includes a one-click demo reseed action.
+
 ### Available commands
 
 ```bash
