@@ -2,109 +2,90 @@
 
 ## Status
 
-Draft UX direction aligned with existing workspace and UI-system docs.
+Draft UX proposal aligned with `ui-system.md` and `workspaces.md`.
 
 ## UX objective
 
-Expose capacity configuration with low friction, so teams get useful promise guidance without building a heavy admin tree.
+Make capacity setup usable in minutes, not hours, while giving immediate value to order intake promise guidance.
 
-## Design principles (aligned to SKOSS)
+## Constraints to preserve
 
-- operator-first, not admin-first
-- setup should improve daily work, not block it
-- mobile-first flows with compact sections
-- practical labels and visible status
-- progressive detail: basic first, advanced optional
+- mobile-first and touch-friendly
+- section-based structure (not deep trees)
+- low typing burden
+- incomplete setup must not block order capture
+- operator language over ERP jargon
 
-## Proposed information architecture
+## Proposed setup IA (section-based)
 
-Within **Setup workspace**, add a compact section group:
+Inside **Setup workspace**, add a compact "Capacity & Promise" section with five sub-sections:
 
-1. **Capacity overview**
-   - confidence level
-   - configured bottlenecks
-   - quick warnings about missing key setup
+1. **Overview**
+   - current confidence level
+   - configured bottlenecks count
+   - missing critical hints
 2. **Shift effort**
-   - role-level capacity per shift/day
+   - role-based per-shift/day envelopes
 3. **Resources**
-   - ovens, mixers, prep tables, fermentation/cold space, packing stations
+   - ovens, mixers, prep tables, fermentation/cold, packaging, dispatch
 4. **Product capacity hints**
-   - product/family day limits, batch/yield hints
-5. **Promise guidance settings** (lightweight)
-   - warning thresholds
+   - per product/family day/shift hints
+   - optional batch/yield/load hints
+5. **Warning thresholds**
+   - near-capacity threshold
+   - high-strain threshold
    - default safety buffer
 
-Keep each area editable in short forms/cards rather than deep nested pages.
+## Mobile-first interaction design
+
+- one section visible at a time
+- card-form rows with large touch targets
+- simple add/edit flows
+- sticky save bar for long forms
+- compact status chips for warnings/confidence
+
+## Desktop behavior (same structure)
+
+- optional side-by-side panels for comparison
+- no separate desktop-only information architecture
+- preserve same labels and flow as mobile
 
 ## Sales workspace integration
 
-Order intake should show feasibility guidance inline, not in a hidden admin panel.
+Order intake should include inline feasibility UI:
 
-On order create/edit:
+- requested slot field
+- status chip (`fulfillable_from_stock`, `requires_production`, etc.)
+- one-line reason label
+- suggested safer slot when needed
+- explicit override with note
 
-- show a compact status chip (`enough stock`, `requires production`, `near capacity`, etc.)
-- show suggested promise date/time when risk exists
-- show short reason line tied to bottleneck or missing setup
-- allow override with note when warning is high
-
-This keeps intake fast while reducing unrealistic commitments.
+No context switch to setup is required.
 
 ## Production workspace integration
 
-Production board/day view can surface:
+Production/day view should show:
 
-- top bottlenecks for the day
+- top bottleneck resources
 - overloaded windows
-- expected spillover to next shift/day
+- potential spillover to next shift/day
 
-This helps leads resolve pressure before intake issues become failures.
+This supports earlier operational decisions and cleaner handoff.
 
-## Mobile vs desktop behavior
+## Setup-light defaults
 
-## Mobile-first behavior
+Default onboarding sequence:
 
-- section list with progressive disclosure
-- one resource card per screen chunk
-- sticky save bar / clear feedback
-- compact chips for warning states
-- avoid wide comparison tables as default
+1. set one global day/shift envelope
+2. add at least one real bottleneck (often oven)
+3. add product-family hints for top 5 products
+4. refine only when warning quality is poor
 
-## Desktop enhancement
-
-- side-by-side comparison where useful (shift effort vs resource load)
-- faster scanning of multi-resource status
-- still preserve same section structure and vocabulary
-
-No separate desktop-only admin paradigm.
-
-## Progressive setup path
-
-Recommended onboarding path:
-
-1. enter day/shift capacity envelopes (5 minutes)
-2. add 1-3 real bottlenecks (for many bakeries: mixer + oven + pack)
-3. optionally map product families to basic capacity hints
-4. refine over time based on observed warnings
-
-Users should gain value after step 1.
-
-## Copy guidance
-
-Prefer practical wording:
-
-- "Shift effort" not "labor planning matrix"
-- "Bake bottleneck" not "critical work center"
-- "Suggested promise" not "finite-capacity commit date"
-
-## Error and warning behavior
-
-- missing setup should show as advisories, not hard errors
-- promises can still be entered with manual confirmation
-- warnings should be persistent enough to support handoff accountability
+Teams should get value at step 1.
 
 ## Anti-patterns to avoid
 
-- deep setup hierarchies with many required dependencies
-- mandatory resource coding systems before first order
-- blocking order flow due to incomplete non-critical setup
-- optimizer jargon in frontline screens
+- deep navigation hierarchies for setup
+- mandatory full resource catalog before first estimate
+- table-heavy desktop-only admin screens
+- blocking order entry because optional hints are missing

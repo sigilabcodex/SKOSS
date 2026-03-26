@@ -204,11 +204,11 @@ Updated conceptual flow:
 
 ### Capacity-aware checkpoint outputs
 
-- `enough_stock`
+- `fulfillable_from_stock`
 - `requires_production`
-- `requires_extra_shift_effort`
 - `near_capacity`
-- `beyond_safe_capacity`
+- `high_strain`
+- `not_safely_fulfillable`
 
 And optionally:
 

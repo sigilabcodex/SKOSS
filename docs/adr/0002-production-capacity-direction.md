@@ -2,75 +2,83 @@
 
 - **Status:** Accepted (documentation direction)
 - **Date:** 2026-03-25
-- **Related:** `docs/production-capacity-model.md`, `docs/promise-date-and-feasibility.md`, `docs/capacity-resources.md`
+- **Related:** `docs/production-capacity-model.md`, `docs/promise-date-and-feasibility.md`, `docs/capacity-resources.md`, `docs/setup-capacity-and-resources-ux.md`
 
 ## Context
 
-SKOSS v0 focuses on the operational loop from orders to production and handoff. The documentation already supports grouped demand, WIP, and shift context, but does not yet define a formal approach for capacity-aware promise guidance.
+SKOSS already defines the demand-to-production-to-handoff loop and treats WIP as first-class. What is missing is a formal, practical way to estimate feasibility and suggest promise dates during order intake.
 
-Teams need practical help answering "can we promise this date/time?" during intake without turning SKOSS into a heavy manufacturing ERP.
+The system must stay operator-first and progressive. It cannot require perfect setup or become an ERP scheduler before proving value.
 
 ## Decision
 
-SKOSS adopts a staged capacity direction:
+Adopt a staged capacity model.
 
-1. **Stage 1: heuristic/day-level capacity**
-   - product or product-family envelopes
-   - WIP-aware gap estimation
-   - non-blocking warnings
-   - suggested promise window
-2. **Stage 2: resource-aware planning**
-   - key human + equipment bottlenecks
-   - simple availability windows
-   - clearer bottleneck reasons
-3. **Stage 3: optional schedule refinement**
-   - queue/sequencing improvements as optional layer
-   - not required for core operational value
+### Stage 1 — heuristic capacity (near-term)
 
-## Why this decision
+- per-day/per-shift envelopes
+- product/product-family capacity hints
+- stock + WIP subtraction before capacity check
+- non-blocking feasibility warnings and suggested promise windows
 
-- aligns with operator-first and progressive-adoption philosophy
-- gives near-term value with low setup burden
-- remains compatible with low-spec single-app direction
-- avoids premature architecture and optimizer complexity
-- preserves reversibility while domain detail matures
+### Stage 2 — resource-aware capacity (mid-term)
 
-## What we are explicitly not doing now
+- key human shift effort by role
+- key equipment and bottleneck resources
+- simple stage/resource mapping for clearer reason labels
 
-- no full finite-capacity scheduling optimizer
-- no MRP-style planning explosion
-- no mandatory complete recipe/process setup
-- no microservice split for planning
-- no hard dependency on advanced infrastructure
+### Stage 3 — scheduling refinement (optional future)
+
+- optional timeline/queue refinement
+- optional sequencing support
+- explicitly not required for core SKOSS value
+
+## Rationale
+
+Why not start with a scheduler:
+
+- high setup burden and fragile assumptions early
+- risks blocking operations when data is incomplete
+- increases complexity before operator trust is established
+
+Why not build MRP:
+
+- MRP scope exceeds current product intent
+- introduces ERP-heavy concepts too early
+- conflicts with progressive adoption and low-friction intake goals
+
+Why this stays aligned with SKOSS:
+
+- practical heuristics first
+- non-blocking guidance over rigid automation
+- reversible increments with real-kitchen feedback
+- compatible with low-spec/self-host deployment constraints
 
 ## Consequences
 
 ### Positive
 
-- faster path to feasible promise guidance in intake
-- better visibility of overload risk
-- preserves practical UX and kitchen-readable language
-- supports incremental model improvement with real data
+- immediate promise-date guidance can be delivered in a narrow PR
+- overload risk becomes visible earlier in sales and production flows
+- keeps domain language kitchen-readable
 
 ### Tradeoffs
 
-- early estimates are approximate, not exact
-- confidence indicators are required to avoid false precision
-- some teams may still rely on manual override until stage 2 matures
+- early guidance is approximate
+- confidence and reason labels are mandatory to avoid false precision
+- overrides remain important until Stage 2 matures
 
-## Validation approach
+## What is explicitly out of scope now
 
-Early validation should focus on:
-
-- reduction of unrealistic promise commitments
-- operator trust in warnings and suggested windows
-- usefulness under incomplete setup
-- minimal overhead for setup maintenance
+- finite-capacity optimizer
+- full timeline scheduler as required core behavior
+- mandatory complete recipe/process modeling
+- architecture split into planning microservices
 
 ## Revisit triggers
 
-Revisit this ADR when:
+Revisit when:
 
-- stage 1 is implemented and field-tested
-- resource-aware signals show consistent demand for deeper sequencing
-- operational evidence justifies stage 3 complexity
+- Stage 1 is implemented and measured
+- field evidence shows Stage 2 bottleneck signals are insufficient
+- specific workflows prove Stage 3 scheduling value
