@@ -30,9 +30,9 @@ export function getWorkspacePriorityForRole(role: UserRole): WorkspaceSurface[] 
     case 'manager':
       return ['timeline', 'orders', 'production', 'handoff', 'customers', 'setup', 'home'];
     case 'production':
-      return ['timeline', 'production', 'handoff', 'orders', 'home'];
+      return ['timeline', 'production', 'handoff', 'home'];
     case 'frontdesk':
-      return ['timeline', 'orders', 'customers', 'handoff', 'home'];
+      return ['timeline', 'orders', 'customers', 'home'];
     case 'delivery':
       return ['timeline', 'handoff', 'customers', 'orders', 'home'];
     default:

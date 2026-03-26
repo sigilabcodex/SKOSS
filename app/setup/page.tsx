@@ -17,12 +17,14 @@ import {
   updateRecipeAction,
   updateSupplierAction,
   updateUserAction,
+  resetDemoWorkspaceAction,
 } from '@/lib/server/actions';
 import { getSetupWorkspace } from '@/lib/server/demo-data';
 import { getCurrentUserContext } from '@/lib/server/auth';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { getVisibleWorkspacesForRole } from '@/lib/workspaces';
 import { ThemeSwitcher } from '@/components/theme-switcher';
+import { getRuntimeMode, isNonProductionMode } from '@/lib/server/runtime-mode';
 
 const basicUnits = [
   'g',
@@ -154,6 +156,10 @@ async function SavedMessage({ saved }: { saved?: string }) {
     return <p className="inline-success">{t('setup.saved.import')}</p>;
   }
 
+  if (saved === 'demo-reset') {
+    return <p className="inline-success">Demo workspace reseeded successfully.</p>;
+  }
+
   return null;
 }
 
@@ -169,6 +175,8 @@ export default async function SetupPage({
     getCurrentUserContext(),
   ]);
   const today = new Date().toISOString().slice(0, 10);
+  const runtimeMode = getRuntimeMode();
+  const canResetDemoWorkspace = isNonProductionMode();
 
   if (!userContext.currentUser) {
     redirect('/login?redirectTo=/setup');
@@ -377,6 +385,26 @@ export default async function SetupPage({
           })}
         </p>
       ) : null}
+
+      <section className="panel page-stack">
+        <div className="table-header-row">
+          <div>
+            <h2>Local demo data safety</h2>
+            <p className="helper-text">
+              Runtime mode: <strong>{runtimeMode}</strong>. Use reset only for local/pilot testing so real records stay separate.
+            </p>
+          </div>
+        </div>
+        {canResetDemoWorkspace ? (
+          <form action={resetDemoWorkspaceAction}>
+            <button type="submit" className="button-secondary compact-button">
+              Reset demo workspace to seed data
+            </button>
+          </form>
+        ) : (
+          <p className="inline-warning">Demo reset is disabled in production mode.</p>
+        )}
+      </section>
 
       <section className="panel page-stack setup-section-nav-panel">
         <div className="table-header-row">
