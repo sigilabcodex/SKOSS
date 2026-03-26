@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation';
 import { CsvImportCard } from '@/components/setup/csv-import-card';
+import { TeamRosterBuilder } from '@/components/setup/team-roster-builder';
+import { TimezoneSelect } from '@/components/setup/timezone-select';
 import { saveBootstrapStepAction, importCsvEntitiesAction } from '@/lib/server/actions';
 import { readStore } from '@/lib/server/store';
 import { detectInstanceGatewayState } from '@/lib/server/instance-entry';
@@ -15,28 +17,25 @@ export default async function BootstrapPage({
 }: {
   searchParams?: Promise<{ step?: string; error?: string; saved?: string }>;
 }) {
-  const [data, params] = await Promise.all([
-    readStore(),
-    searchParams,
-  ]);
+  const [data, params] = await Promise.all([readStore(), searchParams]);
   const state = await detectInstanceGatewayState(data);
 
   if (!state.canRunBootstrap) {
-    redirect('/entry?error=' + encodeURIComponent('First-use bootstrap is locked for initialized instances.'));
+    redirect('/entry?error=' + encodeURIComponent('Setup is locked for initialized instances.'));
   }
 
   const step = bootstrapStep(Number(params?.step ?? 1));
   const progress = Math.round((step / totalSteps) * 100);
-  const adminUser = data.users.find((user) => user.role === 'admin');
+  const adminUser = data.users.find((user) => user.role === 'admin' || user.roles?.includes('admin'));
 
   return (
     <div className="page-stack bootstrap-flow">
       <section className="hero-card">
         <div className="hero-header">
           <div>
-            <p className="eyebrow">Instance bootstrap</p>
-            <h1>First-use wizard</h1>
-            <p className="lede">Complete setup step-by-step. This flow is separate from normal workspaces and app navigation.</p>
+            <p className="eyebrow">First-time setup</p>
+            <h1>Start your kitchen workspace</h1>
+            <p className="lede">A short setup for your first day. You can change every setting later in Setup.</p>
           </div>
           <span className="summary-pill">Step {step} of {totalSteps}</span>
         </div>
@@ -45,7 +44,7 @@ export default async function BootstrapPage({
         </div>
       </section>
 
-      {params?.saved === 'progress' ? <p className="inline-success">Progress saved.</p> : null}
+      {params?.saved === 'progress' ? <p className="inline-success">Saved.</p> : null}
       {params?.error ? <p className="inline-warning">{params.error}</p> : null}
 
       <form action={saveBootstrapStepAction} className="panel page-stack">
@@ -53,27 +52,26 @@ export default async function BootstrapPage({
 
         {step === 1 ? (
           <section className="page-stack">
-            <h2>Welcome and confirmation</h2>
-            <p>This is an instance-level action. Use it for first-time bootstrap, not for day-to-day settings changes.</p>
-            <ul className="stack-list">
-              <li><strong>Safe to pause:</strong> progress is persisted after each step.</li>
-              <li><strong>Safe to skip:</strong> optional sections can be skipped and completed later in Setup.</li>
-              <li><strong>Separate from demo:</strong> demo mode and regular login stay outside this flow.</li>
-            </ul>
-          </section>
-        ) : null}
-
-        {step === 2 ? (
-          <section className="page-stack">
-            <h2>Create first admin</h2>
+            <h2>Identity</h2>
             <div className="grid-two">
               <label>
-                <span className="field-heading">Admin name <span className="setup-required-mark" aria-hidden="true">*</span></span>
-                <input name="adminDisplayName" defaultValue={adminUser?.displayName ?? ''} placeholder="Owner / lead" required />
+                <span className="field-heading">Full name <span className="setup-required-mark" aria-hidden="true">*</span></span>
+                <input name="adminDisplayName" defaultValue={adminUser?.displayName ?? ''} placeholder="Alex Rivera" required />
               </label>
               <label>
                 <span className="field-heading">Username <span className="setup-required-mark" aria-hidden="true">*</span></span>
-                <input name="adminUsername" defaultValue={adminUser?.loginIdentifier ?? ''} placeholder="owner" required />
+                <input name="adminUsername" defaultValue={adminUser?.loginIdentifier ?? ''} placeholder="alex" required />
+                <span className="helper-text">Use 3-40 characters with letters, numbers, dot, dash, or underscore.</span>
+              </label>
+            </div>
+            <div className="grid-two">
+              <label>
+                <span className="field-heading">Email (optional)</span>
+                <input name="adminEmail" type="email" placeholder="owner@kitchen.local" />
+              </label>
+              <label>
+                <span className="field-heading">Phone (optional)</span>
+                <input name="adminPhone" placeholder="+1 555 0100" />
               </label>
             </div>
             <label>
@@ -83,18 +81,15 @@ export default async function BootstrapPage({
           </section>
         ) : null}
 
-        {step === 3 ? (
+        {step === 2 ? (
           <section className="page-stack">
-            <h2>Workspace basics</h2>
+            <h2>Kitchen basics</h2>
             <div className="grid-two">
               <label>
-                <span className="field-heading">Business name</span>
+                <span className="field-heading">Business name <span className="setup-required-mark" aria-hidden="true">*</span></span>
                 <input name="businessName" defaultValue={data.workspace.name} required />
               </label>
-              <label>
-                <span className="field-heading">Timezone</span>
-                <input name="timezone" defaultValue={data.workspace.timezone} />
-              </label>
+              <TimezoneSelect defaultValue={data.workspace.timezone || 'UTC'} />
             </div>
             <div className="grid-two">
               <label>
@@ -106,28 +101,6 @@ export default async function BootstrapPage({
                 </select>
               </label>
               <label>
-                <span className="field-heading">Operating mode</span>
-                <select name="operatingMode" defaultValue={data.preferences.operatingMode}>
-                  <option value="pickup">Pickup</option>
-                  <option value="delivery">Delivery</option>
-                  <option value="mixed">Mixed</option>
-                </select>
-              </label>
-            </div>
-            <div className="grid-two">
-              <label>
-                <span className="field-heading">Preset</span>
-                <select name="preset" defaultValue={data.preferences.preset}>
-                  <option value="bakery">Bakery</option>
-                  <option value="cafe">Cafe</option>
-                  <option value="restaurant">Restaurant</option>
-                  <option value="dark_kitchen">Dark kitchen</option>
-                  <option value="food_stall">Food stall</option>
-                  <option value="generic">Generic</option>
-                  <option value="other">Other</option>
-                </select>
-              </label>
-              <label>
                 <span className="field-heading">Theme</span>
                 <select name="theme" defaultValue={data.preferences.theme}>
                   <option value="light">Light</option>
@@ -136,105 +109,88 @@ export default async function BootstrapPage({
                 </select>
               </label>
             </div>
+            <fieldset className="subpanel page-stack">
+              <legend className="field-heading">Operating mode</legend>
+              <div className="grid-two">
+                <label className="checkbox-row"><input type="radio" name="operatingMode" value="pickup" defaultChecked={data.preferences.operatingMode === 'pickup'} /><span><strong>Pickup</strong><span className="helper-text">Most orders are picked up at your location.</span></span></label>
+                <label className="checkbox-row"><input type="radio" name="operatingMode" value="delivery" defaultChecked={data.preferences.operatingMode === 'delivery'} /><span><strong>Delivery</strong><span className="helper-text">Most orders go out for delivery.</span></span></label>
+                <label className="checkbox-row"><input type="radio" name="operatingMode" value="mixed" defaultChecked={data.preferences.operatingMode === 'mixed'} /><span><strong>Mixed</strong><span className="helper-text">You handle both pickup and delivery.</span></span></label>
+              </div>
+            </fieldset>
+            <label>
+              <span className="field-heading">Preset</span>
+              <select name="preset" defaultValue={data.preferences.preset}>
+                <option value="bakery">Bakery — dough and bake oriented</option>
+                <option value="cafe">Cafe — service and prep oriented</option>
+                <option value="restaurant">Restaurant — shift and order paced</option>
+                <option value="dark_kitchen">Dark kitchen — delivery-first flow</option>
+                <option value="food_stall">Food stall — fast daily rhythm</option>
+                <option value="generic">Generic — flexible baseline</option>
+                <option value="other">Other — start simple</option>
+              </select>
+            </label>
+            <p className="helper-text">You can change all of this later.</p>
+          </section>
+        ) : null}
+
+        {step === 3 ? (
+          <section className="page-stack">
+            <h2>Work style</h2>
+            <p>Choose how you run day-to-day. This helps us suggest defaults.</p>
+            <div className="grid-two">
+              <label className="checkbox-row"><input type="radio" name="workStyle" value="solo" defaultChecked /><span><strong>Solo operator</strong><span className="helper-text">One person handles most tasks.</span></span></label>
+              <label className="checkbox-row"><input type="radio" name="workStyle" value="team" /><span><strong>Small team</strong><span className="helper-text">You hand work across roles and shifts.</span></span></label>
+            </div>
           </section>
         ) : null}
 
         {step === 4 ? (
           <section className="page-stack">
             <h2>Team and roles</h2>
-            <p>Create initial users with username-based sign-in, role assignment, and default workspace access.</p>
-            {[1, 2, 3].map((row) => (
-              <div key={row} className="subpanel page-stack">
-                <h3>Team member {row}</h3>
-                <div className="grid-two">
-                  <label>
-                    <span className="field-heading">Display name</span>
-                    <input name={`teamDisplayName${row}`} placeholder={row === 1 ? 'Owner' : row === 2 ? 'Frontdesk' : 'Night shift'} />
-                  </label>
-                  <label>
-                    <span className="field-heading">Username</span>
-                    <input name={`teamUsername${row}`} placeholder={row === 1 ? 'owner' : row === 2 ? 'frontdesk' : 'nightshift'} />
-                  </label>
-                </div>
-                <div className="grid-two">
-                  <label>
-                    <span className="field-heading">Role</span>
-                    <select name={`teamRole${row}`} defaultValue={row === 1 ? 'manager' : row === 2 ? 'frontdesk' : 'production'}>
-                      <option value="admin">Admin</option>
-                      <option value="manager">Manager</option>
-                      <option value="frontdesk">Frontdesk</option>
-                      <option value="production">Production</option>
-                      <option value="delivery">Delivery</option>
-                    </select>
-                  </label>
-                  <label>
-                    <span className="field-heading">Default workspace</span>
-                    <select name={`teamWorkspace${row}`} defaultValue={row === 3 ? 'production' : 'orders'}>
-                      <option value="orders">Orders</option>
-                      <option value="timeline">Timeline</option>
-                      <option value="customers">Customers</option>
-                      <option value="production">Production</option>
-                      <option value="handoff">Handoff</option>
-                      <option value="setup">Setup</option>
-                    </select>
-                  </label>
-                </div>
-                <label className="checkbox-row">
-                  <input type="checkbox" name={`teamEnabled${row}`} defaultChecked />
-                  <span><strong>Active now</strong></span>
-                </label>
-              </div>
-            ))}
+            <p>Add one user or a full small team. Each user can have multiple roles.</p>
+            <TeamRosterBuilder initialRows={1} />
           </section>
         ) : null}
 
         {step === 5 ? (
           <section className="page-stack">
-            <h2>Shifts</h2>
-            <p>Confirm the shifts you will use first. You can edit details later in Setup.</p>
+            <h2>Operational rhythm</h2>
+            <p>Set your basic working hours. Keep this light; detailed scheduling can come later.</p>
             <div className="grid-two">
-              <label className="checkbox-row"><input type="checkbox" defaultChecked disabled /> <span><strong>Night production</strong></span></label>
-              <label className="checkbox-row"><input type="checkbox" defaultChecked disabled /> <span><strong>Morning bake / dispatch</strong></span></label>
+              <label>
+                <span className="field-heading">Start time</span>
+                <input name="rhythmStart" type="time" defaultValue="06:00" />
+              </label>
+              <label>
+                <span className="field-heading">End time</span>
+                <input name="rhythmEnd" type="time" defaultValue="18:00" />
+              </label>
             </div>
-            <p className="helper-text">This step marks shift intent for bootstrap continuity without introducing heavy scheduling configuration.</p>
           </section>
         ) : null}
 
         {step === 6 ? (
           <section className="page-stack">
-            <h2>Products and recipes</h2>
-            <p>Start with simple product setup. Add recipes progressively as operations stabilize.</p>
-            <p className="helper-text">CSV import is attached to this step so product-oriented setup is not detached from first-run flow.</p>
-            <CsvImportCard
-              entity="rawMaterials"
-              title="Recipe materials import"
-              description="Import raw materials used by recipe lines."
-              hint="CSV sample"
-              sampleHeader="name,category,defaultUnit,brand,notes"
-              actionLabel="Import materials"
-              chooseFileLabel="Choose CSV"
-              mappingTitle="Map columns"
-              previewTitle="Preview"
-              emptyPreview="No rows"
-              noFileLabel="No file selected"
-              parseErrorNoColumns="Could not detect CSV columns."
-              parseErrorReadFile="Could not read CSV file."
-              fields={[
-                { key: 'name', label: 'Material name', required: true },
-                { key: 'category', label: 'Category' },
-                { key: 'defaultUnit', label: 'Unit' },
-                { key: 'brand', label: 'Brand' },
-                { key: 'notes', label: 'Notes' },
-              ]}
-              action={importCsvEntitiesAction}
-              redirectTo="/bootstrap?step=6"
-            />
+            <h2>Products</h2>
+            <p>Create one starter product now. You can expand your catalog later.</p>
+            <div className="grid-two">
+              <label>
+                <span className="field-heading">Product name</span>
+                <input name="starterProductName" placeholder="Sourdough loaf" />
+              </label>
+              <label>
+                <span className="field-heading">Unit</span>
+                <input name="starterProductUnit" placeholder="pieces" />
+              </label>
+            </div>
+            <p className="helper-text">Need bulk import later? Use Setup → Imports after launch.</p>
           </section>
         ) : null}
 
         {step === 7 ? (
           <section className="page-stack">
-            <h2>Customers, suppliers, and materials</h2>
+            <h2>Imports (optional)</h2>
+            <p>Import customers, suppliers, or materials if you already have CSV files.</p>
             <div className="grid-two">
               <CsvImportCard
                 entity="customers"
@@ -250,21 +206,14 @@ export default async function BootstrapPage({
                 noFileLabel="No file selected"
                 parseErrorNoColumns="Could not detect CSV columns."
                 parseErrorReadFile="Could not read CSV file."
-                fields={[
-                  { key: 'displayName', label: 'Customer', required: true },
-                  { key: 'phone', label: 'Phone' },
-                  { key: 'email', label: 'Email' },
-                  { key: 'address', label: 'Address' },
-                  { key: 'deliveryNote', label: 'Delivery note' },
-                  { key: 'internalNote', label: 'Internal note' },
-                ]}
+                fields={[{ key: 'displayName', label: 'Customer', required: true }, { key: 'phone', label: 'Phone' }, { key: 'email', label: 'Email' }]}
                 action={importCsvEntitiesAction}
                 redirectTo="/bootstrap?step=7"
               />
               <CsvImportCard
                 entity="suppliers"
                 title="Supplier import"
-                description="Add supplier memory during bootstrap."
+                description="Add supplier records from your existing file."
                 hint="CSV sample"
                 sampleHeader="name,contact,notes"
                 actionLabel="Import suppliers"
@@ -275,11 +224,7 @@ export default async function BootstrapPage({
                 noFileLabel="No file selected"
                 parseErrorNoColumns="Could not detect CSV columns."
                 parseErrorReadFile="Could not read CSV file."
-                fields={[
-                  { key: 'name', label: 'Supplier', required: true },
-                  { key: 'contact', label: 'Contact' },
-                  { key: 'notes', label: 'Notes' },
-                ]}
+                fields={[{ key: 'name', label: 'Supplier', required: true }, { key: 'contact', label: 'Contact' }, { key: 'notes', label: 'Notes' }]}
                 action={importCsvEntitiesAction}
                 redirectTo="/bootstrap?step=7"
               />
@@ -291,28 +236,24 @@ export default async function BootstrapPage({
           <section className="page-stack">
             <h2>Review and launch</h2>
             <ul className="stack-list">
-              <li><strong>Admin account:</strong> {data.instance.onboardingProgress.adminAccount ? 'ready' : 'missing'}</li>
-              <li><strong>Workspace basics:</strong> {data.instance.onboardingProgress.workspaceBasics ? 'saved' : 'pending'}</li>
-              <li><strong>Team/roles:</strong> {data.instance.onboardingProgress.users ? 'saved' : 'pending'}</li>
-              <li><strong>Shifts:</strong> {data.instance.onboardingProgress.shifts ? 'saved' : 'pending'}</li>
+              <li><strong>Identity:</strong> {data.instance.onboardingProgress.adminAccount ? 'ready' : 'missing'}</li>
+              <li><strong>Kitchen basics:</strong> {data.instance.onboardingProgress.workspaceBasics ? 'saved' : 'pending'}</li>
+              <li><strong>Team:</strong> {data.instance.onboardingProgress.users ? 'saved' : 'pending'}</li>
+              <li><strong>Operational rhythm:</strong> {data.instance.onboardingProgress.shifts ? 'saved' : 'pending'}</li>
               <li><strong>Imports:</strong> optional {data.instance.onboardingProgress.optionalImports ? 'attempted' : 'skipped'}</li>
             </ul>
-            <p className="helper-text">Launch exits bootstrap and returns to entry/login flow for normal use.</p>
+            <p className="helper-text">Launch takes you to sign-in using the credentials you created.</p>
           </section>
         ) : null}
 
         <div className="onboarding-actions">
-          {step > 1 ? (
-            <button type="submit" name="intent" value="back" className="button-secondary">Back</button>
-          ) : null}
+          {step > 1 ? <button type="submit" name="intent" value="back" className="button-secondary">Back</button> : null}
           {step < 8 ? (
             <>
-              <button type="submit" name="intent" value="next" className="button-primary">Next</button>
               <button type="submit" name="intent" value="skip" className="button-ghost">Skip</button>
+              <button type="submit" name="intent" value="next" className="button-primary">Next</button>
             </>
-          ) : (
-            <button type="submit" name="intent" value="launch" className="button-primary">Launch workspace</button>
-          )}
+          ) : <button type="submit" name="intent" value="launch" className="button-primary">Launch workspace</button>}
         </div>
       </form>
     </div>

@@ -152,11 +152,13 @@ export async function launchDemoModeAction() {
 
   const data = await readSeedStore();
   data.instance.demoModeActive = true;
-  data.instance.initialized = true;
+  data.instance.initialized = false;
+  data.instance.onboardingStatus = 'not_started';
+  data.preferences.onboardingCompleted = false;
   data.instance.environmentType = 'demo';
   await writeStore(data);
   revalidateAllWorkspaces();
-  redirect('/login?redirectTo=/');
+  redirect('/?demo=1');
 }
 
 export async function restoreInstanceFromBackupAction(formData: FormData) {
@@ -270,43 +272,56 @@ export async function saveBootstrapStepAction(formData: FormData) {
   data.instance.onboardingStatus = 'in_progress';
 
   if (step === 1) {
-    data.instance.onboardingProgress.workspaceBasics = true;
-  }
-
-  if (step === 2) {
     const displayName = String(formData.get('adminDisplayName') ?? '').trim();
     const username = slugifyUsername(String(formData.get('adminUsername') ?? ''));
+    const email = String(formData.get('adminEmail') ?? '').trim();
+    const phone = String(formData.get('adminPhone') ?? '').trim();
     const password = String(formData.get('adminPassword') ?? '').trim();
 
     if (!displayName || !username || !password) {
-      redirect('/bootstrap?step=2&error=' + encodeURIComponent('Add admin name, username, and password.'));
+      redirect('/bootstrap?step=1&error=' + encodeURIComponent('Add full name, username, and password.'));
+    }
+
+    if (username.length < 3) {
+      redirect('/bootstrap?step=1&error=' + encodeURIComponent('Username must be at least 3 characters.'));
     }
 
     const now = new Date().toISOString();
-    const existingAdmin = data.users.find((user) => user.role === 'admin');
+    const existingAdmin = data.users.find((user) => user.role === 'admin' || user.roles?.includes('admin'));
     const duplicate = data.users.find(
       (user) => user.id !== existingAdmin?.id && user.loginIdentifier.toLowerCase() === username,
     );
     if (duplicate) {
-      redirect('/bootstrap?step=2&error=' + encodeURIComponent('Username is already in use.'));
+      redirect('/bootstrap?step=1&error=' + encodeURIComponent('Username is already in use.'));
     }
 
     if (existingAdmin) {
       existingAdmin.displayName = displayName;
       existingAdmin.loginIdentifier = username;
+      existingAdmin.username = username;
       existingAdmin.passwordHash = hashPassword(password);
       existingAdmin.passwordUpdatedAt = now;
       existingAdmin.active = true;
+      existingAdmin.email = email || undefined;
+      existingAdmin.phone = phone || undefined;
+      existingAdmin.role = 'admin';
+      existingAdmin.roles = existingAdmin.roles?.includes('admin')
+        ? existingAdmin.roles
+        : ['admin', ...(existingAdmin.roles ?? []).filter((role) => role !== 'admin')];
       existingAdmin.updatedAt = now;
     } else {
       data.users.push({
         id: `user-${crypto.randomUUID()}`,
         displayName,
         loginIdentifier: username,
+        username,
         passwordHash: hashPassword(password),
         passwordUpdatedAt: now,
         mustChangePassword: false,
         role: 'admin',
+        roles: ['admin'],
+        email: email || undefined,
+        phone: phone || undefined,
         workspaceId: data.workspace.id,
         defaultWorkspace: 'setup',
         active: true,
@@ -323,7 +338,7 @@ export async function saveBootstrapStepAction(formData: FormData) {
     data.instance.onboardingProgress.roles = true;
   }
 
-  if (step === 3) {
+  if (step === 2) {
     const businessName = String(formData.get('businessName') ?? '').trim();
     const timezone = String(formData.get('timezone') ?? '').trim();
     const locale = String(formData.get('locale') ?? '').trim();
@@ -332,7 +347,7 @@ export async function saveBootstrapStepAction(formData: FormData) {
     const theme = String(formData.get('theme') ?? '').trim();
 
     if (!businessName) {
-      redirect('/bootstrap?step=3&error=' + encodeURIComponent('Business name is required.'));
+      redirect('/bootstrap?step=2&error=' + encodeURIComponent('Business name is required.'));
     }
 
     data.workspace.name = businessName;
@@ -351,12 +366,16 @@ export async function saveBootstrapStepAction(formData: FormData) {
 
   if (step === 4) {
     const now = new Date().toISOString();
-    for (const row of [1, 2, 3]) {
+    for (const row of Array.from({ length: 12 }, (_, index) => index + 1)) {
       const displayName = String(formData.get(`teamDisplayName${row}`) ?? '').trim();
       const username = slugifyUsername(String(formData.get(`teamUsername${row}`) ?? ''));
-      const role = String(formData.get(`teamRole${row}`) ?? 'frontdesk');
+      const selectedRoles = formData.getAll(`teamRoles${row}`).map((value) => String(value));
       const defaultWorkspace = String(formData.get(`teamWorkspace${row}`) ?? 'orders');
       const enabled = formData.get(`teamEnabled${row}`) !== null;
+      const roleList = selectedRoles
+        .filter((role) => ['admin', 'manager', 'production', 'frontdesk', 'delivery'].includes(role))
+        .filter((role, index, list) => list.indexOf(role) === index) as Array<'admin' | 'manager' | 'production' | 'frontdesk' | 'delivery'>;
+      const primaryRole = roleList[0] ?? 'frontdesk';
 
       if (!displayName || !username) {
         continue;
@@ -365,9 +384,10 @@ export async function saveBootstrapStepAction(formData: FormData) {
       const existing = data.users.find((user) => user.loginIdentifier.toLowerCase() === username);
       if (existing) {
         existing.displayName = displayName;
-        existing.role = ['admin', 'manager', 'production', 'frontdesk', 'delivery'].includes(role) ? (role as typeof existing.role) : existing.role;
-        existing.defaultWorkspace = isPrimaryWorkspaceSurface(defaultWorkspace as typeof existing.defaultWorkspace)
-          ? (defaultWorkspace as typeof existing.defaultWorkspace)
+        existing.role = primaryRole;
+        existing.roles = roleList.length > 0 ? roleList : [primaryRole];
+        existing.defaultWorkspace = isPrimaryWorkspaceSurface(defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
+          ? (defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
           : existing.defaultWorkspace;
         existing.active = enabled;
         existing.updatedAt = now;
@@ -379,14 +399,14 @@ export async function saveBootstrapStepAction(formData: FormData) {
           passwordHash: hashPassword('skoss-demo'),
           passwordUpdatedAt: now,
           mustChangePassword: true,
-          role: ['admin', 'manager', 'production', 'frontdesk', 'delivery'].includes(role)
-            ? (role as 'admin' | 'manager' | 'production' | 'frontdesk' | 'delivery')
-            : 'frontdesk',
+          role: primaryRole,
+          roles: roleList.length > 0 ? roleList : [primaryRole],
           workspaceId: data.workspace.id,
           defaultWorkspace: isPrimaryWorkspaceSurface(defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
             ? (defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
             : 'orders',
           active: enabled,
+          username,
           preferences: {
             defaultWorkspace: isPrimaryWorkspaceSurface(defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
               ? (defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
@@ -405,7 +425,31 @@ export async function saveBootstrapStepAction(formData: FormData) {
     data.instance.onboardingProgress.shifts = true;
   }
 
-  if (step === 6 || step === 7) {
+  if (step === 6) {
+    const productName = String(formData.get('starterProductName') ?? '').trim();
+    const productUnit = String(formData.get('starterProductUnit') ?? '').trim() || 'pieces';
+    if (productName) {
+      const existing = data.products.find((product) => product.name.trim().toLowerCase() === productName.toLowerCase());
+      if (!existing) {
+        data.products.push({
+          id: `product-${crypto.randomUUID()}`,
+          name: productName,
+          defaultUnit: productUnit,
+          active: true,
+          variants: [
+            {
+              id: `variant-${crypto.randomUUID()}`,
+              name: 'Default',
+              defaultUnit: productUnit,
+              active: true,
+            },
+          ],
+        });
+      }
+    }
+  }
+
+  if (step === 7) {
     data.instance.onboardingProgress.optionalImports = true;
   }
 
@@ -422,7 +466,7 @@ export async function saveBootstrapStepAction(formData: FormData) {
     data.session.currentUserId = undefined;
     await writeStore(data);
     revalidateAllWorkspaces();
-    redirect('/entry?saved=bootstrap-complete');
+    redirect('/login?redirectTo=/');
   }
 
   await writeStore(data);
@@ -528,7 +572,7 @@ export async function loginAction(formData: FormData) {
     redirect('/entry');
   }
 
-  if (gatewayState.onboardingIncomplete && (user.role === 'admin' || user.role === 'manager')) {
+  if (gatewayState.onboardingIncomplete && (user.roles?.includes('admin') || user.roles?.includes('manager') || user.role === 'admin' || user.role === 'manager')) {
     revalidateAllWorkspaces();
     redirect('/bootstrap?step=1');
   }
@@ -568,7 +612,7 @@ export async function createUserAction(formData: FormData) {
   user.passwordUpdatedAt = new Date().toISOString();
   user.mustChangePassword = !values.password?.trim();
   data.users = [...data.users, user].sort(sortUsers);
-  if (user.role === 'admin') {
+  if (user.roles.includes('admin') || user.role === 'admin') {
     data.instance = {
       ...data.instance,
       initialized: true,

@@ -30,11 +30,10 @@ export default async function EntryGatewayPage({
       <section className="hero-card">
         <div className="hero-header">
           <div>
-            <p className="eyebrow">Instance entry gateway</p>
-            <h1>What do you want to do right now?</h1>
+            <p className="eyebrow">Kitchen entry</p>
+            <h1>Choose how you want to start</h1>
             <p className="lede">
-              Start setup, open demo data, restore from backup, or continue into an existing kitchen without
-              forcing one linear onboarding path.
+              Start your real kitchen setup, launch a safe demo session, restore data, or sign in to an existing workspace.
             </p>
           </div>
         </div>
@@ -42,36 +41,36 @@ export default async function EntryGatewayPage({
 
       {params?.error ? <p className="inline-warning">{params.error}</p> : null}
       {params?.saved === 'restored' ? <p className="inline-success">Backup restored. Continue with sign-in.</p> : null}
-      {params?.saved === 'bootstrap-complete' ? <p className="inline-success">Bootstrap complete. Sign in with your admin username.</p> : null}
 
-      <section className="grid-two">
+      <section className="page-stack">
         <article className="panel page-stack">
           <h2>Start a new kitchen</h2>
-          <p>Run first-use bootstrap with dedicated onboarding screens for admin, workspace basics, team, shifts, imports, and launch.</p>
+          <p>Set up your first workspace, create your admin account, and launch with practical defaults.</p>
           {state.canRunBootstrap ? (
             <Link className="button-primary" href="/bootstrap?step=1">
-              Run first-use wizard
+              Start your kitchen
             </Link>
           ) : (
             <button className="button-primary" disabled type="button">
               First-use wizard unavailable
             </button>
           )}
-          {!state.canRunBootstrap ? <p className="helper-text">Bootstrap is locked after instance initialization is completed.</p> : null}
+          {!state.canRunBootstrap ? <p className="helper-text">Setup is locked after initialization is complete.</p> : null}
         </article>
 
-        <article className="panel page-stack">
-          <h2>Explore demo environment</h2>
-          <p>Load seeded sample data for safe testing with non-production labels and reset support.</p>
+        <article className="subpanel page-stack">
+          <h2>Try demo environment</h2>
+          <p>Open a clearly marked demo workspace. This does not finalize your real setup.</p>
           <form action={launchDemoModeAction}>
             <button type="submit" className="button-secondary" disabled={!isNonProductionMode()}>
               Launch demo workspace
             </button>
           </form>
+          <p className="helper-text">Demo sessions are resettable and safe for training.</p>
           {!isNonProductionMode() ? <p className="helper-text">Demo launch is disabled in production mode.</p> : null}
         </article>
 
-        <article className="panel page-stack">
+        <article className="subpanel page-stack">
           <h2>Restore from backup</h2>
           <p>Import a JSON backup file to restore instance data. Keep this minimal and reversible for pilot use.</p>
           <form action={restoreInstanceFromBackupAction} className="inline-form-grid">
@@ -81,7 +80,7 @@ export default async function EntryGatewayPage({
           {state.backupAvailable ? <p className="helper-text">Detected backup files in data/backups.</p> : null}
         </article>
 
-        <article className="panel page-stack">
+        <article className="subpanel page-stack">
           <h2>Open existing instance</h2>
           <p>Continue with existing users and role workspaces.</p>
           <Link className="button-secondary" href="/login?redirectTo=/">

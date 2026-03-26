@@ -48,13 +48,17 @@ export interface UserPreferences {
 export interface User {
   id: string;
   displayName: string;
+  username?: string;
   loginIdentifier: string;
   passwordHash: string;
   passwordUpdatedAt?: string;
   mustChangePassword?: boolean;
   role: UserRole;
+  roles: UserRole[];
   workspaceId: string;
-  defaultWorkspace: WorkspaceSurface;
+  defaultWorkspace?: WorkspaceSurface;
+  email?: string;
+  phone?: string;
   active: boolean;
   preferences?: UserPreferences;
   createdAt: string;
