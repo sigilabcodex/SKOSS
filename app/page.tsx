@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { redirect } from 'next/navigation';
 import { OnboardingAssistant } from '@/components/setup/onboarding-assistant';
 import { ImportHub } from '@/components/setup/import-hub';
 import { ActivityFeed } from '@/components/activity-feed';
@@ -6,7 +7,9 @@ import { formatDateLabel } from '@/lib/domain/formatters';
 import { getPresetExperience, type WorkspaceLinkKey } from '@/lib/business-presets';
 import { getWorkspaceSummary } from '@/lib/server/demo-data';
 import { getCurrentUserContext } from '@/lib/server/auth';
+import { detectInstanceGatewayState, shouldRouteToEntryGateway } from '@/lib/server/instance-entry';
 import { getRequestPreferences, getServerTranslator } from '@/lib/i18n/server';
+import { readStore } from '@/lib/server/store';
 import { ArrowRightIcon, CustomersIcon, HandoffIcon, OrdersIcon, ProductionIcon, SetupIcon, SparklesIcon, TimelineIcon } from '@/components/ui-icons';
 
 type QuickLink = {
@@ -17,12 +20,23 @@ type QuickLink = {
 };
 
 export default async function HomePage() {
-  const [summary, { t, locale, preset }, requestPreferences] = await Promise.all([
+  const [summary, { t, locale, preset }, requestPreferences, data, userContext] = await Promise.all([
     getWorkspaceSummary(),
     getServerTranslator(),
     getRequestPreferences(),
+    readStore(),
+    getCurrentUserContext(),
   ]);
-  const { currentUser, visibleWorkspaces, homeWorkspace } = await getCurrentUserContext();
+  const { currentUser, visibleWorkspaces, homeWorkspace } = userContext;
+  const gatewayState = await detectInstanceGatewayState(data);
+
+  if (shouldRouteToEntryGateway(gatewayState, Boolean(currentUser))) {
+    redirect('/entry');
+  }
+
+  if (!currentUser) {
+    redirect('/login?redirectTo=/');
+  }
   const presetExperience = getPresetExperience(preset, summary.preferences.operatingMode);
   const recommendedWorkspace = homeWorkspace === 'home' ? presetExperience.emphasisWorkspace : homeWorkspace;
 

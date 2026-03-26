@@ -19,6 +19,23 @@ export const demoSeed: AppData = {
     theme: 'system',
     onboardingCompleted: false,
   },
+  instance: {
+    initialized: true,
+    onboardingStatus: 'in_progress',
+    demoModeActive: true,
+    environmentType: 'demo',
+    backupHintAvailable: false,
+    onboardingProgress: {
+      adminAccount: true,
+      workspaceBasics: false,
+      timezone: false,
+      users: true,
+      roles: true,
+      shifts: false,
+      optionalImports: false,
+    },
+    operatorOnboardingByUserId: {},
+  },
   session: {
     currentUserId: 'user-lucia',
     lastLoginAt: '2026-03-21T18:00:00Z',
