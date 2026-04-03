@@ -386,25 +386,23 @@ export default async function SetupPage({
         </p>
       ) : null}
 
-      <section className="panel page-stack">
-        <div className="table-header-row">
-          <div>
-            <h2>Local demo data safety</h2>
-            <p className="helper-text">
-              Runtime mode: <strong>{runtimeMode}</strong>. Use reset only for local/pilot testing so real records stay separate.
-            </p>
+      {canResetDemoWorkspace ? (
+        <section className="panel page-stack">
+          <div className="table-header-row">
+            <div>
+              <h2>Local demo data safety</h2>
+              <p className="helper-text">
+                Runtime mode: <strong>{runtimeMode}</strong>. Use reset only for local/pilot testing so real records stay separate.
+              </p>
+            </div>
           </div>
-        </div>
-        {canResetDemoWorkspace ? (
           <form action={resetDemoWorkspaceAction}>
             <button type="submit" className="button-secondary compact-button">
               Reset demo workspace to seed data
             </button>
           </form>
-        ) : (
-          <p className="inline-warning">Demo reset is disabled in production mode.</p>
-        )}
-      </section>
+        </section>
+      ) : null}
 
       <section className="panel page-stack setup-section-nav-panel">
         <div className="table-header-row">
