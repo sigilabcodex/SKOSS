@@ -131,6 +131,16 @@ export async function resetDemoWorkspaceAction() {
   redirect('/setup?saved=demo-reset');
 }
 
+export async function resetLocalRuntimeDataAction() {
+  if (!isNonProductionMode()) {
+    redirect('/entry?error=' + encodeURIComponent('Local runtime reset is disabled in production mode.'));
+  }
+
+  await reseedRuntimeStore();
+  revalidateAllWorkspaces();
+  redirect('/entry?saved=runtime-reset');
+}
+
 function isRestorableBackupShape(value: unknown): value is AppData {
   if (!value || typeof value !== 'object') {
     return false;
@@ -159,6 +169,59 @@ export async function launchDemoModeAction() {
   await writeStore(data);
   revalidateAllWorkspaces();
   redirect('/?demo=1');
+}
+
+export async function recoverLocalAdminAccessAction() {
+  if (!isNonProductionMode()) {
+    redirect('/entry?error=' + encodeURIComponent('Local recovery is disabled in production mode.'));
+  }
+
+  const data = await readStore();
+  const now = new Date().toISOString();
+  const adminUser = data.users.find((user) => user.role === 'admin' || user.roles?.includes('admin'));
+
+  if (!adminUser) {
+    redirect('/entry?error=' + encodeURIComponent('No admin account found. Use restore or guided activation.'));
+  }
+
+  const temporaryPassword = 'skoss-local-admin';
+  adminUser.passwordHash = hashPassword(temporaryPassword);
+  adminUser.passwordUpdatedAt = now;
+  adminUser.mustChangePassword = true;
+  adminUser.active = true;
+  adminUser.updatedAt = now;
+  data.instance.initialized = true;
+  data.instance.onboardingProgress.adminAccount = true;
+  data.instance.onboardingStatus = data.preferences.onboardingCompleted ? 'completed' : 'in_progress';
+  data.session.currentUserId = undefined;
+  data.session.lastLoginAt = undefined;
+  await writeStore(data);
+
+  const cookieStore = await cookies();
+  cookieStore.set(sessionUserCookieName, loggedOutSessionValue, { path: '/', maxAge: sessionMaxAgeSeconds, sameSite: 'lax' });
+  revalidateAllWorkspaces();
+  redirect(`/entry?saved=recovered&recoveryUser=${encodeURIComponent(adminUser.loginIdentifier)}`);
+}
+
+export async function resetLocalUsersAndCredentialsAction() {
+  if (!isNonProductionMode()) {
+    redirect('/entry?error=' + encodeURIComponent('Local user reset is disabled in production mode.'));
+  }
+
+  const seedData = await readSeedStore();
+  const data = await readStore();
+  data.users = seedData.users;
+  data.session.currentUserId = undefined;
+  data.session.lastLoginAt = undefined;
+  data.instance.initialized = true;
+  data.instance.onboardingStatus = 'in_progress';
+  data.preferences.onboardingCompleted = false;
+  await writeStore(data);
+
+  const cookieStore = await cookies();
+  cookieStore.set(sessionUserCookieName, loggedOutSessionValue, { path: '/', maxAge: sessionMaxAgeSeconds, sameSite: 'lax' });
+  revalidateAllWorkspaces();
+  redirect('/entry?saved=users-reset');
 }
 
 export async function restoreInstanceFromBackupAction(formData: FormData) {
