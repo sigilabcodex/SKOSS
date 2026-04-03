@@ -36,7 +36,6 @@ export default async function LoginPage({
           </div>
           <span className="summary-pill">{activeUsers.length} {t('common.users')}</span>
         </div>
-        <p className="helper-text">{t('login.demoPasswordHint')}</p>
         <input type="hidden" name="redirectTo" value={redirectTo} />
         <label>
           <span className="field-heading">{t('login.fields.loginIdentifier')} <span className="setup-required-mark" aria-hidden="true">*</span></span>
