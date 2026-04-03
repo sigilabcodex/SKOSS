@@ -267,9 +267,14 @@ export async function saveBootstrapStepAction(formData: FormData) {
   const data = await readStore();
   const step = Number(formData.get('step') ?? 1);
   const intent = String(formData.get('intent') ?? 'next') as 'next' | 'back' | 'stay' | 'launch' | 'skip';
+  const isRequiredStep = step === 1 || step === 2;
 
   data.instance.initialized = true;
   data.instance.onboardingStatus = 'in_progress';
+
+  if (intent === 'skip' && isRequiredStep) {
+    redirect(`/bootstrap?step=${step}&error=${encodeURIComponent('This step is required before launch.')}`);
+  }
 
   if (step === 1) {
     const displayName = String(formData.get('adminDisplayName') ?? '').trim();
@@ -456,6 +461,9 @@ export async function saveBootstrapStepAction(formData: FormData) {
   if (intent === 'launch') {
     if (!data.instance.onboardingProgress.adminAccount) {
       redirect('/bootstrap?step=2&error=' + encodeURIComponent('Create an admin before launch.'));
+    }
+    if (!data.instance.onboardingProgress.workspaceBasics) {
+      redirect('/bootstrap?step=2&error=' + encodeURIComponent('Save workspace basics before launch.'));
     }
 
     data.preferences.onboardingCompleted = true;

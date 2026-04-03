@@ -30,10 +30,10 @@ export default async function EntryGatewayPage({
       <section className="hero-card">
         <div className="hero-header">
           <div>
-            <p className="eyebrow">Kitchen entry</p>
-            <h1>Choose how you want to start</h1>
+            <p className="eyebrow">Instance gateway</p>
+            <h1>Choose your start path</h1>
             <p className="lede">
-              Start your real kitchen setup, launch a safe demo session, restore data, or sign in to an existing workspace.
+              Pick one clear path: new installation, open existing workspace, restore backup, or explore demo safely.
             </p>
           </div>
         </div>
@@ -45,22 +45,22 @@ export default async function EntryGatewayPage({
       <section className="page-stack">
         <article className="panel page-stack">
           <h2>Start a new kitchen</h2>
-          <p>Set up your first workspace, create your admin account, and launch with practical defaults.</p>
+          <p>Create your admin account, set workspace basics, then continue with optional setup at your own pace.</p>
           {state.canRunBootstrap ? (
             <Link className="button-primary" href="/bootstrap?step=1">
-              Start your kitchen
+              Start guided activation
             </Link>
           ) : (
             <button className="button-primary" disabled type="button">
-              First-use wizard unavailable
+              Guided activation unavailable
             </button>
           )}
-          {!state.canRunBootstrap ? <p className="helper-text">Setup is locked after initialization is complete.</p> : null}
+          {!state.canRunBootstrap ? <p className="helper-text">This instance is already initialized. Use Setup for ongoing configuration.</p> : null}
         </article>
 
         <article className="subpanel page-stack">
           <h2>Try demo environment</h2>
-          <p>Open a clearly marked demo workspace. This does not finalize your real setup.</p>
+          <p>Open a clearly marked safe workspace for training and evaluation. This does not finalize real setup.</p>
           <form action={launchDemoModeAction}>
             <button type="submit" className="button-secondary" disabled={!isNonProductionMode()}>
               Launch demo workspace
@@ -72,21 +72,29 @@ export default async function EntryGatewayPage({
 
         <article className="subpanel page-stack">
           <h2>Restore from backup</h2>
-          <p>Import a JSON backup file to restore instance data. Keep this minimal and reversible for pilot use.</p>
+          <p>Import a JSON backup to recover an existing instance. Use backups from the same SKOSS version when possible.</p>
           <form action={restoreInstanceFromBackupAction} className="inline-form-grid">
             <input type="file" name="backupFile" accept="application/json" required />
             <button type="submit" className="button-secondary">Restore backup</button>
           </form>
+          <p className="helper-text">Restoring replaces current runtime instance data.</p>
           {state.backupAvailable ? <p className="helper-text">Detected backup files in data/backups.</p> : null}
         </article>
 
         <article className="subpanel page-stack">
           <h2>Open existing instance</h2>
           <p>Continue with existing users and role workspaces.</p>
-          <Link className="button-secondary" href="/login?redirectTo=/">
-            Sign in
-          </Link>
+          {state.canOpenExistingInstance ? (
+            <Link className="button-secondary" href="/login?redirectTo=/">
+              Sign in
+            </Link>
+          ) : (
+            <button className="button-secondary" disabled type="button">
+              Sign in unavailable
+            </button>
+          )}
           {!state.canOpenExistingInstance ? <p className="helper-text">No active users detected yet.</p> : null}
+          {state.onboardingIncomplete ? <p className="helper-text">Setup appears incomplete. Resume guided activation first.</p> : null}
         </article>
       </section>
 

@@ -357,6 +357,14 @@ export default async function SetupPage({
     query: { section },
     hash: section,
   });
+  const onboardingProgress = data.instance.onboardingProgress;
+  const guidedChecklist = [
+    { label: 'Admin account', done: onboardingProgress.adminAccount },
+    { label: 'Workspace basics', done: onboardingProgress.workspaceBasics },
+    { label: 'Team setup', done: onboardingProgress.users },
+    { label: 'Operational rhythm', done: onboardingProgress.shifts },
+    { label: 'Optional imports', done: onboardingProgress.optionalImports },
+  ];
 
   return (
     <div className="page-stack">
@@ -424,6 +432,38 @@ export default async function SetupPage({
         </div>
       </section>
 
+      <section className="panel page-stack">
+        <div className="table-header-row">
+          <div>
+            <h2>Setup checklist (resumable)</h2>
+            <p className="helper-text">
+              Keep activation practical: only the core is required at launch, everything else can be completed gradually.
+            </p>
+          </div>
+          <span className="summary-pill">
+            {guidedChecklist.filter((item) => item.done).length}/{guidedChecklist.length}
+          </span>
+        </div>
+        <ul className="stack-list compact-list">
+          {guidedChecklist.map((item) => (
+            <li key={item.label} className="list-with-actions">
+              <div>
+                <strong>{item.label}</strong>
+                <span>{item.done ? 'Completed' : 'Pending'}</span>
+              </div>
+            </li>
+          ))}
+        </ul>
+        <div className="inline-action-row">
+          <Link href="/bootstrap?step=1" className="button-secondary compact-button">
+            Resume guided activation
+          </Link>
+          <a href="#suppliers" className="button-secondary compact-button">
+            Continue CSV imports
+          </a>
+        </div>
+      </section>
+
       <section className="grid-two" id="business-setup">
         <article className="panel page-stack" id="customers-summary">
           <div className="table-header-row">
@@ -484,10 +524,13 @@ export default async function SetupPage({
           <div className="table-header-row">
             <div>
               <h2>{t('setup.sections.imports')}</h2>
-              <p className="helper-text">{t('setup.adminReadinessHelp')}</p>
+              <p className="helper-text">Choose manual entry or CSV import based on what your business already has.</p>
             </div>
           </div>
           <div className="inline-action-row">
+            <Link href="/customers#new-customer" className="button-secondary compact-button">
+              Add records manually
+            </Link>
             <a href="#suppliers" className="button-secondary compact-button">
               {t('setup.actions.importSuppliersCsv')}
             </a>
