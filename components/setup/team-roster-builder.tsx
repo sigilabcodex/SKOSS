@@ -49,6 +49,7 @@ export function TeamRosterBuilder({ initialRows = 1 }: TeamRosterBuilderProps) {
               <label>
                 <span className="field-heading">Username</span>
                 <input name={`teamUsername${row}`} placeholder={row === 1 ? 'alex' : 'username'} />
+                <span className="helper-text">Usernames can be simple. Password setup happens at first sign-in.</span>
               </label>
             </div>
             <fieldset className="subpanel page-stack">

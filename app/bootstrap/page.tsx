@@ -7,6 +7,7 @@ import { readStore } from '@/lib/server/store';
 import { detectInstanceGatewayState } from '@/lib/server/instance-entry';
 
 const totalSteps = 8;
+const requiredSteps = new Set([1, 2]);
 
 function bootstrapStep(step: number) {
   return Math.max(1, Math.min(totalSteps, step));
@@ -27,6 +28,7 @@ export default async function BootstrapPage({
   const step = bootstrapStep(Number(params?.step ?? 1));
   const progress = Math.round((step / totalSteps) * 100);
   const adminUser = data.users.find((user) => user.role === 'admin' || user.roles?.includes('admin'));
+  const isRequiredStep = requiredSteps.has(step);
 
   return (
     <div className="page-stack bootstrap-flow">
@@ -35,13 +37,18 @@ export default async function BootstrapPage({
           <div>
             <p className="eyebrow">First-time setup</p>
             <h1>Start your kitchen workspace</h1>
-            <p className="lede">A short setup for your first day. You can change every setting later in Setup.</p>
+            <p className="lede">
+              Guided activation first, then optional setup. Required steps are marked so you can launch fast and keep configuring later.
+            </p>
           </div>
           <span className="summary-pill">Step {step} of {totalSteps}</span>
         </div>
         <div className="bootstrap-progress-track">
           <span className="bootstrap-progress-value" style={{ width: `${progress}%` }} aria-hidden="true" />
         </div>
+        <p className="helper-text no-margin">
+          Required now: steps 1-2 (admin account and workspace basics). Optional and skippable: steps 3-7.
+        </p>
       </section>
 
       {params?.saved === 'progress' ? <p className="inline-success">Saved.</p> : null}
@@ -52,7 +59,7 @@ export default async function BootstrapPage({
 
         {step === 1 ? (
           <section className="page-stack">
-            <h2>Identity</h2>
+            <h2>Admin account (required)</h2>
             <div className="grid-two">
               <label>
                 <span className="field-heading">Full name <span className="setup-required-mark" aria-hidden="true">*</span></span>
@@ -83,7 +90,7 @@ export default async function BootstrapPage({
 
         {step === 2 ? (
           <section className="page-stack">
-            <h2>Kitchen basics</h2>
+            <h2>Workspace basics (required)</h2>
             <div className="grid-two">
               <label>
                 <span className="field-heading">Business name <span className="setup-required-mark" aria-hidden="true">*</span></span>
@@ -135,7 +142,7 @@ export default async function BootstrapPage({
 
         {step === 3 ? (
           <section className="page-stack">
-            <h2>Work style</h2>
+            <h2>Work style (optional)</h2>
             <p>Choose how you run day-to-day. This helps us suggest defaults.</p>
             <div className="grid-two">
               <label className="checkbox-row"><input type="radio" name="workStyle" value="solo" defaultChecked /><span><strong>Solo operator</strong><span className="helper-text">One person handles most tasks.</span></span></label>
@@ -146,15 +153,18 @@ export default async function BootstrapPage({
 
         {step === 4 ? (
           <section className="page-stack">
-            <h2>Team and roles</h2>
-            <p>Add one user or a full small team. Each user can have multiple roles.</p>
+            <h2>Team and roles (optional)</h2>
+            <p>Add one user or a full small team. You can also skip and continue from Setup later.</p>
             <TeamRosterBuilder initialRows={1} />
+            <p className="helper-text">
+              Team members created here receive a temporary password and must update it at first sign-in.
+            </p>
           </section>
         ) : null}
 
         {step === 5 ? (
           <section className="page-stack">
-            <h2>Operational rhythm</h2>
+            <h2>Operational rhythm (optional)</h2>
             <p>Set your basic working hours. Keep this light; detailed scheduling can come later.</p>
             <div className="grid-two">
               <label>
@@ -171,8 +181,8 @@ export default async function BootstrapPage({
 
         {step === 6 ? (
           <section className="page-stack">
-            <h2>Products</h2>
-            <p>Create one starter product now. You can expand your catalog later.</p>
+            <h2>First product (optional)</h2>
+            <p>Create one starter product now for immediate order capture, or skip and add products later.</p>
             <div className="grid-two">
               <label>
                 <span className="field-heading">Product name</span>
@@ -190,7 +200,7 @@ export default async function BootstrapPage({
         {step === 7 ? (
           <section className="page-stack">
             <h2>Imports (optional)</h2>
-            <p>Import customers, suppliers, or materials if you already have CSV files.</p>
+            <p>Import customers, suppliers, or materials if you already have CSV files. Manual setup remains available in Setup.</p>
             <div className="grid-two">
               <CsvImportCard
                 entity="customers"
@@ -242,7 +252,9 @@ export default async function BootstrapPage({
               <li><strong>Operational rhythm:</strong> {data.instance.onboardingProgress.shifts ? 'saved' : 'pending'}</li>
               <li><strong>Imports:</strong> optional {data.instance.onboardingProgress.optionalImports ? 'attempted' : 'skipped'}</li>
             </ul>
-            <p className="helper-text">Launch takes you to sign-in using the credentials you created.</p>
+            <p className="helper-text">
+              Launch takes you to sign-in. Optional items can be resumed later from Setup.
+            </p>
           </section>
         ) : null}
 
@@ -250,7 +262,7 @@ export default async function BootstrapPage({
           {step > 1 ? <button type="submit" name="intent" value="back" className="button-secondary">Back</button> : null}
           {step < 8 ? (
             <>
-              <button type="submit" name="intent" value="skip" className="button-ghost">Skip</button>
+              {!isRequiredStep ? <button type="submit" name="intent" value="skip" className="button-ghost">Skip for now</button> : null}
               <button type="submit" name="intent" value="next" className="button-primary">Next</button>
             </>
           ) : <button type="submit" name="intent" value="launch" className="button-primary">Launch workspace</button>}

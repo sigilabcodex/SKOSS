@@ -51,6 +51,9 @@ export default async function LoginPage({
           ))}
         </datalist>
         <button type="submit" className="button-primary">{t('login.submit')}</button>
+        <p className="helper-text no-margin">
+          Need a different path? <Link href="/entry" className="inline-link">Back to entry gateway</Link> for new setup, restore, or demo mode.
+        </p>
         {gatewayState.canRunBootstrap ? (
           <p className="helper-text no-margin">
             Need to initialize this instance first? <Link href="/bootstrap?step=1" className="inline-link">Run first-use wizard</Link>
