@@ -324,17 +324,17 @@ export function buildRecurringTemplateRecord(values: RecurringTemplateFormValues
   };
 }
 
-const supportedUserRoles: UserRole[] = ['admin', 'manager', 'production', 'frontdesk', 'delivery'];
-const supportedWorkspaceDefaults: WorkspaceSurface[] = ['home', 'timeline', 'orders', 'customers', 'production', 'handoff', 'preferences', 'setup'];
+const supportedUserRoles: UserRole[] = ['owner_admin', 'shift_lead', 'kitchen', 'sales'];
+const supportedWorkspaceDefaults: WorkspaceSurface[] = ['home', 'timeline', 'orders', 'customers', 'production', 'handoff', 'preferences', 'admin'];
 
 export function normalizeUserForm(formData: FormData): UserFormValues {
-  const requestedRole = String(formData.get('role') ?? 'frontdesk') as UserRole;
+  const requestedRole = String(formData.get('role') ?? 'sales') as UserRole;
   const roleValues = formData.getAll('roles').map((value) => String(value) as UserRole);
   const normalizedRoles = roleValues.filter((role): role is UserRole => supportedUserRoles.includes(role));
   const roles: UserRole[] = normalizedRoles.length > 0
     ? normalizedRoles.filter((role, index, list) => list.indexOf(role) === index)
-    : (supportedUserRoles.includes(requestedRole) ? [requestedRole] : ['frontdesk']);
-  const primaryRole = roles[0] ?? 'frontdesk';
+    : (supportedUserRoles.includes(requestedRole) ? [requestedRole] : ['sales']);
+  const primaryRole = roles[0] ?? 'sales';
   const requestedWorkspace = String(formData.get('defaultWorkspace') ?? '') as WorkspaceSurface;
 
   return {
@@ -380,7 +380,7 @@ export function buildUserRecord(
   existingUser?: User,
 ): User {
   const now = new Date().toISOString();
-  const primaryRole = values.roles[0] ?? 'frontdesk';
+  const primaryRole = values.roles[0] ?? 'sales';
   const defaultWorkspace = values.defaultWorkspace || getDefaultWorkspaceForRole(primaryRole);
 
   return {

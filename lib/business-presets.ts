@@ -1,7 +1,7 @@
 import type { OperatingMode } from '@/lib/domain/types';
 import type { AppPreset } from '@/lib/i18n/config';
 
-export type WorkspaceLinkKey = 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'setup';
+export type WorkspaceLinkKey = 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'admin';
 
 type PresetExperience = {
   featuredWorkspaces: WorkspaceLinkKey[];
@@ -25,19 +25,19 @@ export const operatingModeOptions: OperatingMode[] = ['pickup', 'delivery', 'mix
 const presetExperience: Record<AppPreset, Record<OperatingMode, PresetExperience>> = {
   bakery: {
     pickup: {
-      featuredWorkspaces: ['production', 'orders', 'handoff', 'setup'],
+      featuredWorkspaces: ['production', 'orders', 'handoff', 'admin'],
       starterSuggestionKeys: ['sharedCutoff', 'morningCounter'],
       exampleKeys: ['counterPickup', 'nightShift'],
       emphasisWorkspace: 'production',
     },
     delivery: {
-      featuredWorkspaces: ['production', 'orders', 'handoff', 'setup'],
+      featuredWorkspaces: ['production', 'orders', 'handoff', 'admin'],
       starterSuggestionKeys: ['sharedCutoff', 'routePacking'],
       exampleKeys: ['routeDrop', 'nightShift'],
       emphasisWorkspace: 'production',
     },
     mixed: {
-      featuredWorkspaces: ['production', 'orders', 'handoff', 'setup'],
+      featuredWorkspaces: ['production', 'orders', 'handoff', 'admin'],
       starterSuggestionKeys: ['sharedCutoff', 'mixedDispatch'],
       exampleKeys: ['counterPickup', 'routeDrop'],
       emphasisWorkspace: 'production',
@@ -45,19 +45,19 @@ const presetExperience: Record<AppPreset, Record<OperatingMode, PresetExperience
   },
   cafe: {
     pickup: {
-      featuredWorkspaces: ['orders', 'production', 'setup', 'handoff'],
+      featuredWorkspaces: ['orders', 'production', 'admin', 'handoff'],
       starterSuggestionKeys: ['counterRush', 'simpleMenu'],
       exampleKeys: ['counterPickup', 'rushBoard'],
       emphasisWorkspace: 'orders',
     },
     delivery: {
-      featuredWorkspaces: ['orders', 'production', 'setup', 'handoff'],
+      featuredWorkspaces: ['orders', 'production', 'admin', 'handoff'],
       starterSuggestionKeys: ['counterRush', 'courierReady'],
       exampleKeys: ['appCourier', 'rushBoard'],
       emphasisWorkspace: 'orders',
     },
     mixed: {
-      featuredWorkspaces: ['orders', 'production', 'setup', 'handoff'],
+      featuredWorkspaces: ['orders', 'production', 'admin', 'handoff'],
       starterSuggestionKeys: ['counterRush', 'courierReady'],
       exampleKeys: ['counterPickup', 'appCourier'],
       emphasisWorkspace: 'orders',
@@ -65,19 +65,19 @@ const presetExperience: Record<AppPreset, Record<OperatingMode, PresetExperience
   },
   small_restaurant: {
     pickup: {
-      featuredWorkspaces: ['orders', 'production', 'handoff', 'setup'],
+      featuredWorkspaces: ['orders', 'production', 'handoff', 'admin'],
       starterSuggestionKeys: ['menuBoards', 'prepNotes'],
       exampleKeys: ['serviceWindow', 'prepList'],
       emphasisWorkspace: 'orders',
     },
     delivery: {
-      featuredWorkspaces: ['orders', 'production', 'handoff', 'setup'],
+      featuredWorkspaces: ['orders', 'production', 'handoff', 'admin'],
       starterSuggestionKeys: ['menuBoards', 'dispatchFlow'],
       exampleKeys: ['serviceWindow', 'appCourier'],
       emphasisWorkspace: 'orders',
     },
     mixed: {
-      featuredWorkspaces: ['orders', 'production', 'handoff', 'setup'],
+      featuredWorkspaces: ['orders', 'production', 'handoff', 'admin'],
       starterSuggestionKeys: ['menuBoards', 'dispatchFlow'],
       exampleKeys: ['serviceWindow', 'prepList'],
       emphasisWorkspace: 'orders',
@@ -85,19 +85,19 @@ const presetExperience: Record<AppPreset, Record<OperatingMode, PresetExperience
   },
   dark_kitchen: {
     pickup: {
-      featuredWorkspaces: ['orders', 'production', 'handoff', 'setup'],
+      featuredWorkspaces: ['orders', 'production', 'handoff', 'admin'],
       starterSuggestionKeys: ['dispatchFlow', 'handoffNotes'],
       exampleKeys: ['pickupWindow', 'expediteLane'],
       emphasisWorkspace: 'handoff',
     },
     delivery: {
-      featuredWorkspaces: ['orders', 'handoff', 'production', 'setup'],
+      featuredWorkspaces: ['orders', 'handoff', 'production', 'admin'],
       starterSuggestionKeys: ['dispatchFlow', 'courierReady'],
       exampleKeys: ['appCourier', 'expediteLane'],
       emphasisWorkspace: 'handoff',
     },
     mixed: {
-      featuredWorkspaces: ['orders', 'handoff', 'production', 'setup'],
+      featuredWorkspaces: ['orders', 'handoff', 'production', 'admin'],
       starterSuggestionKeys: ['dispatchFlow', 'handoffNotes'],
       exampleKeys: ['pickupWindow', 'appCourier'],
       emphasisWorkspace: 'handoff',
@@ -105,19 +105,19 @@ const presetExperience: Record<AppPreset, Record<OperatingMode, PresetExperience
   },
   food_stall: {
     pickup: {
-      featuredWorkspaces: ['orders', 'production', 'setup', 'handoff'],
+      featuredWorkspaces: ['orders', 'production', 'admin', 'handoff'],
       starterSuggestionKeys: ['fastCapture', 'singleBoard'],
       exampleKeys: ['stallPickup', 'rushBoard'],
       emphasisWorkspace: 'orders',
     },
     delivery: {
-      featuredWorkspaces: ['orders', 'production', 'setup', 'handoff'],
+      featuredWorkspaces: ['orders', 'production', 'admin', 'handoff'],
       starterSuggestionKeys: ['fastCapture', 'dispatchFlow'],
       exampleKeys: ['stallPickup', 'courierPocket'],
       emphasisWorkspace: 'orders',
     },
     mixed: {
-      featuredWorkspaces: ['orders', 'production', 'setup', 'handoff'],
+      featuredWorkspaces: ['orders', 'production', 'admin', 'handoff'],
       starterSuggestionKeys: ['fastCapture', 'singleBoard'],
       exampleKeys: ['stallPickup', 'courierPocket'],
       emphasisWorkspace: 'orders',
@@ -125,19 +125,19 @@ const presetExperience: Record<AppPreset, Record<OperatingMode, PresetExperience
   },
   generic: {
     pickup: {
-      featuredWorkspaces: ['orders', 'production', 'setup', 'handoff'],
+      featuredWorkspaces: ['orders', 'production', 'admin', 'handoff'],
       starterSuggestionKeys: ['simpleStart', 'notesFirst'],
       exampleKeys: ['counterPickup', 'prepList'],
       emphasisWorkspace: 'orders',
     },
     delivery: {
-      featuredWorkspaces: ['orders', 'production', 'handoff', 'setup'],
+      featuredWorkspaces: ['orders', 'production', 'handoff', 'admin'],
       starterSuggestionKeys: ['simpleStart', 'dispatchFlow'],
       exampleKeys: ['routeDrop', 'appCourier'],
       emphasisWorkspace: 'orders',
     },
     mixed: {
-      featuredWorkspaces: ['orders', 'production', 'handoff', 'setup'],
+      featuredWorkspaces: ['orders', 'production', 'handoff', 'admin'],
       starterSuggestionKeys: ['simpleStart', 'notesFirst'],
       exampleKeys: ['counterPickup', 'routeDrop'],
       emphasisWorkspace: 'orders',
@@ -145,19 +145,19 @@ const presetExperience: Record<AppPreset, Record<OperatingMode, PresetExperience
   },
   other: {
     pickup: {
-      featuredWorkspaces: ['orders', 'production', 'setup', 'handoff'],
+      featuredWorkspaces: ['orders', 'production', 'admin', 'handoff'],
       starterSuggestionKeys: ['simpleStart', 'notesFirst'],
       exampleKeys: ['counterPickup', 'prepList'],
       emphasisWorkspace: 'orders',
     },
     delivery: {
-      featuredWorkspaces: ['orders', 'production', 'handoff', 'setup'],
+      featuredWorkspaces: ['orders', 'production', 'handoff', 'admin'],
       starterSuggestionKeys: ['simpleStart', 'dispatchFlow'],
       exampleKeys: ['routeDrop', 'courierPocket'],
       emphasisWorkspace: 'orders',
     },
     mixed: {
-      featuredWorkspaces: ['orders', 'production', 'handoff', 'setup'],
+      featuredWorkspaces: ['orders', 'production', 'handoff', 'admin'],
       starterSuggestionKeys: ['simpleStart', 'notesFirst'],
       exampleKeys: ['counterPickup', 'routeDrop'],
       emphasisWorkspace: 'orders',

@@ -50,8 +50,8 @@ export async function OnboardingQuickStart({ redirectTo, compact = false }: Onbo
           <div className="grid-two">
             <label>
               <span className="field-heading">{t('setup.fields.role')}</span>
-              <select name="roles" defaultValue="frontdesk">
-                {['admin', 'manager', 'production', 'frontdesk', 'delivery'].map((role) => (
+              <select name="roles" defaultValue="sales">
+                {['owner_admin', 'shift_lead', 'kitchen', 'sales'].map((role) => (
                   <option key={role} value={role}>{t(`roles.${role}.label`)}</option>
                 ))}
               </select>
@@ -59,7 +59,7 @@ export async function OnboardingQuickStart({ redirectTo, compact = false }: Onbo
             <label>
               <span className="field-heading">{t('setup.fields.defaultWorkspace')}</span>
               <select name="defaultWorkspace" defaultValue="orders">
-                {['timeline', 'orders', 'customers', 'production', 'handoff', 'preferences', 'setup'].map((workspace) => (
+                {['timeline', 'orders', 'customers', 'production', 'handoff', 'preferences', 'admin'].map((workspace) => (
                   <option key={workspace} value={workspace}>{t(`nav.${workspace}`)}</option>
                 ))}
               </select>
@@ -119,7 +119,7 @@ export async function OnboardingQuickStart({ redirectTo, compact = false }: Onbo
       </div>
 
       <p className="helper-text no-margin">
-        {t('setupAssistant.quickStart.skipHelp')} <Link href="/setup" className="inline-link">{t('setup.title')}</Link>
+        {t('setupAssistant.quickStart.skipHelp')} <Link href="/admin/setup" className="inline-link">{t('setup.title')}</Link>
       </p>
     </section>
   );

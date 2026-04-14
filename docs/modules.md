@@ -226,3 +226,15 @@ When deciding whether something belongs in core or a module, SKOSS should ask:
 5. does it belong in the core SKOSS platform, or is it only a packaging variation inside SKOSSina?
 
 If the answer points toward optional depth rather than universal need, it should probably be a module.
+
+## Current implementation baseline (April 14, 2026)
+
+The monolith now includes an internal module registry baseline with:
+
+- module identity
+- required vs optional marker
+- preset-aware default enablement
+- instance-level enabled state persistence
+- admin control surface at `/admin/modules`
+
+This is intentionally static and internal for v0.

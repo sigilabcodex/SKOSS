@@ -10,7 +10,6 @@ import {
   HomeIcon,
   OrdersIcon,
   ProductionIcon,
-  SetupIcon,
   TimelineIcon,
 } from '@/components/ui-icons';
 import type { WorkspaceSurface } from '@/lib/domain/types';
@@ -21,11 +20,10 @@ type NavHref =
   | '/orders'
   | '/customers'
   | '/production'
-  | '/handoff'
-  | '/setup';
+  | '/handoff';
 
 type NavItem = {
-  key: WorkspaceSurface;
+  key: Exclude<WorkspaceSurface, 'admin' | 'preferences'>;
   href: NavHref;
   labelKey: string;
   icon: typeof HomeIcon;
@@ -33,16 +31,9 @@ type NavItem = {
 };
 
 type DesktopAdminItem = {
-  href:
-    | NavHref
-    | {
-        pathname: '/setup';
-        query: { section: string };
-        hash: string;
-      };
-  section?: string;
+  href: '/admin' | '/admin/setup' | '/admin/modules';
   labelKey: string;
-  active: (pathname: string, section?: string | null) => boolean;
+  active: (pathname: string) => boolean;
 };
 
 function NavLink({
@@ -52,13 +43,7 @@ function NavLink({
   children,
   compact = false,
 }: {
-  href:
-    | NavHref
-    | {
-        pathname: '/setup';
-        query: { section: string };
-        hash: string;
-      };
+  href: NavHref | '/admin' | '/admin/setup' | '/admin/modules';
   label: string;
   active: boolean;
   children?: ReactNode;
@@ -119,73 +104,12 @@ const navItems: NavItem[] = [
     icon: HandoffIcon,
     active: (pathname) => pathname.startsWith('/handoff'),
   },
-  {
-    key: 'setup',
-    href: '/setup',
-    labelKey: 'nav.setup',
-    icon: SetupIcon,
-    active: (pathname) => pathname.startsWith('/setup'),
-  },
 ];
 
 const desktopAdminItems: DesktopAdminItem[] = [
-  {
-    href: '/customers',
-    labelKey: 'nav.customers',
-    active: (pathname) => pathname.startsWith('/customers'),
-  },
-  {
-    href: { pathname: '/setup', query: { section: 'users' }, hash: 'users' },
-    section: 'users',
-    labelKey: 'setup.sections.users',
-    active: (pathname, section) => pathname.startsWith('/setup') && section === 'users',
-  },
-  {
-    href: {
-      pathname: '/setup',
-      query: { section: 'suppliers' },
-      hash: 'suppliers',
-    },
-    section: 'suppliers',
-    labelKey: 'setup.sections.suppliers',
-    active: (pathname, section) => pathname.startsWith('/setup') && section === 'suppliers',
-  },
-  {
-    href: {
-      pathname: '/setup',
-      query: { section: 'raw-materials' },
-      hash: 'raw-materials',
-    },
-    section: 'raw-materials',
-    labelKey: 'setup.sections.rawMaterials',
-    active: (pathname, section) => pathname.startsWith('/setup') && section === 'raw-materials',
-  },
-  {
-    href: {
-      pathname: '/setup',
-      query: { section: 'recipes' },
-      hash: 'recipes',
-    },
-    section: 'recipes',
-    labelKey: 'setup.sections.recipes',
-    active: (pathname, section) => pathname.startsWith('/setup') && section === 'recipes',
-  },
-  {
-    href: {
-      pathname: '/setup',
-      query: { section: 'preferences-system' },
-      hash: 'preferences-system',
-    },
-    section: 'preferences-system',
-    labelKey: 'setup.sections.preferencesSystem',
-    active: (pathname, section) =>
-      pathname.startsWith('/setup') && section === 'preferences-system',
-  },
-  {
-    href: '/setup',
-    labelKey: 'nav.setup',
-    active: (pathname, section) => pathname.startsWith('/setup') && !section,
-  },
+  { href: '/admin', labelKey: 'nav.setup', active: (pathname) => pathname === '/admin' },
+  { href: '/admin/setup', labelKey: 'setup.sections.businessSetup', active: (pathname) => pathname.startsWith('/admin/setup') },
+  { href: '/admin/modules', labelKey: 'setup.sections.preferencesSystem', active: (pathname) => pathname.startsWith('/admin/modules') },
 ];
 
 export function PrimaryNav({
@@ -196,13 +120,9 @@ export function PrimaryNav({
   mode?: 'mobile' | 'desktop';
 }) {
   const pathname = usePathname();
-  const setupSection =
-    typeof window === 'undefined'
-      ? null
-      : new URLSearchParams(window.location.search).get('section');
   const { t } = useI18n();
   const items = navItems.filter((item) => visibleWorkspaces.includes(item.key));
-  const showAdminSection = visibleWorkspaces.includes('setup');
+  const showAdminSection = visibleWorkspaces.includes('admin');
 
   if (mode === 'mobile') {
     return (
@@ -242,7 +162,7 @@ export function PrimaryNav({
               key={`${item.href}-${item.labelKey}`}
               href={item.href}
               label={t(item.labelKey)}
-              active={item.active(pathname, setupSection)}
+              active={item.active(pathname)}
               compact
             />
           ))}

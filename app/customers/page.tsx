@@ -42,7 +42,7 @@ export default async function CustomersPage({
           <p>{t('customers.description')}</p>
         </div>
         <div className="inline-action-row">
-          <Link href="/setup#imports" className="button-secondary">
+          <Link href="/admin/setup#imports" className="button-secondary">
             <span>{t('customers.actions.importCsv')}</span>
           </Link>
           <Link href="/orders" className="button-secondary">

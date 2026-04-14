@@ -47,6 +47,7 @@ const es = {
     production: 'Producción',
     handoff: 'WIP / Relevo',
     preferences: 'Preferencias',
+    admin: 'Administración',
     setup: 'Configuración',
   },
   shell: {
@@ -72,11 +73,10 @@ const es = {
     openPreferences: 'Abrir preferencias completas',
   },
   roles: {
-    admin: { label: 'Admin' },
-    manager: { label: 'Encargado' },
-    production: { label: 'Producción' },
-    frontdesk: { label: 'Mostrador / POS' },
-    delivery: { label: 'Entrega' },
+    owner_admin: { label: 'Administrador propietario' },
+    shift_lead: { label: 'Jefe de turno' },
+    kitchen: { label: 'Cocina' },
+    sales: { label: 'Ventas' },
   },
   language: {
     label: 'Idioma',

@@ -177,3 +177,14 @@ Behavior rules now clarified:
 - bootstrap entry should be shown only while instance state indicates first-use or incomplete onboarding
 - demo exploration remains a separate entry path and should not leak seeded identity into bootstrap
 
+
+## Routing clarification update (April 14, 2026)
+
+The onboarding layers are now explicitly separated by route purpose:
+
+- instance gateway: `/entry`
+- bootstrap (first-run only): `/bootstrap`
+- ongoing structural administration: `/admin/setup`
+- operator daily work: operational routes
+
+This keeps bootstrap out of daily operator navigation and keeps admin setup in the admin plane.

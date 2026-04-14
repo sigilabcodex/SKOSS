@@ -22,19 +22,19 @@ type TimelineEntry = TimelineView['focusEntries'][number];
 
 function getRoleAttentionConfig(role: string | undefined, t: (key: string, values?: Record<string, string | number>) => string) {
   switch (role) {
-    case 'production':
+    case 'kitchen':
       return {
         title: t('timeline.roleAttention.production.title'),
         description: t('timeline.roleAttention.production.description'),
         pick: (entry: TimelineEntry) => entry.remainingQuantity > 0 || entry.changed,
       };
-    case 'delivery':
+    case 'shift_lead':
       return {
-        title: t('timeline.roleAttention.delivery.title'),
-        description: t('timeline.roleAttention.delivery.description'),
+        title: t('timeline.roleAttention.manager.title'),
+        description: t('timeline.roleAttention.manager.description'),
         pick: (entry: TimelineEntry) => entry.fulfillmentType === 'own_delivery' || entry.fulfillmentType === 'app_delivery' || entry.needsAssignment,
       };
-    case 'frontdesk':
+    case 'sales':
       return {
         title: t('timeline.roleAttention.frontdesk.title'),
         description: t('timeline.roleAttention.frontdesk.description'),
@@ -84,13 +84,13 @@ function TimelineRow({
     statusHints.push(t('timeline.recurringHint'));
   }
 
-  const contextLine = role === 'production'
+  const contextLine = role === 'kitchen'
     ? [
         entry.destinationLabel,
         entry.dispatchNotes,
         entry.notes,
       ].filter(Boolean).join(' · ')
-    : role === 'delivery'
+    : role === 'shift_lead'
       ? [
           entry.destinationLabel,
           entry.providerLabel,
@@ -241,7 +241,7 @@ export default async function TimelinePage() {
                 <h2>{roleAttention.title}</h2>
                 <p>{roleAttention.description}</p>
               </div>
-              <span className="summary-pill">{currentUser ? t(`roles.${currentUser.role}.label`) : t('roles.manager.label')}</span>
+              <span className="summary-pill">{currentUser ? t(`roles.${currentUser.role}.label`) : t('roles.shift_lead.label')}</span>
             </div>
             <ul className="stack-list muted-list">
               {roleItems.length ? roleItems.map((entry) => (

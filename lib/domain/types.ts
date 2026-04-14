@@ -1,9 +1,9 @@
 import type { AppLocale, AppPreset } from '@/lib/i18n/config';
 
-export type UserRole = 'admin' | 'manager' | 'production' | 'frontdesk' | 'delivery';
+export type UserRole = 'owner_admin' | 'sales' | 'kitchen' | 'shift_lead';
 export type ThemeName = 'light' | 'dark' | 'system';
 export type OperatingMode = 'pickup' | 'delivery' | 'mixed';
-export type WorkspaceSurface = 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup';
+export type WorkspaceSurface = 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'admin';
 export type CustomerContactMethod = 'phone' | 'email' | 'whatsapp';
 export type EnvironmentType = 'dev' | 'demo' | 'pilot' | 'production';
 export type OnboardingStatus = 'not_started' | 'in_progress' | 'completed';
@@ -89,6 +89,7 @@ export interface InstanceState {
   lastRestoreAt?: string;
   onboardingProgress: OnboardingProgress;
   operatorOnboardingByUserId?: Record<string, boolean>;
+  moduleStates?: Record<string, boolean>;
 }
 
 export interface AuditFields {

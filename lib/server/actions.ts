@@ -54,6 +54,7 @@ import { getDefaultWorkspaceForRole, isPrimaryWorkspaceSurface } from '@/lib/wor
 import { isNonProductionMode } from '@/lib/server/runtime-mode';
 import type { AppData } from '@/lib/domain/types';
 import { detectInstanceGatewayState, shouldRouteToEntryGateway } from '@/lib/server/instance-entry';
+import { moduleRegistry } from '@/lib/modules';
 
 function sortOrders(left: { productionDate: string; updatedAt: string }, right: { productionDate: string; updatedAt: string }) {
   return left.productionDate === right.productionDate
@@ -63,7 +64,7 @@ function sortOrders(left: { productionDate: string; updatedAt: string }, right: 
 
 const supportedThemes = ['light', 'dark', 'system'] as const;
 const supportedOperatingModes = ['pickup', 'delivery', 'mixed'] as const;
-const supportedPreferenceWorkspaces = ['timeline', 'orders', 'customers', 'production', 'handoff', 'setup'] as const;
+const supportedPreferenceWorkspaces = ['timeline', 'orders', 'customers', 'production', 'handoff', 'admin'] as const;
 const sessionMaxAgeSeconds = 60 * 60 * 24 * 14;
 
 function sortUsers(left: { displayName: string }, right: { displayName: string }) {
@@ -83,7 +84,7 @@ function revalidateAllWorkspaces() {
   revalidatePath('/production');
   revalidatePath('/handoff');
   revalidatePath('/preferences');
-  revalidatePath('/setup');
+  revalidatePath('/admin/setup');
   revalidatePath('/login');
 }
 
@@ -123,12 +124,12 @@ function nextBootstrapStep(current: number, direction: 'next' | 'back' | 'stay')
 
 export async function resetDemoWorkspaceAction() {
   if (!isNonProductionMode()) {
-    redirect('/setup?error=' + encodeURIComponent('Demo reset is disabled in production mode.'));
+    redirect('/admin/setup?error=' + encodeURIComponent('Demo reset is disabled in production mode.'));
   }
 
   await reseedRuntimeStore();
   revalidateAllWorkspaces();
-  redirect('/setup?saved=demo-reset');
+  redirect('/admin/setup?saved=demo-reset');
 }
 
 export async function resetLocalRuntimeDataAction() {
@@ -178,7 +179,7 @@ export async function recoverLocalAdminAccessAction() {
 
   const data = await readStore();
   const now = new Date().toISOString();
-  const adminUser = data.users.find((user) => user.role === 'admin' || user.roles?.includes('admin'));
+  const adminUser = data.users.find((user) => user.role === 'owner_admin' || user.roles?.includes('owner_admin'));
 
   if (!adminUser) {
     redirect('/entry?error=' + encodeURIComponent('No admin account found. Use restore or guided activation.'));
@@ -264,23 +265,23 @@ export async function saveOnboardingPreferencesAction(formData: FormData) {
   const redirectTo = String(formData.get('redirectTo') ?? '/');
 
   if (!businessName) {
-    redirect(`${redirectTo.startsWith('/setup') ? '/setup' : '/'}?error=${encodeURIComponent('Add a business name to continue.')}`);
+    redirect(`${redirectTo.startsWith('/admin/setup') ? '/admin/setup' : '/'}?error=${encodeURIComponent('Add a business name to continue.')}`);
   }
 
   if (!isSupportedLocale(locale) || !supportedLocales.includes(locale)) {
-    redirect(`${redirectTo.startsWith('/setup') ? '/setup' : '/'}?error=${encodeURIComponent('Choose a supported language.')}`);
+    redirect(`${redirectTo.startsWith('/admin/setup') ? '/admin/setup' : '/'}?error=${encodeURIComponent('Choose a supported language.')}`);
   }
 
   if (!isSupportedPreset(preset) || !supportedPresets.includes(preset)) {
-    redirect(`${redirectTo.startsWith('/setup') ? '/setup' : '/'}?error=${encodeURIComponent('Choose a supported preset.')}`);
+    redirect(`${redirectTo.startsWith('/admin/setup') ? '/admin/setup' : '/'}?error=${encodeURIComponent('Choose a supported preset.')}`);
   }
 
   if (!supportedOperatingModes.includes(operatingMode as (typeof supportedOperatingModes)[number])) {
-    redirect(`${redirectTo.startsWith('/setup') ? '/setup' : '/'}?error=${encodeURIComponent('Choose how you usually operate.')}`);
+    redirect(`${redirectTo.startsWith('/admin/setup') ? '/admin/setup' : '/'}?error=${encodeURIComponent('Choose how you usually operate.')}`);
   }
 
   if (!supportedThemes.includes(theme as (typeof supportedThemes)[number])) {
-    redirect(`${redirectTo.startsWith('/setup') ? '/setup' : '/'}?error=${encodeURIComponent('Choose an appearance theme.')}`);
+    redirect(`${redirectTo.startsWith('/admin/setup') ? '/admin/setup' : '/'}?error=${encodeURIComponent('Choose an appearance theme.')}`);
   }
 
   const now = new Date().toISOString();
@@ -313,17 +314,39 @@ export async function saveOnboardingPreferencesAction(formData: FormData) {
   cookieStore.set(themeCookieName, theme, { path: '/', maxAge: 31536000, sameSite: 'lax' });
 
   revalidatePath('/');
-  revalidatePath('/setup');
+  revalidatePath('/admin/setup');
   revalidatePath('/timeline');
   revalidatePath('/orders');
   revalidatePath('/production');
   revalidatePath('/handoff');
 
-  if (redirectTo.startsWith('/setup')) {
-    redirect('/setup?saved=preferences');
+  if (redirectTo.startsWith('/admin/setup')) {
+    redirect('/admin/setup?saved=preferences');
   }
 
   redirect('/?welcome=1');
+}
+
+export async function updateModuleRegistryAction(formData: FormData) {
+  const data = await readStore();
+  const nextStates: Record<string, boolean> = {};
+
+  for (const manifest of moduleRegistry) {
+    if (manifest.required) {
+      nextStates[manifest.id] = true;
+      continue;
+    }
+
+    nextStates[manifest.id] = String(formData.get(`module:${manifest.id}`) ?? '') === '1';
+  }
+
+  data.instance.moduleStates = {
+    ...(data.instance.moduleStates ?? {}),
+    ...nextStates,
+  };
+  await writeStore(data);
+  revalidatePath('/admin/modules');
+  redirect('/admin/modules?saved=modules');
 }
 
 export async function saveBootstrapStepAction(formData: FormData) {
@@ -355,7 +378,7 @@ export async function saveBootstrapStepAction(formData: FormData) {
     }
 
     const now = new Date().toISOString();
-    const existingAdmin = data.users.find((user) => user.role === 'admin' || user.roles?.includes('admin'));
+    const existingAdmin = data.users.find((user) => user.role === 'owner_admin' || user.roles?.includes('owner_admin'));
     const duplicate = data.users.find(
       (user) => user.id !== existingAdmin?.id && user.loginIdentifier.toLowerCase() === username,
     );
@@ -372,10 +395,10 @@ export async function saveBootstrapStepAction(formData: FormData) {
       existingAdmin.active = true;
       existingAdmin.email = email || undefined;
       existingAdmin.phone = phone || undefined;
-      existingAdmin.role = 'admin';
-      existingAdmin.roles = existingAdmin.roles?.includes('admin')
+      existingAdmin.role = 'owner_admin';
+      existingAdmin.roles = existingAdmin.roles?.includes('owner_admin')
         ? existingAdmin.roles
-        : ['admin', ...(existingAdmin.roles ?? []).filter((role) => role !== 'admin')];
+        : ['owner_admin', ...(existingAdmin.roles ?? []).filter((role) => role !== 'owner_admin')];
       existingAdmin.updatedAt = now;
     } else {
       data.users.push({
@@ -386,15 +409,15 @@ export async function saveBootstrapStepAction(formData: FormData) {
         passwordHash: hashPassword(password),
         passwordUpdatedAt: now,
         mustChangePassword: false,
-        role: 'admin',
-        roles: ['admin'],
+        role: 'owner_admin',
+        roles: ['owner_admin'],
         email: email || undefined,
         phone: phone || undefined,
         workspaceId: data.workspace.id,
-        defaultWorkspace: 'setup',
+        defaultWorkspace: 'admin',
         active: true,
         preferences: {
-          defaultWorkspace: 'setup',
+          defaultWorkspace: 'admin',
         },
         createdAt: now,
         updatedAt: now,
@@ -441,9 +464,9 @@ export async function saveBootstrapStepAction(formData: FormData) {
       const defaultWorkspace = String(formData.get(`teamWorkspace${row}`) ?? 'orders');
       const enabled = formData.get(`teamEnabled${row}`) !== null;
       const roleList = selectedRoles
-        .filter((role) => ['admin', 'manager', 'production', 'frontdesk', 'delivery'].includes(role))
-        .filter((role, index, list) => list.indexOf(role) === index) as Array<'admin' | 'manager' | 'production' | 'frontdesk' | 'delivery'>;
-      const primaryRole = roleList[0] ?? 'frontdesk';
+        .filter((role) => ['owner_admin', 'shift_lead', 'kitchen', 'sales'].includes(role))
+        .filter((role, index, list) => list.indexOf(role) === index) as Array<'owner_admin' | 'shift_lead' | 'kitchen' | 'sales'>;
+      const primaryRole = roleList[0] ?? 'sales';
 
       if (!displayName || !username) {
         continue;
@@ -454,8 +477,8 @@ export async function saveBootstrapStepAction(formData: FormData) {
         existing.displayName = displayName;
         existing.role = primaryRole;
         existing.roles = roleList.length > 0 ? roleList : [primaryRole];
-        existing.defaultWorkspace = isPrimaryWorkspaceSurface(defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
-          ? (defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
+        existing.defaultWorkspace = isPrimaryWorkspaceSurface(defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'admin')
+          ? (defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'admin')
           : existing.defaultWorkspace;
         existing.active = enabled;
         existing.updatedAt = now;
@@ -470,14 +493,14 @@ export async function saveBootstrapStepAction(formData: FormData) {
           role: primaryRole,
           roles: roleList.length > 0 ? roleList : [primaryRole],
           workspaceId: data.workspace.id,
-          defaultWorkspace: isPrimaryWorkspaceSurface(defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
-            ? (defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
+          defaultWorkspace: isPrimaryWorkspaceSurface(defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'admin')
+            ? (defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'admin')
             : 'orders',
           active: enabled,
           username,
           preferences: {
-            defaultWorkspace: isPrimaryWorkspaceSurface(defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
-              ? (defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'setup')
+            defaultWorkspace: isPrimaryWorkspaceSurface(defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'admin')
+              ? (defaultWorkspace as 'home' | 'timeline' | 'orders' | 'customers' | 'production' | 'handoff' | 'preferences' | 'admin')
               : 'orders',
           },
           createdAt: now,
@@ -643,7 +666,7 @@ export async function loginAction(formData: FormData) {
     redirect('/entry');
   }
 
-  if (gatewayState.onboardingIncomplete && (user.roles?.includes('admin') || user.roles?.includes('manager') || user.role === 'admin' || user.role === 'manager')) {
+  if (gatewayState.onboardingIncomplete && (user.roles?.includes('owner_admin') || user.roles?.includes('shift_lead') || user.role === 'owner_admin' || user.role === 'shift_lead')) {
     revalidateAllWorkspaces();
     redirect('/bootstrap?step=1');
   }
@@ -666,7 +689,7 @@ export async function logoutAction() {
 export async function createUserAction(formData: FormData) {
   const data = await readStore();
   const actorUserId = await getActorUserId(data);
-  const redirectTo = resolveRedirectTo(formData, '/setup');
+  const redirectTo = resolveRedirectTo(formData, '/admin/setup');
   const allowEmpty = shouldAllowEmpty(formData);
   const values = normalizeUserForm(formData);
   if (allowEmpty && !values.displayName.trim() && !values.loginIdentifier.trim()) {
@@ -683,7 +706,7 @@ export async function createUserAction(formData: FormData) {
   user.passwordUpdatedAt = new Date().toISOString();
   user.mustChangePassword = !values.password?.trim();
   data.users = [...data.users, user].sort(sortUsers);
-  if (user.roles.includes('admin') || user.role === 'admin') {
+  if (user.roles.includes('owner_admin') || user.role === 'owner_admin') {
     data.instance = {
       ...data.instance,
       initialized: true,
@@ -712,14 +735,14 @@ export async function updateUserAction(userId: string, formData: FormData) {
   const existing = data.users.find((entry) => entry.id === userId);
 
   if (!existing) {
-    redirect('/setup?error=missing-user');
+    redirect('/admin/setup?error=missing-user');
   }
 
   const values = normalizeUserForm(formData);
   const error = validateUserForm(values, data, userId);
 
   if (error) {
-    redirect(`/setup?user=${userId}&error=${encodeURIComponent(error)}`);
+    redirect(`/admin/setup?user=${userId}&error=${encodeURIComponent(error)}`);
   }
 
   const user = buildUserRecord(values, data, existing);
@@ -745,7 +768,7 @@ export async function updateUserAction(userId: string, formData: FormData) {
 
   await writeStore(data);
   revalidateAllWorkspaces();
-  redirect('/setup?saved=user');
+  redirect('/admin/setup?saved=user');
 }
 
 export async function createCustomerAction(formData: FormData) {
@@ -977,7 +1000,7 @@ export async function addWipEntryAction(formData: FormData) {
 
 export async function createSupplierAction(formData: FormData) {
   const data = await readStore();
-  const redirectTo = resolveRedirectTo(formData, '/setup');
+  const redirectTo = resolveRedirectTo(formData, '/admin/setup');
   const allowEmpty = shouldAllowEmpty(formData);
   const values = normalizeSupplierForm(formData);
   if (allowEmpty && !values.name.trim()) {
@@ -1001,7 +1024,7 @@ export async function createSupplierAction(formData: FormData) {
   });
   await writeStore(data);
   revalidatePath('/');
-  revalidatePath('/setup');
+  revalidatePath('/admin/setup');
   redirect(`${redirectTo}?saved=supplier`);
 }
 
@@ -1010,14 +1033,14 @@ export async function updateSupplierAction(supplierId: string, formData: FormDat
   const existing = data.suppliers.find((entry) => entry.id === supplierId);
 
   if (!existing) {
-    redirect('/setup?error=missing-supplier');
+    redirect('/admin/setup?error=missing-supplier');
   }
 
   const values = normalizeSupplierForm(formData);
   const error = validateSupplierForm(values);
 
   if (error) {
-    redirect(`/setup?supplier=${supplierId}&error=${encodeURIComponent(error)}`);
+    redirect(`/admin/setup?supplier=${supplierId}&error=${encodeURIComponent(error)}`);
   }
 
   const actorUserId = await getActorUserId(data);
@@ -1036,13 +1059,13 @@ export async function updateSupplierAction(supplierId: string, formData: FormDat
   });
   await writeStore(data);
   revalidatePath('/');
-  revalidatePath('/setup');
-  redirect('/setup?saved=supplier');
+  revalidatePath('/admin/setup');
+  redirect('/admin/setup?saved=supplier');
 }
 
 export async function createRawMaterialAction(formData: FormData) {
   const data = await readStore();
-  const redirectTo = resolveRedirectTo(formData, '/setup');
+  const redirectTo = resolveRedirectTo(formData, '/admin/setup');
   const allowEmpty = shouldAllowEmpty(formData);
   const values = normalizeRawMaterialForm(formData);
   if (allowEmpty && !values.name.trim()) {
@@ -1066,13 +1089,13 @@ export async function createRawMaterialAction(formData: FormData) {
   });
   await writeStore(data);
   revalidatePath('/');
-  revalidatePath('/setup');
+  revalidatePath('/admin/setup');
   redirect(`${redirectTo}?saved=raw-material`);
 }
 
 export async function importCsvEntitiesAction(formData: FormData) {
   const data = await readStore();
-  const redirectTo = resolveRedirectTo(formData, '/setup');
+  const redirectTo = resolveRedirectTo(formData, '/admin/setup');
   const entity = String(formData.get('entity') ?? '') as CsvEntity;
   const csvContent = String(formData.get('csvContent') ?? '');
   const rawMapping = String(formData.get('mapping') ?? '');
@@ -1146,14 +1169,14 @@ export async function updateRawMaterialAction(rawMaterialId: string, formData: F
   const existing = data.rawMaterials.find((entry) => entry.id === rawMaterialId);
 
   if (!existing) {
-    redirect('/setup?error=missing-raw-material');
+    redirect('/admin/setup?error=missing-raw-material');
   }
 
   const values = normalizeRawMaterialForm(formData);
   const error = validateRawMaterialForm(values);
 
   if (error) {
-    redirect(`/setup?material=${rawMaterialId}&error=${encodeURIComponent(error)}`);
+    redirect(`/admin/setup?material=${rawMaterialId}&error=${encodeURIComponent(error)}`);
   }
 
   const actorUserId = await getActorUserId(data);
@@ -1172,8 +1195,8 @@ export async function updateRawMaterialAction(rawMaterialId: string, formData: F
   });
   await writeStore(data);
   revalidatePath('/');
-  revalidatePath('/setup');
-  redirect('/setup?saved=raw-material');
+  revalidatePath('/admin/setup');
+  redirect('/admin/setup?saved=raw-material');
 }
 
 export async function createRecipeAction(formData: FormData) {
@@ -1182,7 +1205,7 @@ export async function createRecipeAction(formData: FormData) {
   const error = validateRecipeForm(values, data);
 
   if (error) {
-    redirect(`/setup?error=${encodeURIComponent(error)}`);
+    redirect(`/admin/setup?error=${encodeURIComponent(error)}`);
   }
 
   const actorUserId = await getActorUserId(data);
@@ -1197,8 +1220,8 @@ export async function createRecipeAction(formData: FormData) {
   });
   await writeStore(data);
   revalidatePath('/');
-  revalidatePath('/setup');
-  redirect(`/setup?recipe=${recipe.id}&saved=recipe`);
+  revalidatePath('/admin/setup');
+  redirect(`/admin/setup?recipe=${recipe.id}&saved=recipe`);
 }
 
 export async function updateRecipeAction(recipeId: string, formData: FormData) {
@@ -1206,14 +1229,14 @@ export async function updateRecipeAction(recipeId: string, formData: FormData) {
   const existing = data.recipes.find((entry) => entry.id === recipeId);
 
   if (!existing) {
-    redirect('/setup?error=missing-recipe');
+    redirect('/admin/setup?error=missing-recipe');
   }
 
   const values = normalizeRecipeForm(formData);
   const error = validateRecipeForm(values, data);
 
   if (error) {
-    redirect(`/setup?recipe=${recipeId}&error=${encodeURIComponent(error)}`);
+    redirect(`/admin/setup?recipe=${recipeId}&error=${encodeURIComponent(error)}`);
   }
 
   const actorUserId = await getActorUserId(data);
@@ -1232,8 +1255,8 @@ export async function updateRecipeAction(recipeId: string, formData: FormData) {
   });
   await writeStore(data);
   revalidatePath('/');
-  revalidatePath('/setup');
-  redirect(`/setup?recipe=${recipe.id}&saved=recipe`);
+  revalidatePath('/admin/setup');
+  redirect(`/admin/setup?recipe=${recipe.id}&saved=recipe`);
 }
 
 export async function createSupplierPriceEntryAction(formData: FormData) {
@@ -1242,7 +1265,7 @@ export async function createSupplierPriceEntryAction(formData: FormData) {
   const error = validateSupplierPriceEntryForm(values, data);
 
   if (error) {
-    redirect(`/setup?error=${encodeURIComponent(error)}`);
+    redirect(`/admin/setup?error=${encodeURIComponent(error)}`);
   }
 
   const actorUserId = await getActorUserId(data);
@@ -1254,8 +1277,8 @@ export async function createSupplierPriceEntryAction(formData: FormData) {
   );
   await writeStore(data);
   revalidatePath('/');
-  revalidatePath('/setup');
-  redirect('/setup?saved=price');
+  revalidatePath('/admin/setup');
+  redirect('/admin/setup?saved=price');
 }
 
 export async function saveShiftLogAction(formData: FormData) {
