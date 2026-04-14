@@ -1,6 +1,6 @@
 import type { UserRole, WorkspaceSurface } from '@/lib/domain/types';
 
-export const workspaceSurfaceOrder: WorkspaceSurface[] = ['home', 'timeline', 'orders', 'customers', 'production', 'handoff', 'preferences', 'setup'];
+export const workspaceSurfaceOrder: WorkspaceSurface[] = ['home', 'timeline', 'orders', 'customers', 'production', 'handoff', 'preferences', 'admin'];
 
 export function isPrimaryWorkspaceSurface(workspace: WorkspaceSurface): workspace is Exclude<WorkspaceSurface, 'preferences'> {
   return workspace !== 'preferences';
@@ -8,16 +8,14 @@ export function isPrimaryWorkspaceSurface(workspace: WorkspaceSurface): workspac
 
 export function getDefaultWorkspaceForRole(role: UserRole): WorkspaceSurface {
   switch (role) {
-    case 'admin':
-      return 'setup';
-    case 'manager':
+    case 'owner_admin':
+      return 'admin';
+    case 'shift_lead':
       return 'orders';
-    case 'production':
+    case 'kitchen':
       return 'production';
-    case 'frontdesk':
+    case 'sales':
       return 'orders';
-    case 'delivery':
-      return 'handoff';
     default:
       return 'home';
   }
@@ -25,18 +23,16 @@ export function getDefaultWorkspaceForRole(role: UserRole): WorkspaceSurface {
 
 export function getWorkspacePriorityForRole(role: UserRole): WorkspaceSurface[] {
   switch (role) {
-    case 'admin':
-      return ['setup', 'timeline', 'customers', 'orders', 'production', 'handoff', 'home'];
-    case 'manager':
-      return ['timeline', 'orders', 'production', 'handoff', 'customers', 'setup', 'home'];
-    case 'production':
+    case 'owner_admin':
+      return ['admin', 'timeline', 'customers', 'orders', 'production', 'handoff', 'home'];
+    case 'shift_lead':
+      return ['timeline', 'orders', 'production', 'handoff', 'customers', 'admin', 'home'];
+    case 'kitchen':
       return ['timeline', 'production', 'handoff', 'home'];
-    case 'frontdesk':
+    case 'sales':
       return ['timeline', 'orders', 'customers', 'home'];
-    case 'delivery':
-      return ['timeline', 'handoff', 'customers', 'orders', 'home'];
     default:
-      return ['home', 'timeline', 'orders', 'customers', 'production', 'handoff', 'setup'];
+      return ['home', 'timeline', 'orders', 'customers', 'production', 'handoff', 'admin'];
   }
 }
 
@@ -45,5 +41,5 @@ export function getVisibleWorkspacesForRole(role: UserRole) {
 }
 
 export function canManageSettings(role: UserRole) {
-  return role === 'admin' || role === 'manager';
+  return role === 'owner_admin';
 }

@@ -6,7 +6,7 @@ import { getCurrentUserContext } from '@/lib/server/auth';
 import { getDefaultWorkspaceForRole } from '@/lib/workspaces';
 
 import { themeOptions } from '@/lib/theme';
-const workspaceOptions = ['timeline', 'orders', 'customers', 'production', 'handoff', 'setup'] as const;
+const workspaceOptions = ['timeline', 'orders', 'customers', 'production', 'handoff', 'admin'] as const;
 
 export default async function PreferencesPage({
   searchParams,

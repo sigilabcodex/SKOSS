@@ -27,7 +27,7 @@ export default async function BootstrapPage({
 
   const step = bootstrapStep(Number(params?.step ?? 1));
   const progress = Math.round((step / totalSteps) * 100);
-  const adminUser = data.users.find((user) => user.role === 'admin' || user.roles?.includes('admin'));
+  const adminUser = data.users.find((user) => user.role === 'owner_admin' || user.roles?.includes('owner_admin'));
   const isRequiredStep = requiredSteps.has(step);
 
   return (

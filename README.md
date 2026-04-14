@@ -376,3 +376,22 @@ This scaffold is intentionally light. It now supports a first persisted operatio
 
 
 Current fulfillment support is intentionally lightweight. SKOSS can now show pickup vs delivery, own delivery vs app delivery, and practical handoff/packing context. It still intentionally defers routing, GPS, live courier tracking, dispatch optimization, and marketplace API integrations.
+
+## Current internal application planes (v0 refactor)
+
+SKOSS remains one monolith, but the app now separates two internal planes:
+
+- **SKOSS Core / Admin Console** at `/admin/*` for structural setup, module control, imports, users, and advanced instance configuration
+- **SKOSSina operator surface** on operational routes for daily worker execution (orders, production, handoff, timeline)
+
+First-contact and first-run remain distinct:
+
+- `/entry` for instance gateway decisions
+- `/bootstrap` for first-run bootstrap flow
+
+Canonical v0 roles are now:
+
+- `owner_admin`
+- `shift_lead`
+- `kitchen`
+- `sales`

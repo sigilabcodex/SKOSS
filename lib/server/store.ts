@@ -21,6 +21,7 @@ import { resolveThemePreference } from '@/lib/theme';
 import { getDefaultWorkspaceForRole } from '@/lib/workspaces';
 import { fallbackDemoPassword, hashPassword } from '@/lib/server/passwords';
 import { getRuntimeMode } from '@/lib/server/runtime-mode';
+import { getModuleStateMap } from '@/lib/modules';
 
 const seedStorePath = path.join(process.cwd(), 'data', 'seeds', 'demo-store.seed.json');
 const runtimeStorePath = path.join(process.cwd(), 'data', 'runtime', 'demo-store.json');
@@ -152,21 +153,21 @@ function normalizeRole(role: string | undefined): UserRole {
   switch (role) {
     case 'owner_admin':
     case 'admin':
-      return 'admin';
+      return 'owner_admin';
     case 'shift_lead':
     case 'manager':
-      return 'manager';
+      return 'shift_lead';
     case 'kitchen':
     case 'production':
-      return 'production';
+      return 'kitchen';
     case 'sales':
     case 'frontdesk':
     case 'pos':
-      return 'frontdesk';
+      return 'sales';
     case 'delivery':
-      return 'delivery';
+      return 'shift_lead';
     default:
-      return 'frontdesk';
+      return 'sales';
   }
 }
 
@@ -394,7 +395,7 @@ function hydrateStore(rawData: AppData): AppData {
   };
 
   const users = (rawData.users ?? []).map((user) => normalizeUser(user as Partial<User> & { email?: string; role?: string }, rawData.workspace.id));
-  const hasAdminUser = users.some((user) => user.active && (user.roles?.includes('admin') || user.role === 'admin'));
+  const hasAdminUser = users.some((user) => user.active && (user.roles?.includes('owner_admin') || user.role === 'owner_admin'));
   const onboardingCompleted = rawData.preferences?.onboardingCompleted ?? false;
   const instance: InstanceState = {
     initialized: rawData.instance?.initialized ?? users.length > 0,
@@ -414,6 +415,7 @@ function hydrateStore(rawData: AppData): AppData {
       roles: rawData.instance?.onboardingProgress?.roles ?? hasAdminUser,
     },
     operatorOnboardingByUserId: rawData.instance?.operatorOnboardingByUserId ?? {},
+    moduleStates: getModuleStateMap(preferences.preset, rawData.instance?.moduleStates),
   };
   const currentUserId = rawData.session?.currentUserId && users.find((user) => user.id === rawData.session.currentUserId && user.active)
     ? rawData.session.currentUserId

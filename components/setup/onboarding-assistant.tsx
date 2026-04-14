@@ -51,7 +51,7 @@ export async function OnboardingAssistant({
       </div>
 
       <form action={saveOnboardingPreferencesAction} className="page-stack">
-        <input type="hidden" name="redirectTo" value={variant === 'first-run' ? '/' : '/setup'} />
+        <input type="hidden" name="redirectTo" value={variant === 'first-run' ? '/' : '/admin/setup'} />
 
         <section className="field-section page-stack">
           <div className="field-section-header">
@@ -165,7 +165,7 @@ export async function OnboardingAssistant({
         </div>
       </form>
 
-      {includeQuickStart ? <OnboardingQuickStart redirectTo={variant === 'first-run' ? '/' : '/setup'} compact /> : null}
+      {includeQuickStart ? <OnboardingQuickStart redirectTo={variant === 'first-run' ? '/' : '/admin/setup'} compact /> : null}
     </section>
   );
 }

@@ -3,11 +3,10 @@
 import { useState } from 'react';
 
 const roleOptions = [
-  { value: 'manager', label: 'Manager' },
-  { value: 'production', label: 'Production' },
-  { value: 'frontdesk', label: 'Orders' },
-  { value: 'admin', label: 'Admin' },
-  { value: 'delivery', label: 'Delivery' },
+  { value: 'shift_lead', label: 'Manager' },
+  { value: 'kitchen', label: 'Production' },
+  { value: 'sales', label: 'Orders' },
+  { value: 'owner_admin', label: 'Admin' },
 ] as const;
 
 const workspaceOptions = [
@@ -16,7 +15,7 @@ const workspaceOptions = [
   { value: 'production', label: 'Production' },
   { value: 'customers', label: 'Customers' },
   { value: 'handoff', label: 'Handoff' },
-  { value: 'setup', label: 'Setup' },
+  { value: 'admin', label: 'Admin' },
 ] as const;
 
 type TeamRosterBuilderProps = {
@@ -57,7 +56,7 @@ export function TeamRosterBuilder({ initialRows = 1 }: TeamRosterBuilderProps) {
               <div className="grid-two">
                 {roleOptions.map((role, roleIndex) => (
                   <label key={role.value} className="checkbox-row">
-                    <input type="checkbox" name={`teamRoles${row}`} value={role.value} defaultChecked={row === 1 ? role.value === 'manager' : roleIndex === 1} />
+                    <input type="checkbox" name={`teamRoles${row}`} value={role.value} defaultChecked={row === 1 ? role.value === 'shift_lead' : roleIndex === 1} />
                     <span><strong>{role.label}</strong></span>
                   </label>
                 ))}

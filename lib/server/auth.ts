@@ -44,6 +44,6 @@ export async function getCurrentUserContext(sourceData?: AppData) {
     currentUser,
     visibleWorkspaces,
     homeWorkspace,
-    canManageSettings: currentUser ? currentUser.role === 'admin' || currentUser.role === 'manager' : false,
+    canManageSettings: currentUser ? currentUser.role === 'owner_admin' : false,
   };
 }

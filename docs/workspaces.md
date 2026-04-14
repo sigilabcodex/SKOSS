@@ -347,3 +347,9 @@ Transition behavior:
 
 This separation keeps installation/setup intent distinct from daily operator workflows.
 
+
+## Admin plane separation update (April 14, 2026)
+
+Admin setup is now treated as an **admin plane** under `/admin/*`, not as a peer operator workspace tab.
+
+Operator-facing workspaces remain focused on daily flow (orders, production, handoff, timeline), while admin setup and module control are grouped in the SKOSS Core/Admin Console plane.

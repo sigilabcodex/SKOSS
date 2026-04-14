@@ -68,8 +68,8 @@ export default async function HomePage() {
       description: t('home.quickLinks.handoff.description'),
       icon: HandoffIcon,
     },
-    setup: {
-      href: '/setup',
+    admin: {
+      href: '/admin/setup',
       title: t('home.quickLinks.setup.title'),
       description: t('home.quickLinks.setup.description'),
       icon: SetupIcon,
