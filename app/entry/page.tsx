@@ -11,7 +11,7 @@ import {
 import { getCurrentUserContext } from '@/lib/server/auth';
 import { detectInstanceGatewayState } from '@/lib/server/instance-entry';
 import { getServerTranslator } from '@/lib/i18n/server';
-import { readStore } from '@/lib/server/store';
+import { readAppData } from '@/lib/server/persistence';
 import { getRuntimeMode, isNonProductionMode } from '@/lib/server/runtime-mode';
 
 function getEntryCopy(locale: string) {
@@ -72,7 +72,7 @@ export default async function EntryGatewayPage({
   searchParams?: Promise<{ error?: string; saved?: string; recoveryUser?: string }>;
 }) {
   const [data, { currentUser }, { t, locale }, params] = await Promise.all([
-    readStore(),
+    readAppData(),
     getCurrentUserContext(),
     getServerTranslator(),
     searchParams,

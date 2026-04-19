@@ -3,7 +3,7 @@ import { CsvImportCard } from '@/components/setup/csv-import-card';
 import { TeamRosterBuilder } from '@/components/setup/team-roster-builder';
 import { TimezoneSelect } from '@/components/setup/timezone-select';
 import { saveBootstrapStepAction, importCsvEntitiesAction } from '@/lib/server/actions';
-import { readStore } from '@/lib/server/store';
+import { readAppData } from '@/lib/server/persistence';
 import { detectInstanceGatewayState } from '@/lib/server/instance-entry';
 
 const totalSteps = 8;
@@ -18,7 +18,7 @@ export default async function BootstrapPage({
 }: {
   searchParams?: Promise<{ step?: string; error?: string; saved?: string }>;
 }) {
-  const [data, params] = await Promise.all([readStore(), searchParams]);
+  const [data, params] = await Promise.all([readAppData(), searchParams]);
   const state = await detectInstanceGatewayState(data);
 
   if (!state.canRunBootstrap) {

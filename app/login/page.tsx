@@ -1,6 +1,6 @@
 import { loginAction } from '@/lib/server/actions';
 import { getServerTranslator } from '@/lib/i18n/server';
-import { readStore } from '@/lib/server/store';
+import { readAppData } from '@/lib/server/persistence';
 import { detectInstanceGatewayState } from '@/lib/server/instance-entry';
 import Link from 'next/link';
 
@@ -9,7 +9,7 @@ export default async function LoginPage({
 }: {
   searchParams?: Promise<{ error?: string; redirectTo?: string }>;
 }) {
-  const [{ t }, data, params] = await Promise.all([getServerTranslator(), readStore(), searchParams]);
+  const [{ t }, data, params] = await Promise.all([getServerTranslator(), readAppData(), searchParams]);
   const gatewayState = await detectInstanceGatewayState(data);
   const activeUsers = data.users.filter((user) => user.active);
   const redirectTo = params?.redirectTo ?? '/';

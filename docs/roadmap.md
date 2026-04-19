@@ -21,6 +21,19 @@ It also clarifies the product split going forward:
 
 The next iterations should strengthen fulfillment clarity and daily operator visibility without making the product heavier.
 
+### Persistence transition foundation (active priority)
+
+A dedicated persistence boundary is now in place so app/business flows stop depending directly on runtime JSON file operations.
+
+Near-term priority in this track:
+
+- keep JSON runtime persistence as the active adapter while migration is in progress
+- incrementally reduce remaining `AppData` blob coupling in route/action logic
+- introduce PostgreSQL + Drizzle adapter work by repository segment (not as a big-bang rewrite)
+- preserve bootstrap, setup, and operator flows throughout migration
+
+This transition is architectural debt paydown and should remain a priority before broad feature expansion.
+
 ### Domain-neutral foundation and presets
 
 The next iterations should make the domain-neutral foundation explicit across product and technical work.

@@ -4,12 +4,12 @@ import { headers } from 'next/headers';
 import { PrimaryNav } from '@/components/primary-nav';
 import { UserMenu } from '@/components/user-menu';
 import { getServerTranslator } from '@/lib/i18n/server';
-import { readStore } from '@/lib/server/store';
+import { readAppData } from '@/lib/server/persistence';
 import { getCurrentUserContext } from '@/lib/server/auth';
 import { getRuntimeModeLabel, isNonProductionMode } from '@/lib/server/runtime-mode';
 
 export async function AppShell({ children }: { children?: ReactNode }) {
-  const [{ t }, data] = await Promise.all([getServerTranslator(), readStore()]);
+  const [{ t }, data] = await Promise.all([getServerTranslator(), readAppData()]);
   const { currentUser, visibleWorkspaces } = await getCurrentUserContext(data);
   const showNonProductionBanner = isNonProductionMode();
   const runtimeModeLabel = getRuntimeModeLabel();

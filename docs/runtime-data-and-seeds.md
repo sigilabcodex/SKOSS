@@ -80,3 +80,13 @@ This structure keeps a simple file-backed approach while preparing for:
 - clearer separation of demo vs pilot/real data paths
 - instance-specific backup/restore flows
 - later environment-specific runtime files without changing core workflow code
+
+## Persistence boundary status
+
+As of 2026-04-19, runtime JSON file persistence is no longer the app-level architecture surface.
+
+- app/server flows use `lib/server/persistence`
+- JSON runtime storage is provided through `lib/server/persistence/json-runtime-adapter.ts`
+- `lib/server/store.ts` remains the file-backed adapter implementation
+
+This keeps current behavior while preparing adapter-level migration toward relational persistence (PostgreSQL + Drizzle).
