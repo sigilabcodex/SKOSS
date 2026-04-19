@@ -69,8 +69,8 @@ export const usersTable = pgTable('users', {
 export const userRolesTable = pgTable('user_roles', {
   userId: text('user_id').notNull().references(() => usersTable.id, { onDelete: 'cascade' }),
   role: text('role').$type<UserRole>().notNull(),
-}, (table: { userId: object; role: object }) => ({
-  pk: primaryKey({ columns: [table.userId, table.role] }),
+}, (table) => ({
+  pk: primaryKey(table.userId, table.role),
 }));
 
 export const customersTable = pgTable('customers', {
