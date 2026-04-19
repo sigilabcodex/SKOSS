@@ -1,95 +1,76 @@
-# Persistence repository boundary (refactor preparation)
+# Persistence repository boundary (transitioning to PostgreSQL + Drizzle)
 
 Date: 2026-04-19
-Status: implemented (JSON adapter active)
+Status: active transition (hybrid mode available)
 
 ## Why this pass was needed
 
-SKOSS runtime persistence has been centered around direct `readStore()` / `writeStore()` calls against one mutable `AppData` JSON blob.
+SKOSS runtime persistence was centered around direct JSON file IO against one mutable `AppData` blob.
 
-That made it too easy for route/actions and domain workflow code to couple directly to storage shape and mutation mechanics.
+ADR 0004 introduced a repository boundary. This pass adds PostgreSQL + Drizzle behind that boundary without rewriting every domain at once.
 
-Before introducing PostgreSQL + Drizzle, SKOSS now introduces a persistence boundary so storage can be swapped with smaller blast radius.
+## Current persistence architecture
 
-## Coupling audit summary (before this pass)
+Persistence entry points remain in `lib/server/persistence/index.ts`.
 
-Direct `readStore()` / `writeStore()` usage had spread across:
+Runtime now supports two modes:
 
-- server actions (`lib/server/actions.ts`)
-- auth/session context (`lib/server/auth.ts`)
-- request preference/i18n resolution (`lib/i18n/server.ts`)
-- workspace loaders in `lib/server/demo-data.ts`
-- app pages and route handlers (`app/**`, `components/app-shell.tsx`)
+- `json` mode: JSON-only adapter
+- `hybrid` / `postgres` mode: composed persistence adapter
 
-This created storage leakage into:
+### PostgreSQL-backed source-of-truth domains
 
-- role/session shaping
-- bootstrap and entry-gateway decisions
-- admin/setup flows
-- workspace read models (orders, customers, production, handoff, timeline)
+The following domains are authoritative in PostgreSQL when hybrid mode is enabled:
 
-## What is now in place
-
-A new persistence module exists under `lib/server/persistence/`:
-
-- `contracts.ts`: domain-segmented repository contracts
-- `json-runtime-adapter.ts`: current JSON runtime adapter implementation
-- `index.ts`: application-facing persistence entry points
-
-### Current segmented repositories
-
-The boundary is intentionally practical and keeps domain language:
-
-- instance/workspace/session state
-- users
+- workspace
+- workspace preferences
+- instance state
+- session state
+- users and user roles
 - customers
-- orders
+
+### JSON-backed source-of-truth domains (current phase)
+
+These domains remain authoritative in JSON runtime storage:
+
+- destinations
+- products
+- suppliers
+- raw materials
+- supplier price entries
+- recipes
 - recurring templates
-- catalog (products/destinations)
-- procurement (suppliers, raw materials, supplier prices, recipes)
-- production (WIP, shift logs)
+- orders
+- WIP entries
+- shift logs
 - activities
 
-## JSON in the new architecture
+## Full-AppData writes in hybrid mode
 
-JSON runtime storage remains active, but now sits behind the persistence gateway.
+Many existing flows still mutate full `AppData` objects.
 
-`lib/server/store.ts` is now infrastructure-level file IO + hydration logic, with upstream callers routed through `lib/server/persistence`.
+To prevent accidental overwrites of migrated PostgreSQL domains:
 
-This keeps current behavior while making adapter replacement viable.
+- migrated domains are persisted only to PostgreSQL
+- JSON write-back explicitly persists only non-migrated domains
 
-## What was refactored to depend on the boundary
+This keeps the migration reversible while avoiding ambiguous dual-authority behavior.
 
-Direct `store` imports were removed from app/business surfaces and replaced with persistence entry points.
+## Bootstrap and fallback behavior
 
-Notable conversions include:
+When hybrid mode is enabled and PostgreSQL tables are empty, migrated domains are bootstrapped from current runtime JSON once.
 
-- auth user/session resolution (`lib/server/auth.ts`)
-- i18n request preference resolution (`lib/i18n/server.ts`)
-- route handlers for orders/handoff (`app/api/orders/route.ts`, `app/api/handoff/route.ts`)
-- all previously direct store readers in pages/components/actions now use `lib/server/persistence`
+If PostgreSQL is unavailable at runtime, persistence falls back to JSON adapter behavior and logs a warning.
 
-## Remaining direct coupling and why
+## Drizzle/PostgreSQL structure
 
-Remaining direct store coupling is intentionally concentrated in one place:
+- Drizzle schema: `lib/server/db/schema.ts`
+- DB env/module wiring: `lib/server/db/env.ts`, `lib/server/db/client.ts`
+- Hybrid adapter: `lib/server/persistence/postgres-hybrid-adapter.ts`
+- Migrated-domain operations: `lib/server/persistence/drizzle/migrated-domains.ts`
+- Migration config: `drizzle.config.ts`
+- Initial SQL migration: `migrations/0000_initial_persistence_foundation.sql`
 
-- `lib/server/persistence/json-runtime-adapter.ts` (adapter implementation)
-- `lib/server/store.ts` (JSON runtime storage implementation)
+## Developer workflow
 
-This is expected for current phase: storage details are localized while app flows move to persistence contracts.
-
-## What this unlocks next
-
-This boundary enables a phased adapter transition:
-
-1. introduce PostgreSQL schema and Drizzle mapping by repository segment
-2. add a Postgres/Drizzle adapter implementing the same contracts
-3. move callers without rewriting route/action flow contracts
-4. run coexistence/testing with JSON adapter as fallback during migration work
-
-## Constraints kept in this pass
-
-- no feature-level behavior rewrite
-- no full relational migration yet
-- no microservice split
-- current seed/runtime reset flows preserved
+See README updates for local PostgreSQL setup and migration commands.

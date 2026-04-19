@@ -1,0 +1,16 @@
+services:
+  skoss-postgres:
+    image: postgres:16-alpine
+    container_name: skoss-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: skoss
+      POSTGRES_PASSWORD: skoss
+      POSTGRES_DB: skoss
+    ports:
+      - '5432:5432'
+    volumes:
+      - skoss-postgres-data:/var/lib/postgresql/data
+
+volumes:
+  skoss-postgres-data:

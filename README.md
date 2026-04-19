@@ -395,3 +395,41 @@ Canonical v0 roles are now:
 - `shift_lead`
 - `kitchen`
 - `sales`
+
+## PostgreSQL + Drizzle transition (current)
+
+SKOSS now supports a phased persistence transition.
+
+### Persistence modes
+
+- `SKOSS_PERSISTENCE_MODE=json` (default): JSON runtime persistence only
+- `SKOSS_PERSISTENCE_MODE=hybrid` (or `postgres`): composed persistence
+  - PostgreSQL is source of truth for migrated domains
+  - JSON remains source of truth for non-migrated domains
+
+### Migrated domains (PostgreSQL source of truth)
+
+- workspace
+- workspace preferences
+- instance state
+- session state
+- users (+ user roles)
+- customers
+
+### Local PostgreSQL setup
+
+1. Copy `.env.example` to `.env.local` and set `SKOSS_PERSISTENCE_MODE=hybrid`.
+2. Start local PostgreSQL:
+   - `docker compose -f docker-compose.postgres.yml up -d`
+3. Apply migrations:
+   - `npm run db:migrate`
+4. Start app:
+   - `npm run dev`
+
+If PostgreSQL tables are empty, SKOSS bootstraps migrated domains from runtime JSON on first access.
+
+### Drizzle commands
+
+- `npm run db:generate` — generate migrations from Drizzle schema
+- `npm run db:migrate` — apply migrations
+- `npm run db:push` — push schema directly (dev convenience)
