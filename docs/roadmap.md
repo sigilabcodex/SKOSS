@@ -518,3 +518,11 @@ Scope of this corrective pass:
 
 Non-goals remain unchanged: no enterprise installer, no heavy permissions framework, no broad app redesign.
 
+
+
+## Persistence status update (2026-04-19)
+
+- Repository boundary active.
+- PostgreSQL + Drizzle foundation introduced in hybrid mode.
+- Current PostgreSQL-backed domains: workspace/preferences, instance/session, users/roles, customers.
+- Next target: orders + order lines + recurring templates.

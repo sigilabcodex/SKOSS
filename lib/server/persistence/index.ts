@@ -1,7 +1,7 @@
 import type { AppData } from '@/lib/domain/types';
-import { JsonRuntimePersistenceGateway } from '@/lib/server/persistence/json-runtime-adapter';
+import { createPersistenceGateway } from '@/lib/server/persistence/postgres-hybrid-adapter';
 
-const gateway = new JsonRuntimePersistenceGateway();
+const gateway = createPersistenceGateway();
 
 export function getPersistenceGateway() {
   return gateway;

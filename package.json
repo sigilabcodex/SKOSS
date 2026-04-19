@@ -8,12 +8,17 @@
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit",
-    "reset:demo-runtime": "node scripts/reset-runtime-demo-store.mjs"
+    "reset:demo-runtime": "node scripts/reset-runtime-demo-store.mjs",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:push": "drizzle-kit push"
   },
   "dependencies": {
     "next": "15.3.0",
     "react": "19.1.0",
-    "react-dom": "19.1.0"
+    "react-dom": "19.1.0",
+    "drizzle-orm": "0.44.2",
+    "postgres": "3.4.7"
   },
   "devDependencies": {
     "@types/node": "22.14.0",
@@ -21,6 +26,7 @@
     "@types/react-dom": "19.1.2",
     "eslint": "9.23.0",
     "eslint-config-next": "15.3.0",
-    "typescript": "5.8.2"
+    "typescript": "5.8.2",
+    "drizzle-kit": "0.31.5"
   }
 }
