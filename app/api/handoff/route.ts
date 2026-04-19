@@ -1,9 +1,12 @@
-import { readStore } from '@/lib/server/store';
+import { readPersistence } from '@/lib/server/persistence';
 
 export async function GET(): Promise<Response> {
   try {
-    const data = await readStore();
-    return Response.json({ items: data.shiftLogs, wipEntries: data.wipEntries });
+    const context = await readPersistence();
+    return Response.json({
+      items: context.production.listShiftLogs(),
+      wipEntries: context.production.listWipEntries(),
+    });
   } catch {
     return Response.json(
       {

@@ -1,7 +1,7 @@
 import { cookies } from 'next/headers';
 import type { AppData, User, WorkspaceSurface } from '@/lib/domain/types';
 import { getDefaultWorkspaceForRole, getVisibleWorkspacesForRole, isPrimaryWorkspaceSurface } from '@/lib/workspaces';
-import { readStore } from '@/lib/server/store';
+import { readPersistence } from '@/lib/server/persistence';
 
 export const sessionUserCookieName = 'skoss-user';
 export const loggedOutSessionValue = '__logged_out__';
@@ -26,17 +26,29 @@ export function resolveUserHomeWorkspace(user: User | null | undefined): Workspa
 }
 
 export async function getCurrentUserContext(sourceData?: AppData) {
-  const data = sourceData ?? await readStore();
+  const persisted = sourceData
+    ? {
+        users: sourceData.users,
+        session: sourceData.session,
+      }
+    : await (async () => {
+        const context = await readPersistence();
+        return {
+          users: context.users.list(),
+          session: context.instance.getSessionState(),
+        };
+      })();
+
   const cookieStore = await cookies();
   const requestedUserId = cookieStore.get(sessionUserCookieName)?.value;
-  const sessionUserId = requestedUserId && requestedUserId !== loggedOutSessionValue ? requestedUserId : data.session.currentUserId;
-  const sessionExpired = data.session.lastLoginAt
-    ? Date.now() - new Date(data.session.lastLoginAt).getTime() > sessionMaxAgeMs
+  const sessionUserId = requestedUserId && requestedUserId !== loggedOutSessionValue ? requestedUserId : persisted.session.currentUserId;
+  const sessionExpired = persisted.session.lastLoginAt
+    ? Date.now() - new Date(persisted.session.lastLoginAt).getTime() > sessionMaxAgeMs
     : false;
   const currentUser = requestedUserId === loggedOutSessionValue
     || sessionExpired
     ? null
-    : data.users.find((user) => user.id === sessionUserId && user.active) ?? getFallbackUser(data.users);
+    : persisted.users.find((user) => user.id === sessionUserId && user.active) ?? getFallbackUser(persisted.users);
   const visibleWorkspaces: WorkspaceSurface[] = currentUser ? getVisibleWorkspacesForRole(currentUser.role) : ['home'];
   const homeWorkspace = resolveUserHomeWorkspace(currentUser);
 

@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation';
 import { moduleRegistry } from '@/lib/modules';
 import { getCurrentUserContext } from '@/lib/server/auth';
-import { readStore } from '@/lib/server/store';
+import { readAppData } from '@/lib/server/persistence';
 import { updateModuleRegistryAction } from '@/lib/server/actions';
 
 export default async function AdminModulesPage({ searchParams }: { searchParams?: Promise<{ saved?: string }> }) {
-  const [userContext, data, params] = await Promise.all([getCurrentUserContext(), readStore(), searchParams]);
+  const [userContext, data, params] = await Promise.all([getCurrentUserContext(), readAppData(), searchParams]);
 
   if (!userContext.currentUser) {
     redirect('/login?redirectTo=/admin/modules');

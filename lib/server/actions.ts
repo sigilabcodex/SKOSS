@@ -37,7 +37,7 @@ import {
   validateWipEntry,
 } from '@/lib/server/demo-data';
 import { getCurrentUserContext, loggedOutSessionValue, sessionUserCookieName } from '@/lib/server/auth';
-import { readSeedStore, readStore, reseedRuntimeStore, writeStore } from '@/lib/server/store';
+import { readSeedAppData, readAppData, reseedRuntimeAppData, mutateAppData } from '@/lib/server/persistence';
 import { appendActivity } from '@/lib/server/activity';
 import { hashPassword, verifyPassword } from '@/lib/server/passwords';
 import {
@@ -71,7 +71,7 @@ function sortUsers(left: { displayName: string }, right: { displayName: string }
   return left.displayName.localeCompare(right.displayName);
 }
 
-async function getActorUserId(data: Awaited<ReturnType<typeof readStore>>) {
+async function getActorUserId(data: Awaited<ReturnType<typeof readAppData>>) {
   const { currentUser } = await getCurrentUserContext(data);
   return currentUser?.id;
 }
@@ -127,7 +127,7 @@ export async function resetDemoWorkspaceAction() {
     redirect('/admin/setup?error=' + encodeURIComponent('Demo reset is disabled in production mode.'));
   }
 
-  await reseedRuntimeStore();
+  await reseedRuntimeAppData();
   revalidateAllWorkspaces();
   redirect('/admin/setup?saved=demo-reset');
 }
@@ -137,7 +137,7 @@ export async function resetLocalRuntimeDataAction() {
     redirect('/entry?error=' + encodeURIComponent('Local runtime reset is disabled in production mode.'));
   }
 
-  await reseedRuntimeStore();
+  await reseedRuntimeAppData();
   revalidateAllWorkspaces();
   redirect('/entry?saved=runtime-reset');
 }
@@ -161,13 +161,13 @@ export async function launchDemoModeAction() {
     redirect('/entry?error=' + encodeURIComponent('Demo launch is disabled in production mode.'));
   }
 
-  const data = await readSeedStore();
+  const data = await readSeedAppData();
   data.instance.demoModeActive = true;
   data.instance.initialized = false;
   data.instance.onboardingStatus = 'not_started';
   data.preferences.onboardingCompleted = false;
   data.instance.environmentType = 'demo';
-  await writeStore(data);
+  await mutateAppData(data);
   revalidateAllWorkspaces();
   redirect('/?demo=1');
 }
@@ -177,7 +177,7 @@ export async function recoverLocalAdminAccessAction() {
     redirect('/entry?error=' + encodeURIComponent('Local recovery is disabled in production mode.'));
   }
 
-  const data = await readStore();
+  const data = await readAppData();
   const now = new Date().toISOString();
   const adminUser = data.users.find((user) => user.role === 'owner_admin' || user.roles?.includes('owner_admin'));
 
@@ -196,7 +196,7 @@ export async function recoverLocalAdminAccessAction() {
   data.instance.onboardingStatus = data.preferences.onboardingCompleted ? 'completed' : 'in_progress';
   data.session.currentUserId = undefined;
   data.session.lastLoginAt = undefined;
-  await writeStore(data);
+  await mutateAppData(data);
 
   const cookieStore = await cookies();
   cookieStore.set(sessionUserCookieName, loggedOutSessionValue, { path: '/', maxAge: sessionMaxAgeSeconds, sameSite: 'lax' });
@@ -209,15 +209,15 @@ export async function resetLocalUsersAndCredentialsAction() {
     redirect('/entry?error=' + encodeURIComponent('Local user reset is disabled in production mode.'));
   }
 
-  const seedData = await readSeedStore();
-  const data = await readStore();
+  const seedData = await readSeedAppData();
+  const data = await readAppData();
   data.users = seedData.users;
   data.session.currentUserId = undefined;
   data.session.lastLoginAt = undefined;
   data.instance.initialized = true;
   data.instance.onboardingStatus = 'in_progress';
   data.preferences.onboardingCompleted = false;
-  await writeStore(data);
+  await mutateAppData(data);
 
   const cookieStore = await cookies();
   cookieStore.set(sessionUserCookieName, loggedOutSessionValue, { path: '/', maxAge: sessionMaxAgeSeconds, sameSite: 'lax' });
@@ -245,18 +245,18 @@ export async function restoreInstanceFromBackupAction(formData: FormData) {
 
   const restoredData = parsed;
   restoredData.instance = {
-    ...(restoredData.instance ?? (await readSeedStore()).instance),
+    ...(restoredData.instance ?? (await readSeedAppData()).instance),
     initialized: true,
     backupHintAvailable: true,
     lastRestoreAt: new Date().toISOString(),
   };
-  await writeStore(restoredData);
+  await mutateAppData(restoredData);
   revalidateAllWorkspaces();
   redirect('/entry?saved=restored');
 }
 
 export async function saveOnboardingPreferencesAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const businessName = String(formData.get('businessName') ?? '').trim();
   const locale = String(formData.get('locale') ?? '');
   const preset = String(formData.get('preset') ?? '');
@@ -306,7 +306,7 @@ export async function saveOnboardingPreferencesAction(formData: FormData) {
     },
   };
 
-  await writeStore(data);
+  await mutateAppData(data);
 
   const cookieStore = await cookies();
   cookieStore.set(localeCookieName, locale, { path: '/', maxAge: 31536000, sameSite: 'lax' });
@@ -328,7 +328,7 @@ export async function saveOnboardingPreferencesAction(formData: FormData) {
 }
 
 export async function updateModuleRegistryAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const nextStates: Record<string, boolean> = {};
 
   for (const manifest of moduleRegistry) {
@@ -344,13 +344,13 @@ export async function updateModuleRegistryAction(formData: FormData) {
     ...(data.instance.moduleStates ?? {}),
     ...nextStates,
   };
-  await writeStore(data);
+  await mutateAppData(data);
   revalidatePath('/admin/modules');
   redirect('/admin/modules?saved=modules');
 }
 
 export async function saveBootstrapStepAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const step = Number(formData.get('step') ?? 1);
   const intent = String(formData.get('intent') ?? 'next') as 'next' | 'back' | 'stay' | 'launch' | 'skip';
   const isRequiredStep = step === 1 || step === 2;
@@ -558,12 +558,12 @@ export async function saveBootstrapStepAction(formData: FormData) {
     data.instance.onboardingStatus = 'completed';
     data.instance.demoModeActive = false;
     data.session.currentUserId = undefined;
-    await writeStore(data);
+    await mutateAppData(data);
     revalidateAllWorkspaces();
     redirect('/login?redirectTo=/');
   }
 
-  await writeStore(data);
+  await mutateAppData(data);
   revalidateAllWorkspaces();
   if (intent === 'skip') {
     redirect(`/bootstrap?step=${Math.min(8, step + 1)}&saved=progress`);
@@ -575,7 +575,7 @@ export async function saveBootstrapStepAction(formData: FormData) {
 
 
 export async function saveUserPreferencesAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const { currentUser } = await getCurrentUserContext(data);
 
   if (!currentUser) {
@@ -621,7 +621,7 @@ export async function saveUserPreferencesAction(formData: FormData) {
       }
     : user);
 
-  await writeStore(data);
+  await mutateAppData(data);
 
   const cookieStore = await cookies();
   cookieStore.set(localeCookieName, locale, { path: '/', maxAge: 31536000, sameSite: 'lax' });
@@ -632,7 +632,7 @@ export async function saveUserPreferencesAction(formData: FormData) {
 }
 
 export async function loginAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const requestedIdentifier = String(formData.get('loginIdentifier') ?? '').trim().toLowerCase();
   const password = String(formData.get('password') ?? '');
   const redirectTo = String(formData.get('redirectTo') ?? '/');
@@ -649,7 +649,7 @@ export async function loginAction(formData: FormData) {
   const now = new Date().toISOString();
   data.session.currentUserId = user.id;
   data.session.lastLoginAt = now;
-  await writeStore(data);
+  await mutateAppData(data);
 
   const cookieStore = await cookies();
   cookieStore.set(sessionUserCookieName, user.id, { path: '/', maxAge: sessionMaxAgeSeconds, sameSite: 'lax' });
@@ -676,9 +676,9 @@ export async function loginAction(formData: FormData) {
 }
 
 export async function logoutAction() {
-  const data = await readStore();
+  const data = await readAppData();
   data.session.currentUserId = undefined;
-  await writeStore(data);
+  await mutateAppData(data);
 
   const cookieStore = await cookies();
   cookieStore.set(sessionUserCookieName, loggedOutSessionValue, { path: '/', maxAge: sessionMaxAgeSeconds, sameSite: 'lax' });
@@ -687,7 +687,7 @@ export async function logoutAction() {
 }
 
 export async function createUserAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const actorUserId = await getActorUserId(data);
   const redirectTo = resolveRedirectTo(formData, '/admin/setup');
   const allowEmpty = shouldAllowEmpty(formData);
@@ -725,13 +725,13 @@ export async function createUserAction(formData: FormData) {
     userId: actorUserId,
     summary: `User ${quoteLabel(user.displayName)} created.`,
   });
-  await writeStore(data);
+  await mutateAppData(data);
   revalidateAllWorkspaces();
   redirect(`${redirectTo}?saved=user`);
 }
 
 export async function updateUserAction(userId: string, formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const existing = data.users.find((entry) => entry.id === userId);
 
   if (!existing) {
@@ -766,13 +766,13 @@ export async function updateUserAction(userId: string, formData: FormData) {
     data.session.currentUserId = data.users.find((entry) => entry.active && entry.id !== userId)?.id;
   }
 
-  await writeStore(data);
+  await mutateAppData(data);
   revalidateAllWorkspaces();
   redirect('/admin/setup?saved=user');
 }
 
 export async function createCustomerAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const redirectTo = resolveRedirectTo(formData, '/customers');
   const allowEmpty = shouldAllowEmpty(formData);
   const values = normalizeCustomerForm(formData);
@@ -795,7 +795,7 @@ export async function createCustomerAction(formData: FormData) {
     userId: actorUserId,
     summary: `Customer ${quoteLabel(customer.displayName)} created.`,
   });
-  await writeStore(data);
+  await mutateAppData(data);
   revalidateAllWorkspaces();
   if (redirectTo.startsWith('/customers')) {
     redirect(`/customers?customer=${customer.id}&saved=customer`);
@@ -805,7 +805,7 @@ export async function createCustomerAction(formData: FormData) {
 }
 
 export async function updateCustomerAction(customerId: string, formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const existing = data.customers.find((entry) => entry.id === customerId);
 
   if (!existing) {
@@ -832,13 +832,13 @@ export async function updateCustomerAction(customerId: string, formData: FormDat
       ? `Customer ${quoteLabel(customer.displayName)} marked as ${customer.active ? 'active' : 'inactive'}.`
       : `Customer ${quoteLabel(customer.displayName)} updated.`,
   });
-  await writeStore(data);
+  await mutateAppData(data);
   revalidateAllWorkspaces();
   redirect(`/customers?customer=${customer.id}&saved=customer`);
 }
 
 export async function createOrderAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const values = normalizeOrderForm(formData);
   const error = validateOrderForm(values);
 
@@ -856,7 +856,7 @@ export async function createOrderAction(formData: FormData) {
     userId: actorUserId,
     summary: `Order ${quoteLabel(order.customerLabel)} created for ${order.productionDate}.`,
   });
-  await writeStore(data);
+  await mutateAppData(data);
   revalidatePath('/');
   revalidatePath('/timeline');
   revalidatePath('/orders');
@@ -867,7 +867,7 @@ export async function createOrderAction(formData: FormData) {
 }
 
 export async function updateOrderAction(orderId: string, formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const existing = data.orders.find((entry) => entry.id === orderId);
   if (!existing) {
     redirect('/orders?error=missing-order');
@@ -892,7 +892,7 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
       ? `Order ${quoteLabel(updated.customerLabel)} changed from ${existing.status} to ${updated.status}.`
       : `Order ${quoteLabel(updated.customerLabel)} updated.`,
   });
-  await writeStore(data);
+  await mutateAppData(data);
   revalidatePath('/');
   revalidatePath('/orders');
   revalidatePath(`/orders/${orderId}`);
@@ -903,7 +903,7 @@ export async function updateOrderAction(orderId: string, formData: FormData) {
 }
 
 export async function createRecurringTemplateAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const values = normalizeRecurringTemplateForm(formData);
   const error = validateRecurringTemplateForm(values);
 
@@ -918,7 +918,7 @@ export async function createRecurringTemplateAction(formData: FormData) {
       ? left.customerLabel.localeCompare(right.customerLabel)
       : left.nextOccurrenceDate.localeCompare(right.nextOccurrenceDate),
   );
-  await writeStore(data);
+  await mutateAppData(data);
   revalidatePath('/');
   revalidatePath('/orders');
   revalidatePath('/orders/templates/new');
@@ -927,7 +927,7 @@ export async function createRecurringTemplateAction(formData: FormData) {
 }
 
 export async function updateOrderLineProgressAction(orderId: string, lineId: string, formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const order = data.orders.find((entry) => entry.id === orderId);
 
   if (!order) {
@@ -970,7 +970,7 @@ export async function updateOrderLineProgressAction(orderId: string, lineId: str
   });
 
   data.orders = [...data.orders].sort(sortOrders);
-  await writeStore(data);
+  await mutateAppData(data);
   revalidatePath('/');
   revalidatePath('/orders');
   revalidatePath(`/orders/${orderId}`);
@@ -981,7 +981,7 @@ export async function updateOrderLineProgressAction(orderId: string, lineId: str
 }
 
 export async function addWipEntryAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const actorUserId = await getActorUserId(data);
   const entry = buildWipEntry(formData, actorUserId);
   const error = validateWipEntry(entry);
@@ -991,7 +991,7 @@ export async function addWipEntryAction(formData: FormData) {
   }
 
   data.wipEntries = [entry, ...data.wipEntries].sort(sortOrders);
-  await writeStore(data);
+  await mutateAppData(data);
   revalidatePath('/');
   revalidatePath('/production');
   revalidatePath('/handoff');
@@ -999,7 +999,7 @@ export async function addWipEntryAction(formData: FormData) {
 }
 
 export async function createSupplierAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const redirectTo = resolveRedirectTo(formData, '/admin/setup');
   const allowEmpty = shouldAllowEmpty(formData);
   const values = normalizeSupplierForm(formData);
@@ -1022,14 +1022,14 @@ export async function createSupplierAction(formData: FormData) {
     userId: actorUserId,
     summary: `Supplier ${quoteLabel(supplier.name)} created.`,
   });
-  await writeStore(data);
+  await mutateAppData(data);
   revalidatePath('/');
   revalidatePath('/admin/setup');
   redirect(`${redirectTo}?saved=supplier`);
 }
 
 export async function updateSupplierAction(supplierId: string, formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const existing = data.suppliers.find((entry) => entry.id === supplierId);
 
   if (!existing) {
@@ -1057,14 +1057,14 @@ export async function updateSupplierAction(supplierId: string, formData: FormDat
       ? `Supplier ${quoteLabel(supplier.name)} marked as ${supplier.active ? 'active' : 'inactive'}.`
       : `Supplier ${quoteLabel(supplier.name)} updated.`,
   });
-  await writeStore(data);
+  await mutateAppData(data);
   revalidatePath('/');
   revalidatePath('/admin/setup');
   redirect('/admin/setup?saved=supplier');
 }
 
 export async function createRawMaterialAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const redirectTo = resolveRedirectTo(formData, '/admin/setup');
   const allowEmpty = shouldAllowEmpty(formData);
   const values = normalizeRawMaterialForm(formData);
@@ -1087,14 +1087,14 @@ export async function createRawMaterialAction(formData: FormData) {
     userId: actorUserId,
     summary: `Raw material ${quoteLabel(rawMaterial.name)} created.`,
   });
-  await writeStore(data);
+  await mutateAppData(data);
   revalidatePath('/');
   revalidatePath('/admin/setup');
   redirect(`${redirectTo}?saved=raw-material`);
 }
 
 export async function importCsvEntitiesAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const redirectTo = resolveRedirectTo(formData, '/admin/setup');
   const entity = String(formData.get('entity') ?? '') as CsvEntity;
   const csvContent = String(formData.get('csvContent') ?? '');
@@ -1159,13 +1159,13 @@ export async function importCsvEntitiesAction(formData: FormData) {
     data.rawMaterials = [...data.rawMaterials, ...importedRecords].sort((left, right) => left.name.localeCompare(right.name));
   }
 
-  await writeStore(data);
+  await mutateAppData(data);
   revalidateAllWorkspaces();
   redirect(`${redirectTo}?saved=import&importedEntity=${entity}&importedCount=${imported}&skippedCount=${skipped}`);
 }
 
 export async function updateRawMaterialAction(rawMaterialId: string, formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const existing = data.rawMaterials.find((entry) => entry.id === rawMaterialId);
 
   if (!existing) {
@@ -1193,14 +1193,14 @@ export async function updateRawMaterialAction(rawMaterialId: string, formData: F
       ? `Raw material ${quoteLabel(rawMaterial.name)} marked as ${rawMaterial.active ? 'active' : 'inactive'}.`
       : `Raw material ${quoteLabel(rawMaterial.name)} updated.`,
   });
-  await writeStore(data);
+  await mutateAppData(data);
   revalidatePath('/');
   revalidatePath('/admin/setup');
   redirect('/admin/setup?saved=raw-material');
 }
 
 export async function createRecipeAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const values = normalizeRecipeForm(formData);
   const error = validateRecipeForm(values, data);
 
@@ -1218,14 +1218,14 @@ export async function createRecipeAction(formData: FormData) {
     userId: actorUserId,
     summary: `Recipe ${quoteLabel(recipe.title)} created.`,
   });
-  await writeStore(data);
+  await mutateAppData(data);
   revalidatePath('/');
   revalidatePath('/admin/setup');
   redirect(`/admin/setup?recipe=${recipe.id}&saved=recipe`);
 }
 
 export async function updateRecipeAction(recipeId: string, formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const existing = data.recipes.find((entry) => entry.id === recipeId);
 
   if (!existing) {
@@ -1253,14 +1253,14 @@ export async function updateRecipeAction(recipeId: string, formData: FormData) {
       ? `Recipe ${quoteLabel(recipe.title)} marked as ${recipe.active ? 'active' : 'inactive'}.`
       : `Recipe ${quoteLabel(recipe.title)} updated.`,
   });
-  await writeStore(data);
+  await mutateAppData(data);
   revalidatePath('/');
   revalidatePath('/admin/setup');
   redirect(`/admin/setup?recipe=${recipe.id}&saved=recipe`);
 }
 
 export async function createSupplierPriceEntryAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const values = normalizeSupplierPriceEntryForm(formData);
   const error = validateSupplierPriceEntryForm(values, data);
 
@@ -1275,14 +1275,14 @@ export async function createSupplierPriceEntryAction(formData: FormData) {
       ? left.rawMaterialLabel.localeCompare(right.rawMaterialLabel)
       : right.priceDate.localeCompare(left.priceDate),
   );
-  await writeStore(data);
+  await mutateAppData(data);
   revalidatePath('/');
   revalidatePath('/admin/setup');
   redirect('/admin/setup?saved=price');
 }
 
 export async function saveShiftLogAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const productionDate = String(formData.get('productionDate') ?? '');
   const shiftKey = String(formData.get('shiftKey') ?? 'night');
   const existing = data.shiftLogs.find(
@@ -1303,7 +1303,7 @@ export async function saveShiftLogAction(formData: FormData) {
       )
     : [nextLog, ...data.shiftLogs]
   ).sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
-  await writeStore(data);
+  await mutateAppData(data);
   revalidatePath('/');
   revalidatePath('/production');
   revalidatePath('/handoff');
@@ -1311,7 +1311,7 @@ export async function saveShiftLogAction(formData: FormData) {
 }
 
 export async function addShiftNoteAction(formData: FormData) {
-  const data = await readStore();
+  const data = await readAppData();
   const productionDate = String(formData.get('productionDate') ?? '');
   const shiftKey = String(formData.get('shiftKey') ?? 'night');
   const actorUserId = await getActorUserId(data);
@@ -1351,7 +1351,7 @@ export async function addShiftNoteAction(formData: FormData) {
 
   data.shiftLogs = [...data.shiftLogs].sort((left, right) => right.updatedAt.localeCompare(left.updatedAt));
 
-  await writeStore(data);
+  await mutateAppData(data);
   revalidatePath('/');
   revalidatePath('/handoff');
   revalidatePath('/production');

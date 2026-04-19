@@ -7,7 +7,7 @@ import { getWorkspaceSummary } from '@/lib/server/demo-data';
 import { getCurrentUserContext } from '@/lib/server/auth';
 import { detectInstanceGatewayState, shouldRouteToEntryGateway } from '@/lib/server/instance-entry';
 import { getServerTranslator } from '@/lib/i18n/server';
-import { readStore } from '@/lib/server/store';
+import { readAppData } from '@/lib/server/persistence';
 import { ArrowRightIcon, CustomersIcon, HandoffIcon, OrdersIcon, ProductionIcon, SetupIcon, SparklesIcon, TimelineIcon } from '@/components/ui-icons';
 
 type QuickLink = {
@@ -21,7 +21,7 @@ export default async function HomePage() {
   const [summary, { t, locale, preset }, data, userContext] = await Promise.all([
     getWorkspaceSummary(),
     getServerTranslator(),
-    readStore(),
+    readAppData(),
     getCurrentUserContext(),
   ]);
   const { currentUser, visibleWorkspaces, homeWorkspace } = userContext;

@@ -3,6 +3,8 @@
 - Status: Accepted
 - Date: 2026-03-21
 
+> Update note (2026-04-19): Runtime currently uses JSON adapter persistence and a repository boundary was adopted in ADR 0004 to prepare phased PostgreSQL + Drizzle migration.
+
 ## Context
 
 SKOSS has completed an exploration phase covering product intent, domain language, deployment principles, realtime/offline posture, and FLOSS landscape review.

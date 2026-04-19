@@ -23,7 +23,7 @@ import type {
 } from '@/lib/domain/types';
 import { calculateRecipeEstimatedMaterialCost } from '@/lib/domain/recipe-costing';
 import { deliveryProviderValues, getFocusDate, getLineCompletion, getLineStatus, getOrderProgress, getAllProductionDates, resolveDeliveryProviderLabel } from '@/lib/domain/order-helpers';
-import { readStore } from '@/lib/server/store';
+import { readAppData } from '@/lib/server/persistence';
 import { getDefaultWorkspaceForRole } from '@/lib/workspaces';
 
 export { getLineStatus, getOrderProgress } from '@/lib/domain/order-helpers';
@@ -408,7 +408,7 @@ export function buildUserRecord(
 }
 
 export async function getWorkspaceSummary() {
-  const data = await readStore();
+  const data = await readAppData();
   const focusDate = getFocusDate(data);
   const ordersToday = data.orders.filter((order) => order.productionDate === focusDate);
   const activePriceEntries = data.supplierPriceEntries.filter((entry) => entry.priceDate <= focusDate);
@@ -440,7 +440,7 @@ export async function getWorkspaceSummary() {
 }
 
 export async function getOrdersWorkspace() {
-  const data = await readStore();
+  const data = await readAppData();
   const dates = getAllProductionDates(data);
   const focusDate = getFocusDate(data);
   const orders = [...data.orders].sort(sortOrders);
@@ -470,7 +470,7 @@ export async function getOrdersWorkspace() {
 }
 
 export async function getCustomersWorkspace(selectedCustomerId?: string) {
-  const data = await readStore();
+  const data = await readAppData();
   const customers = [...data.customers].sort((left, right) => left.displayName.localeCompare(right.displayName));
   const orderCountByCustomer = new Map<string, number>();
   const lastOrderDateByCustomer = new Map<string, string>();
@@ -519,7 +519,7 @@ export async function getCustomersWorkspace(selectedCustomerId?: string) {
 }
 
 export async function getOrderEditor(orderId?: string, initialCustomerId?: string) {
-  const data = await readStore();
+  const data = await readAppData();
   const order = orderId ? data.orders.find((entry) => entry.id === orderId) ?? null : null;
   const customerContextById: Record<string, CustomerOrderContext> = {};
 
@@ -553,7 +553,7 @@ export async function getOrderEditor(orderId?: string, initialCustomerId?: strin
 }
 
 export async function getRecurringTemplateEditor() {
-  const data = await readStore();
+  const data = await readAppData();
 
   return {
     destinations: data.destinations,
@@ -598,7 +598,7 @@ function groupOrdersByDate(orders: Order[]) {
 }
 
 export async function getTimelineWorkspace() {
-  const data = await readStore();
+  const data = await readAppData();
   const focusDate = getFocusDate(data);
   const today = new Date().toISOString().slice(0, 10);
   const currentMinutes = new Date().getUTCHours() * 60 + new Date().getUTCMinutes();
@@ -742,7 +742,7 @@ export async function getTimelineWorkspace() {
 }
 
 export async function getProductionBoard() {
-  const data = await readStore();
+  const data = await readAppData();
   const dates = getAllProductionDates(data);
 
   return {
@@ -924,7 +924,7 @@ function buildProductionDayView(data: AppData, productionDate: string) {
 }
 
 export async function getHandoffWorkspace() {
-  const data = await readStore();
+  const data = await readAppData();
   const dates = getAllProductionDates(data);
   const focusDate = getFocusDate(data);
   const logs = [...data.shiftLogs].sort(sortShiftLogs);
@@ -967,7 +967,7 @@ export async function getHandoffWorkspace() {
 }
 
 export async function getSetupWorkspace() {
-  const data = await readStore();
+  const data = await readAppData();
 
   const latestPriceByMaterial = new Map<string, SupplierPriceEntry>();
   for (const entry of [...data.supplierPriceEntries].sort((left, right) => right.priceDate.localeCompare(left.priceDate))) {
