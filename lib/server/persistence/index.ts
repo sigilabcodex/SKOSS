@@ -24,6 +24,7 @@ export async function reseedRuntimeAppData() {
   await gateway.reseedRuntime();
 }
 
+// TODO(next-pr/persistence-segmented-writes): Replace blob-style mutateAppData callsites with domain repository writes (users/customers/session -> orders/recurring -> production/activity).
 export async function mutateAppData(next: AppData | ((data: AppData) => Promise<void> | void)) {
   await gateway.write(async ({ raw }) => {
     if (typeof next === 'function') {
