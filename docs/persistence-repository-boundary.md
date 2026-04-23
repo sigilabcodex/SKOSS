@@ -45,6 +45,17 @@ These domains remain authoritative in JSON runtime storage:
 - shift logs
 - activities
 
+
+## Admin/Core vs SKOSSina interaction rule
+
+While route/shell separation continues, persistence behavior should follow this rule:
+
+- plane-specific code (Admin/Core or SKOSSina) may only touch persistence through the repository gateway/context
+- avoid adding new full-`AppData` mutation callsites in plane-specific code
+- when replacing legacy `readAppData()` / `mutateAppData()` flows, migrate by domain segment (users/customers/session first, then orders/recurring, then production/activity helpers)
+
+This keeps the Admin/Core vs SKOSSina split compatible with ADR 0004/0005 migration staging and avoids cross-plane regressions caused by blob-level writes.
+
 ## Full-AppData writes in hybrid mode
 
 Many existing flows still mutate full `AppData` objects.

@@ -55,6 +55,7 @@ import { isNonProductionMode } from '@/lib/server/runtime-mode';
 import type { AppData } from '@/lib/domain/types';
 import { detectInstanceGatewayState, shouldRouteToEntryGateway } from '@/lib/server/instance-entry';
 import { moduleRegistry } from '@/lib/modules';
+// TODO(next-pr/actions-plane-split): Split this file into admin-core actions, operator actions, and entry/bootstrap actions while preserving current exports for route compatibility.
 
 function sortOrders(left: { productionDate: string; updatedAt: string }, right: { productionDate: string; updatedAt: string }) {
   return left.productionDate === right.productionDate
