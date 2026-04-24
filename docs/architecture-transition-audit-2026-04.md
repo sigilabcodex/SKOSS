@@ -121,3 +121,12 @@ Current practical capability model:
 - TODO(next-pr/orders-migration): migrate `orders` + `recurringTemplates` repositories to PostgreSQL-backed adapter methods with parity tests in json/hybrid modes.
 - TODO(next-pr/read-model): replace `readAppData()` usage in workspace builders with segmented repository reads (`orders`, `production`, `activities`, `customers`).
 - TODO(next-pr/shell-plane): create dedicated admin shell and keep operator nav free of structural admin setup links by default for non-admin roles.
+
+## Update (2026-04-24): action boundary split implemented
+
+The first implementation step from this audit is now complete:
+
+- the server action surface has been split by architectural plane into entry/bootstrap, admin-core, and operator modules;
+- route imports remain intentionally unchanged through a compatibility export surface (`lib/server/actions.ts`);
+- persistence migration remains incremental and still honors hybrid/json adapter boundaries;
+- recommended next step remains repository-first write cleanup (starting with migrated domains), with admin-shell separation as an alternate depending on debt discovered during that cleanup.
