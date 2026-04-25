@@ -21,8 +21,9 @@ import {
   validateWipEntry,
 } from '@/lib/server/demo-data';
 import { getCurrentUserContext } from '@/lib/server/auth';
-import { readAppData, mutateAppData } from '@/lib/server/persistence';
+import { getPersistenceGateway, readAppData, mutateAppData } from '@/lib/server/persistence';
 import { appendActivity } from '@/lib/server/activity';
+import type { AppData } from '@/lib/domain/types';
 
 function sortOrders(left: { productionDate: string; updatedAt: string }, right: { productionDate: string; updatedAt: string }) {
   return left.productionDate === right.productionDate
@@ -34,7 +35,9 @@ function quoteLabel(label: string) {
   return `"${label}"`;
 }
 
-async function getActorUserId(data: Awaited<ReturnType<typeof readAppData>>) {
+const persistence = getPersistenceGateway();
+
+async function getActorUserId(data: AppData) {
   const { currentUser } = await getCurrentUserContext(data);
   return currentUser?.id;
 }
@@ -64,7 +67,7 @@ export async function createCustomerAction(formData: FormData) {
 
   const actorUserId = await getActorUserId(data);
   const customer = buildCustomerRecord(values, actorUserId);
-  data.customers = [...data.customers, customer].sort((left, right) => left.displayName.localeCompare(right.displayName));
+  const nextCustomers = [...data.customers, customer].sort((left, right) => left.displayName.localeCompare(right.displayName));
   appendActivity(data, {
     entityType: 'customer',
     entityId: customer.id,
@@ -72,7 +75,10 @@ export async function createCustomerAction(formData: FormData) {
     userId: actorUserId,
     summary: `Customer ${quoteLabel(customer.displayName)} created.`,
   });
-  await mutateAppData(data);
+  await persistence.write(({ raw, customers }) => {
+    customers.replaceAll(nextCustomers);
+    raw.activities = data.activities;
+  });
   revalidatePath('/');
   revalidatePath('/timeline');
   revalidatePath('/orders');
@@ -103,7 +109,7 @@ export async function updateCustomerAction(customerId: string, formData: FormDat
 
   const actorUserId = await getActorUserId(data);
   const customer = buildCustomerRecord(values, actorUserId, existing);
-  data.customers = data.customers.map((entry) => (entry.id === customerId ? customer : entry))
+  const nextCustomers = data.customers.map((entry) => (entry.id === customerId ? customer : entry))
     .sort((left, right) => left.displayName.localeCompare(right.displayName));
   appendActivity(data, {
     entityType: 'customer',
@@ -114,7 +120,10 @@ export async function updateCustomerAction(customerId: string, formData: FormDat
       ? `Customer ${quoteLabel(customer.displayName)} marked as ${customer.active ? 'active' : 'inactive'}.`
       : `Customer ${quoteLabel(customer.displayName)} updated.`,
   });
-  await mutateAppData(data);
+  await persistence.write(({ raw, customers }) => {
+    customers.replaceAll(nextCustomers);
+    raw.activities = data.activities;
+  });
   revalidatePath('/');
   revalidatePath('/timeline');
   revalidatePath('/orders');
