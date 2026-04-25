@@ -130,3 +130,24 @@ The first implementation step from this audit is now complete:
 - route imports remain intentionally unchanged through a compatibility export surface (`lib/server/actions.ts`);
 - persistence migration remains incremental and still honors hybrid/json adapter boundaries;
 - recommended next step remains repository-first write cleanup (starting with migrated domains), with admin-shell separation as an alternate depending on debt discovered during that cleanup.
+
+## Update (2026-04-25): repository-first write cleanup for migrated domains (PR #53)
+
+The second implementation step from this audit is now in progress:
+
+- migrated-domain writes in `entry-bootstrap`, `admin-core`, and `operator` actions have been converted from full-blob `mutateAppData(data)` calls to `PersistenceGateway.write(...)` with repository segments where available;
+- converted migrated segments in this PR: instance/workspace, workspace preferences, instance state, session state, users/roles, customers;
+- JSON fallback behavior is preserved because repository writes still flow through the same gateway (`json`, `hybrid`, and `postgres` modes all use the shared contract surface);
+- hybrid/postgres ownership is preserved by writing migrated domains through `instance`, `users`, and `customers` repositories while leaving non-migrated domains on JSON-backed fields;
+- compatibility exports and route imports remain unchanged.
+
+Remaining full-AppData mutation hotspots after this PR are concentrated in:
+
+- non-migrated domains inside `admin-core` and `operator` actions (orders, recurring templates, procurement, production);
+- restore/seed style flows that intentionally replace broad runtime state;
+- read-model composition in `lib/server/demo-data.ts`, which still reads `AppData` as a whole.
+
+Recommended next PR remains either:
+
+- orders + recurring templates repository-first writes (if current migrated-domain cleanup is stable), or
+- read-model decoupling in `lib/server/demo-data.ts` (if full `readAppData()` usage is the larger blocker).

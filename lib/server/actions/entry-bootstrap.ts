@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getCurrentUserContext, loggedOutSessionValue, sessionUserCookieName } from '@/lib/server/auth';
-import { readSeedAppData, readAppData, reseedRuntimeAppData, mutateAppData } from '@/lib/server/persistence';
+import { getPersistenceGateway, readSeedAppData, readAppData, reseedRuntimeAppData, mutateAppData } from '@/lib/server/persistence';
 import { hashPassword, verifyPassword } from '@/lib/server/passwords';
 import { isSupportedLocale, isSupportedPreset, localeCookieName, supportedLocales, presetCookieName, supportedPresets } from '@/lib/i18n/config';
 import { themeCookieName } from '@/lib/theme';
@@ -17,6 +17,7 @@ const supportedThemes = ['light', 'dark', 'system'] as const;
 const supportedOperatingModes = ['pickup', 'delivery', 'mixed'] as const;
 const supportedPreferenceWorkspaces = ['timeline', 'orders', 'customers', 'production', 'handoff', 'admin'] as const;
 const sessionMaxAgeSeconds = 60 * 60 * 24 * 14;
+const persistence = getPersistenceGateway();
 
 function revalidateAllWorkspaces() {
   revalidatePath('/');
@@ -80,12 +81,19 @@ export async function launchDemoModeAction() {
   }
 
   const data = await readSeedAppData();
-  data.instance.demoModeActive = true;
-  data.instance.initialized = false;
-  data.instance.onboardingStatus = 'not_started';
-  data.preferences.onboardingCompleted = false;
-  data.instance.environmentType = 'demo';
-  await mutateAppData(data);
+  await persistence.write(({ instance }) => {
+    instance.updateInstanceState({
+      ...data.instance,
+      demoModeActive: true,
+      initialized: false,
+      onboardingStatus: 'not_started',
+      environmentType: 'demo',
+    });
+    instance.updatePreferences({
+      ...data.preferences,
+      onboardingCompleted: false,
+    });
+  });
   revalidateAllWorkspaces();
   redirect('/?demo=1');
 }
@@ -104,17 +112,33 @@ export async function recoverLocalAdminAccessAction() {
   }
 
   const temporaryPassword = 'skoss-local-admin';
-  adminUser.passwordHash = hashPassword(temporaryPassword);
-  adminUser.passwordUpdatedAt = now;
-  adminUser.mustChangePassword = true;
-  adminUser.active = true;
-  adminUser.updatedAt = now;
-  data.instance.initialized = true;
-  data.instance.onboardingProgress.adminAccount = true;
-  data.instance.onboardingStatus = data.preferences.onboardingCompleted ? 'completed' : 'in_progress';
-  data.session.currentUserId = undefined;
-  data.session.lastLoginAt = undefined;
-  await mutateAppData(data);
+  const nextUsers = data.users.map((user) => user.id === adminUser.id
+    ? {
+        ...user,
+        passwordHash: hashPassword(temporaryPassword),
+        passwordUpdatedAt: now,
+        mustChangePassword: true,
+        active: true,
+        updatedAt: now,
+      }
+    : user);
+  await persistence.write(({ users, instance }) => {
+    users.replaceAll(nextUsers);
+    instance.updateInstanceState({
+      ...data.instance,
+      initialized: true,
+      onboardingProgress: {
+        ...data.instance.onboardingProgress,
+        adminAccount: true,
+      },
+      onboardingStatus: data.preferences.onboardingCompleted ? 'completed' : 'in_progress',
+    });
+    instance.updateSessionState({
+      ...data.session,
+      currentUserId: undefined,
+      lastLoginAt: undefined,
+    });
+  });
 
   const cookieStore = await cookies();
   cookieStore.set(sessionUserCookieName, loggedOutSessionValue, { path: '/', maxAge: sessionMaxAgeSeconds, sameSite: 'lax' });
@@ -129,13 +153,23 @@ export async function resetLocalUsersAndCredentialsAction() {
 
   const seedData = await readSeedAppData();
   const data = await readAppData();
-  data.users = seedData.users;
-  data.session.currentUserId = undefined;
-  data.session.lastLoginAt = undefined;
-  data.instance.initialized = true;
-  data.instance.onboardingStatus = 'in_progress';
-  data.preferences.onboardingCompleted = false;
-  await mutateAppData(data);
+  await persistence.write(({ users, instance }) => {
+    users.replaceAll(seedData.users);
+    instance.updateSessionState({
+      ...data.session,
+      currentUserId: undefined,
+      lastLoginAt: undefined,
+    });
+    instance.updateInstanceState({
+      ...data.instance,
+      initialized: true,
+      onboardingStatus: 'in_progress',
+    });
+    instance.updatePreferences({
+      ...data.preferences,
+      onboardingCompleted: false,
+    });
+  });
 
   const cookieStore = await cookies();
   cookieStore.set(sessionUserCookieName, loggedOutSessionValue, { path: '/', maxAge: sessionMaxAgeSeconds, sameSite: 'lax' });
@@ -203,8 +237,11 @@ export async function saveOnboardingPreferencesAction(formData: FormData) {
   }
 
   const now = new Date().toISOString();
-  data.workspace.name = businessName;
-  data.preferences = {
+  const nextWorkspace = {
+    ...data.workspace,
+    name: businessName,
+  };
+  const nextPreferences: AppData['preferences'] = {
     locale,
     preset,
     operatingMode: operatingMode as (typeof supportedOperatingModes)[number],
@@ -213,7 +250,7 @@ export async function saveOnboardingPreferencesAction(formData: FormData) {
     completedAt: data.preferences.completedAt ?? now,
     updatedAt: now,
   };
-  data.instance = {
+  const nextInstance: AppData['instance'] = {
     ...data.instance,
     initialized: true,
     onboardingStatus: 'completed',
@@ -224,7 +261,11 @@ export async function saveOnboardingPreferencesAction(formData: FormData) {
     },
   };
 
-  await mutateAppData(data);
+  await persistence.write(({ instance }) => {
+    instance.updateWorkspace(nextWorkspace);
+    instance.updatePreferences(nextPreferences);
+    instance.updateInstanceState(nextInstance);
+  });
 
   const cookieStore = await cookies();
   cookieStore.set(localeCookieName, locale, { path: '/', maxAge: 31536000, sameSite: 'lax' });
@@ -454,12 +495,30 @@ export async function saveBootstrapStepAction(formData: FormData) {
     data.instance.onboardingStatus = 'completed';
     data.instance.demoModeActive = false;
     data.session.currentUserId = undefined;
-    await mutateAppData(data);
+    await persistence.write(({ raw, instance, users }) => {
+      instance.updateInstanceState(data.instance);
+      instance.updateWorkspace(data.workspace);
+      instance.updatePreferences(data.preferences);
+      instance.updateSessionState(data.session);
+      users.replaceAll(data.users);
+      if (step === 6) {
+        raw.products = data.products;
+      }
+    });
     revalidateAllWorkspaces();
     redirect('/login?redirectTo=/');
   }
 
-  await mutateAppData(data);
+  await persistence.write(({ raw, instance, users }) => {
+    instance.updateInstanceState(data.instance);
+    instance.updateWorkspace(data.workspace);
+    instance.updatePreferences(data.preferences);
+    instance.updateSessionState(data.session);
+    users.replaceAll(data.users);
+    if (step === 6) {
+      raw.products = data.products;
+    }
+  });
   revalidateAllWorkspaces();
   if (intent === 'skip') {
     redirect(`/bootstrap?step=${Math.min(8, step + 1)}&saved=progress`);
@@ -502,7 +561,7 @@ export async function saveUserPreferencesAction(formData: FormData) {
   const defaultWorkspace = defaultWorkspaceValue ? requestedWorkspace : fallbackWorkspace;
   const nextUpdatedAt = new Date().toISOString();
 
-  data.users = data.users.map((user) => user.id === currentUser.id
+  const nextUsers = data.users.map((user) => user.id === currentUser.id
     ? {
         ...user,
         defaultWorkspace,
@@ -516,7 +575,9 @@ export async function saveUserPreferencesAction(formData: FormData) {
       }
     : user);
 
-  await mutateAppData(data);
+  await persistence.write(({ users }) => {
+    users.replaceAll(nextUsers);
+  });
 
   const cookieStore = await cookies();
   cookieStore.set(localeCookieName, locale, { path: '/', maxAge: 31536000, sameSite: 'lax' });
@@ -542,9 +603,13 @@ export async function loginAction(formData: FormData) {
   }
 
   const now = new Date().toISOString();
-  data.session.currentUserId = user.id;
-  data.session.lastLoginAt = now;
-  await mutateAppData(data);
+  await persistence.write(({ instance }) => {
+    instance.updateSessionState({
+      ...data.session,
+      currentUserId: user.id,
+      lastLoginAt: now,
+    });
+  });
 
   const cookieStore = await cookies();
   cookieStore.set(sessionUserCookieName, user.id, { path: '/', maxAge: sessionMaxAgeSeconds, sameSite: 'lax' });
@@ -572,8 +637,12 @@ export async function loginAction(formData: FormData) {
 
 export async function logoutAction() {
   const data = await readAppData();
-  data.session.currentUserId = undefined;
-  await mutateAppData(data);
+  await persistence.write(({ instance }) => {
+    instance.updateSessionState({
+      ...data.session,
+      currentUserId: undefined,
+    });
+  });
 
   const cookieStore = await cookies();
   cookieStore.set(sessionUserCookieName, loggedOutSessionValue, { path: '/', maxAge: sessionMaxAgeSeconds, sameSite: 'lax' });

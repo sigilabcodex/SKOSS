@@ -20,7 +20,7 @@ import {
   validateSupplierPriceEntryForm,
   validateUserForm,
 } from '@/lib/server/demo-data';
-import { readAppData, mutateAppData, reseedRuntimeAppData } from '@/lib/server/persistence';
+import { getPersistenceGateway, readAppData, mutateAppData, reseedRuntimeAppData } from '@/lib/server/persistence';
 import { appendActivity } from '@/lib/server/activity';
 import { hashPassword } from '@/lib/server/passwords';
 import {
@@ -34,6 +34,7 @@ import {
 import { moduleRegistry } from '@/lib/modules';
 import { getCurrentUserContext } from '@/lib/server/auth';
 import { isNonProductionMode } from '@/lib/server/runtime-mode';
+import type { AppData } from '@/lib/domain/types';
 
 function sortUsers(left: { displayName: string }, right: { displayName: string }) {
   return left.displayName.localeCompare(right.displayName);
@@ -43,7 +44,9 @@ function quoteLabel(label: string) {
   return `"${label}"`;
 }
 
-async function getActorUserId(data: Awaited<ReturnType<typeof readAppData>>) {
+const persistence = getPersistenceGateway();
+
+async function getActorUserId(data: AppData) {
   const { currentUser } = await getCurrentUserContext(data);
   return currentUser?.id;
 }
@@ -92,11 +95,15 @@ export async function updateModuleRegistryAction(formData: FormData) {
     nextStates[manifest.id] = String(formData.get(`module:${manifest.id}`) ?? '') === '1';
   }
 
-  data.instance.moduleStates = {
-    ...(data.instance.moduleStates ?? {}),
-    ...nextStates,
-  };
-  await mutateAppData(data);
+  await persistence.write(({ instance }) => {
+    instance.updateInstanceState({
+      ...data.instance,
+      moduleStates: {
+        ...(data.instance.moduleStates ?? {}),
+        ...nextStates,
+      },
+    });
+  });
   revalidatePath('/admin/modules');
   redirect('/admin/modules?saved=modules');
 }
@@ -120,7 +127,7 @@ export async function createUserAction(formData: FormData) {
   user.passwordHash = hashPassword(values.password?.trim() || 'skoss-demo');
   user.passwordUpdatedAt = new Date().toISOString();
   user.mustChangePassword = !values.password?.trim();
-  data.users = [...data.users, user].sort(sortUsers);
+  const nextUsers = [...data.users, user].sort(sortUsers);
   if (user.roles.includes('owner_admin') || user.role === 'owner_admin') {
     data.instance = {
       ...data.instance,
@@ -140,7 +147,11 @@ export async function createUserAction(formData: FormData) {
     userId: actorUserId,
     summary: `User ${quoteLabel(user.displayName)} created.`,
   });
-  await mutateAppData(data);
+  await persistence.write(({ raw, instance, users }) => {
+    users.replaceAll(nextUsers);
+    instance.updateInstanceState(data.instance);
+    raw.activities = data.activities;
+  });
   revalidateAllWorkspaces();
   redirect(`${redirectTo}?saved=user`);
 }
@@ -166,7 +177,7 @@ export async function updateUserAction(userId: string, formData: FormData) {
     user.passwordUpdatedAt = new Date().toISOString();
     user.mustChangePassword = !values.password?.trim();
   }
-  data.users = data.users.map((entry) => (entry.id === userId ? user : entry)).sort(sortUsers);
+  const nextUsers = data.users.map((entry) => (entry.id === userId ? user : entry)).sort(sortUsers);
   appendActivity(data, {
     entityType: 'user',
     entityId: user.id,
@@ -178,10 +189,14 @@ export async function updateUserAction(userId: string, formData: FormData) {
   });
 
   if (!user.active && data.session.currentUserId === userId) {
-    data.session.currentUserId = data.users.find((entry) => entry.active && entry.id !== userId)?.id;
+    data.session.currentUserId = nextUsers.find((entry) => entry.active && entry.id !== userId)?.id;
   }
 
-  await mutateAppData(data);
+  await persistence.write(({ raw, instance, users }) => {
+    users.replaceAll(nextUsers);
+    instance.updateSessionState(data.session);
+    raw.activities = data.activities;
+  });
   revalidateAllWorkspaces();
   redirect('/admin/setup?saved=user');
 }
@@ -347,7 +362,11 @@ export async function importCsvEntitiesAction(formData: FormData) {
     data.rawMaterials = [...data.rawMaterials, ...importedRecords].sort((left, right) => left.name.localeCompare(right.name));
   }
 
-  await mutateAppData(data);
+  await persistence.write(({ raw, customers }) => {
+    customers.replaceAll(data.customers);
+    raw.suppliers = data.suppliers;
+    raw.rawMaterials = data.rawMaterials;
+  });
   revalidateAllWorkspaces();
   redirect(`${redirectTo}?saved=import&importedEntity=${entity}&importedCount=${imported}&skippedCount=${skipped}`);
 }
