@@ -3,13 +3,16 @@ import type { ReactNode } from 'react';
 import { headers } from 'next/headers';
 import { PrimaryNav } from '@/components/primary-nav';
 import { UserMenu } from '@/components/user-menu';
+import { getApplicationPlane, skossinaRoutes } from '@/lib/application-planes';
 import { getServerTranslator } from '@/lib/i18n/server';
-import { readAppData } from '@/lib/server/persistence';
+import { readPersistence } from '@/lib/server/persistence';
 import { getCurrentUserContext } from '@/lib/server/auth';
 import { getRuntimeModeLabel, isNonProductionMode } from '@/lib/server/runtime-mode';
 
 export async function AppShell({ children }: { children?: ReactNode }) {
-  const [{ t }, data] = await Promise.all([getServerTranslator(), readAppData()]);
+  const [{ t }, persistence] = await Promise.all([getServerTranslator(), readPersistence()]);
+  const data = persistence.raw;
+  const workspace = persistence.instance.getWorkspace();
   const { currentUser, visibleWorkspaces } = await getCurrentUserContext(data);
   const showNonProductionBanner = isNonProductionMode();
   const runtimeModeLabel = getRuntimeModeLabel();
@@ -19,9 +22,9 @@ export async function AppShell({ children }: { children?: ReactNode }) {
     ?? headerStore.get('x-invoke-path')
     ?? headerStore.get('x-matched-path')
     ?? '';
-  const isBootstrapRoute = requestPath.startsWith('/bootstrap');
+  const plane = getApplicationPlane(requestPath);
 
-  if (isBootstrapRoute) {
+  if (plane === 'bootstrap') {
     return (
       <div className="shell onboarding-shell">
         {showNonProductionBanner ? (
@@ -42,9 +45,9 @@ export async function AppShell({ children }: { children?: ReactNode }) {
         </div>
       ) : null}
       <header className="shell-header">
-        <Link href="/" className="brand-block" aria-label={t('shell.homeAria')}>
+        <Link href={skossinaRoutes.home} className="brand-block" aria-label={t('shell.homeAria')}>
           <span className="brand-kicker">SKOSS</span>
-          <strong>{data.workspace.name}</strong>
+          <strong>{workspace.name}</strong>
           <span className="brand-subtitle">{t('shell.brandTitle')}</span>
         </Link>
         <div className="shell-controls">

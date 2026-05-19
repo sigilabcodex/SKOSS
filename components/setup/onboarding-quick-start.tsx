@@ -5,6 +5,7 @@ import {
   createSupplierAction,
   createUserAction,
 } from '@/lib/server/actions';
+import { skossCoreRoutes } from '@/lib/application-planes';
 import { getServerTranslator } from '@/lib/i18n/server';
 
 type OnboardingQuickStartProps = {
@@ -119,7 +120,7 @@ export async function OnboardingQuickStart({ redirectTo, compact = false }: Onbo
       </div>
 
       <p className="helper-text no-margin">
-        {t('setupAssistant.quickStart.skipHelp')} <Link href="/admin/setup" className="inline-link">{t('setup.title')}</Link>
+        {t('setupAssistant.quickStart.skipHelp')} <Link href={skossCoreRoutes.adminSetup} className="inline-link">{t('setup.title')}</Link>
       </p>
     </section>
   );

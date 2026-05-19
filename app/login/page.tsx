@@ -1,8 +1,9 @@
+import Link from 'next/link';
+import { skossBootstrapRoutes } from '@/lib/application-planes';
 import { loginAction } from '@/lib/server/actions';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { readAppData } from '@/lib/server/persistence';
 import { detectInstanceGatewayState } from '@/lib/server/instance-entry';
-import Link from 'next/link';
 
 export default async function LoginPage({
   searchParams,
@@ -52,11 +53,11 @@ export default async function LoginPage({
         </datalist>
         <button type="submit" className="button-primary">{t('login.submit')}</button>
         <p className="helper-text no-margin">
-          Need a different path? <Link href="/entry" className="inline-link">Back to entry gateway</Link> for new setup, restore, or demo mode.
+          Need a different path? <Link href={skossBootstrapRoutes.entry} className="inline-link">Back to entry gateway</Link> for new setup, restore, or demo mode.
         </p>
         {gatewayState.canRunBootstrap ? (
           <p className="helper-text no-margin">
-            Need to initialize this instance first? <Link href="/bootstrap?step=1" className="inline-link">Run first-use wizard</Link>
+            Need to initialize this instance first? <Link href={skossBootstrapRoutes.bootstrapStart} className="inline-link">Run first-use wizard</Link>
           </p>
         ) : null}
       </form>

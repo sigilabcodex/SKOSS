@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { LanguageSwitcher } from '@/components/language-switcher';
+import { skossBootstrapRoutes, skossinaRoutes } from '@/lib/application-planes';
 import {
   launchDemoModeAction,
   recoverLocalAdminAccessAction,
@@ -81,7 +82,7 @@ export default async function EntryGatewayPage({
   const state = await detectInstanceGatewayState(data);
 
   if (currentUser && state.hasAdminUser && state.hasInstance && !state.onboardingIncomplete) {
-    redirect('/');
+    redirect(skossinaRoutes.home);
   }
   const copy = getEntryCopy(locale);
   const runtimeMode = getRuntimeMode();
@@ -126,7 +127,7 @@ export default async function EntryGatewayPage({
           <h2>{copy.newTitle}</h2>
           <p>{copy.newBody}</p>
           {state.canRunBootstrap ? (
-            <Link className="button-primary" href="/bootstrap?step=1">
+            <Link className="button-primary" href={skossBootstrapRoutes.bootstrapStart}>
               {copy.newAction}
             </Link>
           ) : (
