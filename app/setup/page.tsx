@@ -1,5 +1,6 @@
 import { redirect } from 'next/navigation';
+import { skossCoreRoutes } from '@/lib/application-planes';
 
 export default function LegacySetupRedirectPage() {
-  redirect('/admin/setup');
+  redirect(skossCoreRoutes.adminSetup);
 }

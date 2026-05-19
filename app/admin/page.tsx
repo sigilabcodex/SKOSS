@@ -1,17 +1,9 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
-import { getCurrentUserContext } from '@/lib/server/auth';
+import { skossCoreRoutes } from '@/lib/application-planes';
+import { requireAdminPlaneAccess } from '@/lib/server/application-access';
 
 export default async function AdminHomePage() {
-  const userContext = await getCurrentUserContext();
-
-  if (!userContext.currentUser) {
-    redirect('/login?redirectTo=/admin');
-  }
-
-  if (!userContext.canManageSettings) {
-    redirect('/');
-  }
+  await requireAdminPlaneAccess(skossCoreRoutes.admin);
 
   return (
     <div className="page-stack">
@@ -21,11 +13,11 @@ export default async function AdminHomePage() {
         <p className="lede">Structural setup, module control, imports, and system configuration stay on the admin plane.</p>
       </section>
       <section className="grid-cards">
-        <Link href="/admin/setup" className="panel-link">
+        <Link href={skossCoreRoutes.adminSetup} className="panel-link">
           <h2>Structural setup</h2>
           <p>Users, suppliers, materials, recipes, imports, and business fine tuning.</p>
         </Link>
-        <Link href="/admin/modules" className="panel-link">
+        <Link href={skossCoreRoutes.adminModules} className="panel-link">
           <h2>Module control</h2>
           <p>Core-required and optional module defaults for this instance.</p>
         </Link>

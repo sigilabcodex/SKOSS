@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 import { cookies } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { getCurrentUserContext, loggedOutSessionValue, sessionUserCookieName } from '@/lib/server/auth';
-import { getPersistenceGateway, readSeedAppData, readAppData, reseedRuntimeAppData, mutateAppData } from '@/lib/server/persistence';
+import { getPersistenceGateway, readSeedAppData, readAppData, readPersistence, reseedRuntimeAppData, mutateAppData } from '@/lib/server/persistence';
 import { hashPassword, verifyPassword } from '@/lib/server/passwords';
 import { isSupportedLocale, isSupportedPreset, localeCookieName, supportedLocales, presetCookieName, supportedPresets } from '@/lib/i18n/config';
 import { themeCookieName } from '@/lib/theme';
@@ -103,41 +103,29 @@ export async function recoverLocalAdminAccessAction() {
     redirect('/entry?error=' + encodeURIComponent('Local recovery is disabled in production mode.'));
   }
 
-  const data = await readAppData();
+  const context = await readPersistence();
+  const data = context.raw;
   const now = new Date().toISOString();
-  const adminUser = data.users.find((user) => user.role === 'owner_admin' || user.roles?.includes('owner_admin'));
+  const adminUser = context.users.list().find((user) => user.role === 'owner_admin' || user.roles?.includes('owner_admin'));
 
   if (!adminUser) {
     redirect('/entry?error=' + encodeURIComponent('No admin account found. Use restore or guided activation.'));
   }
 
   const temporaryPassword = 'skoss-local-admin';
-  const nextUsers = data.users.map((user) => user.id === adminUser.id
-    ? {
-        ...user,
-        passwordHash: hashPassword(temporaryPassword),
-        passwordUpdatedAt: now,
-        mustChangePassword: true,
-        active: true,
-        updatedAt: now,
-      }
-    : user);
+  const recoveredAdmin = {
+    ...adminUser,
+    passwordHash: hashPassword(temporaryPassword),
+    passwordUpdatedAt: now,
+    mustChangePassword: true,
+    active: true,
+    updatedAt: now,
+  };
   await persistence.write(({ users, instance }) => {
-    users.replaceAll(nextUsers);
-    instance.updateInstanceState({
-      ...data.instance,
-      initialized: true,
-      onboardingProgress: {
-        ...data.instance.onboardingProgress,
-        adminAccount: true,
-      },
-      onboardingStatus: data.preferences.onboardingCompleted ? 'completed' : 'in_progress',
-    });
-    instance.updateSessionState({
-      ...data.session,
-      currentUserId: undefined,
-      lastLoginAt: undefined,
-    });
+    users.upsert(recoveredAdmin);
+    instance.setInitialized(true, data.preferences.onboardingCompleted ? 'completed' : 'in_progress');
+    instance.updateOnboardingProgress({ adminAccount: true });
+    instance.setSessionUser(undefined);
   });
 
   const cookieStore = await cookies();
@@ -264,7 +252,8 @@ export async function saveOnboardingPreferencesAction(formData: FormData) {
   await persistence.write(({ instance }) => {
     instance.updateWorkspace(nextWorkspace);
     instance.updatePreferences(nextPreferences);
-    instance.updateInstanceState(nextInstance);
+    instance.setInitialized(nextInstance.initialized, nextInstance.onboardingStatus);
+    instance.updateOnboardingProgress(nextInstance.onboardingProgress);
   });
 
   const cookieStore = await cookies();
@@ -529,7 +518,8 @@ export async function saveBootstrapStepAction(formData: FormData) {
 }
 
 export async function saveUserPreferencesAction(formData: FormData) {
-  const data = await readAppData();
+  const context = await readPersistence();
+  const data = context.raw;
   const { currentUser } = await getCurrentUserContext(data);
 
   if (!currentUser) {
@@ -561,22 +551,20 @@ export async function saveUserPreferencesAction(formData: FormData) {
   const defaultWorkspace = defaultWorkspaceValue ? requestedWorkspace : fallbackWorkspace;
   const nextUpdatedAt = new Date().toISOString();
 
-  const nextUsers = data.users.map((user) => user.id === currentUser.id
-    ? {
-        ...user,
-        defaultWorkspace,
-        preferences: {
-          ...user.preferences,
-          locale,
-          theme: theme as (typeof supportedThemes)[number],
-          defaultWorkspace,
-        },
-        updatedAt: nextUpdatedAt,
-      }
-    : user);
+  const nextUser = {
+    ...currentUser,
+    defaultWorkspace,
+    preferences: {
+      ...currentUser.preferences,
+      locale,
+      theme: theme as (typeof supportedThemes)[number],
+      defaultWorkspace,
+    },
+    updatedAt: nextUpdatedAt,
+  };
 
   await persistence.write(({ users }) => {
-    users.replaceAll(nextUsers);
+    users.upsert(nextUser);
   });
 
   const cookieStore = await cookies();
@@ -604,11 +592,7 @@ export async function loginAction(formData: FormData) {
 
   const now = new Date().toISOString();
   await persistence.write(({ instance }) => {
-    instance.updateSessionState({
-      ...data.session,
-      currentUserId: user.id,
-      lastLoginAt: now,
-    });
+    instance.setSessionUser(user.id, now);
   });
 
   const cookieStore = await cookies();
@@ -636,12 +620,8 @@ export async function loginAction(formData: FormData) {
 }
 
 export async function logoutAction() {
-  const data = await readAppData();
   await persistence.write(({ instance }) => {
-    instance.updateSessionState({
-      ...data.session,
-      currentUserId: undefined,
-    });
+    instance.setSessionUser(undefined);
   });
 
   const cookieStore = await cookies();

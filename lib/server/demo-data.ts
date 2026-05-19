@@ -407,8 +407,7 @@ export function buildUserRecord(
   };
 }
 
-export async function getWorkspaceSummary() {
-  const data = await readAppData();
+export function buildWorkspaceSummary(data: AppData) {
   const focusDate = getFocusDate(data);
   const ordersToday = data.orders.filter((order) => order.productionDate === focusDate);
   const activePriceEntries = data.supplierPriceEntries.filter((entry) => entry.priceDate <= focusDate);
@@ -437,6 +436,10 @@ export async function getWorkspaceSummary() {
           : undefined,
       })),
   };
+}
+
+export async function getWorkspaceSummary() {
+  return buildWorkspaceSummary(await readAppData());
 }
 
 export async function getOrdersWorkspace() {

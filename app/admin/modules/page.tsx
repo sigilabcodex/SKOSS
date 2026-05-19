@@ -1,19 +1,13 @@
-import { redirect } from 'next/navigation';
+import { skossCoreRoutes } from '@/lib/application-planes';
 import { moduleRegistry } from '@/lib/modules';
-import { getCurrentUserContext } from '@/lib/server/auth';
-import { readAppData } from '@/lib/server/persistence';
+import { requireAdminPlaneAccess } from '@/lib/server/application-access';
+import { readPersistence } from '@/lib/server/persistence';
 import { updateModuleRegistryAction } from '@/lib/server/actions';
 
 export default async function AdminModulesPage({ searchParams }: { searchParams?: Promise<{ saved?: string }> }) {
-  const [userContext, data, params] = await Promise.all([getCurrentUserContext(), readAppData(), searchParams]);
-
-  if (!userContext.currentUser) {
-    redirect('/login?redirectTo=/admin/modules');
-  }
-
-  if (!userContext.canManageSettings) {
-    redirect('/');
-  }
+  await requireAdminPlaneAccess(skossCoreRoutes.adminModules);
+  const [persistence, params] = await Promise.all([readPersistence(), searchParams]);
+  const moduleStates = persistence.instance.getInstanceState().moduleStates ?? {};
 
   return (
     <div className="page-stack">
@@ -25,7 +19,7 @@ export default async function AdminModulesPage({ searchParams }: { searchParams?
       {params?.saved === 'modules' ? <p className="inline-success">Module settings updated.</p> : null}
       <form action={updateModuleRegistryAction} className="panel page-stack">
         {moduleRegistry.map((module) => {
-          const enabled = module.required || data.instance.moduleStates?.[module.id] !== false;
+          const enabled = module.required || moduleStates[module.id] !== false;
           return (
             <label key={module.id} className="checkbox-row">
               <input

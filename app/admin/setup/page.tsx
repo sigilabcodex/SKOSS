@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { redirect } from 'next/navigation';
+import { skossBootstrapRoutes, skossCoreRoutes } from '@/lib/application-planes';
 import {
   formatCurrency,
   formatDateLabel,
@@ -19,8 +19,8 @@ import {
   updateUserAction,
   resetDemoWorkspaceAction,
 } from '@/lib/server/actions';
+import { requireAdminPlaneAccess } from '@/lib/server/application-access';
 import { getSetupWorkspace } from '@/lib/server/demo-data';
-import { getCurrentUserContext } from '@/lib/server/auth';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { getVisibleWorkspacesForRole } from '@/lib/workspaces';
 import { ThemeSwitcher } from '@/components/theme-switcher';
@@ -70,7 +70,7 @@ type SetupSearchParams = {
 
 function buildSetupHref(params: Record<string, string | undefined>) {
   return {
-    pathname: '/admin/setup',
+    pathname: skossCoreRoutes.adminSetup,
     query: Object.fromEntries(
       Object.entries(params).filter(([, value]) => Boolean(value)),
     ),
@@ -168,23 +168,15 @@ export default async function SetupPage({
 }: {
   searchParams?: Promise<SetupSearchParams>;
 }) {
-  const [data, params, { t, locale, term }, userContext] = await Promise.all([
+  const userContext = await requireAdminPlaneAccess(skossCoreRoutes.adminSetup);
+  const [data, params, { t, locale, term }] = await Promise.all([
     getSetupWorkspace(),
     searchParams,
     getServerTranslator(),
-    getCurrentUserContext(),
   ]);
   const today = new Date().toISOString().slice(0, 10);
   const runtimeMode = getRuntimeMode();
   const canResetDemoWorkspace = isNonProductionMode();
-
-  if (!userContext.currentUser) {
-    redirect('/login?redirectTo=/admin/setup');
-  }
-
-  if (!userContext.canManageSettings) {
-    redirect('/');
-  }
 
   const editingSupplier = params?.supplier
     ? (data.suppliers.find((supplier) => supplier.id === params.supplier) ??
@@ -353,7 +345,7 @@ export default async function SetupPage({
     { key: 'price-history', label: t('setup.sections.priceHistory') },
   ];
   const buildSectionLink = (section: (typeof sectionNavItems)[number]['key']) => ({
-    pathname: '/admin/setup',
+    pathname: skossCoreRoutes.adminSetup,
     query: { section },
     hash: section,
   });
@@ -455,7 +447,7 @@ export default async function SetupPage({
           ))}
         </ul>
         <div className="inline-action-row">
-          <Link href="/bootstrap?step=1" className="button-secondary compact-button">
+          <Link href={skossBootstrapRoutes.bootstrapStart} className="button-secondary compact-button">
             Resume guided activation
           </Link>
           <a href="#suppliers" className="button-secondary compact-button">

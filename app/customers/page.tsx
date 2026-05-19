@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { skossCoreRoutes, skossinaRoutes } from '@/lib/application-planes';
 import { formatDateLabel, formatStatusLabel } from '@/lib/domain/formatters';
 import { createCustomerAction, updateCustomerAction } from '@/lib/server/actions';
 import { getCustomersWorkspace } from '@/lib/server/demo-data';
@@ -42,10 +43,10 @@ export default async function CustomersPage({
           <p>{t('customers.description')}</p>
         </div>
         <div className="inline-action-row">
-          <Link href="/admin/setup#imports" className="button-secondary">
+          <Link href={skossCoreRoutes.adminSetupImports} className="button-secondary">
             <span>{t('customers.actions.importCsv')}</span>
           </Link>
-          <Link href="/orders" className="button-secondary">
+          <Link href={skossinaRoutes.orders} className="button-secondary">
             <ArrowRightIcon className="button-icon button-icon-reverse" />
             <span>{t('common.backToOrders')}</span>
           </Link>

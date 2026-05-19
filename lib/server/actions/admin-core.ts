@@ -20,7 +20,7 @@ import {
   validateSupplierPriceEntryForm,
   validateUserForm,
 } from '@/lib/server/demo-data';
-import { getPersistenceGateway, readAppData, mutateAppData, reseedRuntimeAppData } from '@/lib/server/persistence';
+import { getPersistenceGateway, readAppData, readPersistence, mutateAppData, reseedRuntimeAppData } from '@/lib/server/persistence';
 import { appendActivity } from '@/lib/server/activity';
 import { hashPassword } from '@/lib/server/passwords';
 import {
@@ -35,10 +35,6 @@ import { moduleRegistry } from '@/lib/modules';
 import { getCurrentUserContext } from '@/lib/server/auth';
 import { isNonProductionMode } from '@/lib/server/runtime-mode';
 import type { AppData } from '@/lib/domain/types';
-
-function sortUsers(left: { displayName: string }, right: { displayName: string }) {
-  return left.displayName.localeCompare(right.displayName);
-}
 
 function quoteLabel(label: string) {
   return `"${label}"`;
@@ -83,7 +79,6 @@ export async function resetDemoWorkspaceAction() {
 }
 
 export async function updateModuleRegistryAction(formData: FormData) {
-  const data = await readAppData();
   const nextStates: Record<string, boolean> = {};
 
   for (const manifest of moduleRegistry) {
@@ -96,20 +91,15 @@ export async function updateModuleRegistryAction(formData: FormData) {
   }
 
   await persistence.write(({ instance }) => {
-    instance.updateInstanceState({
-      ...data.instance,
-      moduleStates: {
-        ...(data.instance.moduleStates ?? {}),
-        ...nextStates,
-      },
-    });
+    instance.updateModuleStates(nextStates);
   });
   revalidatePath('/admin/modules');
   redirect('/admin/modules?saved=modules');
 }
 
 export async function createUserAction(formData: FormData) {
-  const data = await readAppData();
+  const context = await readPersistence();
+  const data = context.raw;
   const actorUserId = await getActorUserId(data);
   const redirectTo = resolveRedirectTo(formData, '/admin/setup');
   const allowEmpty = shouldAllowEmpty(formData);
@@ -127,19 +117,7 @@ export async function createUserAction(formData: FormData) {
   user.passwordHash = hashPassword(values.password?.trim() || 'skoss-demo');
   user.passwordUpdatedAt = new Date().toISOString();
   user.mustChangePassword = !values.password?.trim();
-  const nextUsers = [...data.users, user].sort(sortUsers);
-  if (user.roles.includes('owner_admin') || user.role === 'owner_admin') {
-    data.instance = {
-      ...data.instance,
-      initialized: true,
-      onboardingProgress: {
-        ...data.instance.onboardingProgress,
-        adminAccount: true,
-        roles: true,
-        users: true,
-      },
-    };
-  }
+  const createdOwnerAdmin = user.roles.includes('owner_admin') || user.role === 'owner_admin';
   appendActivity(data, {
     entityType: 'user',
     entityId: user.id,
@@ -148,8 +126,15 @@ export async function createUserAction(formData: FormData) {
     summary: `User ${quoteLabel(user.displayName)} created.`,
   });
   await persistence.write(({ raw, instance, users }) => {
-    users.replaceAll(nextUsers);
-    instance.updateInstanceState(data.instance);
+    users.upsert(user);
+    if (createdOwnerAdmin) {
+      instance.setInitialized(true);
+      instance.updateOnboardingProgress({
+        adminAccount: true,
+        roles: true,
+        users: true,
+      });
+    }
     raw.activities = data.activities;
   });
   revalidateAllWorkspaces();
@@ -157,8 +142,9 @@ export async function createUserAction(formData: FormData) {
 }
 
 export async function updateUserAction(userId: string, formData: FormData) {
-  const data = await readAppData();
-  const existing = data.users.find((entry) => entry.id === userId);
+  const context = await readPersistence();
+  const data = context.raw;
+  const existing = context.users.getById(userId);
 
   if (!existing) {
     redirect('/admin/setup?error=missing-user');
@@ -177,7 +163,6 @@ export async function updateUserAction(userId: string, formData: FormData) {
     user.passwordUpdatedAt = new Date().toISOString();
     user.mustChangePassword = !values.password?.trim();
   }
-  const nextUsers = data.users.map((entry) => (entry.id === userId ? user : entry)).sort(sortUsers);
   appendActivity(data, {
     entityType: 'user',
     entityId: user.id,
@@ -188,13 +173,18 @@ export async function updateUserAction(userId: string, formData: FormData) {
       : `User ${quoteLabel(user.displayName)} updated.`,
   });
 
-  if (!user.active && data.session.currentUserId === userId) {
-    data.session.currentUserId = nextUsers.find((entry) => entry.active && entry.id !== userId)?.id;
+  const wasSessionUser = data.session.currentUserId === userId;
+  const nextSessionUserId = data.users.find((entry) => entry.active && entry.id !== userId)?.id;
+
+  if (!user.active && wasSessionUser) {
+    data.session.currentUserId = nextSessionUserId;
   }
 
   await persistence.write(({ raw, instance, users }) => {
-    users.replaceAll(nextUsers);
-    instance.updateSessionState(data.session);
+    users.upsert(user);
+    if (!user.active && wasSessionUser) {
+      instance.setSessionUser(nextSessionUserId, data.session.lastLoginAt);
+    }
     raw.activities = data.activities;
   });
   revalidateAllWorkspaces();
@@ -297,7 +287,8 @@ export async function createRawMaterialAction(formData: FormData) {
 }
 
 export async function importCsvEntitiesAction(formData: FormData) {
-  const data = await readAppData();
+  const context = await readPersistence();
+  const data = context.raw;
   const redirectTo = resolveRedirectTo(formData, '/admin/setup');
   const entity = String(formData.get('entity') ?? '') as CsvEntity;
   const csvContent = String(formData.get('csvContent') ?? '');
@@ -316,6 +307,7 @@ export async function importCsvEntitiesAction(formData: FormData) {
   const actorUserId = await getActorUserId(data);
   let imported = 0;
   let skipped = 0;
+  let importedCustomers: AppData['customers'] = [];
 
   if (entity === 'customers') {
     const payload = buildCustomerImportPayload(parsed.headers, parsed.rows, mapping);
@@ -329,7 +321,7 @@ export async function importCsvEntitiesAction(formData: FormData) {
       return [buildCustomerRecord(entry, actorUserId)];
     });
 
-    data.customers = [...data.customers, ...importedRecords].sort((left, right) => left.displayName.localeCompare(right.displayName));
+    importedCustomers = importedRecords;
   }
 
   if (entity === 'suppliers') {
@@ -363,7 +355,7 @@ export async function importCsvEntitiesAction(formData: FormData) {
   }
 
   await persistence.write(({ raw, customers }) => {
-    customers.replaceAll(data.customers);
+    customers.upsertMany(importedCustomers);
     raw.suppliers = data.suppliers;
     raw.rawMaterials = data.rawMaterials;
   });

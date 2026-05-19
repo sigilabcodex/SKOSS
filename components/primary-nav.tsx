@@ -4,6 +4,7 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { useI18n } from '@/components/i18n-provider';
+import { adminPlaneNavItems, operatorWorkspaceRoutes, type AppPlaneRoute, type OperatorWorkspaceSurface } from '@/lib/application-planes';
 import {
   CustomersIcon,
   HandoffIcon,
@@ -14,25 +15,11 @@ import {
 } from '@/components/ui-icons';
 import type { WorkspaceSurface } from '@/lib/domain/types';
 
-type NavHref =
-  | '/'
-  | '/timeline'
-  | '/orders'
-  | '/customers'
-  | '/production'
-  | '/handoff';
-
 type NavItem = {
-  key: Exclude<WorkspaceSurface, 'admin' | 'preferences'>;
-  href: NavHref;
+  key: OperatorWorkspaceSurface;
+  href: AppPlaneRoute;
   labelKey: string;
   icon: typeof HomeIcon;
-  active: (pathname: string) => boolean;
-};
-
-type DesktopAdminItem = {
-  href: '/admin' | '/admin/setup' | '/admin/modules';
-  labelKey: string;
   active: (pathname: string) => boolean;
 };
 
@@ -43,7 +30,7 @@ function NavLink({
   children,
   compact = false,
 }: {
-  href: NavHref | '/admin' | '/admin/setup' | '/admin/modules';
+  href: AppPlaneRoute;
   label: string;
   active: boolean;
   children?: ReactNode;
@@ -64,52 +51,46 @@ function NavLink({
 const navItems: NavItem[] = [
   {
     key: 'home',
-    href: '/',
+    href: operatorWorkspaceRoutes.home,
     labelKey: 'nav.home',
     icon: HomeIcon,
     active: (pathname) => pathname === '/',
   },
   {
     key: 'timeline',
-    href: '/timeline',
+    href: operatorWorkspaceRoutes.timeline,
     labelKey: 'nav.timeline',
     icon: TimelineIcon,
     active: (pathname) => pathname.startsWith('/timeline'),
   },
   {
     key: 'orders',
-    href: '/orders',
+    href: operatorWorkspaceRoutes.orders,
     labelKey: 'nav.orders',
     icon: OrdersIcon,
     active: (pathname) => pathname.startsWith('/orders'),
   },
   {
     key: 'customers',
-    href: '/customers',
+    href: operatorWorkspaceRoutes.customers,
     labelKey: 'nav.customers',
     icon: CustomersIcon,
     active: (pathname) => pathname.startsWith('/customers'),
   },
   {
     key: 'production',
-    href: '/production',
+    href: operatorWorkspaceRoutes.production,
     labelKey: 'nav.production',
     icon: ProductionIcon,
     active: (pathname) => pathname.startsWith('/production'),
   },
   {
     key: 'handoff',
-    href: '/handoff',
+    href: operatorWorkspaceRoutes.handoff,
     labelKey: 'nav.handoff',
     icon: HandoffIcon,
     active: (pathname) => pathname.startsWith('/handoff'),
   },
-];
-
-const desktopAdminItems: DesktopAdminItem[] = [
-  { href: '/admin', labelKey: 'nav.setup', active: (pathname) => pathname === '/admin' },
-  { href: '/admin/setup', labelKey: 'setup.sections.businessSetup', active: (pathname) => pathname.startsWith('/admin/setup') },
-  { href: '/admin/modules', labelKey: 'setup.sections.preferencesSystem', active: (pathname) => pathname.startsWith('/admin/modules') },
 ];
 
 export function PrimaryNav({
@@ -157,7 +138,7 @@ export function PrimaryNav({
       {showAdminSection ? (
         <nav className="shell-nav shell-nav-desktop shell-nav-admin" aria-label={t('shell.sections.admin')}>
           <p className="shell-nav-section-label">{t('shell.sections.admin')}</p>
-          {desktopAdminItems.map((item) => (
+          {adminPlaneNavItems.map((item) => (
             <NavLink
               key={`${item.href}-${item.labelKey}`}
               href={item.href}

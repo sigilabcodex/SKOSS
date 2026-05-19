@@ -3,27 +3,28 @@ import { redirect } from 'next/navigation';
 import { ActivityFeed } from '@/components/activity-feed';
 import { formatDateLabel } from '@/lib/domain/formatters';
 import { getPresetExperience, type WorkspaceLinkKey } from '@/lib/business-presets';
-import { getWorkspaceSummary } from '@/lib/server/demo-data';
+import { buildWorkspaceSummary } from '@/lib/server/demo-data';
 import { getCurrentUserContext } from '@/lib/server/auth';
 import { detectInstanceGatewayState, shouldRouteToEntryGateway } from '@/lib/server/instance-entry';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { readAppData } from '@/lib/server/persistence';
+import { skossBootstrapRoutes, skossCoreRoutes, skossinaRoutes, type AppPlaneRoute } from '@/lib/application-planes';
 import { ArrowRightIcon, CustomersIcon, HandoffIcon, OrdersIcon, ProductionIcon, SetupIcon, SparklesIcon, TimelineIcon } from '@/components/ui-icons';
 
 type QuickLink = {
-  href: Parameters<typeof Link>[0]['href'];
+  href: AppPlaneRoute;
   title: string;
   description: string;
   icon: typeof OrdersIcon;
 };
 
 export default async function HomePage() {
-  const [summary, { t, locale, preset }, data, userContext] = await Promise.all([
-    getWorkspaceSummary(),
+  const [{ t, locale, preset }, data, userContext] = await Promise.all([
     getServerTranslator(),
     readAppData(),
     getCurrentUserContext(),
   ]);
+  const summary = buildWorkspaceSummary(data);
   const { currentUser, visibleWorkspaces, homeWorkspace } = userContext;
   const gatewayState = await detectInstanceGatewayState(data);
 
@@ -39,37 +40,37 @@ export default async function HomePage() {
 
   const quickLinkMap: Record<WorkspaceLinkKey, QuickLink> = {
     timeline: {
-      href: '/timeline',
+      href: skossinaRoutes.timeline,
       title: t('home.quickLinks.timeline.title'),
       description: t('home.quickLinks.timeline.description'),
       icon: TimelineIcon,
     },
     orders: {
-      href: '/orders',
+      href: skossinaRoutes.orders,
       title: t('home.quickLinks.orders.title'),
       description: t('home.quickLinks.orders.description'),
       icon: OrdersIcon,
     },
     customers: {
-      href: '/customers',
+      href: skossinaRoutes.customers,
       title: t('home.quickLinks.customers.title'),
       description: t('home.quickLinks.customers.description'),
       icon: CustomersIcon,
     },
     production: {
-      href: '/production',
+      href: skossinaRoutes.production,
       title: t('home.quickLinks.production.title'),
       description: t('home.quickLinks.production.description'),
       icon: ProductionIcon,
     },
     handoff: {
-      href: '/handoff',
+      href: skossinaRoutes.handoff,
       title: t('home.quickLinks.handoff.title'),
       description: t('home.quickLinks.handoff.description'),
       icon: HandoffIcon,
     },
     admin: {
-      href: '/admin/setup',
+      href: skossCoreRoutes.adminSetup,
       title: t('home.quickLinks.setup.title'),
       description: t('home.quickLinks.setup.description'),
       icon: SetupIcon,
@@ -84,7 +85,7 @@ export default async function HomePage() {
   const orderedQuickLinks = orderedQuickLinkKeys.map((key) => quickLinkMap[key]);
 
   if (!summary.preferences.onboardingCompleted) {
-    redirect('/bootstrap?step=1');
+    redirect(skossBootstrapRoutes.bootstrapStart);
   }
 
   return (
