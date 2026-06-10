@@ -4,16 +4,19 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import {
   buildCustomerRecord,
+  buildProductRecord,
   buildRawMaterialRecord,
   buildRecipeRecord,
   buildSupplierPriceEntryRecord,
   buildSupplierRecord,
   buildUserRecord,
+  normalizeProductForm,
   normalizeRawMaterialForm,
   normalizeRecipeForm,
   normalizeSupplierForm,
   normalizeSupplierPriceEntryForm,
   normalizeUserForm,
+  validateProductForm,
   validateRawMaterialForm,
   validateRecipeForm,
   validateSupplierForm,
@@ -189,6 +192,74 @@ export async function updateUserAction(userId: string, formData: FormData) {
   });
   revalidateAllWorkspaces();
   redirect('/admin/setup?saved=user');
+}
+
+
+export async function createProductAction(formData: FormData) {
+  const context = await readPersistence();
+  const data = context.raw;
+  const redirectTo = resolveRedirectTo(formData, '/admin/setup');
+  const allowEmpty = shouldAllowEmpty(formData);
+  const values = normalizeProductForm(formData);
+  if (allowEmpty && !values.name.trim()) {
+    redirect(redirectTo);
+  }
+  const error = validateProductForm(values, data);
+
+  if (error) {
+    redirect(`${redirectTo}?error=${encodeURIComponent(error)}`);
+  }
+
+  const actorUserId = await getActorUserId(data);
+  const product = buildProductRecord(values);
+  appendActivity(data, {
+    entityType: 'product',
+    entityId: product.id,
+    action: 'created',
+    userId: actorUserId,
+    summary: `Product ${quoteLabel(product.name)} created.`,
+  });
+  await persistence.write(({ raw, catalog }) => {
+    catalog.upsertProduct(product);
+    raw.activities = data.activities;
+  });
+  revalidateAllWorkspaces();
+  redirect(`${redirectTo}?saved=product&productSetup=${product.id}#products`);
+}
+
+export async function updateProductAction(productId: string, formData: FormData) {
+  const context = await readPersistence();
+  const data = context.raw;
+  const existing = context.catalog.getProductById(productId);
+
+  if (!existing) {
+    redirect('/admin/setup?error=missing-product#products');
+  }
+
+  const values = normalizeProductForm(formData);
+  const error = validateProductForm(values, data, productId);
+
+  if (error) {
+    redirect(`/admin/setup?productSetup=${productId}&error=${encodeURIComponent(error)}#products`);
+  }
+
+  const actorUserId = await getActorUserId(data);
+  const product = buildProductRecord(values, existing);
+  appendActivity(data, {
+    entityType: 'product',
+    entityId: product.id,
+    action: existing.active !== product.active ? 'status_changed' : 'updated',
+    userId: actorUserId,
+    summary: existing.active !== product.active
+      ? `Product ${quoteLabel(product.name)} marked as ${product.active ? 'active' : 'inactive'}.`
+      : `Product ${quoteLabel(product.name)} updated.`,
+  });
+  await persistence.write(({ raw, catalog }) => {
+    catalog.upsertProduct(product);
+    raw.activities = data.activities;
+  });
+  revalidateAllWorkspaces();
+  redirect(`/admin/setup?saved=product&productSetup=${product.id}#products`);
 }
 
 export async function createSupplierAction(formData: FormData) {

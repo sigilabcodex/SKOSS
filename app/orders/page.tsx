@@ -137,6 +137,9 @@ export default async function OrdersPage({
             <SparklesIcon className="button-icon" />
             <span>{t('orders.newRecurringTemplate')}</span>
           </Link>
+          <Link href="/admin/setup?section=products#products" className="button-secondary">
+            <span>Confirm products</span>
+          </Link>
           <Link href="/orders/new" className="button-primary">
             <OrdersIcon className="button-icon" />
             <span>{t('orders.newOrder')}</span>
@@ -199,6 +202,7 @@ export default async function OrdersPage({
             <div className="inline-action-row top-gap-small">
               <Link href="/orders/new" className="button-primary compact-button">Create first order</Link>
               <Link href="/customers" className="button-secondary compact-button">Confirm customers</Link>
+              <Link href="/admin/setup?section=products#products" className="button-secondary compact-button">Confirm products</Link>
             </div>
           </div>
         </section>

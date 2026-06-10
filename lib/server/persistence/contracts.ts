@@ -59,6 +59,8 @@ export interface RecurringTemplatesRepository {
 
 export interface CatalogRepository {
   listProducts(): Product[];
+  getProductById(productId: string): Product | undefined;
+  upsertProduct(product: Product): void;
   listDestinations(): Destination[];
 }
 

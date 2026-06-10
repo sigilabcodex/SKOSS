@@ -24,12 +24,12 @@ The main blockers are readiness and clarity issues rather than missing infrastru
 - Empty operational states did not always tell a first-time user what to do next.
 - Runtime/demo state was clearer on `/entry` and `/admin/setup` than on the operator home.
 - Production and handoff could look empty or broken before the first order exists.
-- Product setup is still indirect. Operators can type draft products in orders and create a starter product in bootstrap, but dedicated product confirmation remains thin.
+- Product setup was indirect. This is now partially addressed by a narrow `/admin/setup` product confirmation section for product name, default unit, category, and active state.
 - The app still contains demo-seed-oriented copy and example setup surfaces that could be mistaken for real operational readiness.
 
 ## Rough edges
 
-- `/bootstrap` has an optional starter product step, but product/catalog management after launch is still mostly implied through order capture and setup recipe links.
+- `/bootstrap` has an optional starter product step, and `/admin/setup` now has a narrow product confirmation section. This is still intentionally basic and not a full catalog workflow.
 - `/orders` showed an empty recurring-demand grid even when recurring templates did not exist.
 - `/production` had good empty handling when there were no boards, but not enough guidance when a board date exists with no visible orders.
 - `/handoff` showed several empty lists without explaining what makes items appear.
@@ -47,13 +47,13 @@ The main blockers are readiness and clarity issues rather than missing infrastru
 - Confirm production runtime configuration: explicitly set and verify `SKOSS_RUNTIME_MODE` for the target environment.
 - Ensure a fresh instance does not ship with demo records unless the deploy is explicitly a demo/pilot training workspace.
 - Confirm backup/restore behavior for the chosen persistence adapter and document the manual recovery path.
-- Add a product/basic catalog confirmation path or make the draft-product flow intentionally documented as the MWP path.
+- Run the new product confirmation path with real starter products and verify order suggestions are helpful without blocking draft product entry.
 - Validate login/session behavior on the actual target host with at least owner admin and one operator role.
 - Run a real scenario: create customer, create order, update production quantities, record WIP, record handoff, print/review output.
 
 ## Nice-to-have after first deploy
 
-- Dedicated basic product management outside procurement/recipe setup.
+- Dedicated product import and richer catalog editing after the basic confirmation path proves useful.
 - Better guided first-run checklist on the operator home after bootstrap.
 - More complete product/catalog import or quick-add affordances.
 - More precise role onboarding for sales, kitchen, and shift lead users.
@@ -75,6 +75,8 @@ Do not include these in the first deploy readiness scope:
 
 ## Stabilization applied in this pass
 
+- Added a narrow product confirmation path in `/admin/setup` for MWP product name, default unit, optional category, and active state.
+- Kept draft product order lines available so catalog setup does not block real work.
 - Added operator-home runtime/demo visibility and a first-deploy workflow card.
 - Added empty-state guidance to `/orders` for missing recurring templates and missing first orders.
 - Added production entry links and clearer empty guidance for production boards with no visible orders.
@@ -82,4 +84,4 @@ Do not include these in the first deploy readiness scope:
 
 ## Recommended next PR
 
-Add a narrow basic product/catalog confirmation path for the MWP. Keep it separate from recipes, costing, procurement, and inventory: just enough to confirm product names, default units, active state, and variants so first deploy users are not forced to rely only on draft product text in order lines.
+Run a first-deploy rehearsal against a fresh non-demo instance: bootstrap, create admin, confirm products/customers, create orders, update production, record WIP, record handoff, and verify browser-print output. Keep the rehearsal focused on operational confidence before adding richer catalog, procurement, inventory, or deployment automation.

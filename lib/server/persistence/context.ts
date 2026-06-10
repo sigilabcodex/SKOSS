@@ -98,6 +98,16 @@ class InMemoryRecurringTemplatesRepository implements RecurringTemplatesReposito
 class InMemoryCatalogRepository implements CatalogRepository {
   constructor(private readonly data: AppData) {}
   listProducts(): Product[] { return this.data.products; }
+  getProductById(productId: string) { return this.data.products.find((product) => product.id === productId); }
+  upsertProduct(product: Product) {
+    const existingIndex = this.data.products.findIndex((entry) => entry.id === product.id);
+    if (existingIndex >= 0) {
+      this.data.products[existingIndex] = product;
+    } else {
+      this.data.products.push(product);
+    }
+    this.data.products.sort((left, right) => left.name.localeCompare(right.name));
+  }
   listDestinations(): Destination[] { return this.data.destinations; }
 }
 
