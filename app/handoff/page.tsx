@@ -9,7 +9,7 @@ import { getHandoffWorkspace } from '@/lib/server/demo-data';
 import { getServerTranslator } from '@/lib/i18n/server';
 import { SubmitButton } from '@/components/submit-button';
 import Link from 'next/link';
-import { CheckIcon, HandoffIcon, PrinterIcon } from '@/components/ui-icons';
+import { CheckIcon, HandoffIcon, OrdersIcon, PrinterIcon, ProductionIcon } from '@/components/ui-icons';
 
 const shiftOptions = ['night', 'morning', 'afternoon'] as const;
 const stageOptions = ['prepared', 'shaped', 'baked', 'ready'] as const;
@@ -45,10 +45,20 @@ export default async function HandoffPage({
           <h1>{t('handoff.title')}</h1>
           <p>{t('handoff.description')}</p>
         </div>
-        <Link href="/handoff/print" className="button-secondary" target="_blank" rel="noreferrer">
-          <PrinterIcon className="button-icon" />
-          <span>{t('printing.actions.handoffSlip')}</span>
-        </Link>
+        <div className="action-cluster">
+          <Link href="/orders/new" className="button-primary">
+            <OrdersIcon className="button-icon" />
+            <span>Create order</span>
+          </Link>
+          <Link href="/production" className="button-secondary">
+            <ProductionIcon className="button-icon" />
+            <span>Production board</span>
+          </Link>
+          <Link href="/handoff/print" className="button-secondary" target="_blank" rel="noreferrer">
+            <PrinterIcon className="button-icon" />
+            <span>{t('printing.actions.handoffSlip')}</span>
+          </Link>
+        </div>
       </section>
 
       {params?.saved ? <p className="inline-success"><CheckIcon className="button-icon" />{t('handoff.savedUpdate', { item: params.saved })}</p> : null}
@@ -102,6 +112,7 @@ export default async function HandoffPage({
             <span className="summary-pill">{focusWip.length} {t('common.entries')}</span>
           </div>
           <ul className="stack-list muted-list">
+            {focusWip.length === 0 ? <li><strong>No WIP recorded yet</strong><span>Use the WIP form below when prep, baked items, or packed items need to cross a shift.</span></li> : null}
             {focusWip.map((entry) => (
               <li key={entry.id}>
                 <strong>{entry.referenceLabel} · {entry.quantity} {entry.unit}</strong>
@@ -122,6 +133,7 @@ export default async function HandoffPage({
             <span className="summary-pill">{view.packingWatch.length}</span>
           </div>
           <ul className="stack-list muted-list">
+            {view.packingWatch.length === 0 ? <li><strong>No packing watch items</strong><span>Orders appear here when delivery or app-delivery work still has remaining quantity.</span></li> : null}
             {view.packingWatch.map((order) => {
               const providerLabel = getProviderLabel(order, t);
               return (
@@ -152,6 +164,7 @@ export default async function HandoffPage({
             <span className="summary-pill">{view.assignmentWatch.length}</span>
           </div>
           <ul className="stack-list muted-list">
+            {view.assignmentWatch.length === 0 ? <li><strong>No assignment watch items</strong><span>Own-delivery orders without an assignee appear here.</span></li> : null}
             {view.assignmentWatch.map((order) => (
               <li key={order.id}>
                   <strong>{order.customerLabel}</strong>
@@ -178,6 +191,7 @@ export default async function HandoffPage({
             <span className="summary-pill">{view.pickupWatch.length}</span>
           </div>
           <ul className="stack-list muted-list">
+            {view.pickupWatch.length === 0 ? <li><strong>No pickup-ready items</strong><span>Pickup orders appear here after their quantities are completed.</span></li> : null}
             {view.pickupWatch.map((order) => (
               <li key={order.id}>
                   <strong>{order.customerLabel}</strong>
@@ -201,6 +215,7 @@ export default async function HandoffPage({
             <span className="summary-pill">{view.focusOrders.length} {t('common.orders')}</span>
           </div>
           <ul className="stack-list muted-list">
+            {view.focusOrders.length === 0 ? <li><strong>No focus-day orders</strong><span>Create an order to make handoff fulfillment checks useful.</span></li> : null}
             {view.focusOrders.map((order) => (
               <li key={order.id}>
                 <strong>{order.customerLabel}</strong>

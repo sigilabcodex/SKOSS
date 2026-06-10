@@ -9,6 +9,7 @@ import { detectInstanceGatewayState, shouldRouteToEntryGateway } from '@/lib/ser
 import { getServerTranslator } from '@/lib/i18n/server';
 import { readAppData } from '@/lib/server/persistence';
 import { skossBootstrapRoutes, skossCoreRoutes, skossinaRoutes, type AppPlaneRoute } from '@/lib/application-planes';
+import { getRuntimeModeLabel } from '@/lib/server/runtime-mode';
 import { ArrowRightIcon, CustomersIcon, HandoffIcon, OrdersIcon, ProductionIcon, SetupIcon, SparklesIcon, TimelineIcon } from '@/components/ui-icons';
 
 type QuickLink = {
@@ -27,6 +28,7 @@ export default async function HomePage() {
   const summary = buildWorkspaceSummary(data);
   const { currentUser, visibleWorkspaces, homeWorkspace } = userContext;
   const gatewayState = await detectInstanceGatewayState(data);
+  const runtimeModeLabel = getRuntimeModeLabel();
 
   if (shouldRouteToEntryGateway(gatewayState, Boolean(currentUser))) {
     redirect('/entry');
@@ -110,6 +112,8 @@ export default async function HomePage() {
           <span className="summary-pill">{t(`operatingModes.${summary.preferences.operatingMode}.label`)}</span>
           {currentUser ? <span className="summary-pill">{currentUser.displayName} · {t(`roles.${currentUser.role}.label`)}</span> : null}
           <span className="summary-pill">{t(`nav.${recommendedWorkspace}`)} · {t('home.recommendedFirst')}</span>
+          <span className="summary-pill">{runtimeModeLabel}</span>
+          {gatewayState.demoModeActive ? <span className="summary-pill">Demo data active</span> : null}
         </div>
         <div className="stats-grid">
           <div className="stat-card">
@@ -143,6 +147,26 @@ export default async function HomePage() {
             <span>{summary.suppliers} {t('home.stats.supplierPricesHelp')} · {summary.rawMaterials} {t('home.stats.supplierPricesAnd')}</span>
           </div>
         </div>
+      </section>
+
+      <section className="panel page-stack">
+        <div className="table-header-row">
+          <div>
+            <h2>First deploy workflow</h2>
+            <p className="helper-text">For a real first test, start with customers and order capture, then use production and handoff as the daily operating loop.</p>
+          </div>
+          <span className="summary-pill">MWP path</span>
+        </div>
+        <div className="inline-action-row">
+          <Link href={skossinaRoutes.customers} className="button-secondary compact-button">Confirm customers</Link>
+          <Link href={skossinaRoutes.orders} className="button-primary compact-button">Create orders</Link>
+          <Link href={skossinaRoutes.production} className="button-secondary compact-button">Track production</Link>
+          <Link href={skossinaRoutes.handoff} className="button-secondary compact-button">Record handoff</Link>
+          <Link href={skossCoreRoutes.adminSetup} className="button-secondary compact-button">Basic setup</Link>
+        </div>
+        {gatewayState.demoModeActive ? (
+          <p className="inline-warning">This workspace is marked as demo data. Do not treat records here as live operational data.</p>
+        ) : null}
       </section>
 
       <section className="grid-two">

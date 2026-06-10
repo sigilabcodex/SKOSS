@@ -160,6 +160,9 @@ export default async function OrdersPage({
           <span className="summary-pill">{view.recurringTemplates.length} {t('common.templates')}</span>
         </div>
         <div className="card-grid recurring-grid">
+          {view.recurringTemplates.length === 0 ? (
+            <p className="empty-state">No recurring templates yet. Start with one-time orders; recurring demand can be added after the daily flow is working.</p>
+          ) : null}
           {view.recurringTemplates.map((template) => (
             <article key={template.id} className="subpanel page-stack">
               <div className="order-card-header">
@@ -186,6 +189,20 @@ export default async function OrdersPage({
           ))}
         </div>
       </section>
+
+      {view.orderGroups.length === 0 ? (
+        <section className="page-context-card">
+          <OrdersIcon className="callout-icon" />
+          <div>
+            <strong>No orders yet</strong>
+            <p className="helper-text no-margin">Create the first real order to make the production board and handoff views useful.</p>
+            <div className="inline-action-row top-gap-small">
+              <Link href="/orders/new" className="button-primary compact-button">Create first order</Link>
+              <Link href="/customers" className="button-secondary compact-button">Confirm customers</Link>
+            </div>
+          </div>
+        </section>
+      ) : null}
 
       {view.orderGroups.map((group) => (
         <section key={group.productionDate} className="panel page-stack">
