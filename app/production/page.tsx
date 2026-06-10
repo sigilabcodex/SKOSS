@@ -16,6 +16,7 @@ import { SubmitButton } from '@/components/submit-button';
 import {
   CheckIcon,
   HandoffIcon,
+  OrdersIcon,
   PrinterIcon,
   ProductionIcon,
 } from '@/components/ui-icons';
@@ -56,10 +57,16 @@ export default async function ProductionPage() {
           <h1>{t('production.title')}</h1>
           <p>{t('production.description')}</p>
         </div>
-        <Link href="/handoff" className="button-secondary">
-          <HandoffIcon className="button-icon" />
-          <span>{t('production.recordWip')}</span>
-        </Link>
+        <div className="action-cluster">
+          <Link href="/orders/new" className="button-primary">
+            <OrdersIcon className="button-icon" />
+            <span>Create order</span>
+          </Link>
+          <Link href="/handoff" className="button-secondary">
+            <HandoffIcon className="button-icon" />
+            <span>{t('production.recordWip')}</span>
+          </Link>
+        </div>
       </section>
 
       {view.boards.map((board) => {
@@ -107,6 +114,20 @@ export default async function ProductionPage() {
                 </a>
               ))}
             </div>
+
+            {board.boardOrders.length === 0 ? (
+              <section className="page-context-card">
+                <ProductionIcon className="callout-icon" />
+                <div>
+                  <strong>No visible orders on this production board</strong>
+                  <p className="helper-text no-margin">Create an order or make sure existing orders are set to show on the production board.</p>
+                  <div className="inline-action-row top-gap-small">
+                    <Link href="/orders/new" className="button-primary compact-button">Create order</Link>
+                    <Link href="/orders" className="button-secondary compact-button">Review orders</Link>
+                  </div>
+                </div>
+              </section>
+            ) : null}
 
             <div
               className="stats-grid compact-stats-grid"
@@ -404,6 +425,7 @@ export default async function ProductionPage() {
                 </span>
               </div>
               <div className="line-grid-stack">
+                {board.boardOrders.length === 0 ? <p className="empty-state">No order lines are ready for production updates yet.</p> : null}
                 {board.boardOrders.map((order) => {
                   const progress = getOrderProgress(order);
                   return (
