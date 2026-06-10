@@ -177,31 +177,36 @@ export default async function SetupPage({
   const today = new Date().toISOString().slice(0, 10);
   const runtimeMode = getRuntimeMode();
   const canResetDemoWorkspace = isNonProductionMode();
+  const identitySetup = data.identitySetup;
+  const customerSetup = data.customerSetup;
+  const businessSetup = data.businessSetup;
+  const procurementSetup = data.procurementSetup;
+  const catalogSetup = data.catalogSetup;
 
   const editingSupplier = params?.supplier
-    ? (data.suppliers.find((supplier) => supplier.id === params.supplier) ??
+    ? (procurementSetup.suppliers.find((supplier) => supplier.id === params.supplier) ??
       null)
     : null;
   const editingMaterial = params?.material
-    ? (data.rawMaterials.find((material) => material.id === params.material) ??
+    ? (procurementSetup.rawMaterials.find((material) => material.id === params.material) ??
       null)
     : null;
   const selectedProduct = params?.product
-    ? (data.products.find((product) => product.id === params.product) ?? null)
+    ? (catalogSetup.products.find((product) => product.id === params.product) ?? null)
     : null;
   const editingRecipe = params?.recipe
-    ? (data.recipes.find((recipe) => recipe.id === params.recipe) ?? null)
+    ? (catalogSetup.recipes.find((recipe) => recipe.id === params.recipe) ?? null)
     : null;
   const editingUser = params?.user
-    ? (data.users.find((user) => user.id === params.user) ?? null)
+    ? (identitySetup.users.find((user) => user.id === params.user) ?? null)
     : null;
   const historySupplier = params?.historySupplier
-    ? (data.suppliers.find(
+    ? (procurementSetup.suppliers.find(
         (supplier) => supplier.id === params.historySupplier,
       ) ?? null)
     : null;
   const historyMaterial = params?.historyMaterial
-    ? (data.rawMaterials.find(
+    ? (procurementSetup.rawMaterials.find(
         (material) => material.id === params.historyMaterial,
       ) ?? null)
     : null;
@@ -221,7 +226,7 @@ export default async function SetupPage({
 
   const supplierPriceCounts = new Map<string, number>();
   const materialPriceCounts = new Map<string, number>();
-  for (const entry of data.supplierPriceEntries) {
+  for (const entry of procurementSetup.supplierPriceEntries) {
     supplierPriceCounts.set(
       entry.supplierId,
       (supplierPriceCounts.get(entry.supplierId) ?? 0) + 1,
@@ -232,7 +237,7 @@ export default async function SetupPage({
     );
   }
 
-  const filteredPriceEntries = data.supplierPriceEntries.filter((entry) => {
+  const filteredPriceEntries = procurementSetup.supplierPriceEntries.filter((entry) => {
     if (historySupplier && entry.supplierId !== historySupplier.id) {
       return false;
     }
@@ -265,21 +270,21 @@ export default async function SetupPage({
   const recipeLineRows = buildRecipeLineRows(editingRecipe);
   const recipeProductId = editingRecipe?.productId ?? selectedProduct?.id ?? '';
   const editingRecipeCost = editingRecipe
-    ? (data.recipeCostById.get(editingRecipe.id) ?? null)
+    ? (catalogSetup.recipeCostById.get(editingRecipe.id) ?? null)
     : null;
-  const activeRecipes = data.recipes.filter((recipe) => recipe.active).length;
+  const activeRecipes = catalogSetup.recipes.filter((recipe) => recipe.active).length;
   const linkedProductCount = new Set(
-    data.recipes.map((recipe) => recipe.productVariantId ?? recipe.productId),
+    catalogSetup.recipes.map((recipe) => recipe.productVariantId ?? recipe.productId),
   ).size;
   const recipesByProduct = new Map<string, Recipe[]>();
-  for (const recipe of data.recipes) {
+  for (const recipe of catalogSetup.recipes) {
     const existingRecipes = recipesByProduct.get(recipe.productId) ?? [];
     recipesByProduct.set(recipe.productId, [...existingRecipes, recipe]);
   }
   const costingItems = buildCostingSnapshotItems(
-    data.products,
-    data.recipes,
-    data.recipeCostById,
+    catalogSetup.products,
+    catalogSetup.recipes,
+    catalogSetup.recipeCostById,
   );
   const costingStatusFilter = params?.costingStatus ?? 'all';
   const filteredCostingItems = costingItems.filter(
@@ -349,7 +354,7 @@ export default async function SetupPage({
     query: { section },
     hash: section,
   });
-  const onboardingProgress = data.instance.onboardingProgress;
+  const onboardingProgress = identitySetup.instance.onboardingProgress;
   const guidedChecklist = [
     { label: 'Admin account', done: onboardingProgress.adminAccount },
     { label: 'Workspace basics', done: onboardingProgress.workspaceBasics },
@@ -464,12 +469,12 @@ export default async function SetupPage({
               <p>{t('setup.customerMemoryHelp')}</p>
             </div>
             <span className="summary-pill">
-              {data.customers.length} {t('common.customers')}
+              {customerSetup.customers.length} {t('common.customers')}
             </span>
           </div>
-          {data.customers.length > 0 ? (
+          {customerSetup.customers.length > 0 ? (
             <ul className="stack-list compact-list">
-              {data.customers.slice(0, 6).map((customer) => (
+              {customerSetup.customers.slice(0, 6).map((customer) => (
                 <li key={customer.id} className="list-with-actions">
                   <div>
                     <strong>{customer.displayName}</strong>
@@ -570,18 +575,18 @@ export default async function SetupPage({
         <article className="stat-card">
           <span className="stat-label">{t('setup.activeSuppliers')}</span>
           <strong>
-            {data.suppliers.filter((supplier) => supplier.active).length}
+            {procurementSetup.suppliers.filter((supplier) => supplier.active).length}
           </strong>
           <span>{t('setup.activeSuppliersHelp')}</span>
         </article>
         <article className="stat-card stat-card-info">
           <span className="stat-label">{t('setup.rawMaterials')}</span>
-          <strong>{data.rawMaterials.length}</strong>
+          <strong>{procurementSetup.rawMaterials.length}</strong>
           <span>{t('setup.rawMaterialsHelp')}</span>
         </article>
         <article className="stat-card stat-card-success">
           <span className="stat-label">{t('setup.recordedPrices')}</span>
-          <strong>{data.supplierPriceEntries.length}</strong>
+          <strong>{procurementSetup.supplierPriceEntries.length}</strong>
           <span>{t('setup.recordedPricesHelp')}</span>
         </article>
         <article className="stat-card stat-card-neutral">
@@ -599,7 +604,7 @@ export default async function SetupPage({
               <p>{t('setup.productsAndVariantsHelp')}</p>
             </div>
             <span className="summary-pill">
-              {data.products.length} {t('common.products')}
+              {catalogSetup.products.length} {t('common.products')}
             </span>
           </div>
           <p className="helper-text no-margin">
@@ -609,7 +614,7 @@ export default async function SetupPage({
             </Link>
           </p>
           <ul className="stack-list">
-            {data.products.map((product) => (
+            {catalogSetup.products.map((product) => (
               <li key={product.id} className="list-with-actions">
                 <div>
                   <strong>{product.name}</strong>
@@ -663,7 +668,7 @@ export default async function SetupPage({
               <p>{t('setup.destinationsHelp')}</p>
             </div>
             <span className="summary-pill">
-              {data.destinations.length} {term('destination', 'many')}
+              {businessSetup.destinations.length} {term('destination', 'many')}
             </span>
           </div>
           <p className="helper-text no-margin">
@@ -673,7 +678,7 @@ export default async function SetupPage({
             </Link>
           </p>
           <ul className="stack-list">
-            {data.destinations.map((destination) => (
+            {businessSetup.destinations.map((destination) => (
               <li key={destination.id}>
                 <strong>{destination.name}</strong>
                 <span>{destination.kind}</span>
@@ -691,20 +696,20 @@ export default async function SetupPage({
               <p>{t('setup.usersHelp')}</p>
             </div>
             <span className="summary-pill">
-              {data.users.length} {t('common.users')}
+              {identitySetup.users.length} {t('common.users')}
             </span>
           </div>
           <div className="filter-pill-row">
             <span className="summary-pill">
-              {data.users.filter((user) => user.active).length}{' '}
+              {identitySetup.users.filter((user) => user.active).length}{' '}
               {t('setup.labels.activeUsers')}
             </span>
             <span className="summary-pill">
-              {data.users.filter((user) => !user.active).length}{' '}
+              {identitySetup.users.filter((user) => !user.active).length}{' '}
               {t('setup.labels.inactiveUsers')}
             </span>
             <span className="summary-pill">
-              {new Set(data.users.flatMap((user) => user.roles ?? [user.role])).size}{' '}
+              {new Set(identitySetup.users.flatMap((user) => user.roles ?? [user.role])).size}{' '}
               {t('setup.labels.rolesInUse')}
             </span>
             <Link href="/preferences" className="inline-link">
@@ -713,9 +718,9 @@ export default async function SetupPage({
           </div>
           <div className="admin-split-layout">
             <div className="page-stack">
-              {data.users.length > 0 ? (
+              {identitySetup.users.length > 0 ? (
                 <ul className="stack-list compact-list">
-                  {data.users.map((user) => (
+                  {identitySetup.users.map((user) => (
                     <li key={user.id} className="list-with-actions">
                       <div>
                         <strong>
@@ -962,7 +967,7 @@ export default async function SetupPage({
               </div>
               <div className="inline-action-row">
                 <span className="summary-pill">
-                  {data.suppliers.length} {t('common.suppliers')}
+                  {procurementSetup.suppliers.length} {t('common.suppliers')}
                 </span>
                 <a
                   href="#raw-materials"
@@ -973,9 +978,9 @@ export default async function SetupPage({
               </div>
             </div>
             <div className="admin-split-layout">
-              {data.suppliers.length > 0 ? (
+              {procurementSetup.suppliers.length > 0 ? (
                 <ul className="stack-list compact-list">
-                  {data.suppliers.map((supplier) => (
+                  {procurementSetup.suppliers.map((supplier) => (
                     <li key={supplier.id} className="list-with-actions">
                       <div>
                         <strong>
@@ -1120,7 +1125,7 @@ export default async function SetupPage({
               </div>
               <div className="inline-action-row">
                 <span className="summary-pill">
-                  {data.rawMaterials.length} {t('common.materials')}
+                  {procurementSetup.rawMaterials.length} {t('common.materials')}
                 </span>
                 <a href="#suppliers" className="button-secondary compact-button">
                   {t('setup.actions.importRawMaterialsCsv')}
@@ -1128,10 +1133,10 @@ export default async function SetupPage({
               </div>
             </div>
             <div className="admin-split-layout">
-              {data.rawMaterials.length > 0 ? (
+              {procurementSetup.rawMaterials.length > 0 ? (
                 <ul className="stack-list compact-list">
-                  {data.rawMaterials.map((material) => {
-                    const latestPrice = data.latestPriceByMaterial.get(
+                  {procurementSetup.rawMaterials.map((material) => {
+                    const latestPrice = procurementSetup.latestPriceByMaterial.get(
                       material.id,
                     );
 
@@ -1330,16 +1335,16 @@ export default async function SetupPage({
                 <p>{t('setup.recipeListHelp')}</p>
               </div>
               <span className="summary-pill">
-                {data.recipes.length} {t('common.recipes')}
+                {catalogSetup.recipes.length} {t('common.recipes')}
               </span>
             </div>
-            {data.recipes.length > 0 ? (
+            {catalogSetup.recipes.length > 0 ? (
               <ul className="stack-list compact-list">
-                {data.recipes.map((recipe) => {
-                  const recipeCost = data.recipeCostById.get(recipe.id);
+                {catalogSetup.recipes.map((recipe) => {
+                  const recipeCost = catalogSetup.recipeCostById.get(recipe.id);
                   const productLabel = getRecipeLinkLabel(
                     recipe,
-                    data.products,
+                    catalogSetup.products,
                   );
 
                   return (
@@ -1429,7 +1434,7 @@ export default async function SetupPage({
                     <option value="" disabled>
                       {t('common.selectProduct')}
                     </option>
-                    {data.products.map((product) => (
+                    {catalogSetup.products.map((product) => (
                       <option key={product.id} value={product.id}>
                         {product.name}
                       </option>
@@ -1450,7 +1455,7 @@ export default async function SetupPage({
                     <option value="">
                       {t('setup.recipeLabels.productLevel')}
                     </option>
-                    {data.products.map((product) => (
+                    {catalogSetup.products.map((product) => (
                       <optgroup key={product.id} label={product.name}>
                         {product.variants.map((variant) => (
                           <option key={variant.id} value={variant.id}>
@@ -1564,7 +1569,7 @@ export default async function SetupPage({
                             <option value="">
                               {t('setup.recipeLabels.selectMaterialOptional')}
                             </option>
-                            {data.rawMaterials.map((material) => (
+                            {procurementSetup.rawMaterials.map((material) => (
                               <option key={material.id} value={material.id}>
                                 {material.name}
                               </option>
@@ -2034,7 +2039,7 @@ export default async function SetupPage({
             <p>{t('setup.supplierPriceMemoryHelp')}</p>
           </div>
           <span className="summary-pill">
-            {data.supplierPriceEntries.length} {t('common.entries')}
+            {procurementSetup.supplierPriceEntries.length} {t('common.entries')}
           </span>
         </div>
 
@@ -2136,7 +2141,7 @@ export default async function SetupPage({
                   <option value="" disabled>
                     {t('common.selectSupplier')}
                   </option>
-                  {data.suppliers.map((supplier) => (
+                  {procurementSetup.suppliers.map((supplier) => (
                     <option key={supplier.id} value={supplier.id}>
                       {supplier.name}
                     </option>
@@ -2155,7 +2160,7 @@ export default async function SetupPage({
                   <option value="" disabled>
                     {t('common.selectRawMaterial')}
                   </option>
-                  {data.rawMaterials.map((material) => (
+                  {procurementSetup.rawMaterials.map((material) => (
                     <option key={material.id} value={material.id}>
                       {material.name}
                     </option>

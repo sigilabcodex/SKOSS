@@ -23,7 +23,8 @@ import type {
 } from '@/lib/domain/types';
 import { calculateRecipeEstimatedMaterialCost } from '@/lib/domain/recipe-costing';
 import { deliveryProviderValues, getFocusDate, getLineCompletion, getLineStatus, getOrderProgress, getAllProductionDates, resolveDeliveryProviderLabel } from '@/lib/domain/order-helpers';
-import { readAppData } from '@/lib/server/persistence';
+import { readAppData, readPersistence } from '@/lib/server/persistence';
+import type { PersistenceReadContext } from '@/lib/server/persistence/contracts';
 import { getDefaultWorkspaceForRole } from '@/lib/workspaces';
 
 export { getLineStatus, getOrderProgress } from '@/lib/domain/order-helpers';
@@ -969,30 +970,111 @@ export async function getHandoffWorkspace() {
   };
 }
 
-export async function getSetupWorkspace() {
-  const data = await readAppData();
-
+function buildLatestPriceByMaterial(supplierPriceEntries: SupplierPriceEntry[]) {
   const latestPriceByMaterial = new Map<string, SupplierPriceEntry>();
-  for (const entry of [...data.supplierPriceEntries].sort((left, right) => right.priceDate.localeCompare(left.priceDate))) {
+  for (const entry of [...supplierPriceEntries].sort((left, right) => right.priceDate.localeCompare(left.priceDate))) {
     if (!latestPriceByMaterial.has(entry.rawMaterialId)) {
       latestPriceByMaterial.set(entry.rawMaterialId, entry);
     }
   }
 
-  const recipes = [...data.recipes].sort((left, right) => left.title.localeCompare(right.title));
+  return latestPriceByMaterial;
+}
+
+async function resolveSetupContext(context?: PersistenceReadContext) {
+  return context ?? readPersistence();
+}
+
+export async function getIdentitySetupModel(context?: PersistenceReadContext) {
+  const setupContext = await resolveSetupContext(context);
 
   return {
-    ...data,
-    suppliers: [...data.suppliers].sort((left, right) => left.name.localeCompare(right.name)),
-    rawMaterials: [...data.rawMaterials].sort((left, right) => left.name.localeCompare(right.name)),
+    instance: setupContext.instance.getInstanceState(),
+    users: [...setupContext.users.list()].sort((left, right) => left.displayName.localeCompare(right.displayName)),
+  };
+}
+
+export async function getCustomerSetupModel(context?: PersistenceReadContext) {
+  const setupContext = await resolveSetupContext(context);
+
+  return {
+    customers: [...setupContext.customers.list()].sort((left, right) => left.displayName.localeCompare(right.displayName)),
+  };
+}
+
+export async function getModuleSetupModel(context?: PersistenceReadContext) {
+  const setupContext = await resolveSetupContext(context);
+  const instance = setupContext.instance.getInstanceState();
+
+  return {
+    moduleStates: instance.moduleStates ?? {},
+  };
+}
+
+export async function getBusinessSetupModel(context?: PersistenceReadContext) {
+  const setupContext = await resolveSetupContext(context);
+
+  return {
+    workspace: setupContext.instance.getWorkspace(),
+    preferences: setupContext.instance.getPreferences(),
+    destinations: setupContext.catalog.listDestinations(),
+  };
+}
+
+export async function getProcurementSetupModel(context?: PersistenceReadContext) {
+  const setupContext = await resolveSetupContext(context);
+  // Procurement setup is still JSON-backed behind the repository adapter during the migration. Use this model to keep that transitional state explicit.
+  const suppliers = [...setupContext.procurement.listSuppliers()].sort((left, right) => left.name.localeCompare(right.name));
+  const rawMaterials = [...setupContext.procurement.listRawMaterials()].sort((left, right) => left.name.localeCompare(right.name));
+  const supplierPriceEntries = [...setupContext.procurement.listSupplierPriceEntries()].sort((left, right) =>
+    left.priceDate === right.priceDate
+      ? left.rawMaterialLabel.localeCompare(right.rawMaterialLabel)
+      : right.priceDate.localeCompare(left.priceDate),
+  );
+
+  return {
+    suppliers,
+    rawMaterials,
+    supplierPriceEntries,
+    latestPriceByMaterial: buildLatestPriceByMaterial(supplierPriceEntries),
+  };
+}
+
+export async function getCatalogSetupModel(context?: PersistenceReadContext, latestPriceByMaterial?: Map<string, SupplierPriceEntry>) {
+  const setupContext = await resolveSetupContext(context);
+  const products = setupContext.catalog.listProducts();
+  const recipes = [...setupContext.procurement.listRecipes()].sort((left, right) => left.title.localeCompare(right.title));
+  const priceEvidence = latestPriceByMaterial ?? buildLatestPriceByMaterial(setupContext.procurement.listSupplierPriceEntries());
+
+  return {
+    products,
     recipes,
-    supplierPriceEntries: [...data.supplierPriceEntries].sort((left, right) =>
-      left.priceDate === right.priceDate
-        ? left.rawMaterialLabel.localeCompare(right.rawMaterialLabel)
-        : right.priceDate.localeCompare(left.priceDate),
-    ),
-    latestPriceByMaterial,
-    recipeCostById: new Map(recipes.map((recipe) => [recipe.id, calculateRecipeEstimatedMaterialCost(recipe, latestPriceByMaterial)])),
+    recipeCostById: new Map(recipes.map((recipe) => [recipe.id, calculateRecipeEstimatedMaterialCost(recipe, priceEvidence)])),
+  };
+}
+
+export async function getSetupWorkspace() {
+  const context = await readPersistence();
+  const identitySetup = await getIdentitySetupModel(context);
+  const customerSetup = await getCustomerSetupModel(context);
+  const moduleSetup = await getModuleSetupModel(context);
+  const businessSetup = await getBusinessSetupModel(context);
+  const procurementSetup = await getProcurementSetupModel(context);
+  const catalogSetup = await getCatalogSetupModel(context, procurementSetup.latestPriceByMaterial);
+
+  return {
+    ...context.raw,
+    ...identitySetup,
+    ...customerSetup,
+    ...businessSetup,
+    ...procurementSetup,
+    ...catalogSetup,
+    identitySetup,
+    customerSetup,
+    moduleSetup,
+    businessSetup,
+    procurementSetup,
+    catalogSetup,
   };
 }
 
