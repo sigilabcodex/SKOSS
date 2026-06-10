@@ -157,7 +157,7 @@ export default async function EntryGatewayPage({
             <input type="file" name="backupFile" accept="application/json" required />
             <button type="submit" className="button-secondary">Restore backup</button>
           </form>
-          <p className="helper-text">Restoring replaces current runtime instance data.</p>
+          <p className="helper-text">Restoring replaces current runtime instance data. Creating an export is still a manual maintainer step for first-deploy rehearsal.</p>
           {state.backupAvailable ? <p className="helper-text">Detected backup files in data/backups.</p> : null}
         </article>
 
@@ -222,6 +222,7 @@ export default async function EntryGatewayPage({
         <p>Quick links for first-time orientation and pilot flow context.</p>
         <ul className="stack-list">
           <li><Link href="https://github.com/sigilabcodex/SKOSS#readme" target="_blank">README overview</Link></li>
+          <li><Link href="https://github.com/sigilabcodex/SKOSS/blob/main/docs/first-deploy-rehearsal.md" target="_blank">First deploy rehearsal checklist</Link></li>
           <li><Link href="https://github.com/sigilabcodex/SKOSS/blob/main/docs/pilot-deployment-plan.md" target="_blank">Pilot deployment workflow</Link></li>
           <li><Link href="https://github.com/sigilabcodex/SKOSS/blob/main/docs/local-testing-and-demo-mode.md" target="_blank">Local testing and demo mode</Link></li>
         </ul>
