@@ -123,6 +123,12 @@ The first UI system should continue improving around real kitchen and front-of-h
 - stronger visibility for notes, exceptions, and partial completion
 - more focused role-oriented views where daily use shows friction
 
+### MWP stabilization path (current focus)
+
+The next stabilization passes should bias toward a usable minimum workable product before expanding into adjacent systems. The core MWP path should cover reliable bootstrap/admin access, customers, orders, basic products and catalog, production board, WIP, handoff, and basic setup.
+
+Procurement foundations can remain visible where they support recipes and price evidence, but full procurement, inventory, purchase planning, delivery workflows, WhatsApp integration, printing expansion, module marketplace behavior, and complex permissions should stay out of the immediate MWP stabilization path. See `docs/mwp-stabilization-status.md` for the current scope note.
+
 ### Admin operability pass (current focus)
 
 The immediate priority is to make existing setup/admin foundations genuinely operable before adding more subsystems.
