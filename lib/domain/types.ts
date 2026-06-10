@@ -97,7 +97,7 @@ export interface AuditFields {
   updatedByUserId?: string;
 }
 
-export type ActivityEntityType = 'order' | 'customer' | 'supplier' | 'raw_material' | 'recipe' | 'user';
+export type ActivityEntityType = 'order' | 'customer' | 'product' | 'supplier' | 'raw_material' | 'recipe' | 'user';
 export type ActivityActionType = 'created' | 'updated' | 'deleted' | 'status_changed';
 
 export interface ActivityEntry {

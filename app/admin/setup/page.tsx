@@ -8,11 +8,13 @@ import {
 import type { Product, Recipe } from '@/lib/domain/types';
 import { buildCostingSnapshotItems } from '@/lib/domain/recipe-costing';
 import {
+  createProductAction,
   createRawMaterialAction,
   createRecipeAction,
   createSupplierAction,
   createSupplierPriceEntryAction,
   createUserAction,
+  updateProductAction,
   updateRawMaterialAction,
   updateRecipeAction,
   updateSupplierAction,
@@ -42,6 +44,7 @@ type SetupSearchParams = {
     | 'business-setup'
     | 'users'
     | 'preferences-system'
+    | 'products'
     | 'suppliers'
     | 'raw-materials'
     | 'recipes'
@@ -52,6 +55,7 @@ type SetupSearchParams = {
   supplier?: string;
   material?: string;
   product?: string;
+  productSetup?: string;
   historySupplier?: string;
   historyMaterial?: string;
   recipe?: string;
@@ -144,6 +148,10 @@ async function SavedMessage({ saved }: { saved?: string }) {
     return <p className="inline-success">{t('setup.saved.recipe')}</p>;
   }
 
+  if (saved === 'product') {
+    return <p className="inline-success">Product saved.</p>;
+  }
+
   if (saved === 'preferences') {
     return <p className="inline-success">{t('setup.saved.preferences')}</p>;
   }
@@ -194,6 +202,9 @@ export default async function SetupPage({
   const selectedProduct = params?.product
     ? (catalogSetup.products.find((product) => product.id === params.product) ?? null)
     : null;
+  const editingProduct = params?.productSetup
+    ? (catalogSetup.products.find((product) => product.id === params.productSetup) ?? null)
+    : null;
   const editingRecipe = params?.recipe
     ? (catalogSetup.recipes.find((recipe) => recipe.id === params.recipe) ?? null)
     : null;
@@ -217,6 +228,9 @@ export default async function SetupPage({
   const rawMaterialFormAction = editingMaterial
     ? updateRawMaterialAction.bind(null, editingMaterial.id)
     : createRawMaterialAction;
+  const productFormAction = editingProduct
+    ? updateProductAction.bind(null, editingProduct.id)
+    : createProductAction;
   const recipeFormAction = editingRecipe
     ? updateRecipeAction.bind(null, editingRecipe.id)
     : createRecipeAction;
@@ -333,6 +347,7 @@ export default async function SetupPage({
       | 'business-setup'
       | 'users'
       | 'preferences-system'
+      | 'products'
       | 'suppliers'
       | 'raw-materials'
       | 'recipes'
@@ -343,6 +358,7 @@ export default async function SetupPage({
     { key: 'business-setup', label: t('setup.sections.businessSetup') },
     { key: 'users', label: t('setup.sections.users') },
     { key: 'preferences-system', label: t('setup.sections.preferencesSystem') },
+    { key: 'products', label: 'Products' },
     { key: 'suppliers', label: t('setup.sections.suppliers') },
     { key: 'raw-materials', label: t('setup.sections.rawMaterials') },
     { key: 'recipes', label: t('setup.sections.recipes') },
@@ -597,68 +613,109 @@ export default async function SetupPage({
       </section>
 
       <section className="grid-two">
-        <article className="panel page-stack">
+        <article className="panel page-stack" id="products">
           <div className="table-header-row">
             <div>
-              <h2>{t('setup.productsAndVariants')}</h2>
-              <p>{t('setup.productsAndVariantsHelp')}</p>
+              <h2>Products for order capture</h2>
+              <p>Confirm the basic sellable items your team needs for first orders. Recipes, costing, inventory, and procurement can come later.</p>
             </div>
             <span className="summary-pill">
-              {catalogSetup.products.length} {t('common.products')}
+              {catalogSetup.products.filter((product) => product.active).length}/{catalogSetup.products.length} active
             </span>
           </div>
           <p className="helper-text no-margin">
-            {t('setup.managedFromOrders')}{' '}
+            Confirmed products appear as suggestions during order capture. Operators can still type draft product names when real work needs to move before setup is complete.{' '}
             <Link href="/orders/new" className="inline-link">
               {t('setup.openOrderCapture')}
             </Link>
           </p>
-          <ul className="stack-list">
-            {catalogSetup.products.map((product) => (
-              <li key={product.id} className="list-with-actions">
-                <div>
-                  <strong>{product.name}</strong>
-                  <span>
-                    {product.variants.map((variant) => variant.name).join(', ')}
-                  </span>
-                  <span className="inline-meta">
-                    {(recipesByProduct.get(product.id) ?? []).length}{' '}
-                    {t('common.recipes')}
-                  </span>
-                </div>
-                <div className="inline-action-row">
-                  <Link
-                    href={buildSetupHref({
-                      product: product.id,
-                      supplier: editingSupplier?.id,
-                      material: editingMaterial?.id,
-                      historySupplier: historySupplier?.id,
-                      historyMaterial: historyMaterial?.id,
-                      recipe: undefined,
-                    })}
-                    className="inline-link"
-                  >
-                    {t('setup.actions.addRecipe')}
-                  </Link>
-                  {(recipesByProduct.get(product.id) ?? [])[0] ? (
+          <div className="admin-split-layout">
+            <ul className="stack-list compact-list">
+              {catalogSetup.products.map((product) => (
+                <li key={product.id} className={`list-with-actions ${editingProduct?.id === product.id ? 'is-selected-row' : ''}`}>
+                  <div>
+                    <strong>
+                      {product.name}
+                      {!product.active ? ` · ${t('common.inactive').toLowerCase()}` : ''}
+                    </strong>
+                    <span>
+                      {[product.category, `${product.defaultUnit} default unit`].filter(Boolean).join(' · ')}
+                    </span>
+                    <span className="inline-meta">
+                      {product.variants.length} variant{product.variants.length === 1 ? '' : 's'} · {(recipesByProduct.get(product.id) ?? []).length} {t('common.recipes')}
+                    </span>
+                  </div>
+                  <div className="inline-action-row">
                     <Link
                       href={buildSetupHref({
-                        recipe: (recipesByProduct.get(product.id) ?? [])[0]?.id,
+                        productSetup: product.id,
+                        product: selectedProduct?.id,
+                        supplier: editingSupplier?.id,
+                        material: editingMaterial?.id,
+                        historySupplier: historySupplier?.id,
+                        historyMaterial: historyMaterial?.id,
+                        recipe: editingRecipe?.id,
+                      })}
+                      className="inline-link"
+                    >
+                      {t('setup.actions.edit')}
+                    </Link>
+                    <Link
+                      href={buildSetupHref({
                         product: product.id,
                         supplier: editingSupplier?.id,
                         material: editingMaterial?.id,
                         historySupplier: historySupplier?.id,
                         historyMaterial: historyMaterial?.id,
+                        recipe: undefined,
                       })}
                       className="inline-link"
                     >
-                      {t('setup.actions.editRecipe')}
+                      {t('setup.actions.addRecipe')}
                     </Link>
-                  ) : null}
+                  </div>
+                </li>
+              ))}
+            </ul>
+            <form action={productFormAction} className="field-section page-stack">
+              <input type="hidden" name="redirectTo" value="/admin/setup" />
+              <div className="field-section-header">
+                <div>
+                  <h3>{editingProduct ? 'Edit product' : 'Add product'}</h3>
+                  <p className="helper-text">Keep this to the name and unit needed for first orders.</p>
                 </div>
-              </li>
-            ))}
-          </ul>
+                {editingProduct ? (
+                  <Link href={buildSetupHref({ product: selectedProduct?.id })} className="button-secondary compact-button">
+                    {t('setup.actions.cancelEdit')}
+                  </Link>
+                ) : null}
+              </div>
+              <div className="grid-two">
+                <label>
+                  <span className="field-heading">Product name {renderRequiredMark()}</span>
+                  <input name="name" defaultValue={editingProduct?.name ?? ''} placeholder="Sourdough loaf" required />
+                </label>
+                <label>
+                  <span className="field-heading">Default unit {renderRequiredMark()}</span>
+                  <input name="defaultUnit" list="basic-unit-options" defaultValue={editingProduct?.defaultUnit ?? 'piece'} required />
+                </label>
+                <label>
+                  <span className="field-heading">Category <span className="optional-pill">{t('common.optional')}</span></span>
+                  <input name="category" defaultValue={editingProduct?.category ?? ''} placeholder="Bread, pastry, prepared food" />
+                </label>
+                <label className="checkbox-row">
+                  <input name="active" type="checkbox" defaultChecked={editingProduct?.active ?? true} />
+                  <span>
+                    <strong>Active for order suggestions</strong>
+                    <span className="helper-text">Inactive products stay saved but stop appearing as active order suggestions.</span>
+                  </span>
+                </label>
+              </div>
+              <button type="submit" className="button-primary">
+                {editingProduct ? 'Update product' : 'Save product'}
+              </button>
+            </form>
+          </div>
         </article>
 
         <article className="panel page-stack">

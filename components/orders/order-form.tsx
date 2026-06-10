@@ -388,6 +388,7 @@ export function OrderForm({
               <p className="helper-text">{t('orders.orderForm.sections.linesHelp')}</p>
             </div>
           </div>
+          <p className="helper-text no-margin">Confirmed products appear as suggestions, but you can still type a draft item when setup is incomplete. <Link href="/admin/setup?section=products#products" className="inline-link">Confirm products</Link>.</p>
           <LineItemsEditor
             editorId="order-lines-editor"
             initialLines={lineDrafts}

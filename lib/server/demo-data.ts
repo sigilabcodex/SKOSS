@@ -95,6 +95,13 @@ export interface RawMaterialFormValues {
   active: boolean;
 }
 
+export interface ProductFormValues {
+  name: string;
+  category?: string;
+  defaultUnit: string;
+  active: boolean;
+}
+
 export interface RecipeFormValues {
   productId: string;
   productVariantId?: string;
@@ -182,8 +189,15 @@ function getProductLabel(product: Pick<Product, 'name'>, variant?: { name: strin
   return variant ? `${product.name} / ${variant.name}` : product.name;
 }
 
-function getProductSuggestions(products: Array<{ name: string; variants: Array<{ name: string }> }>) {
-  return products.flatMap((product) => product.variants.map((variant) => `${product.name} / ${variant.name}`));
+function getProductSuggestions(products: Array<{ name: string; active?: boolean; variants: Array<{ name: string; active?: boolean }> }>) {
+  return products
+    .filter((product) => product.active !== false)
+    .flatMap((product) => [
+      product.name,
+      ...product.variants
+        .filter((variant) => variant.active !== false)
+        .map((variant) => `${product.name} / ${variant.name}`),
+    ]);
 }
 
 function getCustomerById(customers: Customer[], customerId?: string) {
@@ -1291,6 +1305,51 @@ export function buildRawMaterialRecord(values: RawMaterialFormValues, actorUserI
     updatedAt: now,
     createdByUserId: existingRawMaterial?.createdByUserId ?? actorUserId,
     updatedByUserId: actorUserId ?? existingRawMaterial?.updatedByUserId,
+  };
+}
+
+export function normalizeProductForm(formData: FormData): ProductFormValues {
+  return {
+    name: String(formData.get('name') ?? ''),
+    category: String(formData.get('category') ?? ''),
+    defaultUnit: String(formData.get('defaultUnit') ?? 'piece'),
+    active: formData.get('active') !== null,
+  };
+}
+
+export function validateProductForm(values: ProductFormValues, data: Pick<AppData, 'products'>, existingProductId?: string) {
+  if (!values.name.trim()) {
+    return 'Product name is required.';
+  }
+
+  const normalizedName = values.name.trim().toLowerCase();
+  const duplicate = data.products.find((product) => product.name.trim().toLowerCase() === normalizedName && product.id !== existingProductId);
+  if (duplicate) {
+    return 'Product name must stay unique.';
+  }
+
+  if (!values.defaultUnit.trim()) {
+    return 'Default unit is required.';
+  }
+
+  return null;
+}
+
+export function buildProductRecord(values: ProductFormValues, existingProduct?: Product): Product {
+  const defaultUnit = values.defaultUnit.trim() || 'piece';
+  const existingVariants = existingProduct?.variants ?? [];
+  const variants = existingVariants.length > 0
+    ? existingVariants.map((variant, index) => index === 0 ? { ...variant, defaultUnit } : variant)
+    : [{ id: `variant-${crypto.randomUUID()}`, name: 'Default', defaultUnit, active: true }];
+
+  return {
+    id: existingProduct?.id ?? `product-${crypto.randomUUID()}`,
+    name: values.name.trim(),
+    category: values.category?.trim() || undefined,
+    baseDoughId: existingProduct?.baseDoughId,
+    defaultUnit,
+    active: values.active,
+    variants,
   };
 }
 
