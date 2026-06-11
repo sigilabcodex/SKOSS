@@ -10,3 +10,5 @@ coverage
 *.tsbuildinfo
 data/runtime/*
 !data/runtime/.gitkeep
+data/backups/*
+!data/backups/.gitkeep
