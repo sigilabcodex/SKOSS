@@ -39,7 +39,7 @@ function NavLink({
   return (
     <Link
       href={href}
-      className={`shell-nav-link ${compact ? 'is-compact' : ''} ${active ? 'is-active' : ''}`}
+      className={`shell-nav-link ${compact ? 'is-compact is-admin-link' : ''} ${active ? 'is-active' : ''}`}
       aria-current={active ? 'page' : undefined}
     >
       {children}

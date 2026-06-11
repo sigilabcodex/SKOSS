@@ -154,7 +154,23 @@ export default async function OrdersPage({
         </p>
       ) : null}
 
-      <section className="panel page-stack">
+      <section className="operator-priority-card page-stack">
+        <div className="table-header-row">
+          <div>
+            <p className="eyebrow">Primary action</p>
+            <h2>Create or review today&apos;s orders</h2>
+            <p className="helper-text">Order capture is the first-deploy priority. Confirm products when useful, but freeform lines can keep work moving.</p>
+          </div>
+          <OrdersIcon className="callout-icon" />
+        </div>
+        <div className="inline-action-row action-row-start">
+          <Link href="/orders/new" className="button-primary compact-button"><OrdersIcon className="button-icon" />Create order</Link>
+          <Link href="/customers" className="button-secondary compact-button">Confirm customers</Link>
+          <Link href="/admin/setup?section=products#products" className="button-ghost compact-button">Confirm products</Link>
+        </div>
+      </section>
+
+      <section className="panel page-stack support-section">
         <div className="table-header-row">
           <div>
             <strong>{t('orders.recurringDemand')}</strong>

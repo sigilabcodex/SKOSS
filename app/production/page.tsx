@@ -69,7 +69,24 @@ export default async function ProductionPage() {
         </div>
       </section>
 
-      {view.boards.map((board) => {
+      <section className="operator-priority-card page-stack">
+        <div className="table-header-row">
+          <div>
+            <p className="eyebrow">Primary action</p>
+            <h2>Update pending production work</h2>
+            <p className="helper-text">Use the line update cards on each board to mark what is done. Create orders only when demand is missing.</p>
+          </div>
+          <ProductionIcon className="callout-icon" />
+        </div>
+        <div className="inline-action-row action-row-start">
+          <a href="#production-work" className="button-primary compact-button"><CheckIcon className="button-icon" />Update production</a>
+          <Link href="/orders/new" className="button-secondary compact-button"><OrdersIcon className="button-icon" />Create order</Link>
+          <Link href="/handoff" className="button-ghost compact-button"><HandoffIcon className="button-icon" />Record WIP / handoff</Link>
+        </div>
+      </section>
+
+      <div id="production-work" className="page-stack">
+        {view.boards.map((board) => {
         const sectionIdBase = board.productionDate;
 
         return (
@@ -130,7 +147,7 @@ export default async function ProductionPage() {
             ) : null}
 
             <div
-              className="stats-grid compact-stats-grid"
+              className="stats-grid compact-stats-grid support-section"
               id={`${sectionIdBase}-demand`}
             >
               <div className="stat-card">
@@ -163,7 +180,7 @@ export default async function ProductionPage() {
               </div>
             </div>
 
-            <div className="stats-grid compact-stats-grid">
+            <div className="stats-grid compact-stats-grid support-section">
               <div className="stat-card">
                 <span className="stat-label">
                   {t('production.fulfillmentSummary.standard')}
@@ -240,7 +257,7 @@ export default async function ProductionPage() {
               ))}
             </div>
 
-            <div className="grid-two" id={`${sectionIdBase}-fulfillment`}>
+            <div className="grid-two support-section" id={`${sectionIdBase}-fulfillment`}>
               <article className="subpanel page-stack">
                 <div className="table-header-row">
                   <div>
@@ -307,7 +324,7 @@ export default async function ProductionPage() {
               </article>
             </div>
 
-            <div className="grid-two">
+            <div className="grid-two support-section">
               <article className="subpanel page-stack">
                 <div className="table-header-row">
                   <div>
@@ -361,7 +378,7 @@ export default async function ProductionPage() {
               </article>
             </div>
 
-            <div className="grid-two" id={`${sectionIdBase}-handoff`}>
+            <div className="grid-two support-section" id={`${sectionIdBase}-handoff`}>
               <article className="subpanel page-stack">
                 <div className="table-header-row">
                   <div>
@@ -565,7 +582,8 @@ export default async function ProductionPage() {
             </article>
           </section>
         );
-      })}
+        })}
+      </div>
 
       {!view.boards.length ? (
         <section className="page-context-card">

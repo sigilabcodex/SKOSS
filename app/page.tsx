@@ -149,27 +149,28 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="panel page-stack">
+      <section className="operator-priority-card page-stack">
         <div className="table-header-row">
           <div>
-            <h2>First deploy workflow</h2>
-            <p className="helper-text">For a real first test, start with customers and order capture, then use production and handoff as the daily operating loop.</p>
+            <p className="eyebrow">Today&apos;s priority</p>
+            <h2>Start the daily loop</h2>
+            <p className="helper-text">Create or confirm orders first. Production and handoff become useful once real orders exist.</p>
           </div>
           <span className="summary-pill">MWP path</span>
         </div>
-        <div className="inline-action-row">
-          <Link href={skossinaRoutes.customers} className="button-secondary compact-button">Confirm customers</Link>
-          <Link href={skossinaRoutes.orders} className="button-primary compact-button">Create orders</Link>
-          <Link href={skossinaRoutes.production} className="button-secondary compact-button">Track production</Link>
-          <Link href={skossinaRoutes.handoff} className="button-secondary compact-button">Record handoff</Link>
-          <Link href={skossCoreRoutes.adminSetup} className="button-secondary compact-button">Basic setup</Link>
+        <div className="inline-action-row action-row-start">
+          <Link href={skossinaRoutes.orders} className="button-primary compact-button"><OrdersIcon className="button-icon" />Create order</Link>
+          <Link href={skossinaRoutes.production} className="button-secondary compact-button"><ProductionIcon className="button-icon" />Track production</Link>
+          <Link href={skossinaRoutes.handoff} className="button-secondary compact-button"><HandoffIcon className="button-icon" />Record handoff</Link>
+          <Link href={skossinaRoutes.customers} className="button-ghost compact-button"><CustomersIcon className="button-icon" />Customers</Link>
+          <Link href={skossCoreRoutes.adminSetup} className="button-ghost compact-button"><SetupIcon className="button-icon" />Basic setup</Link>
         </div>
         {gatewayState.demoModeActive ? (
           <p className="inline-warning">This workspace is marked as demo data. Do not treat records here as live operational data.</p>
         ) : null}
       </section>
 
-      <section className="grid-two">
+      <section className="grid-two support-section">
         <article className="panel page-stack">
           <div className="table-header-row">
             <div>
@@ -207,14 +208,16 @@ export default async function HomePage() {
         </article>
       </section>
 
-      <ActivityFeed
+      <div className="support-section">
+        <ActivityFeed
         title={t('activity.homeTitle')}
         description={t('activity.homeHelp')}
         emptyLabel={t('activity.empty')}
         items={summary.recentActivities}
       />
+      </div>
 
-      <section className="page-context-card">
+      <section className="page-context-card support-section">
         <SparklesIcon className="callout-icon" />
         <div>
           <strong>{t('home.roleFocusTitle')}</strong>
@@ -229,7 +232,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="grid-cards">
+      <section className="grid-cards support-section">
         {orderedQuickLinks.map((link, index) => {
           const Icon = link.icon;
           const isRecommended = homeWorkspace === 'home' ? index === 0 : link.href === `/${recommendedWorkspace}`;

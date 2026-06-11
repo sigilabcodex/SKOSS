@@ -1063,6 +1063,103 @@ label,
   border-color: color-mix(in srgb, var(--info) 28%, transparent);
 }
 
+
+.operator-priority-card {
+  padding: clamp(1rem, 2vw, 1.35rem);
+  border: 1px solid color-mix(in srgb, var(--accent) 36%, var(--border));
+  border-radius: var(--radius-xl);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--accent-soft) 58%, var(--surface)), var(--surface));
+  box-shadow: var(--shadow-md);
+}
+
+.operator-priority-card .eyebrow {
+  color: var(--accent-strong);
+}
+
+.support-section {
+  opacity: 0.88;
+}
+
+.support-section .panel,
+.support-section.panel,
+.support-section .subpanel,
+.support-section.page-context-card {
+  box-shadow: none;
+}
+
+.support-section .stat-card strong {
+  font-size: clamp(1.25rem, 2vw, 1.6rem);
+}
+
+.shell-nav-admin {
+  opacity: 0.78;
+}
+
+.shell-nav-admin .shell-nav-section-label::after {
+  content: ' / setup';
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: none;
+}
+
+.shell-nav-link.is-admin-link {
+  color: var(--muted);
+  background: transparent;
+  border-color: transparent;
+}
+
+.shell-nav-link.is-admin-link.is-active {
+  color: var(--ink-soft);
+  background: var(--surface-soft);
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+.badge,
+.summary-pill {
+  cursor: default;
+}
+
+a.summary-pill,
+button.summary-pill,
+.panel-link,
+.inline-link,
+.button-primary,
+.button-secondary,
+.button-ghost,
+.shell-nav-link {
+  cursor: pointer;
+}
+
+a.summary-pill {
+  transition:
+    border-color 140ms ease,
+    background-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+a.summary-pill:hover,
+a.summary-pill:focus-visible {
+  border-color: var(--border-strong);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+.order-card:hover,
+.line-entry-card:hover,
+.timeline-card:hover {
+  border-color: var(--border);
+}
+
+.order-card:has(a:hover),
+.order-card:has(a:focus-visible),
+.line-entry-card:has(button:hover),
+.line-entry-card:has(button:focus-visible),
+.timeline-card:has(a:hover),
+.timeline-card:has(a:focus-visible) {
+  border-color: var(--border-strong);
+}
+
 .button-primary {
   background: linear-gradient(180deg, var(--accent), var(--accent-strong));
   color: white;
