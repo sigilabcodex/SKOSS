@@ -50,7 +50,7 @@ export function OrderForm({
 }: OrderFormProps) {
   const { t, locale } = useI18n();
   const [selectedCustomerId, setSelectedCustomerId] = useState(order?.customerId ?? initialCustomerId ?? '');
-  const lineDrafts = getDefaultLineDrafts(order?.lines);
+  const lineDrafts = getDefaultLineDrafts(order?.lines, order ? Math.max(order.lines.length, 1) : 1);
   const visibleCustomers = customers.filter((customer) => customer.active || customer.id === order?.customerId);
   const selectedCustomer = useMemo(
     () => visibleCustomers.find((customer) => customer.id === selectedCustomerId) ?? null,
@@ -142,8 +142,14 @@ export function OrderForm({
           </div>
         ) : null}
 
+        <div className="order-flow-steps" aria-label="Fast order flow">
+          <span>1. Customer and date</span>
+          <span>2. Item and quantity</span>
+          <span>3. Save order</span>
+        </div>
+
         <div className="field-section-grid">
-          <section className="field-section">
+          <section className="field-section order-primary-section line-span-2">
             <div className="field-section-header">
               <div>
                 <h3>{t('orders.orderForm.sections.whoAndWhen')}</h3>
@@ -295,7 +301,7 @@ export function OrderForm({
             ) : null}
           </section>
 
-          <section className="field-section">
+          <section className="field-section optional-order-section support-section">
             <div className="field-section-header">
               <div>
                 <h3>{t('orders.orderForm.sections.dispatch')}</h3>
@@ -338,7 +344,7 @@ export function OrderForm({
             <p className="helper-text no-margin">{t('orders.orderForm.dispatchHint.delivery')}</p>
           </section>
 
-          <section className="field-section">
+          <section className="field-section optional-order-section support-section">
             <div className="field-section-header">
               <div>
                 <h3>{t('orders.orderForm.sections.visibility')}</h3>
@@ -385,7 +391,7 @@ export function OrderForm({
           <div className="field-section-header">
             <div>
               <h3>{t('orders.orderForm.sections.lines')}</h3>
-              <p className="helper-text">{t('orders.orderForm.sections.linesHelp')}</p>
+              <p className="helper-text">Start with one item. Add another line only when this order needs it.</p>
             </div>
           </div>
           <p className="helper-text no-margin">Confirmed products appear as suggestions, but you can still type a draft item when setup is incomplete. <Link href="/admin/setup?section=products#products" className="inline-link">Confirm products</Link>.</p>
@@ -395,7 +401,7 @@ export function OrderForm({
             productSuggestions={productSuggestions}
             lineTypeOptions={lineTypeOptions}
             existingStatuses={existingStatuses}
-            sectionLabel={t('orders.orderForm.sections.linesHelp')}
+            sectionLabel="Freeform item names are allowed; product suggestions are optional."
           />
         </section>
       </section>
