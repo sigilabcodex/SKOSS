@@ -99,9 +99,10 @@ If the runtime mode is unclear in `/entry`, stop the rehearsal and inspect envir
 ## Reset And Retry Notes
 
 - Use reset tools only in `demo` or other non-production local modes.
-- Before destructive reset or restore tests, take a manual copy of JSON runtime data and any local database volume used by the rehearsal.
-- Restore currently accepts JSON backup uploads from `/entry`.
-- A user-facing export/backup creation flow is not ready yet. Treat export as a documented manual operator/maintainer task for the first rehearsal.
+- Before destructive reset or restore tests, follow [First Deploy Backup Runbook](./first-deploy-backup-runbook.md).
+- Use `npm run skoss:backup:json` for JSON runtime snapshots.
+- Restore currently accepts JSON backup uploads from `/entry`; maintainers can also use the guarded `npm run skoss:restore:json -- <backup>` path.
+- Hybrid/PostgreSQL rehearsals need both the JSON runtime backup and a matching PostgreSQL dump.
 - If data mode changes during rehearsal, restart from a clean instance and repeat the path from `/entry`.
 
 ## Explicitly Not Ready Yet
@@ -128,4 +129,4 @@ The first local deploy rehearsal should not attempt to validate:
 
 ## Recommended Next PR
 
-Add a narrow backup/export rehearsal path or maintainer runbook that matches the active persistence mode. Keep it focused on "can we safely retry the first deploy rehearsal" rather than broad data lifecycle tooling.
+Run the first deploy rehearsal using the backup runbook, then fix only the failures that block retrying setup, order capture, production progress, or handoff on the selected persistence mode.

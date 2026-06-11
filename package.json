@@ -11,7 +11,9 @@
     "reset:demo-runtime": "node scripts/reset-runtime-demo-store.mjs",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "skoss:backup:json": "node scripts/backup-runtime-json.mjs",
+    "skoss:restore:json": "node scripts/restore-runtime-json.mjs"
   },
   "dependencies": {
     "next": "15.3.0",

@@ -182,6 +182,7 @@ SKOSS should favor:
 - practical exports in human-manageable formats
 - reliable backups
 - simple restore paths
+- a documented first-deploy backup rehearsal path in [`docs/first-deploy-backup-runbook.md`](docs/first-deploy-backup-runbook.md)
 - architecture that can be understood and maintained by FOSS contributors
 - sensible privacy and security defaults for customer and operational data
 
