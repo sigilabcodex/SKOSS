@@ -77,6 +77,7 @@ Do not include these in the first deploy readiness scope:
 
 - Added a narrow product confirmation path in `/admin/setup` for MWP product name, default unit, optional category, and active state.
 - Kept draft product order lines available so catalog setup does not block real work.
+- Simplified new order capture so first use starts with one visible line, a clearer customer/date -> item -> save flow, and secondary dispatch details.
 - Added operator-home runtime/demo visibility and a first-deploy workflow card.
 - Added empty-state guidance to `/orders` for missing recurring templates and missing first orders.
 - Added production entry links and clearer empty guidance for production boards with no visible orders.

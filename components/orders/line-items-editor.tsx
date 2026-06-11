@@ -110,6 +110,7 @@ function LineRow({
   template?: boolean;
 }) {
   const { t } = useI18n();
+  const isEmptyDraft = !line.productLabel.trim() && !String(line.quantity).trim() && !line.note.trim();
   const labels = {
     line: t('orders.lineEditor.line'),
     remove: t('orders.lineEditor.remove'),
@@ -118,14 +119,14 @@ function LineRow({
 
   return (
     <div
-      className="line-entry-card line-entry-card-structured"
+      className={`line-entry-card line-entry-card-structured ${isEmptyDraft && !template ? 'line-entry-card-empty' : ''}`}
       data-line-row
       data-template={template ? 'true' : 'false'}
     >
       <div className="line-entry-top">
         <div>
           <strong data-line-number>{`${labels.line} ${index + 1}`}</strong>
-          <p className="helper-text no-margin">{t('orders.lineEditor.rowHelp')}</p>
+          <p className="helper-text no-margin">{isEmptyDraft && !template ? 'Type the item and quantity. Add more lines only if needed.' : t('orders.lineEditor.rowHelp')}</p>
         </div>
         <div className="action-cluster wrap-cluster compact-actions">
           {status ? <span className={`badge badge-${status.tone}`}>{status.label}</span> : null}

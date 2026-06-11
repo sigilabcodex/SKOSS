@@ -32,7 +32,7 @@ export default async function NewOrderPage({
 
       {params?.error ? <p className="inline-warning">{params.error}</p> : null}
 
-      <section className="page-context-card">
+      <section className="page-context-card support-section">
         <OrdersIcon className="callout-icon" />
         <div>
           <strong>{t('orders.newPage.calloutTitle')}</strong>
