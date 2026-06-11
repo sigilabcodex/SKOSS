@@ -175,15 +175,23 @@ export default async function TimelinePage() {
         </Link>
       </section>
 
-      <section className="page-context-card">
-        <TimelineIcon className="callout-icon" />
-        <div>
-          <strong>{t('timeline.focusDateTitle', { date: formatDateLabel(view.focusDate, locale) })}</strong>
-          <p className="helper-text no-margin">{t('timeline.focusDateBody')}</p>
+      <section className="operator-priority-card page-stack">
+        <div className="table-header-row">
+          <div>
+            <p className="eyebrow">Support view</p>
+            <h2>{t('timeline.focusDateTitle', { date: formatDateLabel(view.focusDate, locale) })}</h2>
+            <p className="helper-text">Use timeline to spot timing risk. Daily work still happens in orders, production, and handoff.</p>
+          </div>
+          <TimelineIcon className="callout-icon" />
+        </div>
+        <div className="inline-action-row action-row-start">
+          <Link href="/orders" className="button-primary compact-button"><OrdersIcon className="button-icon" />Open orders</Link>
+          <Link href="/production" className="button-secondary compact-button">Production board</Link>
+          <Link href="/handoff" className="button-ghost compact-button">Handoff</Link>
         </div>
       </section>
 
-      <section className="stats-grid compact-stats-grid">
+      <section className="stats-grid compact-stats-grid support-section">
         <div className="stat-card stat-card-warn">
           <span className="stat-label">{t('timeline.summary.overdue')}</span>
           <strong>{view.summary.overdue}</strong>
@@ -234,7 +242,7 @@ export default async function TimelinePage() {
           </div>
         </article>
 
-        <div className="page-stack">
+        <div className="page-stack support-section">
           <article className="panel page-stack">
             <div className="table-header-row">
               <div>

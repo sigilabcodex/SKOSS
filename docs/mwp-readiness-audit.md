@@ -82,6 +82,12 @@ Do not include these in the first deploy readiness scope:
 - Added production entry links and clearer empty guidance for production boards with no visible orders.
 - Added handoff entry links and empty-list guidance for WIP, packing, assignment, pickup, and focus-day order watches.
 
+## Product/menu benchmark note
+
+The current product setup path is intentionally MWP-only. It is meant to confirm basic sellable product names, default units, optional category labels, and active/inactive state so real orders can be captured. It should not be judged as a full POS/menu manager yet.
+
+Loyverse, Uber Eats, and DiDi Food are useful later benchmarks for product/menu UX patterns such as richer descriptions, prices, images, modifiers, variants, availability, menu grouping, and channel-specific presentation. Those remain post-MWP/beta work for SKOSS. The first deploy should preserve the current principle: product setup helps order capture, but incomplete catalog data must not block daily kitchen work.
+
 ## Recommended next PR
 
 Run a first-deploy rehearsal against a fresh non-demo instance: bootstrap, create admin, confirm products/customers, create orders, update production, record WIP, record handoff, and verify browser-print output. Keep the rehearsal focused on operational confidence before adding richer catalog, procurement, inventory, or deployment automation.

@@ -64,7 +64,23 @@ export default async function HandoffPage({
       {params?.saved ? <p className="inline-success"><CheckIcon className="button-icon" />{t('handoff.savedUpdate', { item: params.saved })}</p> : null}
       {params?.error ? <p className="inline-warning">{params.error}</p> : null}
 
-      <section className="grid-two">
+      <section className="operator-priority-card page-stack">
+        <div className="table-header-row">
+          <div>
+            <p className="eyebrow">Primary action</p>
+            <h2>Release ready work and record handoff notes</h2>
+            <p className="helper-text">Check pickup, packing, and assignment watches first. Use WIP and shift notes when work must cross a shift.</p>
+          </div>
+          <HandoffIcon className="callout-icon" />
+        </div>
+        <div className="inline-action-row action-row-start">
+          <a href="#handoff-watch" className="button-primary compact-button"><HandoffIcon className="button-icon" />Review release watches</a>
+          <a href="#handoff-forms" className="button-secondary compact-button"><CheckIcon className="button-icon" />Record WIP / shift note</a>
+          <Link href="/production" className="button-ghost compact-button"><ProductionIcon className="button-icon" />Production board</Link>
+        </div>
+      </section>
+
+      <section className="grid-two support-section">
         <article className="panel page-stack">
           <div className="table-header-row">
             <div>
@@ -123,7 +139,7 @@ export default async function HandoffPage({
         </article>
       </section>
 
-      <section className="grid-two">
+      <section className="grid-two" id="handoff-watch">
         <article className="panel page-stack">
           <div className="table-header-row">
             <div>
@@ -232,7 +248,7 @@ export default async function HandoffPage({
         </article>
       </section>
 
-      <section className="grid-two">
+      <section className="grid-two" id="handoff-forms">
         <form action={addWipEntryAction} className="panel form-grid compact-form page-stack">
           <div>
             <p className="eyebrow">{t('handoff.addWip')}</p>
